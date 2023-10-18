@@ -16,16 +16,16 @@ package mongox
 
 import (
 	"context"
+	"reflect"
+
 	mongoxErr "github.com/chenmingyong0423/go-mongox/error"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"reflect"
 )
 
 type MongoClient struct {
 	client *mongo.Client
 	db     *mongo.Database
-	odm    string
 	err    error
 }
 
