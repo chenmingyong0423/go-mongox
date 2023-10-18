@@ -37,6 +37,6 @@ jobs:
         run: |
           make check
           if [ -n "$(git status --porcelain)" ]; then
-             echo >&2 "错误: 请在本地仓库执行命令 → 'make check' 后再次提交."
+             echo >&2 "error: Please execute the command → 'make check' in the local warehouse and submit again."
              exit 1
           fi
