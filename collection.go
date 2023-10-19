@@ -32,14 +32,19 @@ type CollectionName interface {
 
 type Collection struct {
 	coll *mongo.Collection
+	err  error
 }
 
-func newCollection(coll *mongo.Collection) *Collection {
+func newCollection(coll *mongo.Collection, err error) *Collection {
 	return &Collection{
 		coll: coll,
+		err:  err,
 	}
 }
 
 func (c *Collection) FindById(ctx context.Context, id any, expectPtr any, opts ...*options.FindOneOptions) error {
+	if c.err != nil {
+		return c.err
+	}
 	return c.coll.FindOne(ctx, bson.M{ID: id}, opts...).Decode(expectPtr)
 }

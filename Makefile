@@ -23,3 +23,16 @@ tidy:
 check:
 	@$(MAKE) --no-print-directory fmt
 	@$(MAKE) --no-print-directory tidy
+
+# e2e 测试
+.PHONY: e2e
+e2e:
+	sh ./script/integrate_test.sh
+
+.PHONY: dev_3rd_up
+dev_3rd_up:
+	docker-compose -f script/integration_test_compose.yml up -d
+
+.PHONY: dev_3rd_down
+dev_3rd_down:
+	docker-compose -f script/integration_test_compose.yml down -v
