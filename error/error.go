@@ -17,6 +17,6 @@ package error
 import "errors"
 
 var (
-	ErrModelIsNil    = errors.New("the model is nil")
-	ErrNotStructType = errors.New("the model's type must be struct or struct pointer")
+	ErrModelIsNil       = errors.New("the model is nil")
+	ErrInvalidModelType = errors.New("the model's type must be struct or struct pointer or string")
 )

@@ -34,7 +34,7 @@ type Config struct {
 	DbOpts     []*options.DatabaseOptions
 }
 
-func Open(ctx context.Context, db string, cfg *Config) (mc MongoClient, err error) {
+func Open(ctx context.Context, db string, cfg Config) (mc MongoClient, err error) {
 	mc = MongoClient{}
 	mc.client, err = mongo.Connect(ctx, cfg.ClientOpts...)
 	if err != nil {
@@ -56,23 +56,27 @@ func (mc *MongoClient) Coll(model any, opts ...*options.CollectionOptions) *Coll
 	collName := ""
 	if model == nil {
 		mc.err = mongoxErr.ErrModelIsNil
+		return newCollection(mc.db.Collection(collName, opts...), mc.err)
 	}
 	valType := reflect.TypeOf(model)
 	switch valType.Kind() {
 	case reflect.Struct:
-		if col, ok := model.(CollectionName); ok {
-			collName = col.CollectionName()
+		if val, ok := model.(CollectionName); ok {
+			collName = val.CollectionName()
 		} else {
 			collName = valType.Name()
 		}
 	case reflect.Ptr:
-		return mc.Coll(valType.Elem())
+		if val, ok := model.(CollectionName); ok {
+			collName = val.CollectionName()
+		} else {
+			valType = valType.Elem()
+			collName = valType.Name()
+		}
+	case reflect.String:
+		return newCollection(mc.db.Collection(model.(string), opts...), nil)
 	default:
-		mc.err = mongoxErr.ErrNotStructType
+		mc.err = mongoxErr.ErrInvalidModelType
 	}
 	return newCollection(mc.db.Collection(collName, opts...), mc.err)
-}
-
-func (mc *MongoClient) CollectionByCollName(collName string, opts ...*options.CollectionOptions) *Collection {
-	return newCollection(mc.db.Collection(collName, opts...), nil)
 }
