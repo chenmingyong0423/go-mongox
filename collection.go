@@ -17,6 +17,7 @@ package mongox
 import (
 	"context"
 
+	mongoxError "github.com/chenmingyong0423/go-mongox/error"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,40 +30,103 @@ type Collection[T any] struct {
 	collection *mongo.Collection
 }
 
-func (c *Collection[T]) FindById(ctx context.Context, id any, opts ...*options.FindOneOptions) (t *T, err error) {
-	err = c.collection.FindOne(ctx, NewBsonBuilder().Id(id).Build(), opts...).Decode(t)
-	return
+func (c *Collection[T]) FindById(ctx context.Context, id any, opts ...*options.FindOneOptions) (*T, error) {
+	t := new(T)
+	err := c.collection.FindOne(ctx, NewBsonBuilder().Id(id).Build(), opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (c *Collection[T]) Find(ctx context.Context, filter any, opts ...*options.FindOptions) (t []*T, err error) {
+func (c *Collection[T]) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) (*T, error) {
+	if filter == nil {
+		return nil, mongoxError.ErrNilFilter
+	}
 	bsonFilter := toBson(filter)
+	if bsonFilter == nil {
+		return nil, mongoxError.ErrInvalidFilterType
+	}
+	t := new(T)
+	err := c.collection.FindOne(ctx, bsonFilter, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (c *Collection[T]) Find(ctx context.Context, filter any, opts ...*options.FindOptions) ([]*T, error) {
+	if filter == nil {
+		return nil, mongoxError.ErrNilFilter
+	}
+	bsonFilter := toBson(filter)
+	if bsonFilter == nil {
+		return nil, mongoxError.ErrInvalidFilterType
+	}
+	t := make([]*T, 0)
 	cursor, err := c.collection.Find(ctx, bsonFilter, opts...)
 	if err != nil {
-		return
+		return nil, err
 	}
 	defer cursor.Close(ctx)
 	err = cursor.All(ctx, &t)
-	return
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (c *Collection[T]) FindOneAndDelete(ctx context.Context, filter any, opts ...*options.FindOneAndDeleteOptions) (t *T, err error) {
-	// 是否判断 bsonFilter 为 bson.D{}，待探究
+func (c *Collection[T]) FindOneAndDelete(ctx context.Context, filter any, opts ...*options.FindOneAndDeleteOptions) (*T, error) {
+	if filter == nil {
+		return nil, mongoxError.ErrNilFilter
+	}
 	bsonFilter := toBson(filter)
-	err = c.collection.FindOneAndDelete(ctx, bsonFilter, opts...).Decode(t)
-	return
+	if bsonFilter == nil {
+		return nil, mongoxError.ErrInvalidFilterType
+	}
+	t := new(T)
+	err := c.collection.FindOneAndDelete(ctx, bsonFilter, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (c *Collection[T]) FindOneAndUpdate(ctx context.Context, filter any, updates any, opts ...*options.FindOneAndUpdateOptions) (t *T, err error) {
-	// 是否判断 bsonFilter 为 bson.D{}，待探究
+func (c *Collection[T]) FindOneAndUpdate(ctx context.Context, filter any, updates any, opts ...*options.FindOneAndUpdateOptions) (*T, error) {
+	if filter == nil {
+		return nil, mongoxError.ErrNilFilter
+	}
+	if updates == nil {
+		return nil, mongoxError.ErrNilUpdates
+	}
 	bsonFilter := toBson(filter)
+	if bsonFilter == nil {
+		return nil, mongoxError.ErrInvalidFilterType
+	}
 	newUpdates := toSetBson(updates)
-	err = c.collection.FindOneAndUpdate(ctx, bsonFilter, newUpdates, opts...).Decode(t)
-	return
+	if newUpdates == nil {
+		return nil, mongoxError.ErrInvalidUpdatesType
+	}
+	t := new(T)
+	err := c.collection.FindOneAndUpdate(ctx, bsonFilter, newUpdates, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (c *Collection[T]) FindOneAndReplace(ctx context.Context, filter any, updates any, opts ...*options.FindOneAndReplaceOptions) (t *T, err error) {
-	// 是否判断 bsonFilter 为 bson.D{}，待探究
+func (c *Collection[T]) FindOneAndReplace(ctx context.Context, filter any, replacement any, opts ...*options.FindOneAndReplaceOptions) (*T, error) {
+	if filter == nil {
+		return nil, mongoxError.ErrNilFilter
+	}
 	bsonFilter := toBson(filter)
-	err = c.collection.FindOneAndReplace(ctx, bsonFilter, updates, opts...).Decode(t)
-	return
+	if bsonFilter == nil {
+		return nil, mongoxError.ErrInvalidFilterType
+	}
+	t := new(T)
+	err := c.collection.FindOneAndReplace(ctx, bsonFilter, replacement, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }

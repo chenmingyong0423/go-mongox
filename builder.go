@@ -16,6 +16,7 @@ package mongox
 
 import (
 	"reflect"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -62,6 +63,9 @@ func (b *BsonBuilder) Build() bson.D {
 }
 
 func toBson(data any) bson.D {
+	if data == nil {
+		return nil
+	}
 	val := reflect.ValueOf(data)
 	kind := val.Kind()
 	switch kind {
@@ -74,7 +78,7 @@ func toBson(data any) bson.D {
 	case reflect.Ptr:
 		elemVal := val.Elem()
 		if elemVal.Kind() == reflect.Struct {
-			return StructToBson(elemVal.Interface())
+			return structToBson(elemVal)
 		} else if elemVal.Kind() == reflect.Map && elemVal.Type().Key().Kind() == reflect.String && elemVal.Type().Elem().Kind() == reflect.Interface {
 			return MapToBson(elemVal.Interface().(map[string]any))
 		}
@@ -83,14 +87,15 @@ func toBson(data any) bson.D {
 			return d
 		}
 	}
-	return bson.D{}
+	return nil
 }
 
-func MapToBson(data map[string]any) (d bson.D) {
+func MapToBson(data map[string]any) bson.D {
+	d := bson.D{}
 	for k, v := range data {
 		d = append(d, bson.E{Key: k, Value: v})
 	}
-	return
+	return d
 }
 
 func structToBson(val reflect.Value) (d bson.D) {
@@ -106,7 +111,7 @@ func structToBson(val reflect.Value) (d bson.D) {
 
 		fieldName := bsonTag
 		if fieldName == "" {
-			fieldName = field.Name
+			fieldName = strings.ToLower(field.Name)
 		}
 		d = append(d, bson.E{Key: fieldName, Value: valueField.Interface()})
 	}
@@ -165,7 +170,10 @@ func toSetBson(updates any) bson.D {
 	case reflect.Ptr:
 		elemVal := val.Elem()
 		if elemVal.Kind() == reflect.Struct {
-			return StructToBson(elemVal.Interface())
+			d := structToBson(elemVal)
+			if len(d) != 0 {
+				return bson.D{bson.E{Key: set, Value: d}}
+			}
 		} else if elemVal.Kind() == reflect.Map && elemVal.Type().Key().Kind() == reflect.String && elemVal.Type().Elem().Kind() == reflect.Interface {
 			return MapToSetBson(elemVal.Interface().(map[string]any))
 		}
@@ -174,5 +182,5 @@ func toSetBson(updates any) bson.D {
 			return d
 		}
 	}
-	return bson.D{}
+	return nil
 }
