@@ -83,6 +83,12 @@ func TestStructToSetBson(t *testing.T) {
 			data:  1,
 			wantD: nil,
 		},
+		{
+			name: "empty struct",
+			data: struct{}{},
+
+			wantD: nil,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -118,6 +124,43 @@ func Test_toBson(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, toBson(tc.data))
+		})
+	}
+}
+
+func Test_toSetBson(t *testing.T) {
+
+	testCases := []struct {
+		name    string
+		updates any
+		want    bson.D
+	}{
+		{
+			name: "map pointer",
+			updates: func() *map[string]any {
+				data := map[string]any{
+					"k1": "v1",
+				}
+				return &data
+			}(),
+
+			want: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}},
+		},
+		{
+			name:    "empty struct",
+			updates: struct{}{},
+
+			want: nil,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			setBson := toSetBson(tc.updates)
+			if len(setBson) > 0 {
+				assert.Equal(t, tc.want[0].Value, setBson[0].Value)
+			} else {
+				assert.Equal(t, tc.want, setBson)
+			}
 		})
 	}
 }
