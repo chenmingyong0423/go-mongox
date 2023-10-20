@@ -62,34 +62,3 @@ func (c *Collection[T]) Find(ctx context.Context, filter any, opts ...*options.F
 	}
 	return t, nil
 }
-
-func (c *Collection[T]) FindOneAndDelete(ctx context.Context, filter any, opts ...*options.FindOneAndDeleteOptions) (*T, error) {
-	bsonFilter := toBson(filter)
-	t := new(T)
-	err := c.collection.FindOneAndDelete(ctx, bsonFilter, opts...).Decode(t)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
-func (c *Collection[T]) FindOneAndUpdate(ctx context.Context, filter any, updates any, opts ...*options.FindOneAndUpdateOptions) (*T, error) {
-	bsonFilter := toBson(filter)
-	newUpdates := toSetBson(updates)
-	t := new(T)
-	err := c.collection.FindOneAndUpdate(ctx, bsonFilter, newUpdates, opts...).Decode(t)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
-func (c *Collection[T]) FindOneAndReplace(ctx context.Context, filter any, replacement any, opts ...*options.FindOneAndReplaceOptions) (*T, error) {
-	bsonFilter := toBson(filter)
-	t := new(T)
-	err := c.collection.FindOneAndReplace(ctx, bsonFilter, replacement, opts...).Decode(t)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
