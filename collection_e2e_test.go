@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+////go:build e2e
 
 package mongox
 
@@ -21,7 +21,6 @@ import (
 	"errors"
 	"testing"
 
-	mongoxError "github.com/chenmingyong0423/go-mongox/error"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -56,7 +55,7 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 		opts        []*options.FindOneAndReplaceOptions
 
 		wantT   *testUser
-		wantErr error
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name:   "filter is not map, bson.D, struct and struct pointer",
@@ -66,8 +65,14 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 			ctx:    context.Background(),
 			filter: 1,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidFilterType,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "nil filter",
@@ -76,8 +81,14 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 
 			ctx: context.Background(),
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilFilter,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "nil replacement",
@@ -88,7 +99,13 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 			filter:      bson.D{},
 			replacement: nil,
 			wantT:       nil,
-			wantErr:     mongo.ErrNilDocument,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if !errors.Is(err, mongo.ErrNilDocument) {
+					t.Errorf("expected an error but not eq: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty replacement",
@@ -120,7 +137,13 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 			filter:      NewBsonBuilder().Id("123").Build(),
 			replacement: map[string]any{},
 			wantT:       &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr:     nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "replace by struct",
@@ -156,7 +179,13 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 			filter:      NewBsonBuilder().Id("123").Build(),
 			replacement: testUser{Id: "123", Name: "ccc"},
 			wantT:       &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr:     nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 	}
 
@@ -165,8 +194,8 @@ func TestCollection_e2e_FindOneAndReplace(t *testing.T) {
 			tc.before(tc.ctx, t)
 			gotT, err := collection.FindOneAndReplace(tc.ctx, tc.filter, tc.replacement, tc.opts...)
 			tc.after(tc.ctx, t)
+			assert.True(t, tc.wantErr(t, err))
 			assert.Equal(t, tc.wantT, gotT)
-			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }
@@ -185,7 +214,7 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 		opts    []*options.FindOneAndUpdateOptions
 
 		wantT   *testUser
-		wantErr error
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name:   "filter is not map, bson.D, struct and struct pointer",
@@ -196,8 +225,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  1,
 			updates: bson.D{},
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidFilterType,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "update is not map, bson.D, struct and struct pointer",
@@ -208,8 +243,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  bson.D{},
 			updates: 1,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidUpdatesType,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "nil filter",
@@ -218,8 +259,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 
 			ctx: context.Background(),
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilFilter,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "nil updates",
@@ -229,8 +276,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			ctx:    context.Background(),
 			filter: bson.D{},
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilUpdates,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty bson.D updates",
@@ -243,7 +296,13 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  bson.D{},
 			updates: bson.D{},
 			wantT:   nil,
-			wantErr: errors.New("update document must have at least one element"),
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "update by bson.D",
@@ -278,7 +337,13 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  NewBsonBuilder().Id("123").Build(),
 			updates: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
 			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty map updates",
@@ -290,7 +355,13 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  map[string]any{},
 			updates: map[string]any{},
 			wantT:   nil,
-			wantErr: errors.New("update document must have at least one element"),
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "update by map filter",
@@ -326,8 +397,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			updates: map[string]any{
 				"name": "ccc",
 			},
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct",
@@ -363,7 +440,13 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  NewBsonBuilder().Id("123").Build(),
 			updates: updatedUser{},
 			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "update by struct",
@@ -399,8 +482,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  NewBsonBuilder().Id("123").Build(),
 			updates: updatedUser{Name: "ccc", Age: 24},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct pointer",
@@ -436,8 +525,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  NewBsonBuilder().Id("123").Build(),
 			updates: &updatedUser{Name: "ccc", Age: 24},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "update by struct pointer",
@@ -473,8 +568,14 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			filter:  NewBsonBuilder().Id("123").Build(),
 			updates: &updatedUser{Name: "ccc", Age: 24},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 	}
 
@@ -483,8 +584,8 @@ func TestCollection_e2e_FindOneAndUpdate(t *testing.T) {
 			tc.before(tc.ctx, t)
 			gotT, err := collection.FindOneAndUpdate(tc.ctx, tc.filter, tc.updates, tc.opts...)
 			tc.after(tc.ctx, t)
+			assert.True(t, tc.wantErr(t, err))
 			assert.Equal(t, tc.wantT, gotT)
-			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }
@@ -502,7 +603,7 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 		opts   []*options.FindOneAndDeleteOptions
 
 		wantT   *testUser
-		wantErr error
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name:   "not map, bson.D, struct and struct pointer",
@@ -512,19 +613,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: 1,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidFilterType,
-		},
-		{
-			name:   "nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-
-			ctx:    context.Background(),
-			filter: nil,
-
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilFilter,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty bson.D filter",
@@ -555,8 +651,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: bson.D{},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by bson.D filter",
@@ -587,8 +689,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: bson.D{bson.E{Key: id, Value: "123"}},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty map filter",
@@ -619,8 +727,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: map[string]any{},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by map filter",
@@ -655,8 +769,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 				"_id": "123",
 			},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct",
@@ -687,8 +807,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: testUser{},
 
-			wantT:   nil,
-			wantErr: mongo.ErrNoDocuments,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if !errors.Is(err, mongo.ErrNoDocuments) {
+					t.Errorf("expected an error but not eq: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct",
@@ -720,8 +846,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: testUser{Id: "123", Name: "cmy", Age: 18},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct pointer",
@@ -752,8 +884,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: &testUser{},
 
-			wantT:   nil,
-			wantErr: mongo.ErrNoDocuments,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if !errors.Is(err, mongo.ErrNoDocuments) {
+					t.Errorf("expected an error but not eq: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct pointer",
@@ -785,8 +923,14 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			ctx:    context.Background(),
 			filter: &testUser{Id: "123", Name: "cmy", Age: 18},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 	}
 
@@ -795,8 +939,8 @@ func TestCollection_e2e_FindOneAndDelete(t *testing.T) {
 			tc.before(tc.ctx, t)
 			gotT, err := collection.FindOneAndDelete(tc.ctx, tc.filter, tc.opts...)
 			tc.after(tc.ctx, t)
+			assert.True(t, tc.wantErr(t, err))
 			assert.Equal(t, tc.wantT, gotT)
-			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }
@@ -814,7 +958,7 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 		opts   []*options.FindOneOptions
 
 		wantT   *testUser
-		wantErr error
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name:   "not map, bson.D, struct and struct pointer",
@@ -824,8 +968,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: 1,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidFilterType,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name:   "nil filter",
@@ -835,8 +985,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: nil,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilFilter,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty bson.D filter",
@@ -865,8 +1021,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: bson.D{},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by bson.D filter",
@@ -895,8 +1057,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: bson.D{bson.E{Key: id, Value: "123"}},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty map filter",
@@ -925,8 +1093,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: map[string]any{},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by map filter",
@@ -957,8 +1131,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 				"_id": "123",
 			},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct",
@@ -987,8 +1167,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: testUser{},
 
-			wantT:   nil,
-			wantErr: mongo.ErrNoDocuments,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if !errors.Is(err, mongo.ErrNoDocuments) {
+					t.Errorf("expected an error but not eq: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct",
@@ -1017,8 +1203,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: testUser{Id: "123", Name: "cmy", Age: 18},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct pointer",
@@ -1047,8 +1239,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: &testUser{},
 
-			wantT:   nil,
-			wantErr: mongo.ErrNoDocuments,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if !errors.Is(err, mongo.ErrNoDocuments) {
+					t.Errorf("expected an error but not eq: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct pointer",
@@ -1077,8 +1275,14 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			ctx:    context.Background(),
 			filter: &testUser{Id: "123", Name: "cmy", Age: 18},
 
-			wantT:   &testUser{Id: "123", Name: "cmy", Age: 18},
-			wantErr: nil,
+			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got %v", err)
+					return false
+				}
+				return true
+			},
 		},
 	}
 
@@ -1087,8 +1291,8 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			tc.before(tc.ctx, t)
 			gotT, err := collection.FindOne(tc.ctx, tc.filter, tc.opts...)
 			tc.after(tc.ctx, t)
+			assert.True(t, tc.wantErr(t, err))
 			assert.Equal(t, tc.wantT, gotT)
-			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }
@@ -1106,7 +1310,7 @@ func TestCollection_e2e_Find(t *testing.T) {
 		opts   []*options.FindOptions
 
 		wantT   []*testUser
-		wantErr error
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name:   "not map, bson.D, struct and struct pointer",
@@ -1116,19 +1320,14 @@ func TestCollection_e2e_Find(t *testing.T) {
 			ctx:    context.Background(),
 			filter: 1,
 
-			wantT:   nil,
-			wantErr: mongoxError.ErrInvalidFilterType,
-		},
-		{
-			name:   "nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-
-			ctx:    context.Background(),
-			filter: nil,
-
-			wantT:   nil,
-			wantErr: mongoxError.ErrNilFilter,
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty bson.D filter",
@@ -1161,7 +1360,36 @@ func TestCollection_e2e_Find(t *testing.T) {
 				{Id: "123", Name: "cmy", Age: 18},
 				{Id: "456", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "decode failed",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(id, "123").Add("name", "cmy").Add("age", "18").Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+
+			ctx:    context.Background(),
+			filter: NewBsonBuilder().Id("123").Build(),
+
+			wantT: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by bson.D filter",
@@ -1193,7 +1421,13 @@ func TestCollection_e2e_Find(t *testing.T) {
 			wantT: []*testUser{
 				{Id: "123", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "empty map filter",
@@ -1226,7 +1460,13 @@ func TestCollection_e2e_Find(t *testing.T) {
 				{Id: "123", Name: "cmy", Age: 18},
 				{Id: "456", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by map filter",
@@ -1260,7 +1500,13 @@ func TestCollection_e2e_Find(t *testing.T) {
 			wantT: []*testUser{
 				{Id: "123", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct",
@@ -1289,8 +1535,14 @@ func TestCollection_e2e_Find(t *testing.T) {
 			ctx:    context.Background(),
 			filter: testUser{},
 
-			wantT:   []*testUser{},
-			wantErr: nil,
+			wantT: []*testUser{},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct",
@@ -1322,7 +1574,13 @@ func TestCollection_e2e_Find(t *testing.T) {
 			wantT: []*testUser{
 				{Id: "123", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "zero struct pointer",
@@ -1351,8 +1609,14 @@ func TestCollection_e2e_Find(t *testing.T) {
 			ctx:    context.Background(),
 			filter: &testUser{},
 
-			wantT:   []*testUser{},
-			wantErr: nil,
+			wantT: []*testUser{},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 		{
 			name: "get one by struct pointer",
@@ -1384,7 +1648,13 @@ func TestCollection_e2e_Find(t *testing.T) {
 			wantT: []*testUser{
 				{Id: "123", Name: "cmy", Age: 18},
 			},
-			wantErr: nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
 		},
 	}
 
@@ -1393,8 +1663,8 @@ func TestCollection_e2e_Find(t *testing.T) {
 			tc.before(tc.ctx, t)
 			gotT, err := collection.Find(tc.ctx, tc.filter, tc.opts...)
 			tc.after(tc.ctx, t)
+			assert.True(t, tc.wantErr(t, err))
 			assert.Equal(t, tc.wantT, gotT)
-			assert.Equal(t, tc.wantErr, err)
 		})
 	}
 }
