@@ -24,10 +24,16 @@ import (
 func TestBsonBuilder(t *testing.T) {
 	assert.Equal(t, bson.D{}, NewBsonBuilder().Build())
 
+	// Id()
 	assert.Equal(t, bson.D{bson.E{Key: id, Value: 123}}, NewBsonBuilder().Id(123).Build())
 
+	// Add()
 	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: "v1"}, bson.E{Key: "k2", Value: "v2"}}, NewBsonBuilder().Add("k1", "v1").Add("k2", "v2").Build())
 
+	// Set()
+	assert.Equal(t, bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}}, NewBsonBuilder().Set("k1", "v1").Build())
+
+	// SetForMap()
 	assert.Equal(t, bson.D{}, NewBsonBuilder().SetForMap(nil).Build())
 	assert.Equal(t, bson.D{}, NewBsonBuilder().SetForMap(map[string]any{}).Build())
 	assert.ElementsMatch(t, bson.D{bson.E{Key: set, Value: bson.D{
@@ -40,6 +46,7 @@ func TestBsonBuilder(t *testing.T) {
 		"k3": "v3",
 	}).Build()[0].Value)
 
+	// SetForStruct()
 	assert.ElementsMatch(t, bson.D{}, NewBsonBuilder().SetForStruct(nil).Build())
 	assert.ElementsMatch(t, bson.D{}, NewBsonBuilder().SetForStruct(
 		func() **testData {

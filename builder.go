@@ -41,6 +41,11 @@ func (b *BsonBuilder) Add(k string, v any) *BsonBuilder {
 	return b
 }
 
+func (b *BsonBuilder) Set(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: set, Value: bson.D{bson.E{Key: key, Value: value}}})
+	return b
+}
+
 func (b *BsonBuilder) SetForMap(data map[string]any) *BsonBuilder {
 	if d := MapToBson(data); len(d) != 0 {
 		b.data = append(b.data, bson.E{Key: set, Value: d})
