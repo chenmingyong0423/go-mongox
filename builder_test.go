@@ -73,6 +73,10 @@ func TestBsonBuilder(t *testing.T) {
 		Unknown: "",
 	}).Build()[0].Value)
 
+	// in
+	ints := []any{1, 2, 3, 4}
+	assert.Equal(t, bson.D{bson.E{Key: "ids", Value: bson.D{bson.E{Key: in, Value: []any{1, 2, 3, 4}}}}}, NewBsonBuilder().In("ids", ints...).Build())
+
 }
 
 type testData struct {

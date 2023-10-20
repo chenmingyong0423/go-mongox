@@ -62,3 +62,15 @@ func (c *Collection[T]) Find(ctx context.Context, filter any, opts ...*options.F
 	}
 	return t, nil
 }
+
+func (c *Collection[T]) InsertOne(ctx context.Context, t T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	return c.collection.InsertOne(ctx, t, opts...)
+}
+
+func (c *Collection[T]) InsertMany(ctx context.Context, t []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+	documents := make([]interface{}, 0, len(t))
+	for i := range t {
+		documents = append(documents, t[i])
+	}
+	return c.collection.InsertMany(ctx, documents, opts...)
+}

@@ -21,6 +21,7 @@ import (
 const (
 	id  = "_id"
 	set = "$set"
+	in  = "$in"
 )
 
 type BsonBuilder struct {
@@ -57,6 +58,10 @@ func (b *BsonBuilder) SetForStruct(data any) *BsonBuilder {
 	if d := StructToBson(data); len(d) != 0 {
 		b.data = append(b.data, bson.E{Key: set, Value: d})
 	}
+	return b
+}
+func (b *BsonBuilder) In(key string, values ...any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.D{bson.E{Key: in, Value: values}}})
 	return b
 }
 

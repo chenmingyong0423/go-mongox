@@ -19,6 +19,8 @@ package mongox
 import (
 	"context"
 	"errors"
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,7 +38,7 @@ type testUser struct {
 }
 
 func TestCollection_e2e_FindOne(t *testing.T) {
-	collection := getCollection(t)
+	collection := getCollection[testUser](t)
 	testCases := []struct {
 		name string
 
@@ -388,7 +390,7 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 }
 
 func TestCollection_e2e_Find(t *testing.T) {
-	collection := getCollection(t)
+	collection := getCollection[testUser](t)
 	testCases := []struct {
 		name string
 
@@ -760,7 +762,7 @@ func TestCollection_e2e_Find(t *testing.T) {
 }
 
 func TestCollection_e2e_FindById(t *testing.T) {
-	collection := getCollection(t)
+	collection := getCollection[testUser](t)
 
 	testCases := []struct {
 		name string
@@ -825,7 +827,7 @@ func TestCollection_e2e_FindById(t *testing.T) {
 	}
 }
 
-func getCollection(t *testing.T) *Collection[testUser] {
+func getCollection[T any](t *testing.T) *Collection[T] {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
 		Password:   "test",
@@ -834,6 +836,51 @@ func getCollection(t *testing.T) *Collection[testUser] {
 	assert.NoError(t, err)
 	assert.NoError(t, client.Ping(context.Background(), readpref.Primary()))
 
-	collection := NewCollection[testUser](client.Database("db-test").Collection("test_user"))
+	collection := NewCollection[T](client.Database("db-test").Collection("test_user"))
 	return collection
+}
+
+func TestCollection_Insert(t *testing.T) {
+	collection := getCollection[testUser](t)
+
+	// InsertOne
+	{
+		user := testUser{
+			Id:   "123",
+			Name: "cmy",
+			Age:  24,
+		}
+		insertOneResult, err := collection.InsertOne(context.Background(), user)
+		assert.NoError(t, err)
+		assert.Equal(t, "123", insertOneResult.InsertedID.(string))
+
+		foundUser := new(testUser)
+		err = collection.collection.FindOneAndDelete(context.Background(), NewBsonBuilder().Id("123").Build()).Decode(foundUser)
+		assert.NoError(t, err)
+		assert.Equal(t, &user, foundUser)
+	}
+
+	// InsertMany
+	{
+		users := []testUser{
+			{Id: "123", Name: "cmy", Age: 24},
+			{Id: "456", Name: "cmy", Age: 24},
+		}
+		ids := []any{"123", "456"}
+		insertManyResult, err := collection.InsertMany(context.Background(), users)
+		assert.NoError(t, err)
+		assert.Equal(t, ids, insertManyResult.InsertedIDs)
+
+		foundUsers, err := collection.Find(context.Background(), NewBsonBuilder().In("_id", ids...).Build())
+		assert.NoError(t, err)
+		fmt.Println(foundUsers)
+		assert.True(t, reflect.DeepEqual([]*testUser{
+			{Id: "123", Name: "cmy", Age: 24},
+			{Id: "456", Name: "cmy", Age: 24},
+		}, foundUsers))
+
+		deleteResult, err := collection.collection.DeleteMany(context.Background(), NewBsonBuilder().In("_id", ids...))
+		assert.NoError(t, err)
+		assert.Equal(t, int64(2), deleteResult.DeletedCount)
+	}
 }
