@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+////go:build e2e
 
 package mongox
 
@@ -35,6 +35,226 @@ type testUser struct {
 	Name         string `bson:"name"`
 	Age          int
 	UnknownField string `bson:"-"`
+}
+
+type updatedUser struct {
+	Name string `bson:"name"`
+	Age  int
+}
+
+func TestCollection_UpdateOne(t *testing.T) {
+	collection := getCollection[testUser](t)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx     context.Context
+		filter  any
+		updates any
+		opts    []*options.UpdateOptions
+
+		result  func(t *testing.T, us *mongo.UpdateResult)
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "nil filter",
+			before:  func(_ context.Context, _ *testing.T) {},
+			after:   func(_ context.Context, _ *testing.T) {},
+			ctx:     context.Background(),
+			filter:  nil,
+			updates: nil,
+
+			result: func(t *testing.T, ur *mongo.UpdateResult) {
+				assert.Nil(t, ur)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name:   "nil updates",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+
+			ctx:     context.Background(),
+			filter:  bson.D{},
+			updates: nil,
+
+			result: func(t *testing.T, ur *mongo.UpdateResult) {
+				assert.Nil(t, ur)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "update a record which is not exist.",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testData{
+					Id:   "123",
+					Name: "cmy",
+					Age:  18,
+				})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+			filter:  map[string]any{id: "456"},
+			updates: map[string]any{"name": "ccc"},
+			result: func(t *testing.T, us *mongo.UpdateResult) {
+				assert.Equal(t, int64(0), us.ModifiedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got one %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "the type of filter and updates is bson",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testData{
+					Id:   "123",
+					Name: "cmy",
+					Age:  18,
+				})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+			filter:  bson.D{bson.E{Key: id, Value: "123"}},
+			updates: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
+			result: func(t *testing.T, us *mongo.UpdateResult) {
+				assert.Equal(t, int64(1), us.ModifiedCount)
+				one, err := collection.FindOne(context.Background(), NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, err)
+				assert.Equal(t, &testUser{Id: "123", Name: "ccc", Age: 18}, one)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got one %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "the type of filter and updates is map",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testData{
+					Id:   "123",
+					Name: "cmy",
+					Age:  18,
+				})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+			filter:  map[string]any{id: "123"},
+			updates: map[string]any{"name": "ccc"},
+			result: func(t *testing.T, us *mongo.UpdateResult) {
+				assert.Equal(t, int64(1), us.ModifiedCount)
+				one, err := collection.FindOne(context.Background(), NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, err)
+				assert.Equal(t, &testUser{Id: "123", Name: "ccc", Age: 18}, one)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got one %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "the type of filter and updates is struct",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testData{
+					Id:   "123",
+					Name: "cmy",
+					Age:  18,
+				})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+			filter:  testUser{Id: "123", Name: "cmy", Age: 18},
+			updates: updatedUser{Name: "ccc", Age: 24},
+			result: func(t *testing.T, us *mongo.UpdateResult) {
+				assert.Equal(t, int64(1), us.ModifiedCount)
+				one, err := collection.FindOne(context.Background(), NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, err)
+				assert.Equal(t, &testUser{Id: "123", Name: "ccc", Age: 24}, one)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got one %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "the type of filter and updates is struct pointer",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testData{
+					Id:   "123",
+					Name: "cmy",
+					Age:  18,
+				})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+			},
+			filter:  &testUser{Id: "123", Name: "cmy", Age: 18},
+			updates: &updatedUser{Name: "ccc", Age: 24},
+			result: func(t *testing.T, us *mongo.UpdateResult) {
+				assert.Equal(t, int64(1), us.ModifiedCount)
+				one, err := collection.FindOne(context.Background(), NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, err)
+				assert.Equal(t, &testUser{Id: "123", Name: "ccc", Age: 24}, one)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got one %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			updateResult, err := collection.UpdateOne(tc.ctx, tc.filter, tc.updates, tc.opts...)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			tc.result(t, updateResult)
+			tc.after(tc.ctx, t)
+		})
+	}
 }
 
 func TestCollection_e2e_FindOne(t *testing.T) {
@@ -101,7 +321,6 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 					Age:  18,
 				})
 				assert.NoError(t, fErr)
-
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())

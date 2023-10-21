@@ -74,3 +74,9 @@ func (c *Collection[T]) InsertMany(ctx context.Context, t []T, opts ...*options.
 	}
 	return c.collection.InsertMany(ctx, documents, opts...)
 }
+
+func (c *Collection[T]) UpdateOne(ctx context.Context, filter, updates any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	bsonFilter := toBson(filter)
+	bsonUpdates := toSetBson(updates)
+	return c.collection.UpdateOne(ctx, bsonFilter, bsonUpdates, opts...)
+}

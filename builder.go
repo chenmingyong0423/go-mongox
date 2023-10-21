@@ -60,6 +60,7 @@ func (b *BsonBuilder) SetForStruct(data any) *BsonBuilder {
 	}
 	return b
 }
+
 func (b *BsonBuilder) In(key string, values ...any) *BsonBuilder {
 	b.data = append(b.data, bson.E{Key: key, Value: bson.D{bson.E{Key: in, Value: values}}})
 	return b
