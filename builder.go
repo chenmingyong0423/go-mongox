@@ -22,14 +22,25 @@ const (
 	id  = "_id"
 	set = "$set"
 	in  = "$in"
+	eq  = "$eq"
+	gt  = "$gt"
+	gte = "$gte"
+	lt  = "$lt"
+	lte = "$lte"
+	ne  = "$ne"
+	nin = "$nin"
 )
+
+func NewBsonBuilder() *BsonBuilder {
+	return &BsonBuilder{data: bson.D{}}
+}
 
 type BsonBuilder struct {
 	data bson.D
 }
 
-func NewBsonBuilder() *BsonBuilder {
-	return &BsonBuilder{data: bson.D{}}
+func (b *BsonBuilder) Build() bson.D {
+	return b.data
 }
 
 func (b *BsonBuilder) Id(v any) *BsonBuilder {
@@ -66,6 +77,37 @@ func (b *BsonBuilder) In(key string, values ...any) *BsonBuilder {
 	return b
 }
 
-func (b *BsonBuilder) Build() bson.D {
-	return b.data
+func (b *BsonBuilder) Eq(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{eq: value}})
+	return b
+}
+
+func (b *BsonBuilder) Gt(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{gt: value}})
+	return b
+}
+
+func (b *BsonBuilder) Gte(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{gte: value}})
+	return b
+}
+
+func (b *BsonBuilder) Lt(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{lt: value}})
+	return b
+}
+
+func (b *BsonBuilder) Lte(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{lte: value}})
+	return b
+}
+
+func (b *BsonBuilder) Ne(key string, value any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{ne: value}})
+	return b
+}
+
+func (b *BsonBuilder) Nin(key string, values ...any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{nin: values}})
+	return b
 }

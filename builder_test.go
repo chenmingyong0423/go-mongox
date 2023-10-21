@@ -75,7 +75,28 @@ func TestBsonBuilder(t *testing.T) {
 
 	// in
 	ints := []any{1, 2, 3, 4}
-	assert.Equal(t, bson.D{bson.E{Key: "ids", Value: bson.D{bson.E{Key: in, Value: []any{1, 2, 3, 4}}}}}, NewBsonBuilder().In("ids", ints...).Build())
+	assert.Equal(t, bson.D{bson.E{Key: "id", Value: bson.D{bson.E{Key: in, Value: ints}}}}, NewBsonBuilder().In("id", ints...).Build())
+
+	// eq
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{eq: "v1"}}}, NewBsonBuilder().Eq("k1", "v1").Build())
+
+	// gt
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{gt: "v1"}}}, NewBsonBuilder().Gt("k1", "v1").Build())
+
+	// gte
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{gte: "v1"}}}, NewBsonBuilder().Gte("k1", "v1").Build())
+
+	// lt
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{lt: "v1"}}}, NewBsonBuilder().Lt("k1", "v1").Build())
+
+	// lte
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{lte: "v1"}}}, NewBsonBuilder().Lte("k1", "v1").Build())
+
+	// ne
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{ne: "v1"}}}, NewBsonBuilder().Ne("k1", "v1").Build())
+
+	// nin
+	assert.Equal(t, bson.D{bson.E{Key: "id", Value: bson.M{nin: ints}}}, NewBsonBuilder().Nin("id", ints...).Build())
 
 }
 
