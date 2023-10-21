@@ -80,3 +80,8 @@ func (c *Collection[T]) UpdateOne(ctx context.Context, filter, updates any, opts
 	bsonUpdates := toSetBson(updates)
 	return c.collection.UpdateOne(ctx, bsonFilter, bsonUpdates, opts...)
 }
+
+func (c *Collection[T]) UpdateId(ctx context.Context, id, updates any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	bsonUpdates := toSetBson(updates)
+	return c.collection.UpdateByID(ctx, id, bsonUpdates, opts...)
+}
