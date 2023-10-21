@@ -517,7 +517,7 @@ func TestCollection_e2e_UpdateId(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			updateResult, err := collection.UpdateId(tc.ctx, tc.id, tc.updates, tc.opts...)
+			updateResult, err := collection.UpdateById(tc.ctx, tc.id, tc.updates, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -1590,5 +1590,478 @@ func TestCollection_e2e_Insert(t *testing.T) {
 		deleteResult, err := collection.collection.DeleteMany(context.Background(), NewBsonBuilder().In("_id", ids...))
 		assert.NoError(t, err)
 		assert.Equal(t, int64(2), deleteResult.DeletedCount)
+	}
+}
+
+func TestCollection_e2e_DeleteOne(t *testing.T) {
+	collection := getCollection[testUser](t)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx    context.Context
+		filter any
+		opts   []*options.DeleteOptions
+
+		result  func(t *testing.T, us *mongo.DeleteResult)
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:   "not map, bson.D, struct and struct pointer",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+			ctx:    context.Background(),
+			filter: 1,
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Nil(t, us)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "empty bson.D filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one which does not exist",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.NoError(t, fErr)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{bson.E{Key: types.Id, Value: "456"}},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(0), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one successfully by bson.D filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{bson.E{Key: types.Id, Value: "123"}},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one successfully by map filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: map[string]any{types.Id: "123"},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expect no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one successfully by struct filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testUser{Id: "123", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: testUser{Id: "123", Name: "cmy", Age: 18},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expect no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one successfully by struct pointer filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, &testUser{Id: "123", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: &testUser{Id: "123", Name: "cmy", Age: 18},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expect no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			updateResult, err := collection.DeleteOne(tc.ctx, tc.filter, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			tc.result(t, updateResult)
+		})
+	}
+}
+
+func TestCollection_e2e_DeleteById(t *testing.T) {
+	collection := getCollection[testUser](t)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx  context.Context
+		id   any
+		opts []*options.DeleteOptions
+
+		result  func(t *testing.T, us *mongo.DeleteResult)
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "delete one which does not exist",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Id("123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.NoError(t, fErr)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:  context.Background(),
+			id:   "456",
+			opts: nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(0), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete one successfully",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Id("123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Id("123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:  context.Background(),
+			id:   "123",
+			opts: nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(1), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			updateResult, err := collection.DeleteById(tc.ctx, tc.id, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			tc.result(t, updateResult)
+		})
+	}
+}
+
+func TestCollection_e2e_DeleteMany(t *testing.T) {
+	collection := getCollection[testUser](t)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx    context.Context
+		filter any
+		opts   []*options.DeleteOptions
+
+		result  func(t *testing.T, us *mongo.DeleteResult)
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:   "not map, bson.D, struct and struct pointer",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+			ctx:    context.Background(),
+			filter: 1,
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Nil(t, us)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name:   "nil filter",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+			ctx:    context.Background(),
+			filter: nil,
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Nil(t, us)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected an error but got none")
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "empty bson.D filter",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+				_, fErr = collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "456").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+				_, fErr = collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "456").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(2), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+
+		{
+			name: "delete much successfully when filter is bson.D",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+				_, fErr = collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "456").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+				_, fErr = collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "456").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{bson.E{Key: types.Id, Value: bson.D{{Key: "$in", Value: bson.A{"123", "456"}}}}},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(2), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete much successfully when filter is map",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+				_, fErr = collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "456").Add("name", "cmy").Add("age", 18).Build())
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+				_, fErr = collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "456").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: map[string]any{"_id": map[string]any{"$in": []any{"123", "456"}}},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(2), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete much successfully when filter is struct",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, testUser{Id: "123", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+				_, fErr = collection.collection.InsertOne(ctx, testUser{Id: "456", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+				_, fErr = collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "456").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: userName{Name: "cmy"},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(2), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expect no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "delete much successfully when filter is struct pointer",
+			before: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.collection.InsertOne(ctx, &testUser{Id: "123", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+				_, fErr = collection.collection.InsertOne(ctx, &testUser{Id: "456", Name: "cmy", Age: 18})
+				assert.NoError(t, fErr)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				_, fErr := collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "123").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+				_, fErr = collection.FindOne(ctx, NewBsonBuilder().Add(types.Id, "456").Build())
+				assert.Equal(t, mongo.ErrNoDocuments, fErr)
+			},
+			ctx:    context.Background(),
+			filter: &userName{Name: "cmy"},
+			opts:   nil,
+			result: func(t *testing.T, us *mongo.DeleteResult) {
+				assert.Equal(t, int64(2), us.DeletedCount)
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expect no error but got %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			updateResult, err := collection.DeleteMany(tc.ctx, tc.filter, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			tc.result(t, updateResult)
+		})
 	}
 }

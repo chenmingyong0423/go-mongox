@@ -81,7 +81,7 @@ func (c *Collection[T]) UpdateOne(ctx context.Context, filter, updates any, opts
 	return c.collection.UpdateOne(ctx, bsonFilter, bsonUpdates, opts...)
 }
 
-func (c *Collection[T]) UpdateId(ctx context.Context, id, updates any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (c *Collection[T]) UpdateById(ctx context.Context, id, updates any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	bsonUpdates := toSetBson(updates)
 	return c.collection.UpdateByID(ctx, id, bsonUpdates, opts...)
 }
@@ -89,4 +89,18 @@ func (c *Collection[T]) UpdateId(ctx context.Context, id, updates any, opts ...*
 func (c *Collection[T]) UpdateMany(ctx context.Context, filter, updates any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	bsonUpdates := toSetBson(updates)
 	return c.collection.UpdateMany(ctx, filter, bsonUpdates, opts...)
+}
+
+func (c *Collection[T]) DeleteOne(ctx context.Context, filter any, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	bsonFilter := toBson(filter)
+	return c.collection.DeleteOne(ctx, bsonFilter, opts...)
+}
+
+func (c *Collection[T]) DeleteById(ctx context.Context, id any, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	return c.collection.DeleteOne(ctx, NewBsonBuilder().Id(id).Build(), opts...)
+}
+
+func (c *Collection[T]) DeleteMany(ctx context.Context, filter any, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	bsonFilter := toBson(filter)
+	return c.collection.DeleteMany(ctx, bsonFilter, opts...)
 }
