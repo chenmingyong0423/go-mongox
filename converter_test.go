@@ -111,6 +111,20 @@ func Test_toBson(t *testing.T) {
 		want bson.D
 	}{
 		{
+			name: "nil data",
+			data: nil,
+			want: nil,
+		},
+		{
+			name: "bson.D",
+			data: bson.D{
+				bson.E{Key: "k1", Value: "v1"},
+			},
+			want: bson.D{
+				bson.E{Key: "k1", Value: "v1"},
+			},
+		},
+		{
 			name: "map pointer",
 			data: func() *map[string]any {
 				data := map[string]any{
@@ -178,7 +192,7 @@ func Test_toBson(t *testing.T) {
 		{
 			name: "empty struct",
 			data: struct{}{},
-			want: nil,
+			want: bson.D{},
 		},
 	}
 	for _, tc := range testCases {
@@ -196,6 +210,25 @@ func Test_toSetBson(t *testing.T) {
 		want    bson.D
 	}{
 		{
+			name:    "nil data",
+			updates: nil,
+			want:    nil,
+		},
+		{
+			name: "bson.D",
+			updates: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}},
+			},
+			want: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}},
+		},
+		{
+			name: "map",
+			updates: map[string]any{
+				"k1": "v1",
+			},
+			want: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}},
+		},
+		{
 			name: "map pointer",
 			updates: func() *map[string]any {
 				data := map[string]any{
@@ -210,7 +243,31 @@ func Test_toSetBson(t *testing.T) {
 			name:    "empty struct",
 			updates: struct{}{},
 
-			want: nil,
+			want: bson.D{},
+		},
+		{
+			name:    "struct",
+			updates: testData{Id: "123", Name: "cmy", Age: 24},
+			want: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
+					bson.E{Key: "_id", Value: "123"},
+					bson.E{Key: "name", Value: "cmy"},
+					bson.E{Key: "age", Value: 24},
+				},
+				},
+			},
+		},
+		{
+			name:    "struct pointer",
+			updates: &testData{Id: "123", Name: "cmy", Age: 24},
+			want: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
+					bson.E{Key: "_id", Value: "123"},
+					bson.E{Key: "name", Value: "cmy"},
+					bson.E{Key: "age", Value: 24},
+				},
+				},
+			},
 		},
 	}
 	for _, tc := range testCases {

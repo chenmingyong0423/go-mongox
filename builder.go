@@ -17,6 +17,7 @@ package mongox
 import (
 	"github.com/chenmingyong0423/go-mongox/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 func NewBsonBuilder() *BsonBuilder {
@@ -274,7 +275,6 @@ func (b *BsonBuilder) And(conditions ...bson.D) *BsonBuilder {
 	return b
 }
 
-// Not
 func (b *BsonBuilder) Not(condition bson.D) *BsonBuilder {
 	b.data = append(b.data, bson.E{Key: types.Not, Value: condition})
 	return b
@@ -291,5 +291,30 @@ func (b *BsonBuilder) Nor(conditions ...bson.D) *BsonBuilder {
 // 对于 conditions 参数，你同样可以使用 BsonBuilder 去生成
 func (b *BsonBuilder) Or(conditions ...bson.D) *BsonBuilder {
 	b.data = append(b.data, bson.E{Key: types.Or, Value: conditions})
+	return b
+}
+
+func (b *BsonBuilder) Exists(key string, exists bool) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Exists: exists}})
+	return b
+}
+
+func (b *BsonBuilder) Type(key string, t bsontype.Type) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Type: t}})
+	return b
+}
+
+func (b *BsonBuilder) TypeAlias(key string, alias string) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Type: alias}})
+	return b
+}
+
+func (b *BsonBuilder) TypeArray(key string, ts ...bsontype.Type) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Type: ts}})
+	return b
+}
+
+func (b *BsonBuilder) TypeArrayAlias(key string, aliases ...string) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Type: aliases}})
 	return b
 }

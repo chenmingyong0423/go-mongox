@@ -17,6 +17,8 @@ package mongox
 import (
 	"testing"
 
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+
 	"github.com/chenmingyong0423/go-mongox/internal/types"
 
 	"github.com/stretchr/testify/assert"
@@ -134,6 +136,15 @@ func TestBsonBuilder(t *testing.T) {
 		{bson.E{Key: "k1", Value: "v1"}},
 		{bson.E{Key: "k2", Value: "v2"}},
 	}}}, NewBsonBuilder().Or(NewBsonBuilder().Add("k1", "v1").Build(), NewBsonBuilder().Add("k2", "v2").Build()).Build())
+
+	// Exists
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.Exists: true}}}, NewBsonBuilder().Exists("k1", true).Build())
+
+	// Type
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.Type: bson.TypeString}}}, NewBsonBuilder().Type("k1", bson.TypeString).Build())
+
+	// TypeAlias
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.Type: "string"}}}, NewBsonBuilder().TypeAlias("k1", "string").Build())
 }
 
 type testData struct {
@@ -1314,6 +1325,102 @@ func TestBsonBuilder_NinString(t *testing.T) {
 
 			got := NewBsonBuilder().NinString(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestBsonBuilder_TypeArray(t *testing.T) {
+
+	testCases := []struct {
+		name string
+		key  string
+		ts   []bsontype.Type
+
+		want bson.D
+	}{
+		{
+			name: "nil values",
+			key:  "name",
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: ([]bsontype.Type)(nil)}},
+			},
+		},
+		{
+			name: "empty values",
+			key:  "name",
+			ts:   []bsontype.Type{},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []bsontype.Type{}}},
+			},
+		},
+		{
+			name: "one value",
+			key:  "name",
+			ts:   []bsontype.Type{bson.TypeString},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []bsontype.Type{bson.TypeString}}},
+			},
+		},
+		{
+			name: "multiple values",
+			key:  "name",
+			ts:   []bsontype.Type{bson.TypeString, bson.TypeInt32},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []bsontype.Type{bson.TypeString, bson.TypeInt32}}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, NewBsonBuilder().TypeArray(tc.key, tc.ts...).Build())
+		})
+	}
+}
+
+func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
+
+	testCases := []struct {
+		name string
+		key  string
+		ts   []string
+
+		want bson.D
+	}{
+		{
+			name: "nil values",
+			key:  "name",
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: ([]string)(nil)}},
+			},
+		},
+		{
+			name: "empty values",
+			key:  "name",
+			ts:   []string{},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []string{}}},
+			},
+		},
+		{
+			name: "one value",
+			key:  "name",
+			ts:   []string{"string"},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []string{"string"}}},
+			},
+		},
+		{
+			name: "multiple values",
+			key:  "name",
+			ts:   []string{"string", "int32"},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.M{types.Type: []string{"string", "int32"}}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, NewBsonBuilder().TypeArrayAlias(tc.key, tc.ts...).Build())
 		})
 	}
 }

@@ -59,7 +59,8 @@ func MapToBson(data map[string]any) bson.D {
 	return d
 }
 
-func structToBson(val reflect.Value) (d bson.D) {
+func structToBson(val reflect.Value) bson.D {
+	d := bson.D{}
 	typ := val.Type()
 	for i := 0; i < val.NumField(); i++ {
 		field := typ.Field(i)
@@ -76,7 +77,7 @@ func structToBson(val reflect.Value) (d bson.D) {
 		}
 		d = append(d, bson.E{Key: fieldName, Value: valueField.Interface()})
 	}
-	return
+	return d
 }
 
 func StructToBson(data any) (d bson.D) {
