@@ -122,6 +122,64 @@ func Test_toBson(t *testing.T) {
 				bson.E{Key: "k1", Value: "v1"},
 			},
 		},
+		{
+			name: "map",
+			data: map[string]any{
+				"k1": "v1",
+			},
+			want: bson.D{
+				bson.E{Key: "k1", Value: "v1"},
+			},
+		},
+		{
+			name: "struct pointer",
+			data: func() *testData {
+				data := testData{Id: "123", Name: "cmy", Age: 24}
+				return &data
+			}(),
+			want: bson.D{
+				bson.E{Key: "_id", Value: "123"},
+				bson.E{Key: "name", Value: "cmy"},
+				bson.E{Key: "age", Value: 24},
+			},
+		},
+		{
+			name: "struct",
+			data: testData{Id: "123", Name: "cmy", Age: 24},
+			want: bson.D{
+				bson.E{Key: "_id", Value: "123"},
+				bson.E{Key: "name", Value: "cmy"},
+				bson.E{Key: "age", Value: 24},
+			},
+		},
+		{
+			name: "struct pointer with empty-value",
+			data: &testData{},
+			want: bson.D{
+				bson.E{Key: "_id", Value: ""},
+				bson.E{Key: "name", Value: ""},
+				bson.E{Key: "age", Value: 0},
+			},
+		},
+		{
+			name: "struct pointer with no empty-value",
+			data: &testData{Id: "123", Name: "cmy", Age: 24},
+			want: bson.D{
+				bson.E{Key: "_id", Value: "123"},
+				bson.E{Key: "name", Value: "cmy"},
+				bson.E{Key: "age", Value: 24},
+			},
+		},
+		{
+			name: "not struct",
+			data: 1,
+			want: nil,
+		},
+		{
+			name: "empty struct",
+			data: struct{}{},
+			want: nil,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -163,6 +221,57 @@ func Test_toSetBson(t *testing.T) {
 			} else {
 				assert.Equal(t, tc.want, setBson)
 			}
+		})
+	}
+}
+
+func TestMapToSetBson(t *testing.T) {
+	testCases := []struct {
+		name  string
+		data  map[string]any
+		wantD bson.D
+	}{
+		{
+			name:  "nil data",
+			data:  nil,
+			wantD: nil,
+		},
+		{
+			name: "map with zero-value",
+			data: map[string]any{
+				"name": "",
+			},
+			wantD: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
+					bson.E{Key: "name", Value: ""},
+				}},
+			},
+		},
+		{
+			name: "map with no zero-value",
+			data: map[string]any{
+				"name": "cmy",
+			},
+			wantD: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
+					bson.E{Key: "name", Value: "cmy"},
+				},
+				}},
+		},
+		{
+			name: "empty map",
+			data: map[string]any{},
+			wantD: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.data != nil {
+				assert.Equal(t, tc.wantD[0].Value, MapToSetBson(tc.data)[0].Value)
+			}
+			assert.Equal(t, tc.wantD, MapToSetBson(tc.data))
 		})
 	}
 }

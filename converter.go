@@ -93,11 +93,11 @@ func StructToBson(data any) (d bson.D) {
 	return structToBson(val)
 }
 
-func MapToSetBson(data map[string]any) (d bson.D) {
-	if d = MapToBson(data); len(d) != 0 {
-		return bson.D{bson.E{Key: types.Set, Value: d}}
+func MapToSetBson(data map[string]any) bson.D {
+	if data == nil {
+		return nil
 	}
-	return
+	return bson.D{bson.E{Key: types.Set, Value: MapToBson(data)}}
 }
 
 func StructToSetBson(data any) bson.D {
