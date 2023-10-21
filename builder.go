@@ -143,7 +143,6 @@ func (b *BsonBuilder) InFloat64(key string, values ...float64) *BsonBuilder {
 	return b
 }
 
-// 我已经创建了很多 InXXX 的方法了，你能帮我写 NinXXX 的方法吗？
 func (b *BsonBuilder) NinUint(key string, values ...uint) *BsonBuilder {
 	valuesAny := toAnySlice(values...)
 	b.Nin(key, valuesAny...)
@@ -276,7 +275,6 @@ func (b *BsonBuilder) And(conditions ...bson.D) *BsonBuilder {
 }
 
 // Not
-// 对于 conditions 参数，你同样可以使用 BsonBuilder 去生成
 func (b *BsonBuilder) Not(condition bson.D) *BsonBuilder {
 	b.data = append(b.data, bson.E{Key: types.Not, Value: condition})
 	return b
