@@ -18,6 +18,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/chenmingyong0423/go-mongox/internal/types"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -93,7 +95,7 @@ func StructToBson(data any) (d bson.D) {
 
 func MapToSetBson(data map[string]any) (d bson.D) {
 	if d = MapToBson(data); len(d) != 0 {
-		return bson.D{bson.E{Key: set, Value: d}}
+		return bson.D{bson.E{Key: types.Set, Value: d}}
 	}
 	return
 }
@@ -110,7 +112,7 @@ func StructToSetBson(data any) bson.D {
 		return nil
 	}
 	if d := structToBson(val); len(d) != 0 {
-		return bson.D{bson.E{Key: set, Value: d}}
+		return bson.D{bson.E{Key: types.Set, Value: d}}
 	}
 	return nil
 }
@@ -126,7 +128,7 @@ func toSetBson(updates any) bson.D {
 	case reflect.Struct:
 		d := structToBson(val)
 		if len(d) != 0 {
-			return bson.D{bson.E{Key: set, Value: d}}
+			return bson.D{bson.E{Key: types.Set, Value: d}}
 		}
 		return d
 	case reflect.Ptr:
@@ -134,7 +136,7 @@ func toSetBson(updates any) bson.D {
 		if elemVal.Kind() == reflect.Struct {
 			d := structToBson(elemVal)
 			if len(d) != 0 {
-				return bson.D{bson.E{Key: set, Value: d}}
+				return bson.D{bson.E{Key: types.Set, Value: d}}
 			}
 		} else if elemVal.Kind() == reflect.Map && elemVal.Type().Key().Kind() == reflect.String && elemVal.Type().Elem().Kind() == reflect.Interface {
 			return MapToSetBson(elemVal.Interface().(map[string]any))

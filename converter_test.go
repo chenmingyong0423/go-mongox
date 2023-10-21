@@ -17,6 +17,8 @@ package mongox
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -42,7 +44,7 @@ func TestStructToSetBson(t *testing.T) {
 			name: "struct with zero-value",
 			data: testData{},
 			wantD: bson.D{
-				bson.E{Key: set, Value: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
 					bson.E{Key: "name", Value: ""},
 					bson.E{Key: "age", Value: 0},
 				}},
@@ -52,7 +54,7 @@ func TestStructToSetBson(t *testing.T) {
 			name: "struct with no zero-value",
 			data: testData{Name: "cmy", Age: 24},
 			wantD: bson.D{
-				bson.E{Key: set, Value: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
 					bson.E{Key: "name", Value: "cmy"},
 					bson.E{Key: "age", Value: 24},
 				}},
@@ -62,7 +64,7 @@ func TestStructToSetBson(t *testing.T) {
 			name: "struct pointer with empty-value",
 			data: &testData{},
 			wantD: bson.D{
-				bson.E{Key: set, Value: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
 					bson.E{Key: "name", Value: ""},
 					bson.E{Key: "age", Value: 0},
 				}},
@@ -72,7 +74,7 @@ func TestStructToSetBson(t *testing.T) {
 			name: "struct pointer with no empty-value",
 			data: &testData{Name: "cmy", Age: 24},
 			wantD: bson.D{
-				bson.E{Key: set, Value: bson.D{
+				bson.E{Key: types.Set, Value: bson.D{
 					bson.E{Key: "name", Value: "cmy"},
 					bson.E{Key: "age", Value: 24},
 				}},
@@ -144,7 +146,7 @@ func Test_toSetBson(t *testing.T) {
 				return &data
 			}(),
 
-			want: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}},
+			want: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}},
 		},
 		{
 			name:    "empty struct",
