@@ -100,7 +100,7 @@ func TestBsonBuilder(t *testing.T) {
 	// nin
 	assert.Equal(t, bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: ints}}}, NewBsonBuilder().Nin("id", ints...).Build())
 
-	// And 帮我写一个 BsonBuilder 结构体 And 方法的测试用例代码
+	// And
 	assert.Equal(t, bson.D{bson.E{Key: types.And, Value: []bson.D{
 		{bson.E{Key: "k1", Value: "v1"}},
 		{bson.E{Key: "k2", Value: "v2"}},
@@ -113,6 +113,34 @@ func TestBsonBuilder(t *testing.T) {
 		{bson.E{Key: "k2", Value: "v2"}},
 	}}}, NewBsonBuilder().And(NewBsonBuilder().Add("k1", "v1").Build(), NewBsonBuilder().Add("k2", "v2").Build()).Build())
 
+	// Not 测试用例
+	assert.Equal(t, bson.D{bson.E{Key: types.Not, Value: bson.D{bson.E{Key: "k1", Value: "v1"}}}}, NewBsonBuilder().Not(bson.D{bson.E{Key: "k1", Value: "v1"}}).Build())
+
+	// Nor
+	assert.Equal(t, bson.D{bson.E{Key: types.Nor, Value: []bson.D{
+		{bson.E{Key: "k1", Value: "v1"}},
+		{bson.E{Key: "k2", Value: "v2"}},
+	}}}, NewBsonBuilder().Nor(
+		bson.D{bson.E{Key: "k1", Value: "v1"}},
+		bson.D{bson.E{Key: "k2", Value: "v2"}},
+	).Build())
+	assert.Equal(t, bson.D{bson.E{Key: types.Nor, Value: []bson.D{
+		{bson.E{Key: "k1", Value: "v1"}},
+		{bson.E{Key: "k2", Value: "v2"}},
+	}}}, NewBsonBuilder().Nor(NewBsonBuilder().Add("k1", "v1").Build(), NewBsonBuilder().Add("k2", "v2").Build()).Build())
+
+	// Or
+	assert.Equal(t, bson.D{bson.E{Key: types.Or, Value: []bson.D{
+		{bson.E{Key: "k1", Value: "v1"}},
+		{bson.E{Key: "k2", Value: "v2"}},
+	}}}, NewBsonBuilder().Or(
+		bson.D{bson.E{Key: "k1", Value: "v1"}},
+		bson.D{bson.E{Key: "k2", Value: "v2"}},
+	).Build())
+	assert.Equal(t, bson.D{bson.E{Key: types.Or, Value: []bson.D{
+		{bson.E{Key: "k1", Value: "v1"}},
+		{bson.E{Key: "k2", Value: "v2"}},
+	}}}, NewBsonBuilder().Or(NewBsonBuilder().Add("k1", "v1").Build(), NewBsonBuilder().Add("k2", "v2").Build()).Build())
 }
 
 type testData struct {
