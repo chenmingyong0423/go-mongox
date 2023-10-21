@@ -61,8 +61,176 @@ func (b *BsonBuilder) SetForStruct(data any) *BsonBuilder {
 }
 
 func (b *BsonBuilder) In(key string, values ...any) *BsonBuilder {
-	b.data = append(b.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.In, Value: values}}})
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b
+}
+
+func (b *BsonBuilder) InUint(key string, values ...uint) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InUint8(key string, values ...uint8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InUint16(key string, values ...uint16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InUint32(key string, values ...uint32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InUint64(key string, values ...uint64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InInt(key string, values ...int) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InInt8(key string, values ...int8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InInt16(key string, values ...int16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InInt32(key string, values ...int32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InInt64(key string, values ...int64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InString(key string, values ...string) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InFloat32(key string, values ...float32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) InFloat64(key string, values ...float64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.In(key, valuesAny...)
+	return b
+}
+
+// 我已经创建了很多 InXXX 的方法了，你能帮我写 NinXXX 的方法吗？
+func (b *BsonBuilder) NinUint(key string, values ...uint) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinUint8(key string, values ...uint8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinUint16(key string, values ...uint16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinUint32(key string, values ...uint32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinUint64(key string, values ...uint64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinInt(key string, values ...int) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinInt8(key string, values ...int8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinInt16(key string, values ...int16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinInt32(key string, values ...int32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinInt64(key string, values ...int64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinString(key string, values ...string) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinFloat32(key string, values ...float32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) NinFloat64(key string, values ...float64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.Nin(key, valuesAny...)
+	return b
+}
+
+func toAnySlice[T any](values ...T) []any {
+	if values == nil {
+		return nil
+	}
+	valuesAny := make([]any, len(values))
+	for i, v := range values {
+		valuesAny[i] = v
+	}
+	return valuesAny
 }
 
 func (b *BsonBuilder) Eq(key string, value any) *BsonBuilder {

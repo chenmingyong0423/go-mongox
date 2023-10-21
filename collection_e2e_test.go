@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -122,7 +124,7 @@ func TestCollection_e2e_UpdateMany(t *testing.T) {
 				_, fErr = collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("456").Build())
 				assert.NoError(t, fErr)
 			},
-			filter:  map[string]any{id: "789"},
+			filter:  map[string]any{types.Id: "789"},
 			updates: map[string]any{"name": "ccc"},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(0), us.ModifiedCount)
@@ -167,7 +169,7 @@ func TestCollection_e2e_UpdateMany(t *testing.T) {
 				assert.NoError(t, fErr)
 			},
 			filter:  bson.D{bson.E{Key: "name", Value: "cmy"}},
-			updates: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
+			updates: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(2), us.ModifiedCount)
 			},
@@ -406,7 +408,7 @@ func TestCollection_e2e_UpdateId(t *testing.T) {
 				assert.NoError(t, fErr)
 			},
 			id:      "123",
-			updates: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
+			updates: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(1), us.ModifiedCount)
 			},
@@ -593,7 +595,7 @@ func TestCollection_e2e_UpdateOne(t *testing.T) {
 				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, fErr)
 			},
-			filter:  map[string]any{id: "456"},
+			filter:  map[string]any{types.Id: "456"},
 			updates: map[string]any{"name": "ccc"},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(0), us.ModifiedCount)
@@ -624,8 +626,8 @@ func TestCollection_e2e_UpdateOne(t *testing.T) {
 				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, fErr)
 			},
-			filter:  bson.D{bson.E{Key: id, Value: "123"}},
-			updates: bson.D{bson.E{Key: set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
+			filter:  bson.D{bson.E{Key: types.Id, Value: "123"}},
+			updates: bson.D{bson.E{Key: types.Set, Value: bson.D{bson.E{Key: "name", Value: "ccc"}}}},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(1), us.ModifiedCount)
 			},
@@ -655,7 +657,7 @@ func TestCollection_e2e_UpdateOne(t *testing.T) {
 				_, fErr := collection.collection.DeleteOne(ctx, NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, fErr)
 			},
-			filter:  map[string]any{id: "123"},
+			filter:  map[string]any{types.Id: "123"},
 			updates: map[string]any{"name": "ccc"},
 			result: func(t *testing.T, us *mongo.UpdateResult) {
 				assert.Equal(t, int64(1), us.ModifiedCount)
@@ -853,7 +855,7 @@ func TestCollection_e2e_FindOne(t *testing.T) {
 			},
 
 			ctx:    context.Background(),
-			filter: bson.D{bson.E{Key: id, Value: "123"}},
+			filter: bson.D{bson.E{Key: types.Id, Value: "123"}},
 
 			wantT: &testUser{Id: "123", Name: "cmy", Age: 18},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -1169,7 +1171,7 @@ func TestCollection_e2e_Find(t *testing.T) {
 		{
 			name: "decode failed",
 			before: func(ctx context.Context, t *testing.T) {
-				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(id, "123").Add("name", "cmy").Add("age", "18").Build())
+				_, fErr := collection.collection.InsertOne(ctx, NewBsonBuilder().Add(types.Id, "123").Add("name", "cmy").Add("age", "18").Build())
 				assert.NoError(t, fErr)
 			},
 			after: func(ctx context.Context, t *testing.T) {
@@ -1214,7 +1216,7 @@ func TestCollection_e2e_Find(t *testing.T) {
 			},
 
 			ctx:    context.Background(),
-			filter: bson.D{bson.E{Key: id, Value: "123"}},
+			filter: bson.D{bson.E{Key: types.Id, Value: "123"}},
 
 			wantT: []*testUser{
 				{Id: "123", Name: "cmy", Age: 18},
