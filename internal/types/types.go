@@ -31,4 +31,5 @@ const (
 	Or     = "$or"
 	Exists = "$exists"
 	Type   = "$type"
+	All    = "$all"
 )

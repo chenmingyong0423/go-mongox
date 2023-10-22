@@ -318,3 +318,86 @@ func (b *BsonBuilder) TypeArrayAlias(key string, aliases ...string) *BsonBuilder
 	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Type: aliases}})
 	return b
 }
+
+func (b *BsonBuilder) All(key string, values ...any) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.All: values}})
+	return b
+}
+
+func (b *BsonBuilder) AllUint(key string, values ...uint) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllUint8(key string, values ...uint8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllUint16(key string, values ...uint16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllUint32(key string, values ...uint32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllUint64(key string, values ...uint64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllInt(key string, values ...int) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllInt8(key string, values ...int8) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllInt16(key string, values ...int16) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllInt32(key string, values ...int32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllInt64(key string, values ...int64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllString(key string, values ...string) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllFloat32(key string, values ...float32) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
+
+func (b *BsonBuilder) AllFloat64(key string, values ...float64) *BsonBuilder {
+	valuesAny := toAnySlice(values...)
+	b.All(key, valuesAny...)
+	return b
+}
