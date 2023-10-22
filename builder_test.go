@@ -145,6 +145,10 @@ func TestBsonBuilder(t *testing.T) {
 
 	// TypeAlias
 	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.Type: "string"}}}, NewBsonBuilder().TypeAlias("k1", "string").Build())
+
+	// ElemMatch
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.ElemMatch: bson.D{bson.E{Key: "k2", Value: "v2"}}}}}, NewBsonBuilder().ElemMatch("k1", bson.D{bson.E{Key: "k2", Value: "v2"}}).Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.ElemMatch: NewBsonBuilder().Add("k2", "v2").Build()}}}, NewBsonBuilder().ElemMatch("k1", bson.D{bson.E{Key: "k2", Value: "v2"}}).Build())
 }
 
 type testData struct {
