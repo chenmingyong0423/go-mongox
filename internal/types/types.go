@@ -33,4 +33,5 @@ const (
 	Type      = "$type"
 	All       = "$all"
 	ElemMatch = "$elemMatch"
+	Size      = "$size"
 )

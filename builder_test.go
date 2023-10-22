@@ -149,6 +149,9 @@ func TestBsonBuilder(t *testing.T) {
 	// ElemMatch
 	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.ElemMatch: bson.D{bson.E{Key: "k2", Value: "v2"}}}}}, NewBsonBuilder().ElemMatch("k1", bson.D{bson.E{Key: "k2", Value: "v2"}}).Build())
 	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.ElemMatch: NewBsonBuilder().Add("k2", "v2").Build()}}}, NewBsonBuilder().ElemMatch("k1", bson.D{bson.E{Key: "k2", Value: "v2"}}).Build())
+
+	// Size
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.M{types.Size: 1}}}, NewBsonBuilder().Size("k1", 1).Build())
 }
 
 type testData struct {

@@ -403,6 +403,11 @@ func (b *BsonBuilder) AllFloat64(key string, values ...float64) *BsonBuilder {
 }
 
 func (b *BsonBuilder) ElemMatch(key string, condition bson.D) *BsonBuilder {
-	b.data = append(b.data, bson.E{Key: key, Value: bson.M{"$elemMatch": condition}})
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.ElemMatch: condition}})
+	return b
+}
+
+func (b *BsonBuilder) Size(key string, size int) *BsonBuilder {
+	b.data = append(b.data, bson.E{Key: key, Value: bson.M{types.Size: size}})
 	return b
 }
