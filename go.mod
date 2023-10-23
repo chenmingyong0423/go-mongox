@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.12.1
+	go.uber.org/mock v0.3.0
 )
 
 require (

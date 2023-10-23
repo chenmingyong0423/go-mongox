@@ -15,18 +15,23 @@
 package mongox
 
 import (
+	"testing"
+
 	"github.com/chenmingyong0423/go-mongox/finder"
+	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func NewCollection[T any](collection *mongo.Collection) *Collection[T] {
-	return &Collection[T]{collection: collection}
+func TestCollection_New(t *testing.T) {
+	mockMongoCollection := &mongo.Collection{}
+
+	result := NewCollection[any](mockMongoCollection)
+
+	assert.NotNil(t, result, "Expected non-nil Collection")
+	assert.Equal(t, mockMongoCollection, result.collection, "Expected collection field to be initialized correctly")
 }
 
-type Collection[T any] struct {
-	collection *mongo.Collection
-}
-
-func (c *Collection[T]) Finder() *finder.Finder[T] {
-	return finder.NewFinder[T](c.collection)
+func TestCollection_Finder(t *testing.T) {
+	mockFinder := finder.NewFinder[any](&mongo.Collection{})
+	assert.NotNil(t, mockFinder, "Expected non-nil Finder")
 }

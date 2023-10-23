@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mongox
+package converter
 
 import (
 	"reflect"
@@ -23,7 +23,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func toBson(data any) bson.D {
+func ToBson(data any) bson.D {
 	if data == nil {
 		return nil
 	}
@@ -118,7 +118,7 @@ func StructToSetBson(data any) bson.D {
 	return nil
 }
 
-func toSetBson(updates any) bson.D {
+func ToSetBson(updates any) bson.D {
 	val := reflect.ValueOf(updates)
 	kind := val.Kind()
 	switch kind {

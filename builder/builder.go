@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mongox
+package builder
 
 import (
+	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -48,14 +49,14 @@ func (b *BsonBuilder) Set(key string, value any) *BsonBuilder {
 }
 
 func (b *BsonBuilder) SetForMap(data map[string]any) *BsonBuilder {
-	if d := MapToBson(data); len(d) != 0 {
+	if d := converter.MapToBson(data); len(d) != 0 {
 		b.data = append(b.data, bson.E{Key: types.Set, Value: d})
 	}
 	return b
 }
 
 func (b *BsonBuilder) SetForStruct(data any) *BsonBuilder {
-	if d := StructToBson(data); len(d) != 0 {
+	if d := converter.StructToBson(data); len(d) != 0 {
 		b.data = append(b.data, bson.E{Key: types.Set, Value: d})
 	}
 	return b

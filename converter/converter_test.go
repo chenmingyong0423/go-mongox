@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mongox
+package converter
 
 import (
 	"testing"
@@ -22,6 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
+
+type testData struct {
+	Id      string `bson:"_id"`
+	Name    string `bson:"name"`
+	Age     int
+	Unknown string `bson:"-"`
+}
 
 func TestStructToSetBson(t *testing.T) {
 	type testData struct {
@@ -197,7 +204,7 @@ func Test_toBson(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, toBson(tc.data))
+			assert.Equal(t, tc.want, ToBson(tc.data))
 		})
 	}
 }
@@ -272,7 +279,7 @@ func Test_toSetBson(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			setBson := toSetBson(tc.updates)
+			setBson := ToSetBson(tc.updates)
 			if len(setBson) > 0 {
 				assert.Equal(t, tc.want[0].Value, setBson[0].Value)
 			} else {
