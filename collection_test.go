@@ -17,6 +17,8 @@ package mongox
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/creator"
+
 	"github.com/chenmingyong0423/go-mongox/finder"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,6 +34,11 @@ func TestCollection_New(t *testing.T) {
 }
 
 func TestCollection_Finder(t *testing.T) {
-	mockFinder := finder.NewFinder[any](&mongo.Collection{})
-	assert.NotNil(t, mockFinder, "Expected non-nil Finder")
+	f := finder.NewFinder[any](&mongo.Collection{})
+	assert.NotNil(t, f, "Expected non-nil Finder")
+}
+
+func TestCollection_Creator(t *testing.T) {
+	c := creator.NewCreator[any](&mongo.Collection{})
+	assert.NotNil(t, c, "Expected non-nil Creator")
 }

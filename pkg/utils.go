@@ -12,26 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mongox
+package pkg
 
-import (
-	"github.com/chenmingyong0423/go-mongox/creator"
-	"github.com/chenmingyong0423/go-mongox/finder"
-	"go.mongodb.org/mongo-driver/mongo"
-)
-
-func NewCollection[T any](collection *mongo.Collection) *Collection[T] {
-	return &Collection[T]{collection: collection}
-}
-
-type Collection[T any] struct {
-	collection *mongo.Collection
-}
-
-func (c *Collection[T]) Finder() *finder.Finder[T] {
-	return finder.NewFinder[T](c.collection)
-}
-
-func (c *Collection[T]) Creator() *creator.Creator[T] {
-	return creator.NewCreator[T](c.collection)
+func ToAnySlice[T any](values ...T) []any {
+	if values == nil {
+		return nil
+	}
+	valuesAny := make([]any, len(values))
+	for i, v := range values {
+		valuesAny[i] = v
+	}
+	return valuesAny
 }

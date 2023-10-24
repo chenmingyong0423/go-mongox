@@ -17,6 +17,8 @@ package builder
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/pkg"
+
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 
 	"github.com/chenmingyong0423/go-mongox/internal/types"
@@ -738,7 +740,7 @@ func Test_toAnySlice(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, toAnySlice(tc.values...))
+			assert.Equal(t, tc.want, pkg.ToAnySlice(tc.values...))
 		})
 	}
 }

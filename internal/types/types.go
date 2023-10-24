@@ -35,3 +35,25 @@ const (
 	ElemMatch = "$elemMatch"
 	Size      = "$size"
 )
+
+type TestUser struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int
+	UnknownField string `bson:"-"`
+}
+
+type IllegalUser struct {
+	Id   string `bson:"_id"`
+	Name string `bson:"name"`
+	Age  string
+}
+
+//type updatedUser struct {
+//	Name string `bson:"name"`
+//	Age  int
+//}
+//
+//type userName struct {
+//	Name string `bson:"name"`
+//}

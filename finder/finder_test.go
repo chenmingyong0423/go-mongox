@@ -19,6 +19,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/types"
+
 	"github.com/chenmingyong0423/go-mongox/builder"
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
 	"github.com/stretchr/testify/assert"
@@ -27,34 +29,27 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-type testUser struct {
-	Id           string `bson:"_id"`
-	Name         string `bson:"name"`
-	Age          int
-	UnknownField string `bson:"-"`
-}
-
 func TestFinder_New(t *testing.T) {
-	mockMongoCollection := &mongo.Collection{}
+	mongoCollection := &mongo.Collection{}
 
-	result := NewFinder[testUser](mockMongoCollection)
+	result := NewFinder[any](mongoCollection)
 	assert.NotNil(t, result, "Expected non-nil Finder")
-	assert.Equal(t, mockMongoCollection, result.collection, "Expected finder field to be initialized correctly")
+	assert.Equal(t, mongoCollection, result.collection, "Expected finder field to be initialized correctly")
 }
 
 func TestFinder_One(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser]
 		ctx  context.Context
 
-		want    *testUser
+		want    *types.TestUser
 		wantErr error
 	}{
 		{
 			name: "error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
 				mockCollection.EXPECT().One(gomock.Any()).Return(nil, mongo.ErrNoDocuments).Times(1)
 				return mockCollection
 			},
@@ -62,16 +57,16 @@ func TestFinder_One(t *testing.T) {
 		},
 		{
 			name: "match the first one",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().One(gomock.Any()).Return(&testUser{
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().One(gomock.Any()).Return(&types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  18,
 				}, nil).Times(1)
 				return mockCollection
 			},
-			want: &testUser{
+			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  18,
@@ -94,17 +89,17 @@ func TestFinder_One(t *testing.T) {
 func TestFinder_OneWithOptions(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[testUser]
+		mock func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[types.TestUser]
 		ctx  context.Context
 		opts []*options.FindOneOptions
 
-		want    *testUser
+		want    *types.TestUser
 		wantErr error
 	}{
 		{
 			name: "error",
-			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
+			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
 				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(nil, mongo.ErrNoDocuments).Times(1)
 				return mockCollection
 			},
@@ -112,16 +107,16 @@ func TestFinder_OneWithOptions(t *testing.T) {
 		},
 		{
 			name: "match the first one",
-			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&testUser{
+			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  18,
 				}, nil).Times(1)
 				return mockCollection
 			},
-			want: &testUser{
+			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  18,
@@ -129,9 +124,9 @@ func TestFinder_OneWithOptions(t *testing.T) {
 		},
 		{
 			name: "returns some of fields",
-			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&testUser{
+			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 				}, nil).Times(1)
@@ -142,16 +137,16 @@ func TestFinder_OneWithOptions(t *testing.T) {
 					Projection: builder.NewBsonBuilder().Add("_id", 1).Add("name", 1).Build(),
 				},
 			},
-			want: &testUser{
+			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 			},
 		},
 		{
 			name: "ignore _id field",
-			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&testUser{
+			mock: func(ctx context.Context, opts []*options.FindOneOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().OneWithOptions(ctx, opts).Return(&types.TestUser{
 					Name: "cmy",
 					Age:  18,
 				}, nil).Times(1)
@@ -162,7 +157,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 					Projection: builder.NewBsonBuilder().Add("_id", 0).Build(),
 				},
 			},
-			want: &testUser{
+			want: &types.TestUser{
 				Name: "cmy",
 				Age:  18,
 			},
@@ -184,26 +179,26 @@ func TestFinder_OneWithOptions(t *testing.T) {
 func TestFinder_All(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser]
 		ctx  context.Context
 
-		want    []*testUser
+		want    []*types.TestUser
 		wantErr error
 	}{
 		{
 			name: "empty documents",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().All(ctx).Return([]*testUser{}, nil).Times(1)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().All(ctx).Return([]*types.TestUser{}, nil).Times(1)
 				return mockCollection
 			},
-			want: []*testUser{},
+			want: []*types.TestUser{},
 		},
 		{
 			name: "matched",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().All(ctx).Return([]*testUser{
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().All(ctx).Return([]*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -217,7 +212,7 @@ func TestFinder_All(t *testing.T) {
 				}, nil).Times(1)
 				return mockCollection
 			},
-			want: []*testUser{
+			want: []*types.TestUser{
 				{
 					Id:   "123",
 					Name: "cmy",
@@ -247,17 +242,17 @@ func TestFinder_All(t *testing.T) {
 func TestFinder_AllWithOptions(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser]
+		mock func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser]
 		ctx  context.Context
 		opts []*options.FindOptions
 
-		want    []*testUser
+		want    []*types.TestUser
 		wantErr error
 	}{
 		{
 			name: "cursor.all error",
-			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
+			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
 				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return(nil, errors.New("decode failed")).Times(1)
 				return mockCollection
 			},
@@ -265,18 +260,18 @@ func TestFinder_AllWithOptions(t *testing.T) {
 		},
 		{
 			name: "empty documents",
-			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*testUser{}, nil).Times(1)
+			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*types.TestUser{}, nil).Times(1)
 				return mockCollection
 			},
-			want: []*testUser{},
+			want: []*types.TestUser{},
 		},
 		{
 			name: "matched",
-			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*testUser{
+			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -290,7 +285,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 				}, nil).Times(1)
 				return mockCollection
 			},
-			want: []*testUser{
+			want: []*types.TestUser{
 				{
 					Id:   "123",
 					Name: "cmy",
@@ -305,9 +300,9 @@ func TestFinder_AllWithOptions(t *testing.T) {
 		},
 		{
 			name: "returns some of fields",
-			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*testUser{
+			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -324,7 +319,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 					Projection: builder.NewBsonBuilder().Add("_id", 1).Add("name", 1).Build(),
 				},
 			},
-			want: []*testUser{
+			want: []*types.TestUser{
 				{
 					Id:   "123",
 					Name: "cmy",
@@ -337,9 +332,9 @@ func TestFinder_AllWithOptions(t *testing.T) {
 		},
 		{
 			name: "ignore _id field",
-			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[testUser] {
-				mockCollection := mocks.NewMockiFinder[testUser](ctl)
-				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*testUser{
+			mock: func(ctx context.Context, opts []*options.FindOptions, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().AllWithOptions(ctx, opts).Return([]*types.TestUser{
 					{
 						Name: "cmy",
 						Age:  18,
@@ -356,7 +351,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 					Projection: builder.NewBsonBuilder().Add("_id", 0).Build(),
 				},
 			},
-			want: []*testUser{
+			want: []*types.TestUser{
 				{
 					Name: "cmy",
 					Age:  18,

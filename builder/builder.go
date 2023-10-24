@@ -17,6 +17,7 @@ package builder
 import (
 	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/internal/types"
+	"github.com/chenmingyong0423/go-mongox/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
@@ -68,170 +69,159 @@ func (b *BsonBuilder) In(key string, values ...any) *BsonBuilder {
 }
 
 func (b *BsonBuilder) InUint(key string, values ...uint) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InUint8(key string, values ...uint8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InUint16(key string, values ...uint16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InUint32(key string, values ...uint32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InUint64(key string, values ...uint64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InInt(key string, values ...int) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InInt8(key string, values ...int8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InInt16(key string, values ...int16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InInt32(key string, values ...int32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InInt64(key string, values ...int64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InString(key string, values ...string) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InFloat32(key string, values ...float32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) InFloat64(key string, values ...float64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.In(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinUint(key string, values ...uint) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinUint8(key string, values ...uint8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinUint16(key string, values ...uint16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinUint32(key string, values ...uint32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinUint64(key string, values ...uint64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinInt(key string, values ...int) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinInt8(key string, values ...int8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinInt16(key string, values ...int16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinInt32(key string, values ...int32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinInt64(key string, values ...int64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinString(key string, values ...string) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinFloat32(key string, values ...float32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) NinFloat64(key string, values ...float64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.Nin(key, valuesAny...)
 	return b
-}
-
-func toAnySlice[T any](values ...T) []any {
-	if values == nil {
-		return nil
-	}
-	valuesAny := make([]any, len(values))
-	for i, v := range values {
-		valuesAny[i] = v
-	}
-	return valuesAny
 }
 
 func (b *BsonBuilder) Eq(key string, value any) *BsonBuilder {
@@ -326,79 +316,79 @@ func (b *BsonBuilder) All(key string, values ...any) *BsonBuilder {
 }
 
 func (b *BsonBuilder) AllUint(key string, values ...uint) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllUint8(key string, values ...uint8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllUint16(key string, values ...uint16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllUint32(key string, values ...uint32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllUint64(key string, values ...uint64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllInt(key string, values ...int) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllInt8(key string, values ...int8) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllInt16(key string, values ...int16) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllInt32(key string, values ...int32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllInt64(key string, values ...int64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllString(key string, values ...string) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllFloat32(key string, values ...float32) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }
 
 func (b *BsonBuilder) AllFloat64(key string, values ...float64) *BsonBuilder {
-	valuesAny := toAnySlice(values...)
+	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b
 }

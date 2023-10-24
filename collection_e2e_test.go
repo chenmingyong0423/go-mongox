@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/creator"
+
 	"github.com/chenmingyong0423/go-mongox/finder"
 
 	"github.com/stretchr/testify/assert"
@@ -31,8 +33,15 @@ import (
 func TestCollection_e2e_Finder(t *testing.T) {
 	collection := getCollection[any](t)
 
-	mockFinder := finder.NewFinder[any](collection.collection)
-	assert.NotNil(t, mockFinder, "Expected non-nil Finder")
+	f := finder.NewFinder[any](collection.collection)
+	assert.NotNil(t, f, "Expected non-nil Finder")
+}
+
+func TestCollection_e2e_Creator(t *testing.T) {
+	collection := getCollection[any](t)
+
+	c := creator.NewCreator[any](collection.collection)
+	assert.NotNil(t, c, "Expected non-nil Creator")
 }
 
 func TestCollection_e2e_New(t *testing.T) {
