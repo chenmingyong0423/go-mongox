@@ -52,7 +52,7 @@ func (c *Creator[T]) OneWithOptions(ctx context.Context, doc T, opts ...*options
 }
 
 func (c *Creator[T]) Many(ctx context.Context, docs []T) (*mongo.InsertManyResult, error) {
-	return c.collection.InsertMany(ctx, pkg.ToAnySlice(docs), c.insertManyOptions...)
+	return c.collection.InsertMany(ctx, pkg.ToAnySlice(docs...), c.insertManyOptions...)
 }
 
 func (c *Creator[T]) ManyWithOptions(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {

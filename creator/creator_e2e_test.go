@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/builder"
+
 	"github.com/chenmingyong0423/go-mongox/internal/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -91,11 +93,7 @@ func TestCreator_e2e_One(t *testing.T) {
 
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
 			},
@@ -125,6 +123,274 @@ func TestCreator_e2e_One(t *testing.T) {
 			}
 			if insertOneResult != nil {
 				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
+			}
+		})
+	}
+}
+
+func TestCreator_e2e_OneWithOptions(t *testing.T) {
+	collection := newCollection(t)
+	creator := NewCreator[types.TestUser](collection)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx  context.Context
+		opts []*options.InsertOneOptions
+		t    types.TestUser
+
+		wantId    string
+		wantError assert.ErrorAssertionFunc
+	}{
+		{
+			name: "duplicate",
+			before: func(ctx context.Context, t *testing.T) {
+				oneResult, err := collection.InsertOne(ctx, types.TestUser{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				})
+				assert.Equal(t, "123", oneResult.InsertedID)
+				assert.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			ctx: context.Background(),
+			t: types.TestUser{
+				Id:   "123",
+				Name: "cmy",
+				Age:  24,
+			},
+			wantId: "",
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return mongo.IsDuplicateKeyError(err)
+			},
+		},
+		{
+			name:   "insert one successfully",
+			before: func(_ context.Context, _ *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			ctx: context.Background(),
+			t: types.TestUser{
+				Id:   "123",
+				Name: "cmy",
+				Age:  24,
+			},
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			wantId: "123",
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected no error, but got: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			insertOneResult, err := creator.OneWithOptions(tc.ctx, tc.t, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantError(t, err) {
+				return
+			}
+			if insertOneResult != nil {
+				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
+			}
+		})
+	}
+}
+
+func TestCreator_e2e_Many(t *testing.T) {
+	collection := newCollection(t)
+	creator := NewCreator[types.TestUser](collection)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx context.Context
+		t   []types.TestUser
+
+		wantIds   []string
+		wantError assert.ErrorAssertionFunc
+	}{
+		{
+			name: "duplicate",
+			before: func(ctx context.Context, t *testing.T) {
+				oneResult, err := collection.InsertOne(ctx, types.TestUser{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				})
+				assert.Equal(t, "123", oneResult.InsertedID)
+				assert.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			ctx: context.Background(),
+			t: []types.TestUser{
+				{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				},
+				{
+					Id:   "456",
+					Name: "cmy",
+					Age:  24,
+				},
+			},
+			wantIds: nil,
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return mongo.IsDuplicateKeyError(err)
+			},
+		},
+		{
+			name:   "insert many successfully",
+			before: func(_ context.Context, _ *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			ctx: context.Background(),
+			t: []types.TestUser{
+				{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				},
+				{
+					Id:   "456",
+					Name: "cmy",
+					Age:  24,
+				},
+			},
+			wantIds:   []string{"123", "456"},
+			wantError: assert.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			insertManyResult, err := creator.Many(tc.ctx, tc.t)
+			tc.after(tc.ctx, t)
+			if !tc.wantError(t, err) {
+				return
+			}
+			if insertManyResult != nil {
+				assert.ElementsMatch(t, tc.wantIds, insertManyResult.InsertedIDs)
+			}
+		})
+	}
+}
+
+func TestCreator_e2e_ManyWithOptions(t *testing.T) {
+	collection := newCollection(t)
+	creator := NewCreator[types.TestUser](collection)
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		opts []*options.InsertManyOptions
+
+		ctx context.Context
+		t   []types.TestUser
+
+		wantIds   []string
+		wantError assert.ErrorAssertionFunc
+	}{
+		{
+			name: "duplicate",
+			before: func(ctx context.Context, t *testing.T) {
+				oneResult, err := collection.InsertOne(ctx, types.TestUser{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				})
+				assert.Equal(t, "123", oneResult.InsertedID)
+				assert.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			ctx: context.Background(),
+			t: []types.TestUser{
+				{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				},
+				{
+					Id:   "456",
+					Name: "cmy",
+					Age:  24,
+				},
+			},
+			wantIds: nil,
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return mongo.IsDuplicateKeyError(err)
+			},
+		},
+		{
+			name:   "insert many successfully",
+			before: func(_ context.Context, _ *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				assert.NoError(t, err)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			t: []types.TestUser{
+				{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				},
+				{
+					Id:   "456",
+					Name: "cmy",
+					Age:  24,
+				},
+			},
+			wantIds:   []string{"123", "456"},
+			wantError: assert.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			insertManyResult, err := creator.ManyWithOptions(tc.ctx, tc.t, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantError(t, err) {
+				return
+			}
+			if insertManyResult != nil {
+				assert.ElementsMatch(t, tc.wantIds, insertManyResult.InsertedIDs)
 			}
 		})
 	}
