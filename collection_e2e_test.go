@@ -30,6 +30,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+func TestCollection_e2e_Deleter(t *testing.T) {
+	collection := getCollection[any](t)
+
+	d := collection.Deleter()
+	assert.NotNil(t, d, "Expected non-nil Deleter")
+}
+
 func TestCollection_e2e_Updater(t *testing.T) {
 	collection := getCollection[any](t)
 

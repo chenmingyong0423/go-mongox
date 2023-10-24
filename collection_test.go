@@ -49,3 +49,8 @@ func TestCollection_Updater(t *testing.T) {
 	u := updater.NewUpdater[any](&mongo.Collection{})
 	assert.NotNil(t, u, "Expected non-nil Updater")
 }
+
+func TestCollection_Deleter(t *testing.T) {
+	d := NewCollection[any](&mongo.Collection{}).Deleter()
+	assert.NotNil(t, d, "Expected non-nil Deleter")
+}

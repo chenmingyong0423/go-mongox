@@ -16,6 +16,7 @@ package mongox
 
 import (
 	"github.com/chenmingyong0423/go-mongox/creator"
+	"github.com/chenmingyong0423/go-mongox/deleter"
 	"github.com/chenmingyong0423/go-mongox/finder"
 	"github.com/chenmingyong0423/go-mongox/updater"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -39,4 +40,8 @@ func (c *Collection[T]) Creator() *creator.Creator[T] {
 
 func (c *Collection[T]) Updater() *updater.Updater[T] {
 	return updater.NewUpdater[T](c.collection)
+}
+
+func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
+	return deleter.NewDeleter[T](c.collection)
 }
