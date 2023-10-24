@@ -41,9 +41,9 @@ func (m *MockiCreator[T]) EXPECT() *MockiCreatorMockRecorder[T] {
 }
 
 // Many mocks base method.
-func (m *MockiCreator[T]) Many(ctx context.Context, docs []T) (*mongo.InsertManyResult, error) {
+func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []T) (*mongo.InsertManyResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Many", ctx, docs)
+	ret := m.ctrl.Call(m, "InsertMany", ctx, docs)
 	ret0, _ := ret[0].(*mongo.InsertManyResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -52,17 +52,17 @@ func (m *MockiCreator[T]) Many(ctx context.Context, docs []T) (*mongo.InsertMany
 // Many indicates an expected call of Many.
 func (mr *MockiCreatorMockRecorder[T]) Many(ctx, docs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Many", reflect.TypeOf((*MockiCreator[T])(nil).Many), ctx, docs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockiCreator[T])(nil).InsertMany), ctx, docs)
 }
 
 // ManyWithOptions mocks base method.
-func (m *MockiCreator[T]) ManyWithOptions(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+func (m *MockiCreator[T]) InsertManyWithOptions(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, docs}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ManyWithOptions", varargs...)
+	ret := m.ctrl.Call(m, "InsertManyWithOptions", varargs...)
 	ret0, _ := ret[0].(*mongo.InsertManyResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -72,13 +72,13 @@ func (m *MockiCreator[T]) ManyWithOptions(ctx context.Context, docs []T, opts ..
 func (mr *MockiCreatorMockRecorder[T]) ManyWithOptions(ctx, docs any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, docs}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ManyWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).ManyWithOptions), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertManyWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).InsertManyWithOptions), varargs...)
 }
 
 // One mocks base method.
-func (m *MockiCreator[T]) One(ctx context.Context, docs T) (*mongo.InsertOneResult, error) {
+func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs T) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "One", ctx, docs)
+	ret := m.ctrl.Call(m, "InsertOne", ctx, docs)
 	ret0, _ := ret[0].(*mongo.InsertOneResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -87,17 +87,17 @@ func (m *MockiCreator[T]) One(ctx context.Context, docs T) (*mongo.InsertOneResu
 // One indicates an expected call of One.
 func (mr *MockiCreatorMockRecorder[T]) One(ctx, docs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockiCreator[T])(nil).One), ctx, docs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockiCreator[T])(nil).InsertOne), ctx, docs)
 }
 
 // OneWithOptions mocks base method.
-func (m *MockiCreator[T]) OneWithOptions(ctx context.Context, doc T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (m *MockiCreator[T]) InsertOneWithOptions(ctx context.Context, doc T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, doc}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "OneWithOptions", varargs...)
+	ret := m.ctrl.Call(m, "InsertOneWithOptions", varargs...)
 	ret0, _ := ret[0].(*mongo.InsertOneResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -107,5 +107,5 @@ func (m *MockiCreator[T]) OneWithOptions(ctx context.Context, doc T, opts ...*op
 func (mr *MockiCreatorMockRecorder[T]) OneWithOptions(ctx, doc any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, doc}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).OneWithOptions), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOneWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).InsertOneWithOptions), varargs...)
 }

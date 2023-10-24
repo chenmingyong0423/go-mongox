@@ -87,7 +87,7 @@ func TestCreator_One(t *testing.T) {
 			defer ctl.Finish()
 			creator := tc.mock(tc.ctx, ctl)
 
-			insertOneResult, err := creator.One(tc.ctx, tc.doc)
+			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc)
 			assert.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
@@ -155,7 +155,7 @@ func TestCreator_OneWithOptions(t *testing.T) {
 			defer ctl.Finish()
 			creator := tc.mock(tc.ctx, ctl)
 
-			insertOneResult, err := creator.OneWithOptions(tc.ctx, tc.doc, tc.opts...)
+			insertOneResult, err := creator.InsertOneWithOptions(tc.ctx, tc.doc, tc.opts...)
 			assert.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
@@ -230,7 +230,7 @@ func TestCreator_Many(t *testing.T) {
 			defer ctl.Finish()
 			creator := tc.mock(tc.ctx, ctl)
 
-			insertResult, err := creator.Many(tc.ctx, tc.doc)
+			insertResult, err := creator.InsertMany(tc.ctx, tc.doc)
 			assert.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.ElementsMatch(t, tc.wantIds, insertResult.InsertedIDs)
@@ -311,7 +311,7 @@ func TestCreator_ManyWithOptions(t *testing.T) {
 			defer ctl.Finish()
 			creator := tc.mock(tc.ctx, ctl)
 
-			insertResult, err := creator.ManyWithOptions(tc.ctx, tc.doc, tc.opts...)
+			insertResult, err := creator.InsertManyWithOptions(tc.ctx, tc.doc, tc.opts...)
 			assert.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.ElementsMatch(t, tc.wantIds, insertResult.InsertedIDs)
