@@ -17,6 +17,8 @@ package mongox
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/updater"
+
 	"github.com/chenmingyong0423/go-mongox/creator"
 
 	"github.com/chenmingyong0423/go-mongox/finder"
@@ -41,4 +43,9 @@ func TestCollection_Finder(t *testing.T) {
 func TestCollection_Creator(t *testing.T) {
 	c := creator.NewCreator[any](&mongo.Collection{})
 	assert.NotNil(t, c, "Expected non-nil Creator")
+}
+
+func TestCollection_Updater(t *testing.T) {
+	u := updater.NewUpdater[any](&mongo.Collection{})
+	assert.NotNil(t, u, "Expected non-nil Updater")
 }

@@ -23,48 +23,48 @@ import (
 )
 
 //go:generate mockgen -source=updater.go -destination=../mock/updater.mock.go -package=mocks
-type iUpdater interface {
+type iUpdater[T any] interface {
 	UpdateOne(ctx context.Context) (*mongo.UpdateResult, error)
 	UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context) (*mongo.UpdateResult, error)
 	UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 }
 
-func NewUpdater(collection *mongo.Collection) *Updater {
-	return &Updater{collection: collection, filter: nil}
+func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
+	return &Updater[T]{collection: collection, filter: nil}
 }
 
-type Updater struct {
+type Updater[T any] struct {
 	collection *mongo.Collection
 	filter     bson.D
 	updates    bson.D
 	opts       []*options.UpdateOptions
 }
 
-func (u *Updater) Filter(filter bson.D) *Updater {
+func (u *Updater[T]) Filter(filter bson.D) *Updater[T] {
 	u.filter = filter
 	return u
 }
 
-func (u *Updater) Updates(updates bson.D) *Updater {
+func (u *Updater[T]) Updates(updates bson.D) *Updater[T] {
 	u.updates = updates
 	return u
 }
 
-func (u *Updater) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
 	return u.collection.UpdateOne(ctx, u.filter, u.updates, u.opts...)
 }
 
-func (u *Updater) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	u.opts = opts
 	return u.UpdateOne(ctx)
 }
 
-func (u *Updater) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
 	return u.collection.UpdateMany(ctx, u.filter, u.updates, u.opts...)
 }
 
-func (u *Updater) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	u.opts = opts
 	return u.UpdateMany(ctx)
 }

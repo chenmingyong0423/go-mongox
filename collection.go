@@ -17,6 +17,7 @@ package mongox
 import (
 	"github.com/chenmingyong0423/go-mongox/creator"
 	"github.com/chenmingyong0423/go-mongox/finder"
+	"github.com/chenmingyong0423/go-mongox/updater"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -34,4 +35,8 @@ func (c *Collection[T]) Finder() *finder.Finder[T] {
 
 func (c *Collection[T]) Creator() *creator.Creator[T] {
 	return creator.NewCreator[T](c.collection)
+}
+
+func (c *Collection[T]) Updater() *updater.Updater[T] {
+	return updater.NewUpdater[T](c.collection)
 }

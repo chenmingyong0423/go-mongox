@@ -43,13 +43,13 @@ func getCollection(t *testing.T) *mongo.Collection {
 }
 
 func TestUpdater_e2e_New(t *testing.T) {
-	updater := NewUpdater(getCollection(t))
+	updater := NewUpdater[any](getCollection(t))
 	assert.NotNil(t, updater)
 }
 
 func TestUpdater_e2e_UpdateOne(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater(collection)
+	updater := NewUpdater[any](collection)
 	assert.NotNil(t, updater)
 
 	testCases := []struct {
@@ -133,7 +133,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 
 func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater(collection)
+	updater := NewUpdater[any](collection)
 	assert.NotNil(t, updater)
 
 	testCases := []struct {
@@ -200,7 +200,7 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater(collection)
+	updater := NewUpdater[any](collection)
 	assert.NotNil(t, updater)
 
 	testCases := []struct {
@@ -292,7 +292,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 
 func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater(collection)
+	updater := NewUpdater[any](collection)
 	assert.NotNil(t, updater)
 
 	testCases := []struct {

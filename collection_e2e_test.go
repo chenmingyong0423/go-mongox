@@ -30,6 +30,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+func TestCollection_e2e_Updater(t *testing.T) {
+	collection := getCollection[any](t)
+
+	u := collection.Updater()
+	assert.NotNil(t, u, "Expected non-nil Updater")
+}
+
 func TestCollection_e2e_Finder(t *testing.T) {
 	collection := getCollection[any](t)
 

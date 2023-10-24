@@ -26,7 +26,7 @@ import (
 )
 
 func TestNewUpdater(t *testing.T) {
-	updater := NewUpdater(&mongo.Collection{})
+	updater := NewUpdater[any](&mongo.Collection{})
 	assert.NotNil(t, updater)
 }
 
@@ -34,7 +34,7 @@ func TestUpdater_UpdateOne(t *testing.T) {
 
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iUpdater
+		mock func(ctx context.Context, ctl *gomock.Controller) iUpdater[any]
 
 		ctx     context.Context
 		want    *mongo.UpdateResult
@@ -42,8 +42,8 @@ func TestUpdater_UpdateOne(t *testing.T) {
 	}{
 		{
 			name: "failed to update one",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOne(ctx).Return(nil, assert.AnError).Times(1)
 				return updater
 			},
@@ -56,8 +56,8 @@ func TestUpdater_UpdateOne(t *testing.T) {
 		},
 		{
 			name: "execute successfully but modified count is 0",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOne(ctx).Return(&mongo.UpdateResult{ModifiedCount: 0}, nil).Times(1)
 				return updater
 			},
@@ -71,8 +71,8 @@ func TestUpdater_UpdateOne(t *testing.T) {
 		},
 		{
 			name: "update successfully",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOne(ctx).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil).Times(1)
 				return updater
 			},
@@ -101,7 +101,7 @@ func TestUpdater_UpdateOne(t *testing.T) {
 func TestUpdater_UpdateOneWithOptions(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater
+		mock func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any]
 
 		ctx     context.Context
 		opts    []*options.UpdateOptions
@@ -110,8 +110,8 @@ func TestUpdater_UpdateOneWithOptions(t *testing.T) {
 	}{
 		{
 			name: "failed to update one",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOneWithOptions(ctx, opts).Return(nil, assert.AnError).Times(1)
 				return updater
 			},
@@ -123,8 +123,8 @@ func TestUpdater_UpdateOneWithOptions(t *testing.T) {
 		},
 		{
 			name: "execute successfully but modified count is 0",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOneWithOptions(ctx, opts).Return(&mongo.UpdateResult{ModifiedCount: 0}, nil).Times(1)
 				return updater
 			},
@@ -141,8 +141,8 @@ func TestUpdater_UpdateOneWithOptions(t *testing.T) {
 		},
 		{
 			name: "update successfully",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateOneWithOptions(ctx, opts).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil).Times(1)
 				return updater
 			},
@@ -174,7 +174,7 @@ func TestUpdater_UpdateOneWithOptions(t *testing.T) {
 func TestUpdater_UpdateMany(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iUpdater
+		mock func(ctx context.Context, ctl *gomock.Controller) iUpdater[any]
 
 		ctx     context.Context
 		want    *mongo.UpdateResult
@@ -182,8 +182,8 @@ func TestUpdater_UpdateMany(t *testing.T) {
 	}{
 		{
 			name: "failed to update many",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateMany(ctx).Return(nil, assert.AnError).Times(1)
 				return updater
 			},
@@ -195,8 +195,8 @@ func TestUpdater_UpdateMany(t *testing.T) {
 		},
 		{
 			name: "execute successfully but modified count is 0",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateMany(ctx).Return(&mongo.UpdateResult{ModifiedCount: 0}, nil).Times(1)
 				return updater
 			},
@@ -210,8 +210,8 @@ func TestUpdater_UpdateMany(t *testing.T) {
 		},
 		{
 			name: "update successfully",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateMany(ctx).Return(&mongo.UpdateResult{ModifiedCount: 2}, nil).Times(1)
 				return updater
 			},
@@ -240,7 +240,7 @@ func TestUpdater_UpdateMany(t *testing.T) {
 func TestUpdater_UpdateManyWithOptions(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater
+		mock func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any]
 
 		ctx     context.Context
 		opts    []*options.UpdateOptions
@@ -249,8 +249,8 @@ func TestUpdater_UpdateManyWithOptions(t *testing.T) {
 	}{
 		{
 			name: "failed to update many",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateManyWithOptions(ctx, opts).Return(nil, assert.AnError).Times(1)
 				return updater
 			},
@@ -263,8 +263,8 @@ func TestUpdater_UpdateManyWithOptions(t *testing.T) {
 		},
 		{
 			name: "execute successfully but modified count is 0",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateManyWithOptions(ctx, opts).Return(&mongo.UpdateResult{ModifiedCount: 0}, nil).Times(1)
 				return updater
 			},
@@ -281,8 +281,8 @@ func TestUpdater_UpdateManyWithOptions(t *testing.T) {
 		},
 		{
 			name: "update successfully",
-			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater {
-				updater := mocks.NewMockiUpdater(ctl)
+			mock: func(ctx context.Context, opts []*options.UpdateOptions, ctl *gomock.Controller) iUpdater[any] {
+				updater := mocks.NewMockiUpdater[any](ctl)
 				updater.EXPECT().UpdateManyWithOptions(ctx, opts).Return(&mongo.UpdateResult{ModifiedCount: 2}, nil).Times(1)
 				return updater
 			},

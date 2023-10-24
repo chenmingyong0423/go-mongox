@@ -18,30 +18,30 @@ import (
 )
 
 // MockiUpdater is a mock of iUpdater interface.
-type MockiUpdater struct {
+type MockiUpdater[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiUpdaterMockRecorder
+	recorder *MockiUpdaterMockRecorder[T]
 }
 
 // MockiUpdaterMockRecorder is the mock recorder for MockiUpdater.
-type MockiUpdaterMockRecorder struct {
-	mock *MockiUpdater
+type MockiUpdaterMockRecorder[T any] struct {
+	mock *MockiUpdater[T]
 }
 
 // NewMockiUpdater creates a new mock instance.
-func NewMockiUpdater(ctrl *gomock.Controller) *MockiUpdater {
-	mock := &MockiUpdater{ctrl: ctrl}
-	mock.recorder = &MockiUpdaterMockRecorder{mock}
+func NewMockiUpdater[T any](ctrl *gomock.Controller) *MockiUpdater[T] {
+	mock := &MockiUpdater[T]{ctrl: ctrl}
+	mock.recorder = &MockiUpdaterMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiUpdater) EXPECT() *MockiUpdaterMockRecorder {
+func (m *MockiUpdater[T]) EXPECT() *MockiUpdaterMockRecorder[T] {
 	return m.recorder
 }
 
 // UpdateMany mocks base method.
-func (m *MockiUpdater) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateMany", ctx)
 	ret0, _ := ret[0].(*mongo.UpdateResult)
@@ -50,13 +50,13 @@ func (m *MockiUpdater) UpdateMany(ctx context.Context) (*mongo.UpdateResult, err
 }
 
 // UpdateMany indicates an expected call of UpdateMany.
-func (mr *MockiUpdaterMockRecorder) UpdateMany(ctx any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateMany(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockiUpdater)(nil).UpdateMany), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateMany), ctx)
 }
 
 // UpdateManyWithOptions mocks base method.
-func (m *MockiUpdater) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -69,14 +69,14 @@ func (m *MockiUpdater) UpdateManyWithOptions(ctx context.Context, opts ...*optio
 }
 
 // UpdateManyWithOptions indicates an expected call of UpdateManyWithOptions.
-func (mr *MockiUpdaterMockRecorder) UpdateManyWithOptions(ctx any, opts ...any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateManyWithOptions(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateManyWithOptions", reflect.TypeOf((*MockiUpdater)(nil).UpdateManyWithOptions), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateManyWithOptions", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateManyWithOptions), varargs...)
 }
 
 // UpdateOne mocks base method.
-func (m *MockiUpdater) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateOne", ctx)
 	ret0, _ := ret[0].(*mongo.UpdateResult)
@@ -85,13 +85,13 @@ func (m *MockiUpdater) UpdateOne(ctx context.Context) (*mongo.UpdateResult, erro
 }
 
 // UpdateOne indicates an expected call of UpdateOne.
-func (mr *MockiUpdaterMockRecorder) UpdateOne(ctx any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateOne(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockiUpdater)(nil).UpdateOne), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOne), ctx)
 }
 
 // UpdateOneWithOptions mocks base method.
-func (m *MockiUpdater) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -104,8 +104,8 @@ func (m *MockiUpdater) UpdateOneWithOptions(ctx context.Context, opts ...*option
 }
 
 // UpdateOneWithOptions indicates an expected call of UpdateOneWithOptions.
-func (mr *MockiUpdaterMockRecorder) UpdateOneWithOptions(ctx any, opts ...any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateOneWithOptions(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneWithOptions", reflect.TypeOf((*MockiUpdater)(nil).UpdateOneWithOptions), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneWithOptions", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOneWithOptions), varargs...)
 }
