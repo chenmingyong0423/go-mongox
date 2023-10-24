@@ -24,10 +24,10 @@ import (
 
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 type iFinder[T any] interface {
-	One(ctx context.Context) (*T, error)
-	OneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error)
-	All(ctx context.Context) ([]*T, error)
-	AllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error)
+	FindOne(ctx context.Context) (*T, error)
+	FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error)
+	FindAll(ctx context.Context) ([]*T, error)
+	FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error)
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -48,7 +48,7 @@ func (f *Finder[T]) Filter(d bson.D) *Finder[T] {
 	return f
 }
 
-func (f *Finder[T]) One(ctx context.Context) (*T, error) {
+func (f *Finder[T]) FindOne(ctx context.Context) (*T, error) {
 	t := new(T)
 	err := f.collection.FindOne(ctx, f.filter, f.findOneOpts...).Decode(t)
 	if err != nil {
@@ -57,12 +57,12 @@ func (f *Finder[T]) One(ctx context.Context) (*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) OneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error) {
+func (f *Finder[T]) FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error) {
 	f.findOneOpts = opts
-	return f.One(ctx)
+	return f.FindOne(ctx)
 }
 
-func (f *Finder[T]) All(ctx context.Context) ([]*T, error) {
+func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	t := make([]*T, 0)
 	cursor, err := f.collection.Find(ctx, f.filter, f.findOpts...)
 	if err != nil {
@@ -76,7 +76,7 @@ func (f *Finder[T]) All(ctx context.Context) ([]*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) AllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error) {
+func (f *Finder[T]) FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error) {
 	f.findOpts = opts
-	return f.All(ctx)
+	return f.FindAll(ctx)
 }

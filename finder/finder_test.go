@@ -79,7 +79,7 @@ func TestFinder_One(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			user, err := finder.One(tc.ctx)
+			user, err := finder.FindOne(tc.ctx)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
 		})
@@ -169,7 +169,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, tc.opts, ctl)
 
-			user, err := finder.OneWithOptions(tc.ctx, tc.opts)
+			user, err := finder.FindOneWithOptions(tc.ctx, tc.opts)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
 		})
@@ -232,7 +232,7 @@ func TestFinder_All(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			users, err := finder.All(tc.ctx)
+			users, err := finder.FindAll(tc.ctx)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})
@@ -369,7 +369,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, tc.opts, ctl)
 
-			users, err := finder.AllWithOptions(tc.ctx, tc.opts)
+			users, err := finder.FindAllWithOptions(tc.ctx, tc.opts)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})

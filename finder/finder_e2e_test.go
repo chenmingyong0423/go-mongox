@@ -196,7 +196,7 @@ func TestFinder_e2e_One(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			finder = tc.filter(finder)
-			user, err := finder.One(tc.ctx)
+			user, err := finder.FindOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
@@ -307,7 +307,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			finder = tc.filter(finder)
-			user, err := finder.OneWithOptions(tc.ctx, tc.opts)
+			user, err := finder.FindOneWithOptions(tc.ctx, tc.opts)
 			tc.after(tc.ctx, t)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
@@ -561,7 +561,7 @@ func TestFinder_e2e_All(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			finder = tc.filter(finder)
-			users, err := finder.All(tc.ctx)
+			users, err := finder.FindAll(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -814,7 +814,7 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			finder = tc.filter(finder)
-			users, err := finder.AllWithOptions(tc.ctx, tc.opts)
+			users, err := finder.FindAllWithOptions(tc.ctx, tc.opts)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
