@@ -39,7 +39,7 @@ func (m *MockiFinder[T]) EXPECT() *MockiFinderMockRecorder[T] {
 	return m.recorder
 }
 
-// All mocks base method.
+// FindAll mocks base method.
 func (m *MockiFinder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ctx)
@@ -48,13 +48,13 @@ func (m *MockiFinder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	return ret0, ret1
 }
 
-// All indicates an expected call of All.
-func (mr *MockiFinderMockRecorder[T]) All(ctx any) *gomock.Call {
+// FindAll indicates an expected call of FindAll.
+func (mr *MockiFinderMockRecorder[T]) FindAll(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockiFinder[T])(nil).FindAll), ctx)
 }
 
-// AllWithOptions mocks base method.
+// FindAllWithOptions mocks base method.
 func (m *MockiFinder[T]) FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAllWithOptions", ctx, opts)
@@ -63,13 +63,13 @@ func (m *MockiFinder[T]) FindAllWithOptions(ctx context.Context, opts []*options
 	return ret0, ret1
 }
 
-// AllWithOptions indicates an expected call of AllWithOptions.
-func (mr *MockiFinderMockRecorder[T]) AllWithOptions(ctx, opts any) *gomock.Call {
+// FindAllWithOptions indicates an expected call of FindAllWithOptions.
+func (mr *MockiFinderMockRecorder[T]) FindAllWithOptions(ctx, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllWithOptions", reflect.TypeOf((*MockiFinder[T])(nil).FindAllWithOptions), ctx, opts)
 }
 
-// One mocks base method.
+// FindOne mocks base method.
 func (m *MockiFinder[T]) FindOne(ctx context.Context) (*T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOne", ctx)
@@ -78,13 +78,13 @@ func (m *MockiFinder[T]) FindOne(ctx context.Context) (*T, error) {
 	return ret0, ret1
 }
 
-// One indicates an expected call of One.
-func (mr *MockiFinderMockRecorder[T]) One(ctx any) *gomock.Call {
+// FindOne indicates an expected call of FindOne.
+func (mr *MockiFinderMockRecorder[T]) FindOne(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockiFinder[T])(nil).FindOne), ctx)
 }
 
-// OneWithOptions mocks base method.
+// FindOneWithOptions mocks base method.
 func (m *MockiFinder[T]) FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindOneWithOptions", ctx, opts)
@@ -93,8 +93,8 @@ func (m *MockiFinder[T]) FindOneWithOptions(ctx context.Context, opts []*options
 	return ret0, ret1
 }
 
-// OneWithOptions indicates an expected call of OneWithOptions.
-func (mr *MockiFinderMockRecorder[T]) OneWithOptions(ctx, opts any) *gomock.Call {
+// FindOneWithOptions indicates an expected call of FindOneWithOptions.
+func (mr *MockiFinderMockRecorder[T]) FindOneWithOptions(ctx, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneWithOptions", reflect.TypeOf((*MockiFinder[T])(nil).FindOneWithOptions), ctx, opts)
 }
