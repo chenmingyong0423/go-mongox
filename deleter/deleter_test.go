@@ -27,7 +27,7 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestNewDeleter(t *testing.T) {
+func TestDeleter_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
 
 	result := NewDeleter[any](mongoCollection)

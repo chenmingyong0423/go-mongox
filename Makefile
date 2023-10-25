@@ -29,10 +29,10 @@ check:
 e2e:
 	sh ./script/integrate_test.sh
 
-.PHONY: dev_3rd_up
-dev_3rd_up:
+.PHONY: e2e_up
+e2e_up:
 	docker-compose -f script/integration_test_compose.yml up -d
 
-.PHONY: dev_3rd_down
-dev_3rd_down:
+.PHONY: e2e_down
+e2e_down:
 	docker-compose -f script/integration_test_compose.yml down -v
