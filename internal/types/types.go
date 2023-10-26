@@ -39,7 +39,7 @@ const (
 type TestUser struct {
 	Id           string `bson:"_id"`
 	Name         string `bson:"name"`
-	Age          int
+	Age          int64
 	UnknownField string `bson:"-"`
 }
 
@@ -49,10 +49,11 @@ type IllegalUser struct {
 	Age  string
 }
 
-//type updatedUser struct {
-//	Name string `bson:"name"`
-//	Age  int
-//}
+type UpdatedUser struct {
+	Name string `bson:"name"`
+	Age  int64
+}
+
 //
 //type userName struct {
 //	Name string `bson:"name"`

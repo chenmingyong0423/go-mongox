@@ -62,7 +62,7 @@ func TestBsonBuilder(t *testing.T) {
 	assert.ElementsMatch(t, bson.D{bson.E{Key: types.Set, Value: bson.D{
 		bson.E{Key: "_id", Value: "123"},
 		bson.E{Key: "name", Value: "cmy"},
-		bson.E{Key: "age", Value: 0},
+		bson.E{Key: "age", Value: int32(0)},
 	}}}[0].Value, NewBsonBuilder().SetForStruct(testData{
 		Id:      "123",
 		Name:    "cmy",
@@ -71,7 +71,7 @@ func TestBsonBuilder(t *testing.T) {
 	assert.ElementsMatch(t, bson.D{bson.E{Key: types.Set, Value: bson.D{
 		bson.E{Key: "_id", Value: "123"},
 		bson.E{Key: "name", Value: "cmy"},
-		bson.E{Key: "age", Value: 18},
+		bson.E{Key: "age", Value: int32(18)},
 	}}}[0].Value, NewBsonBuilder().SetForStruct(testData{
 		Id:      "123",
 		Name:    "cmy",

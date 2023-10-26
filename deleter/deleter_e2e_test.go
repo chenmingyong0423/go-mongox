@@ -139,15 +139,13 @@ func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
 		wantError assert.ErrorAssertionFunc
 	}{
 		{
-			name:   "error: nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-			filter: nil,
-			ctx:    context.Background(),
-			want:   nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
-			},
+			name:      "error: nil filter",
+			before:    func(_ context.Context, _ *testing.T) {},
+			after:     func(_ context.Context, _ *testing.T) {},
+			filter:    nil,
+			ctx:       context.Background(),
+			want:      nil,
+			wantError: assert.Error,
 		},
 		{
 			name: "deleted count: 0",

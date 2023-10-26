@@ -263,8 +263,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
 			filter:  builder.NewBsonBuilder().InString("_id", []string{"123", "456"}...).Build(),
@@ -323,7 +323,7 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 			},
 		},
 		{
-			name: "upserted count is 2",
+			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
 				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy", Age: 24},
@@ -333,8 +333,8 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
 			filter:  builder.NewBsonBuilder().Id("456").Build(),

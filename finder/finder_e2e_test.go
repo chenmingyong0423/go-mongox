@@ -73,13 +73,13 @@ func TestFinder_e2e_One(t *testing.T) {
 					Name: "cmy",
 					Age:  18,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123"))
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
@@ -96,13 +96,13 @@ func TestFinder_e2e_One(t *testing.T) {
 					Name: "cmy",
 					Age:  18,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123"))
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
 				return finder
@@ -121,13 +121,13 @@ func TestFinder_e2e_One(t *testing.T) {
 					Name: "cmy",
 					Age:  18,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123"))
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -151,9 +151,9 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123"))
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -173,13 +173,13 @@ func TestFinder_e2e_One(t *testing.T) {
 					Name: "cmy",
 					Age:  18,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123"))
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -233,8 +233,8 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
@@ -257,8 +257,8 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
 				return finder.Filter(builder.NewBsonBuilder().Id("123").Build())
@@ -281,13 +281,13 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 					Name: "cmy",
 					Age:  18,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
 				return finder.Filter(builder.NewBsonBuilder().Id("123").Build())
@@ -360,12 +360,13 @@ func TestFinder_e2e_All(t *testing.T) {
 						Age:  "18",
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				_, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -399,8 +400,8 @@ func TestFinder_e2e_All(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -430,13 +431,13 @@ func TestFinder_e2e_All(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -477,13 +478,13 @@ func TestFinder_e2e_All(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -524,13 +525,13 @@ func TestFinder_e2e_All(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -601,12 +602,13 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 						Age:  "18",
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				_, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
@@ -635,13 +637,14 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
@@ -673,13 +676,14 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
@@ -722,13 +726,13 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
@@ -773,13 +777,13 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 						Age:  18,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteManyResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},

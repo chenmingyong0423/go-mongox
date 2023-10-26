@@ -16,7 +16,6 @@ package converter
 
 import (
 	"reflect"
-	"strings"
 
 	"github.com/chenmingyong0423/go-mongox/internal/types"
 
@@ -35,11 +34,11 @@ func ToBson(data any) bson.D {
 			return MapToBson(data.(map[string]any))
 		}
 	case reflect.Struct:
-		return structToBson(val)
+		return structToBson(data)
 	case reflect.Ptr:
 		elemVal := val.Elem()
 		if elemVal.Kind() == reflect.Struct {
-			return structToBson(elemVal)
+			return structToBson(elemVal.Interface())
 		} else if elemVal.Kind() == reflect.Map && elemVal.Type().Key().Kind() == reflect.String && elemVal.Type().Elem().Kind() == reflect.Interface {
 			return MapToBson(elemVal.Interface().(map[string]any))
 		}
@@ -59,24 +58,13 @@ func MapToBson(data map[string]any) bson.D {
 	return d
 }
 
-func structToBson(val reflect.Value) bson.D {
-	d := bson.D{}
-	typ := val.Type()
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		valueField := val.Field(i)
-
-		bsonTag := field.Tag.Get("bson")
-		if bsonTag == "-" {
-			continue // Ignore fields with bson tag "-"
-		}
-
-		fieldName := bsonTag
-		if fieldName == "" {
-			fieldName = strings.ToLower(field.Name)
-		}
-		d = append(d, bson.E{Key: fieldName, Value: valueField.Interface()})
+func structToBson(val any) bson.D {
+	marshal, err := bson.Marshal(val)
+	if err != nil {
+		return nil
 	}
+	var d bson.D
+	_ = bson.Unmarshal(marshal, &d)
 	return d
 }
 
@@ -85,13 +73,12 @@ func StructToBson(data any) (d bson.D) {
 		return
 	}
 	val := reflect.ValueOf(data)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
+	if val.Kind() == reflect.Struct {
+		return structToBson(data)
+	} else if val.Kind() == reflect.Ptr && val.Elem().Kind() == reflect.Struct {
+		return structToBson(val.Elem().Interface())
 	}
-	if val.Kind() != reflect.Struct {
-		return
-	}
-	return structToBson(val)
+	return
 }
 
 func MapToSetBson(data map[string]any) bson.D {
@@ -101,21 +88,20 @@ func MapToSetBson(data map[string]any) bson.D {
 	return bson.D{bson.E{Key: types.Set, Value: MapToBson(data)}}
 }
 
-func StructToSetBson(data any) bson.D {
+func StructToSetBson(data any) (d bson.D) {
 	if data == nil {
-		return nil
+		return
 	}
 	val := reflect.ValueOf(data)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
+	if val.Kind() == reflect.Struct {
+		d = structToBson(data)
+	} else if val.Kind() == reflect.Ptr && val.Elem().Kind() == reflect.Struct {
+		d = structToBson(val.Elem().Interface())
 	}
-	if val.Kind() != reflect.Struct {
+	if len(d) == 0 {
 		return nil
 	}
-	if d := structToBson(val); len(d) != 0 {
-		return bson.D{bson.E{Key: types.Set, Value: d}}
-	}
-	return nil
+	return bson.D{bson.E{Key: types.Set, Value: d}}
 }
 
 func ToSetBson(updates any) bson.D {
@@ -127,7 +113,7 @@ func ToSetBson(updates any) bson.D {
 			return MapToSetBson(updates.(map[string]any))
 		}
 	case reflect.Struct:
-		d := structToBson(val)
+		d := structToBson(updates)
 		if len(d) != 0 {
 			return bson.D{bson.E{Key: types.Set, Value: d}}
 		}
@@ -135,7 +121,7 @@ func ToSetBson(updates any) bson.D {
 	case reflect.Ptr:
 		elemVal := val.Elem()
 		if elemVal.Kind() == reflect.Struct {
-			d := structToBson(elemVal)
+			d := structToBson(elemVal.Interface())
 			if len(d) != 0 {
 				return bson.D{bson.E{Key: types.Set, Value: d}}
 			}

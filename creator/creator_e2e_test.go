@@ -64,17 +64,13 @@ func TestCreator_e2e_One(t *testing.T) {
 					Name: "cmy",
 					Age:  24,
 				})
-				assert.Equal(t, "123", oneResult.InsertedID)
 				assert.NoError(t, err)
+				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: types.TestUser{
@@ -88,14 +84,12 @@ func TestCreator_e2e_One(t *testing.T) {
 			},
 		},
 		{
-			name: "insert one successfully",
-			before: func(ctx context.Context, t *testing.T) {
-
-			},
+			name:   "insert one successfully",
+			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: types.TestUser{
@@ -156,8 +150,8 @@ func TestCreator_e2e_OneWithOptions(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
@@ -178,8 +172,8 @@ func TestCreator_e2e_OneWithOptions(t *testing.T) {
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: types.TestUser{
@@ -237,23 +231,18 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Name: "cmy",
 					Age:  24,
 				})
-				assert.Equal(t, "123", oneResult.InsertedID)
 				assert.NoError(t, err)
+				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: []types.TestUser{
 				{
 					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				},
-				{
-					Id:   "456",
 					Name: "cmy",
 					Age:  24,
 				},
@@ -268,8 +257,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: []types.TestUser{
@@ -327,23 +316,18 @@ func TestCreator_e2e_ManyWithOptions(t *testing.T) {
 					Name: "cmy",
 					Age:  24,
 				})
-				assert.Equal(t, "123", oneResult.InsertedID)
 				assert.NoError(t, err)
+				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			t: []types.TestUser{
 				{
 					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				},
-				{
-					Id:   "456",
 					Name: "cmy",
 					Age:  24,
 				},
@@ -358,8 +342,8 @@ func TestCreator_e2e_ManyWithOptions(t *testing.T) {
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			opts: []*options.InsertManyOptions{
