@@ -19,7 +19,7 @@ remote=$1
 url=$2
 echo >&2 "Try pushing $2 to $1"
 
-TEST="go list ./... | xargs -I {} sh -c 'go test -race -cover -failfast -count=1 -parallel=1 {} || exit 255'"
+TEST="go test ./... -race -cover -failfast"
 
 LINTER="golangci-lint run"
 
