@@ -16,5 +16,5 @@ set -e
 docker-compose -f script/integration_test_compose.yml down -v
 docker-compose -f script/integration_test_compose.yml up -d
 
-go test -race -cover ./... -tags=e2e
+go test -race -cover -count=1 ./... -tags=e2e
 docker-compose -f script/integration_test_compose.yml down -v
