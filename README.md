@@ -11,7 +11,7 @@
 
 English | [中文简体](./README-zh_CN.md)
 
-# 介绍
+# Introduction
 The `go-mongox` framework has two cores, one core is the generics-based **collection** form, and the other core is the **builder** constructor.
 
 
