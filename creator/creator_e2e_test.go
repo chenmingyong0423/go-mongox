@@ -20,9 +20,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/chenmingyong0423/go-mongox/builder"
 
-	"github.com/chenmingyong0423/go-mongox/internal/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -17,7 +17,7 @@ package converter
 import (
 	"reflect"
 
-	"github.com/chenmingyong0423/go-mongox/internal/types"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 )

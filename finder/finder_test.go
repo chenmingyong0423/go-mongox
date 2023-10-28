@@ -19,7 +19,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/internal/types"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/chenmingyong0423/go-mongox/builder"
 	mocks "github.com/chenmingyong0423/go-mongox/mock"

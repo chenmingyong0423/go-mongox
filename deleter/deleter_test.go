@@ -19,7 +19,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/internal/types"
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"

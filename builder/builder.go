@@ -16,8 +16,8 @@ package builder
 
 import (
 	"github.com/chenmingyong0423/go-mongox/converter"
-	"github.com/chenmingyong0423/go-mongox/internal/types"
 	"github.com/chenmingyong0423/go-mongox/pkg"
+	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )

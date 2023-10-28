@@ -17,7 +17,7 @@ package converter
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/internal/types"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
