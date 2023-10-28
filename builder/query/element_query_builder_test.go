@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package query
 
 import (
 	"testing"
@@ -24,15 +24,15 @@ import (
 )
 
 func Test_elementQueryBuilder_Exists(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$exists": true}}}, Query().Exists("name", true).Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$exists": true}}}, BsonBuilder().Exists("name", true).Build())
 }
 
 func Test_elementQueryBuilder_Type(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$type": bson.TypeString}}}, Query().Type("name", bson.TypeString).Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$type": bson.TypeString}}}, BsonBuilder().Type("name", bson.TypeString).Build())
 }
 
 func Test_elementQueryBuilder_TypeAlias(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$type": "string"}}}, Query().TypeAlias("name", "string").Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$type": "string"}}}, BsonBuilder().TypeAlias("name", "string").Build())
 }
 
 func TestBsonBuilder_TypeArray(t *testing.T) {
@@ -78,7 +78,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Query().TypeArray(tc.key, tc.ts...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().TypeArray(tc.key, tc.ts...).Build())
 		})
 	}
 }
@@ -126,7 +126,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Query().TypeArrayAlias(tc.key, tc.ts...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().TypeArrayAlias(tc.key, tc.ts...).Build())
 		})
 	}
 }

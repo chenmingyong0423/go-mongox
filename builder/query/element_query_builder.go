@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package query
 
 import (
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -21,30 +21,30 @@ import (
 )
 
 type elementQueryBuilder struct {
-	parent *QueryBuilder
+	parent *Builder
 }
 
-func (b *elementQueryBuilder) Exists(key string, exists bool) *QueryBuilder {
+func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Exists: exists}})
 	return b.parent
 }
 
-func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *QueryBuilder {
+func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: t}})
 	return b.parent
 }
 
-func (b *elementQueryBuilder) TypeAlias(key string, alias string) *QueryBuilder {
+func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: alias}})
 	return b.parent
 }
 
-func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *QueryBuilder {
+func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: ts}})
 	return b.parent
 }
 
-func (b *elementQueryBuilder) TypeArrayAlias(key string, aliases ...string) *QueryBuilder {
+func (b *elementQueryBuilder) TypeArrayAlias(key string, aliases ...string) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: aliases}})
 	return b.parent
 }

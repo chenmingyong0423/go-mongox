@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package query
 
 import (
 	"testing"
@@ -22,17 +22,17 @@ import (
 )
 
 func Test_logicalQueryBuilder_And(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$and", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, Query().And(bson.D{{Key: "name", Value: "cmy"}}).Build())
+	assert.Equal(t, bson.D{{Key: "$and", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, BsonBuilder().And(bson.D{{Key: "name", Value: "cmy"}}).Build())
 }
 
 func Test_logicalQueryBuilder_Not(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$not", Value: bson.D{{Key: "name", Value: "cmy"}}}}, Query().Not(bson.D{{Key: "name", Value: "cmy"}}).Build())
+	assert.Equal(t, bson.D{{Key: "$not", Value: bson.D{{Key: "name", Value: "cmy"}}}}, BsonBuilder().Not(bson.D{{Key: "name", Value: "cmy"}}).Build())
 }
 
 func Test_logicalQueryBuilder_Nor(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$nor", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, Query().Nor(bson.D{{Key: "name", Value: "cmy"}}).Build())
+	assert.Equal(t, bson.D{{Key: "$nor", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, BsonBuilder().Nor(bson.D{{Key: "name", Value: "cmy"}}).Build())
 }
 
 func Test_logicalQueryBuilder_Or(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$or", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, Query().Or(bson.D{{Key: "name", Value: "cmy"}}).Build())
+	assert.Equal(t, bson.D{{Key: "$or", Value: []bson.D{{{Key: "name", Value: "cmy"}}}}}, BsonBuilder().Or(bson.D{{Key: "name", Value: "cmy"}}).Build())
 }

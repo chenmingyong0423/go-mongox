@@ -14,6 +14,12 @@
 
 package pkg
 
+import (
+	"reflect"
+
+	"go.mongodb.org/mongo-driver/bson"
+)
+
 func ToAnySlice[T any](values ...T) []any {
 	if values == nil {
 		return nil
@@ -23,4 +29,47 @@ func ToAnySlice[T any](values ...T) []any {
 		valuesAny[i] = v
 	}
 	return valuesAny
+}
+
+// EqualBSONDElements 比较两个 bson.D 结构的元素是否一致，不考虑顺序
+func EqualBSONDElements(d1, d2 bson.D) bool {
+	// 如果长度不同，它们不相等
+	if len(d1) != len(d2) {
+		return false
+	}
+
+	// 创建 map 用于存储元素的键值对
+	elementsMap1 := make(map[string]interface{})
+
+	// 将元素存储在 map 中
+	for _, e := range d1 {
+		elementsMap1[e.Key] = e.Value
+	}
+
+	for _, e := range d2 {
+		v, ok := elementsMap1[e.Key]
+		if !ok {
+			return false
+		}
+		if bv, ok := v.(bson.D); ok {
+			return EqualBSONDElements(bv, e.Value.(bson.D))
+		}
+		if !reflect.DeepEqual(e.Value, v) {
+			return false
+		}
+	}
+	return true
+}
+
+func IsNumeric(value any) bool {
+	switch reflect.TypeOf(value).Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return true
+	case reflect.Float32, reflect.Float64:
+		return true
+	default:
+		return false
+	}
 }

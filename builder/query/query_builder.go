@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package query
 
 import (
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Query() *QueryBuilder {
-	query := &QueryBuilder{
+func BsonBuilder() *Builder {
+	query := &Builder{
 		data: bson.D{},
 	}
 	query.comparisonQueryBuilder = comparisonQueryBuilder{parent: query}
@@ -30,7 +30,7 @@ func Query() *QueryBuilder {
 	return query
 }
 
-type QueryBuilder struct {
+type Builder struct {
 	data bson.D
 	comparisonQueryBuilder
 	logicalQueryBuilder
@@ -38,16 +38,16 @@ type QueryBuilder struct {
 	arrayQueryBuilder
 }
 
-func (b *QueryBuilder) Build() bson.D {
+func (b *Builder) Build() bson.D {
 	return b.data
 }
 
-func (b *QueryBuilder) Id(v any) *QueryBuilder {
+func (b *Builder) Id(v any) *Builder {
 	b.data = append(b.data, bson.E{Key: types.Id, Value: v})
 	return b
 }
 
-func (b *QueryBuilder) Add(k string, v any) *QueryBuilder {
+func (b *Builder) Add(k string, v any) *Builder {
 	b.data = append(b.data, bson.E{Key: k, Value: v})
 	return b
 }

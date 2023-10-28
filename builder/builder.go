@@ -22,10 +22,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
+// Deprecated: 这个函数不再建议使用，在 v0.0.3 版本将会删除
+// Deprecated: This function is no longer recommended for use and will be removed in version v0.0.3.
 func NewBsonBuilder() *BsonBuilder {
 	return &BsonBuilder{data: bson.D{}}
 }
 
+// Deprecated: 这个结构体不再建议使用，在 v0.0.3 版本将会删除
+// Deprecated: This struct is no longer recommended for use and will be removed in version v0.0.3.
 type BsonBuilder struct {
 	data bson.D
 }

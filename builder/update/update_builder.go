@@ -12,25 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package query
+package update
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestQuery(t *testing.T) {
-	query := BsonBuilder()
-	assert.NotNil(t, query)
-	assert.Equal(t, bson.D{}, query.Build())
+func BsonBuilder() *Builder {
+	b := &Builder{data: bson.D{}}
+	b.fieldUpdateBuilder = fieldUpdateBuilder{parent: b}
+	return b
 }
 
-func TestQueryBuilder_Id(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "_id", Value: "123"}}, BsonBuilder().Id("123").Build())
+type Builder struct {
+	data bson.D
+	fieldUpdateBuilder
 }
 
-func TestQueryBuilder_Add(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: "cmy"}}, BsonBuilder().Add("name", "cmy").Build())
+func (b *Builder) Add(k string, v any) *Builder {
+	b.data = append(b.data, bson.E{Key: k, Value: v})
+	return b
+}
+
+func (b *Builder) Build() bson.D {
+	return b.data
 }

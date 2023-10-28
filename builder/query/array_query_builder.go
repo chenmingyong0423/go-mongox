@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package builder
+package query
 
 import (
 	"github.com/chenmingyong0423/go-mongox/pkg"
@@ -21,98 +21,98 @@ import (
 )
 
 type arrayQueryBuilder struct {
-	parent *QueryBuilder
+	parent *Builder
 }
 
-func (b *arrayQueryBuilder) All(key string, values ...any) *QueryBuilder {
+func (b *arrayQueryBuilder) All(key string, values ...any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.All: values}})
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllUint(key string, values ...uint) *QueryBuilder {
+func (b *arrayQueryBuilder) AllUint(key string, values ...uint) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllUint8(key string, values ...uint8) *QueryBuilder {
+func (b *arrayQueryBuilder) AllUint8(key string, values ...uint8) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllUint16(key string, values ...uint16) *QueryBuilder {
+func (b *arrayQueryBuilder) AllUint16(key string, values ...uint16) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllUint32(key string, values ...uint32) *QueryBuilder {
+func (b *arrayQueryBuilder) AllUint32(key string, values ...uint32) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllUint64(key string, values ...uint64) *QueryBuilder {
+func (b *arrayQueryBuilder) AllUint64(key string, values ...uint64) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllInt(key string, values ...int) *QueryBuilder {
+func (b *arrayQueryBuilder) AllInt(key string, values ...int) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllInt8(key string, values ...int8) *QueryBuilder {
+func (b *arrayQueryBuilder) AllInt8(key string, values ...int8) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllInt16(key string, values ...int16) *QueryBuilder {
+func (b *arrayQueryBuilder) AllInt16(key string, values ...int16) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllInt32(key string, values ...int32) *QueryBuilder {
+func (b *arrayQueryBuilder) AllInt32(key string, values ...int32) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllInt64(key string, values ...int64) *QueryBuilder {
+func (b *arrayQueryBuilder) AllInt64(key string, values ...int64) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllString(key string, values ...string) *QueryBuilder {
+func (b *arrayQueryBuilder) AllString(key string, values ...string) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllFloat32(key string, values ...float32) *QueryBuilder {
+func (b *arrayQueryBuilder) AllFloat32(key string, values ...float32) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) AllFloat64(key string, values ...float64) *QueryBuilder {
+func (b *arrayQueryBuilder) AllFloat64(key string, values ...float64) *Builder {
 	valuesAny := pkg.ToAnySlice(values...)
 	b.All(key, valuesAny...)
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) ElemMatch(key string, condition bson.D) *QueryBuilder {
+func (b *arrayQueryBuilder) ElemMatch(key string, condition bson.D) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.ElemMatch: condition}})
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) Size(key string, size int) *QueryBuilder {
+func (b *arrayQueryBuilder) Size(key string, size int) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Size: size}})
 	return b.parent
 }
