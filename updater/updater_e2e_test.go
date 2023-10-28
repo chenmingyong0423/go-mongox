@@ -20,9 +20,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/chenmingyong0423/go-mongox/builder"
 	"github.com/chenmingyong0423/go-mongox/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -86,13 +88,13 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().Id("456").Build(),
-			updates: builder.NewBsonBuilder().Set("name", "cmy").Build(),
+			filter:  query.BsonBuilder().Id("456").Build(),
+			updates: update.BsonBuilder().Set("name", "cmy").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -106,13 +108,13 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().Id("123").Build(),
-			updates: builder.NewBsonBuilder().Set("name", "hhh").Build(),
+			filter:  query.BsonBuilder().Id("123").Build(),
+			updates: update.BsonBuilder().Set("name", "hhh").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -172,13 +174,13 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().Id("456").Build(),
-			updates: builder.NewBsonBuilder().Set("name", "cmy").Build(),
+			filter:  query.BsonBuilder().Id("456").Build(),
+			updates: update.BsonBuilder().Set("name", "cmy").Build(),
 			opts:    options.Update().SetUpsert(true),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -240,13 +242,13 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().InString("_id", []string{"789", "000"}...).Build(),
-			updates: builder.NewBsonBuilder().Set("name", "hhh").Build(),
+			filter:  query.BsonBuilder().InString("_id", []string{"789", "000"}...).Build(),
+			updates: update.BsonBuilder().Set("name", "hhh").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -263,13 +265,13 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().InString("_id", []string{"123", "456"}...).Build(),
-			updates: builder.NewBsonBuilder().Set("name", "hhh").Build(),
+			filter:  query.BsonBuilder().InString("_id", []string{"123", "456"}...).Build(),
+			updates: update.BsonBuilder().Set("name", "hhh").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -333,13 +335,13 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 				assert.ElementsMatch(t, []string{"123"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  builder.NewBsonBuilder().Id("456").Build(),
-			updates: builder.NewBsonBuilder().Set("name", "cmy").Build(),
+			filter:  query.BsonBuilder().Id("456").Build(),
+			updates: update.BsonBuilder().Set("name", "cmy").Build(),
 			opts:    options.Update().SetUpsert(true),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {

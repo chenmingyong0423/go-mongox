@@ -20,9 +20,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
+	"github.com/chenmingyong0423/go-mongox/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/builder"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -69,7 +69,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -88,7 +88,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			name:   "insert one successfully",
 			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -150,7 +150,7 @@ func TestCreator_e2e_OneWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -172,7 +172,7 @@ func TestCreator_e2e_OneWithOptions(t *testing.T) {
 			name:   "insert one successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -236,7 +236,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -257,7 +257,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 			name:   "insert many successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -321,7 +321,7 @@ func TestCreator_e2e_ManyWithOptions(t *testing.T) {
 				assert.Equal(t, "123", oneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, builder.NewBsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -342,7 +342,7 @@ func TestCreator_e2e_ManyWithOptions(t *testing.T) {
 			name:   "insert many successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, builder.NewBsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
