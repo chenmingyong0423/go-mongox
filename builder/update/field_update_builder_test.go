@@ -214,7 +214,7 @@ func Test_fieldUpdateBuilder_CurrentDateForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().CurrentDateForMap(tc.data).Build())
+			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().CurrentDateForMap(tc.data).Build()))
 		})
 	}
 }

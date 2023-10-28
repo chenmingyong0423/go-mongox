@@ -19,9 +19,10 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/chenmingyong0423/go-mongox/builder"
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -134,7 +135,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: builder.NewBsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -154,7 +155,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: builder.NewBsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add("_id", 0).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -316,7 +317,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: builder.NewBsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
 				},
 			},
 			want: []*types.TestUser{
@@ -348,7 +349,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: builder.NewBsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add("_id", 0).Build(),
 				},
 			},
 			want: []*types.TestUser{
