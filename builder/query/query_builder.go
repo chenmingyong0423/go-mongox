@@ -28,6 +28,7 @@ func BsonBuilder() *Builder {
 	query.elementQueryBuilder = elementQueryBuilder{parent: query}
 	query.arrayQueryBuilder = arrayQueryBuilder{parent: query}
 	query.evaluationQueryBuilder = evaluationQueryBuilder{parent: query}
+	query.projectionQueryBuilder = projectionQueryBuilder{parent: query}
 	return query
 }
 
@@ -38,6 +39,7 @@ type Builder struct {
 	elementQueryBuilder
 	arrayQueryBuilder
 	evaluationQueryBuilder
+	projectionQueryBuilder
 }
 
 func (b *Builder) Build() bson.D {

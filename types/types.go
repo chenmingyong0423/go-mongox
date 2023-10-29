@@ -53,6 +53,7 @@ const (
 	CaseSensitive      = "$caseSensitive"
 	DiacriticSensitive = "$diacriticSensitive"
 	Where              = "$where"
+	Slice              = "$slice"
 )
 
 type TestUser struct {
