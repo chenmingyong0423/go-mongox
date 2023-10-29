@@ -91,26 +91,26 @@ func TestBsonBuilder_InUint(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]uint)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint{uint(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint(1), uint(2), uint(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint{uint(1), uint(2), uint(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -130,26 +130,26 @@ func TestBsonBuilder_InUint8(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]uint8)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint8{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint8{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint8{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint8(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint8{uint8(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint8{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint8(1), uint8(2), uint8(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint8{uint8(1), uint8(2), uint8(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -169,26 +169,26 @@ func TestBsonBuilder_InUint16(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]uint16)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint16{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint16{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint16{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint16(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint16{uint16(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint16{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint16(1), uint16(2), uint16(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint16{uint16(1), uint16(2), uint16(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -208,26 +208,26 @@ func TestBsonBuilder_InUint32(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]uint32)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint32{uint32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint32(1), uint32(2), uint32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint32{uint32(1), uint32(2), uint32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -247,26 +247,26 @@ func TestBsonBuilder_InUint64(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]uint64)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint64{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint64{uint64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{uint64(1), uint64(2), uint64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []uint64{uint64(1), uint64(2), uint64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -286,26 +286,26 @@ func TestBsonBuilder_InInt(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]int)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []int{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{1}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int{1}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{1, 2, 3}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int{1, 2, 3}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -325,26 +325,26 @@ func TestBsonBuilder_InInt8(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]int8)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []int8{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int8{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int8{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int8(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int8{int8(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int8{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int8(1), int8(2), int8(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int8{int8(1), int8(2), int8(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -364,26 +364,26 @@ func TestBsonBuilder_InInt16(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]int16)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []int16{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int16{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int16{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int16(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int16{int16(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int16{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int16(1), int16(2), int16(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int16{int16(1), int16(2), int16(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -403,26 +403,26 @@ func TestBsonBuilder_InInt32(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]int32)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []int32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int32{int32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int32(1), int32(2), int32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int32{int32(1), int32(2), int32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -442,26 +442,26 @@ func TestBsonBuilder_InInt64(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]int64)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []int64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int64{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int64{int64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{int64(1), int64(2), int64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []int64{int64(1), int64(2), int64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -481,26 +481,26 @@ func TestBsonBuilder_InFloat32(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]float32)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []float32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []float32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{float32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float32{float32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []float32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{float32(1), float32(2), float32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float32{float32(1), float32(2), float32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -521,25 +521,25 @@ func TestBsonBuilder_InFloat64(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]float64)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []float64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float64{}}}}},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []float64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{float64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float64{float64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []float64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{float64(1), float64(2), float64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []float64{float64(1), float64(2), float64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -560,26 +560,26 @@ func TestBsonBuilder_InString(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.In: ([]string)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []string{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []string{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []string{"1"},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{"1"}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []string{"1"}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []string{"1", "2", "3"},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []any{"1", "2", "3"}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.In: []string{"1", "2", "3"}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -639,26 +639,26 @@ func TestBsonBuilder_NinUint(t *testing.T) {
 		{
 			name: "nil values",
 			key:  "id",
-			want: bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}}},
+			want: bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: ([]uint)(nil)}}},
 		},
 
 		{
 			name:   "empty values",
 			key:    "id",
 			values: []uint{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint{uint(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint(1), uint(2), uint(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint{uint(1), uint(2), uint(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -680,7 +680,7 @@ func TestBsonBuilder_NinUint8(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]uint8)(nil)}},
 			},
 		},
 
@@ -688,19 +688,19 @@ func TestBsonBuilder_NinUint8(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []uint8{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint8{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint8{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint8(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint8{uint8(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint8{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint8(1), uint8(2), uint8(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint8{uint8(1), uint8(2), uint8(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -722,7 +722,7 @@ func TestBsonBuilder_NinUint16(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]uint16)(nil)}},
 			},
 		},
 
@@ -730,19 +730,19 @@ func TestBsonBuilder_NinUint16(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []uint16{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint16{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint16{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint16(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint16{uint16(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint16{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint16(1), uint16(2), uint16(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint16{uint16(1), uint16(2), uint16(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -764,7 +764,7 @@ func TestBsonBuilder_NinUint32(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]uint32)(nil)}},
 			},
 		},
 
@@ -772,19 +772,19 @@ func TestBsonBuilder_NinUint32(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []uint32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint32{uint32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint32(1), uint32(2), uint32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint32{uint32(1), uint32(2), uint32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -806,7 +806,7 @@ func TestBsonBuilder_NinUint64(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]uint64)(nil)}},
 			},
 		},
 
@@ -814,19 +814,19 @@ func TestBsonBuilder_NinUint64(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []uint64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint64{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []uint64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint64{uint64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []uint64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{uint64(1), uint64(2), uint64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []uint64{uint64(1), uint64(2), uint64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -849,7 +849,7 @@ func TestBsonBuilder_NinInt(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]int)(nil)}},
 			},
 		},
 
@@ -857,19 +857,19 @@ func TestBsonBuilder_NinInt(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []int{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{1}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int{1}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{1, 2, 3}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int{1, 2, 3}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -892,7 +892,7 @@ func TestBsonBuilder_NinInt8(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]int8)(nil)}},
 			},
 		},
 
@@ -900,19 +900,19 @@ func TestBsonBuilder_NinInt8(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []int8{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int8{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int8{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int8(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int8{int8(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int8{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int8(1), int8(2), int8(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int8{int8(1), int8(2), int8(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -935,7 +935,7 @@ func TestBsonBuilder_NinInt16(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]int16)(nil)}},
 			},
 		},
 
@@ -943,19 +943,19 @@ func TestBsonBuilder_NinInt16(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []int16{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int16{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int16{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int16(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int16{int16(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int16{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int16(1), int16(2), int16(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int16{int16(1), int16(2), int16(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -978,7 +978,7 @@ func TestBsonBuilder_NinInt32(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]int32)(nil)}},
 			},
 		},
 
@@ -986,19 +986,19 @@ func TestBsonBuilder_NinInt32(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []int32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int32{int32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int32(1), int32(2), int32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int32{int32(1), int32(2), int32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -1021,7 +1021,7 @@ func TestBsonBuilder_NinInt64(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]int64)(nil)}},
 			},
 		},
 
@@ -1029,19 +1029,19 @@ func TestBsonBuilder_NinInt64(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []int64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int64{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []int64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int64{int64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []int64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{int64(1), int64(2), int64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []int64{int64(1), int64(2), int64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -1064,7 +1064,7 @@ func TestBsonBuilder_NinFloat32(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]float32)(nil)}},
 			},
 		},
 
@@ -1072,19 +1072,19 @@ func TestBsonBuilder_NinFloat32(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []float32{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float32{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []float32{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{float32(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float32{float32(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []float32{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{float32(1), float32(2), float32(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float32{float32(1), float32(2), float32(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -1107,7 +1107,7 @@ func TestBsonBuilder_NinFloat64(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]float64)(nil)}},
 			},
 		},
 
@@ -1115,19 +1115,19 @@ func TestBsonBuilder_NinFloat64(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []float64{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float64{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []float64{1},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{float64(1)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float64{float64(1)}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []float64{1, 2, 3},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{float64(1), float64(2), float64(3)}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []float64{float64(1), float64(2), float64(3)}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -1150,7 +1150,7 @@ func TestBsonBuilder_NinString(t *testing.T) {
 			name: "nil values",
 			key:  "id",
 			want: bson.D{
-				bson.E{Key: "id", Value: bson.M{types.Nin: ([]any)(nil)}},
+				bson.E{Key: "id", Value: bson.M{types.Nin: ([]string)(nil)}},
 			},
 		},
 
@@ -1158,19 +1158,19 @@ func TestBsonBuilder_NinString(t *testing.T) {
 			name:   "empty values",
 			key:    "id",
 			values: []string{},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []string{}}}},
 		},
 		{
 			name:   "one value",
 			key:    "id",
 			values: []string{"1"},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{"1"}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []string{"1"}}}},
 		},
 		{
 			name:   "multiple values",
 			key:    "id",
 			values: []string{"1", "2", "3"},
-			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []any{"1", "2", "3"}}}},
+			want:   bson.D{bson.E{Key: "id", Value: bson.M{types.Nin: []string{"1", "2", "3"}}}},
 		},
 	}
 	for _, tc := range testCases {

@@ -15,7 +15,6 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/pkg"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -45,80 +44,67 @@ func (b *comparisonQueryBuilder) In(key string, values ...any) *Builder {
 }
 
 func (b *comparisonQueryBuilder) InUint(key string, values ...uint) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint8(key string, values ...uint8) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint16(key string, values ...uint16) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint32(key string, values ...uint32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint64(key string, values ...uint64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt(key string, values ...int) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt8(key string, values ...int8) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt16(key string, values ...int16) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt32(key string, values ...int32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt64(key string, values ...int64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InString(key string, values ...string) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InFloat32(key string, values ...float32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InFloat64(key string, values ...float64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.In(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
 	return b.parent
 }
 
@@ -128,80 +114,67 @@ func (b *comparisonQueryBuilder) Nin(key string, values ...any) *Builder {
 }
 
 func (b *comparisonQueryBuilder) NinUint(key string, values ...uint) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint8(key string, values ...uint8) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint16(key string, values ...uint16) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint32(key string, values ...uint32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint64(key string, values ...uint64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt(key string, values ...int) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt8(key string, values ...int8) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt16(key string, values ...int16) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt32(key string, values ...int32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt64(key string, values ...int64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinString(key string, values ...string) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinFloat32(key string, values ...float32) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinFloat64(key string, values ...float64) *Builder {
-	valuesAny := pkg.ToAnySlice(values...)
-	b.Nin(key, valuesAny...)
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
 	return b.parent
 }
 
