@@ -82,7 +82,7 @@ func Test_arrayUpdateBuilder_AddToSetForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().AddToSetForMap(tc.keyValues).Build())
+			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().AddToSetForMap(tc.keyValues).Build()))
 		})
 	}
 }
@@ -1255,7 +1255,7 @@ func Test_arrayUpdateBuilder_SortForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SortForMap(tc.value).Build())
+			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().SortForMap(tc.value).Build()))
 		})
 	}
 }

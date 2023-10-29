@@ -53,7 +53,7 @@ func Test_fieldUpdateBuilder_SetForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SetForMap(tc.data).Build())
+			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().SetForMap(tc.data).Build()))
 		})
 	}
 }

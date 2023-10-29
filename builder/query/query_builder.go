@@ -51,7 +51,15 @@ func (b *Builder) Id(v any) *Builder {
 	return b
 }
 
-func (b *Builder) Add(k string, v any) *Builder {
-	b.data = append(b.data, bson.E{Key: k, Value: v})
+func (b *Builder) Add(keyValues ...any) *Builder {
+	if len(keyValues)%2 == 0 {
+		for i := 0; i < len(keyValues); i += 2 {
+			key, ok := keyValues[i].(string)
+			if !ok {
+				continue
+			}
+			b.data = append(b.data, bson.E{Key: key, Value: keyValues[i+1]})
+		}
+	}
 	return b
 }
