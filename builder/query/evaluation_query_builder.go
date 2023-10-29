@@ -15,7 +15,7 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/pkg"
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -35,7 +35,7 @@ func (b *evaluationQueryBuilder) JsonSchema(d bson.D) *Builder {
 }
 
 func (b *evaluationQueryBuilder) Mod(key string, divisor any, remainder int) *Builder {
-	if pkg.IsNumeric(divisor) {
+	if utils.IsNumeric(divisor) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Mod: []any{divisor, remainder}}})
 	}
 	return b.parent

@@ -20,11 +20,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/chenmingyong0423/go-mongox/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -229,7 +230,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
@@ -251,7 +252,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
@@ -311,7 +312,7 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
@@ -334,7 +335,7 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))

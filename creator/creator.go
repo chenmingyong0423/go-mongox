@@ -17,7 +17,8 @@ package creator
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/pkg"
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -52,7 +53,7 @@ func (c *Creator[T]) InsertOneWithOptions(ctx context.Context, doc T, opts ...*o
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []T) (*mongo.InsertManyResult, error) {
-	return c.collection.InsertMany(ctx, pkg.ToAnySlice(docs...), c.insertManyOptions...)
+	return c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), c.insertManyOptions...)
 }
 
 func (c *Creator[T]) InsertManyWithOptions(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {

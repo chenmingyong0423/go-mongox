@@ -20,12 +20,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/chenmingyong0423/go-mongox/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -234,7 +235,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -257,7 +258,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "update many success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -328,7 +329,7 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, pkg.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
 					{Id: "123", Name: "cmy", Age: 24},
 				}...))
 				assert.NoError(t, err)

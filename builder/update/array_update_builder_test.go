@@ -17,8 +17,9 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/pkg"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -82,7 +83,7 @@ func Test_arrayUpdateBuilder_AddToSetForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().AddToSetForMap(tc.keyValues).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().AddToSetForMap(tc.keyValues).Build()))
 		})
 	}
 }
@@ -148,14 +149,14 @@ func Test_arrayUpdateBuilder_PopForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PopForMap(tc.keyValues).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PopForMap(tc.keyValues).Build()))
 		})
 	}
 }
 
 func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
-	assert.Equal(t, bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []any{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}}, BsonBuilder().Pull(
+	assert.Equal(t, bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}}, BsonBuilder().Pull(
 		// 可以使用 query 构造
 		query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add("vegetables", "carrots").Build(),
 	).Build())
@@ -303,7 +304,7 @@ func Test_arrayUpdateBuilder_PullAllInt8(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt8(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt8(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -341,7 +342,7 @@ func Test_arrayUpdateBuilder_PullAllInt16(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt16(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt16(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -379,7 +380,7 @@ func Test_arrayUpdateBuilder_PullAllInt32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt32(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt32(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -417,7 +418,7 @@ func Test_arrayUpdateBuilder_PullAllInt64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt64(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllInt64(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -455,7 +456,7 @@ func Test_arrayUpdateBuilder_PullAllString(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllString(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllString(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -493,7 +494,7 @@ func Test_arrayUpdateBuilder_PullAllFloat32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllFloat32(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllFloat32(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -531,7 +532,7 @@ func Test_arrayUpdateBuilder_PullAllFloat64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllFloat64(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllFloat64(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -569,7 +570,7 @@ func Test_arrayUpdateBuilder_PullAllUint(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().PullAllUint(tc.key, tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PullAllUint(tc.key, tc.values...).Build()))
 		})
 	}
 }
@@ -1117,7 +1118,7 @@ func Test_arrayUpdateBuilder_EachUint16(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().EachUint16(tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().EachUint16(tc.values...).Build()))
 		})
 	}
 }
@@ -1150,7 +1151,7 @@ func Test_arrayUpdateBuilder_EachUint32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().EachUint32(tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().EachUint32(tc.values...).Build()))
 		})
 	}
 }
@@ -1183,7 +1184,7 @@ func Test_arrayUpdateBuilder_EachUint64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().EachUint64(tc.values...).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().EachUint64(tc.values...).Build()))
 		})
 	}
 }
@@ -1255,7 +1256,7 @@ func Test_arrayUpdateBuilder_SortForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().SortForMap(tc.value).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().SortForMap(tc.value).Build()))
 		})
 	}
 }

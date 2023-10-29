@@ -18,7 +18,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/pkg"
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,7 +54,7 @@ func Test_fieldUpdateBuilder_SetForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().SetForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().SetForMap(tc.data).Build()))
 		})
 	}
 }
@@ -151,7 +152,7 @@ func Test_fieldUpdateBuilder_SetOnInsertForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().SetOnInsertForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().SetOnInsertForMap(tc.data).Build()))
 		})
 	}
 }
@@ -214,7 +215,7 @@ func Test_fieldUpdateBuilder_CurrentDateForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().CurrentDateForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().CurrentDateForMap(tc.data).Build()))
 		})
 	}
 }
@@ -282,7 +283,7 @@ func Test_fieldUpdateBuilder_IncForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().IncForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().IncForMap(tc.data).Build()))
 		})
 	}
 }
@@ -345,7 +346,7 @@ func Test_fieldUpdateBuilder_MinForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().MinForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().MinForMap(tc.data).Build()))
 		})
 	}
 }
@@ -408,7 +409,7 @@ func Test_fieldUpdateBuilder_MaxForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().MaxForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().MaxForMap(tc.data).Build()))
 		})
 	}
 }
@@ -481,7 +482,7 @@ func Test_fieldUpdateBuilder_MulForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().MulForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().MulForMap(tc.data).Build()))
 		})
 	}
 }
@@ -539,7 +540,7 @@ func Test_fieldUpdateBuilder_RenameForMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, pkg.EqualBSONDElements(tc.want, BsonBuilder().RenameForMap(tc.data).Build()))
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().RenameForMap(tc.data).Build()))
 		})
 	}
 }

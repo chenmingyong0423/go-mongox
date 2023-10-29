@@ -16,7 +16,7 @@ package update
 
 import (
 	"github.com/chenmingyong0423/go-mongox/converter"
-	"github.com/chenmingyong0423/go-mongox/pkg"
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -190,7 +190,7 @@ func (b *fieldUpdateBuilder) Mul(keyValues ...any) *Builder {
 				continue
 			}
 			v := keyValues[i+1]
-			if pkg.IsNumeric(v) {
+			if utils.IsNumeric(v) {
 				value = append(value, bson.E{Key: key, Value: v})
 			}
 		}
@@ -203,7 +203,7 @@ func (b *fieldUpdateBuilder) MulForMap(data map[string]any) *Builder {
 	if data != nil {
 		d := bson.D{}
 		for k, v := range data {
-			if pkg.IsNumeric(v) {
+			if utils.IsNumeric(v) {
 				d = append(d, bson.E{Key: k, Value: v})
 			}
 		}
