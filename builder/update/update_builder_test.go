@@ -22,5 +22,35 @@ import (
 )
 
 func TestBuilder_Add(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: "cmy"}}, BsonBuilder().Add("name", "cmy").Build())
+	testCases := []struct {
+		name      string
+		keyValues []any
+
+		want bson.D
+	}{
+		{
+			name: "zero params",
+			want: bson.D{},
+		},
+		{
+			name:      "odd params",
+			keyValues: []any{"name", "cmy", "age"},
+			want:      bson.D{},
+		},
+		{
+			name:      "keys contain non-string",
+			keyValues: []any{"name", "cmy", 2, "age"},
+			want:      bson.D{bson.E{Key: "name", Value: "cmy"}},
+		},
+		{
+			name:      "normal params",
+			keyValues: []any{"name", "cmy", "age", 18, "scores", []int{100, 99, 98}},
+			want:      bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.want, BsonBuilder().Add(testCase.keyValues...).Build())
+		})
+	}
 }

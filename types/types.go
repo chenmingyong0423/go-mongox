@@ -54,6 +54,15 @@ const (
 	DiacriticSensitive = "$diacriticSensitive"
 	Where              = "$where"
 	Slice              = "$slice"
+	AddToSet           = "$addToSet"
+	Pop                = "$pop"
+	Pull               = "$pull"
+	Push               = "$push"
+	PullAll            = "$pullAll"
+	Each               = "$each"
+	Position           = "$position"
+	SliceForUpdate     = "$slice"
+	Sort               = "$sort"
 )
 
 type TestUser struct {

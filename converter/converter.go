@@ -58,6 +58,14 @@ func MapToBson(data map[string]any) bson.D {
 	return d
 }
 
+func MapToBsonV2[T any](data map[string]T) bson.D {
+	d := bson.D{}
+	for k, v := range data {
+		d = append(d, bson.E{Key: k, Value: v})
+	}
+	return d
+}
+
 func structToBson(val any) bson.D {
 	marshal, err := bson.Marshal(val)
 	if err != nil {
