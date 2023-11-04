@@ -137,7 +137,7 @@ func (b *StageBuilder) Group(id any, accumulators ...any) *StageBuilder {
 
 func (b *StageBuilder) GroupMap(id any, accumulators map[string]map[string]any) *StageBuilder {
 	d := bson.D{{Key: "_id", Value: id}}
-	bsonAccumulators := converter.MapToBsonV2(accumulators)
+	bsonAccumulators := converter.MapToBson(accumulators)
 	d = append(d, bsonAccumulators...)
 	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageGroup, Value: d}})
 	return b

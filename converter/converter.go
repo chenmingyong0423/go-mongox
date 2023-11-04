@@ -52,15 +52,10 @@ func ToBson(data any) bson.D {
 	return nil
 }
 
-func MapToBson(data map[string]any) bson.D {
-	d := bson.D{}
-	for k, v := range data {
-		d = append(d, bson.E{Key: k, Value: v})
+func MapToBson[T any](data map[string]T) bson.D {
+	if data == nil {
+		return nil
 	}
-	return d
-}
-
-func MapToBsonV2[T any](data map[string]T) bson.D {
 	d := bson.D{}
 	for k, v := range data {
 		isMap := utils.IsMap(v)

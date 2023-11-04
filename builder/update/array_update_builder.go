@@ -266,7 +266,7 @@ func (b *arrayUpdateBuilder) Sort(keyValues ...any) *Builder {
 
 func (b *arrayUpdateBuilder) SortForMap(value map[string]int) *Builder {
 	if value != nil {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: converter.MapToBsonV2(value)})
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: converter.MapToBson(value)})
 	}
 	return b.parent
 }

@@ -439,3 +439,60 @@ func TestStructToBson(t *testing.T) {
 		})
 	}
 }
+
+func TestMapToBson(t *testing.T) {
+	testCases := []struct {
+		name string
+		data map[string]any
+		want bson.D
+	}{
+		{
+			name: "nil map",
+			data: nil,
+			want: nil,
+		},
+		{
+			name: "empty map",
+			data: map[string]any{},
+			want: bson.D{},
+		},
+		{
+			name: "map with zero-value",
+			data: map[string]any{
+				"name": "",
+			},
+			want: bson.D{
+				bson.E{Key: "name", Value: ""},
+			},
+		},
+		{
+			name: "map with no zero-value",
+			data: map[string]any{
+				"name": "cmy",
+			},
+			want: bson.D{
+				bson.E{Key: "name", Value: "cmy"},
+			},
+		},
+		{
+			name: "map value is map",
+			data: map[string]any{
+				"name": map[string]any{
+					"first": "c",
+					"last":  "my",
+				},
+			},
+			want: bson.D{
+				bson.E{Key: "name", Value: bson.D{
+					bson.E{Key: "first", Value: "c"},
+					bson.E{Key: "last", Value: "my"},
+				}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, MapToBson(tc.data))
+		})
+	}
+}
