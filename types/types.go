@@ -101,6 +101,10 @@ const (
 	AggregationGte              = "$gte"
 	AggregationLt               = "$lt"
 	AggregationLte              = "$lte"
+	AggregationAnd              = "$and"
+	AggregationNot              = "$not"
+	AggregationNor              = "$nor"
+	AggregationOr               = "$or"
 )
 
 type TestUser struct {

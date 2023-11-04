@@ -24,6 +24,7 @@ func BsonBuilder() *Builder {
 
 	b.arithmeticBuilder = arithmeticBuilder{parent: b}
 	b.comparisonBuilder = comparisonBuilder{parent: b}
+	b.logicalBuilder = logicalBuilder{parent: b}
 
 	return b
 }
@@ -31,6 +32,7 @@ func BsonBuilder() *Builder {
 type Builder struct {
 	arithmeticBuilder
 	comparisonBuilder
+	logicalBuilder
 
 	d bson.D
 }
