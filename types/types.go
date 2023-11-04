@@ -95,6 +95,12 @@ const (
 	AggregationSubtract         = "$subtract"
 	AggregationDivide           = "$divide"
 	AggregationMod              = "$mod"
+	AggregationEq               = "$eq"
+	AggregationNe               = "$ne"
+	AggregationGt               = "$gt"
+	AggregationGte              = "$gte"
+	AggregationLt               = "$lt"
+	AggregationLte              = "$lte"
 )
 
 type TestUser struct {

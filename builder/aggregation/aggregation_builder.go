@@ -23,12 +23,14 @@ func BsonBuilder() *Builder {
 	b := &Builder{d: bson.D{}}
 
 	b.arithmeticBuilder = arithmeticBuilder{parent: b}
+	b.comparisonBuilder = comparisonBuilder{parent: b}
 
 	return b
 }
 
 type Builder struct {
 	arithmeticBuilder
+	comparisonBuilder
 
 	d bson.D
 }
