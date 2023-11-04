@@ -17,6 +17,8 @@ package converter
 import (
 	"reflect"
 
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -61,7 +63,12 @@ func MapToBson(data map[string]any) bson.D {
 func MapToBsonV2[T any](data map[string]T) bson.D {
 	d := bson.D{}
 	for k, v := range data {
-		d = append(d, bson.E{Key: k, Value: v})
+		isMap := utils.IsMap(v)
+		if !isMap {
+			d = append(d, bson.E{Key: k, Value: v})
+		} else {
+			d = append(d, bson.E{Key: k, Value: ToBson(v)})
+		}
 	}
 	return d
 }

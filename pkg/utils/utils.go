@@ -17,6 +17,8 @@ package utils
 import (
 	"reflect"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -59,6 +61,24 @@ func EqualBSONDElements(d1, d2 bson.D) bool {
 		}
 	}
 	return true
+}
+
+func EqualPipelineElements(p1, p2 mongo.Pipeline) bool {
+	// 如果长度不同，它们不相等
+	if len(p1) != len(p2) {
+		return false
+	}
+
+	for i := range p1 {
+		if !EqualBSONDElements(p1[i], p2[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func IsMap(value any) bool {
+	return reflect.TypeOf(value).Kind() == reflect.Map
 }
 
 func IsNumeric(value any) bool {
