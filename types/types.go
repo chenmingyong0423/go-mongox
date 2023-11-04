@@ -103,8 +103,11 @@ const (
 	AggregationLte              = "$lte"
 	AggregationAnd              = "$and"
 	AggregationNot              = "$not"
-	AggregationNor              = "$nor"
 	AggregationOr               = "$or"
+	AggregationConcat           = "$concat"
+	AggregationSubstrBytes      = "$substrBytes"
+	AggregationToLower          = "$toLower"
+	AggregationToUpper          = "$toUpper"
 )
 
 type TestUser struct {
