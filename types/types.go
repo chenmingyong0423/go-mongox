@@ -117,6 +117,7 @@ const (
 	AggregationWeek             = "$week"
 	AggregationCond             = "$cond"
 	AggregationIfNull           = "$ifNull"
+	AggregationSwitch           = "$switch"
 )
 
 const (
@@ -130,6 +131,10 @@ const (
 	Format      = "format"
 	Timezone    = "timezone"
 	OnNull      = "onNull"
+	Branches    = "branches"
+	Case        = "case"
+	Then        = "then"
+	DefaultCase = "default"
 )
 
 type TestUser struct {

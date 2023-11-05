@@ -32,3 +32,16 @@ func (b condBuilder) IfNull(expr, replacement any) *Builder {
 	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationIfNull, Value: []any{expr, replacement}})
 	return b.parent
 }
+
+// Switch
+// cases: [case, then, case, then]
+func (b condBuilder) Switch(cases []any, defaultCase any) *Builder {
+	if len(cases) != 0 && len(cases)%2 == 0 {
+		branches := bson.A{}
+		for i := 0; i < len(cases); i += 2 {
+			branches = append(branches, bson.D{{Key: types.Case, Value: cases[i]}, {Key: types.Then, Value: cases[i+1]}})
+		}
+		b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}})
+	}
+	return b.parent
+}

@@ -76,3 +76,47 @@ func Test_condBuilder_IfNull(t *testing.T) {
 		})
 	}
 }
+
+func Test_condBuilder_Switch(t *testing.T) {
+	testCases := []struct {
+		name        string
+		cases       []any
+		defaultCase any
+		expected    bson.D
+	}{
+		{
+			name:        "nil cases",
+			cases:       nil,
+			defaultCase: "Did not match",
+			expected:    bson.D{},
+		},
+		{
+			name:        "empty cases",
+			cases:       []any{},
+			defaultCase: "Did not match",
+			expected:    bson.D{},
+		},
+		{
+			name: "normal",
+			cases: []any{
+				BsonBuilder().Eq(0, 5).Build(), "equals",
+				BsonBuilder().Gt(0, 5).Build(), "greater than",
+			},
+			defaultCase: "Did not match",
+			expected: bson.D{
+				{Key: "$switch", Value: bson.D{
+					{Key: "branches", Value: bson.A{
+						bson.D{{Key: "case", Value: bson.D{{Key: "$eq", Value: []any{0, 5}}}}, {Key: "then", Value: "equals"}},
+						bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: []any{0, 5}}}}, {Key: "then", Value: "greater than"}},
+					}},
+					{Key: "default", Value: "Did not match"},
+				}},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, BsonBuilder().Switch(tc.cases, tc.defaultCase).Build())
+		})
+	}
+}
