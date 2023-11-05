@@ -927,7 +927,7 @@ func TestStageBuilder_FacetMap(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().FacetMap(tc.facets).Build())
+			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().FacetMap(tc.facets).Build()))
 		})
 	}
 }
