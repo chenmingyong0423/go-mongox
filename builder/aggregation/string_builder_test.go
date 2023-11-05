@@ -110,3 +110,22 @@ func Test_stringBuilder_ToUpper(t *testing.T) {
 		})
 	}
 }
+
+func Test_stringBuilder_Contact(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expressions []any
+		expected    bson.D
+	}{
+		{
+			name:        "normal",
+			expressions: []any{"$item", " - ", "$description"},
+			expected:    bson.D{{Key: "$concat", Value: []any{"$item", " - ", "$description"}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, BsonBuilder().Contact(tc.expressions...).Build())
+		})
+	}
+}

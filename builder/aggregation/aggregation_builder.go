@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -61,10 +60,5 @@ func (b *Builder) AddKeyValues(keyValues ...any) *Builder {
 			b.d = append(b.d, bson.E{Key: key, Value: keyValues[i+1]})
 		}
 	}
-	return b
-}
-
-func (b *Builder) Contact(expressions ...any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationContact, Value: expressions})
 	return b
 }

@@ -41,3 +41,8 @@ func (b *stringBuilder) ToUpper(expression any) *Builder {
 	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationToUpper, Value: expression})
 	return b.parent
 }
+
+func (b *stringBuilder) Contact(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationContact, Value: expressions})
+	return b.parent
+}
