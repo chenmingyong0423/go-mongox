@@ -145,3 +145,7 @@ func ToSetBson(updates any) bson.D {
 	}
 	return nil
 }
+
+func KeyValue(key string, value any) types.KeyValue {
+	return types.KeyValue{Key: key, Value: value}
+}

@@ -17,6 +17,8 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -158,7 +160,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
 	assert.Equal(t, bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}}, BsonBuilder().Pull(
 		// 可以使用 query 构造
-		query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add("vegetables", "carrots").Build(),
+		query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(converter.KeyValue("vegetables", "carrots")).Build(),
 	).Build())
 }
 

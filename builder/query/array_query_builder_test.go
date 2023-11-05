@@ -17,13 +17,15 @@ package query
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Test_arrayQueryBuilder_ElemMatch(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$elemMatch": bson.D{bson.E{Key: "$gt", Value: 1}}}}}, BsonBuilder().ElemMatch("name", BsonBuilder().Add("$gt", 1).Build()).Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.M{"$elemMatch": bson.D{bson.E{Key: "$gt", Value: 1}}}}}, BsonBuilder().ElemMatch("name", BsonBuilder().Add(converter.KeyValue("$gt", 1)).Build()).Build())
 }
 
 func TestBsonBuilder_All(t *testing.T) {

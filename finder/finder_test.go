@@ -19,6 +19,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -135,7 +137,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1)).Add(converter.KeyValue("name", 1)).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -155,7 +157,7 @@ func TestFinder_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -317,7 +319,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1)).Add(converter.KeyValue("name", 1)).Build(),
 				},
 			},
 			want: []*types.TestUser{
@@ -349,7 +351,7 @@ func TestFinder_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
 				},
 			},
 			want: []*types.TestUser{

@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -158,7 +160,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add("name", "cmy").Build())
+				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build())
 			},
 			want: &types.TestUser{
 				Id:   "123",
@@ -184,7 +186,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add("age", 18).Build())
+				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("age", 18)).Build())
 			},
 			want: &types.TestUser{
 				Id:   "123",
@@ -266,7 +268,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1), converter.KeyValue("name", 1)).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -295,7 +297,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOneOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -536,7 +538,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add("name", "cmy").Build())
+				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build())
 			},
 			want: []*types.TestUser{
 				{
@@ -742,7 +744,7 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 1).Add("name", 1).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1)).Add(converter.KeyValue("name", 1)).Build(),
 				},
 			},
 			want: []*types.TestUser{
@@ -793,7 +795,7 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 			},
 			opts: []*options.FindOptions{
 				{
-					Projection: query.BsonBuilder().Add("_id", 0).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
 				},
 			},
 			want: []*types.TestUser{

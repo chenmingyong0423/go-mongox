@@ -184,3 +184,8 @@ type DateToStringOptions struct {
 	Timezone string
 	OnNull   any
 }
+
+type KeyValue struct {
+	Key   string
+	Value any
+}

@@ -17,6 +17,8 @@ package finder
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/converter"
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,15 +55,9 @@ func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	return f
 }
 
-// FilterKV is used to set the filter of the query
-// bsonElements is key-value pairs, the key must be string
-// if the key is not string, it will be ignored
-// the format of bsonElements is: key1, value1, key2, value2, ...
-func (f *Finder[T]) FilterKV(bsonElements ...any) *Finder[T] {
-	length := len(bsonElements)
-	if length > 0 && length%2 == 0 {
-		f.filter = query.BsonBuilder().Add(bsonElements).Build()
-	}
+// FilterKeyValue is used to set the filter of the query
+func (f *Finder[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Finder[T] {
+	f.filter = query.BsonBuilder().Add(bsonElements...).Build()
 	return f
 }
 

@@ -22,6 +22,7 @@ import (
 func BsonBuilder() *Builder {
 	query := &Builder{
 		data: bson.D{},
+		err:  make([]error, 0),
 	}
 	query.comparisonQueryBuilder = comparisonQueryBuilder{parent: query}
 	query.logicalQueryBuilder = logicalQueryBuilder{parent: query}
@@ -40,6 +41,8 @@ type Builder struct {
 	arrayQueryBuilder
 	evaluationQueryBuilder
 	projectionQueryBuilder
+
+	err []error
 }
 
 func (b *Builder) Build() bson.D {
@@ -51,14 +54,11 @@ func (b *Builder) Id(v any) *Builder {
 	return b
 }
 
-func (b *Builder) Add(keyValues ...any) *Builder {
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			b.data = append(b.data, bson.E{Key: key, Value: keyValues[i+1]})
+func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
+	if len(bsonElements) != 0 {
+		for _, element := range bsonElements {
+
+			b.data = append(b.data, bson.E{Key: element.Key, Value: element.Value})
 		}
 	}
 	return b

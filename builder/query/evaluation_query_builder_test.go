@@ -17,6 +17,8 @@ package query
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -24,10 +26,10 @@ import (
 func Test_evaluationQueryBuilder_Expr(t *testing.T) {
 	assert.Equal(t,
 		bson.D{{Key: "$expr", Value: bson.D{{Key: "$gt", Value: []any{"$spent", "$budget"}}}}},
-		BsonBuilder().Expr(BsonBuilder().Add("$gt", []any{
+		BsonBuilder().Expr(BsonBuilder().Add(converter.KeyValue("$gt", []any{
 			"$spent",
 			"$budget",
-		}).Build()).Build())
+		})).Build()).Build())
 }
 
 func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
@@ -70,30 +72,30 @@ func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
 		}}},
 		BsonBuilder().JsonSchema(
 			BsonBuilder().
-				Add("required", []string{"name", "major", "gpa", "address"}).
-				Add("properties",
+				Add(converter.KeyValue("required", []string{"name", "major", "gpa", "address"})).
+				Add(converter.KeyValue("properties",
 					BsonBuilder().
-						Add("name",
+						Add(converter.KeyValue("name",
 							BsonBuilder().
-								Add("bsonType", "string").
-								Add("description", "must be a string and is required").
-								Build()).
-						Add("address",
-							BsonBuilder().Add("bsonType", "object").
-								Add("required", []string{"zipcode"}).
-								Add("properties",
+								Add(converter.KeyValue("bsonType", "string")).
+								Add(converter.KeyValue("description", "must be a string and is required")).
+								Build())).
+						Add(converter.KeyValue("address",
+							BsonBuilder().Add(converter.KeyValue("bsonType", "object")).
+								Add(converter.KeyValue("required", []string{"zipcode"})).
+								Add(converter.KeyValue("properties",
 									BsonBuilder().
-										Add("street",
+										Add(converter.KeyValue("street",
 											BsonBuilder().
-												Add("bsonType", "string").
-												Build()).
-										Add("zipcode",
+												Add(converter.KeyValue("bsonType", "string")).
+												Build())).
+										Add(converter.KeyValue("zipcode",
 											BsonBuilder().
-												Add("bsonType", "string").
-												Build()).
-										Build()).
-								Build()).
-						Build()).
+												Add(converter.KeyValue("bsonType", "string")).
+												Build())).
+										Build())).
+								Build())).
+						Build())).
 				Build()).
 			Build())
 }
