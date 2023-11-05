@@ -108,6 +108,10 @@ const (
 	AggregationSubstrBytes      = "$substrBytes"
 	AggregationToLower          = "$toLower"
 	AggregationToUpper          = "$toUpper"
+	AggregationArrayElemAt      = "$arrayElemAt"
+	AggregationConcatArrays     = "$concatArrays"
+	AggregationSize             = "$size"
+	AggregationSlice            = "$slice"
 )
 
 type TestUser struct {

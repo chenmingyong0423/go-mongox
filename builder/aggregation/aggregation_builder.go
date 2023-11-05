@@ -26,6 +26,7 @@ func BsonBuilder() *Builder {
 	b.comparisonBuilder = comparisonBuilder{parent: b}
 	b.logicalBuilder = logicalBuilder{parent: b}
 	b.stringBuilder = stringBuilder{parent: b}
+	b.arrayBuilder = arrayBuilder{parent: b}
 
 	return b
 }
@@ -35,6 +36,7 @@ type Builder struct {
 	comparisonBuilder
 	logicalBuilder
 	stringBuilder
+	arrayBuilder
 
 	d bson.D
 }
@@ -98,10 +100,5 @@ func (b *Builder) Avg(expression any) *Builder {
 
 func (b *Builder) AvgMany(expressions ...any) *Builder {
 	b.d = append(b.d, bson.E{Key: types.AggregationAvg, Value: expressions})
-	return b
-}
-
-func (b *Builder) ArrayToObject(expression any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationArrayToObject, Value: expression})
 	return b
 }
