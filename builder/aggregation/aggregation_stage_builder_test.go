@@ -401,8 +401,12 @@ func TestStageBuilder_Group(t *testing.T) {
 			},
 		},
 		{
-			name:         "accumulators is nil",
-			id:           BsonBuilder().DateToString("$date", "%Y-%m-%d", "", nil).Build(),
+			name: "accumulators is nil",
+			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "",
+				OnNull:   nil,
+			}).Build(),
 			accumulators: nil,
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$group", Value: bson.D{
@@ -412,7 +416,11 @@ func TestStageBuilder_Group(t *testing.T) {
 		},
 		{
 			name: "id and accumulators are not nil",
-			id:   BsonBuilder().DateToString("$date", "%Y-%m-%d", "", nil).Build(),
+			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "",
+				OnNull:   nil,
+			}).Build(),
 			accumulators: []any{
 				"totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build(),
 				"averageQuantity", BsonBuilder().Avg("$quantity").Build(),

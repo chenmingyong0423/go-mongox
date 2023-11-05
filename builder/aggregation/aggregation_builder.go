@@ -27,6 +27,7 @@ func BsonBuilder() *Builder {
 	b.logicalBuilder = logicalBuilder{parent: b}
 	b.stringBuilder = stringBuilder{parent: b}
 	b.arrayBuilder = arrayBuilder{parent: b}
+	b.dateBuilder = dateBuilder{parent: b}
 
 	return b
 }
@@ -37,6 +38,7 @@ type Builder struct {
 	logicalBuilder
 	stringBuilder
 	arrayBuilder
+	dateBuilder
 
 	d bson.D
 }
@@ -75,21 +77,6 @@ func (b *Builder) Contact(expressions ...any) *Builder {
 
 func (b *Builder) Push(expression any) *Builder {
 	b.d = append(b.d, bson.E{Key: types.AggregationPush, Value: expression})
-	return b
-}
-
-func (b *Builder) DateToString(date any, format, timezone string, onNull any) *Builder {
-	d := bson.D{bson.E{Key: "date", Value: date}}
-	if format != "" {
-		d = append(d, bson.E{Key: "format", Value: format})
-	}
-	if timezone != "" {
-		d = append(d, bson.E{Key: "timezone", Value: timezone})
-	}
-	if onNull != nil {
-		d = append(d, bson.E{Key: "onNull", Value: onNull})
-	}
-	b.d = append(b.d, bson.E{Key: types.AggregationDateToString, Value: d})
 	return b
 }
 

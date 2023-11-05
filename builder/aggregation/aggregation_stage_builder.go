@@ -83,15 +83,15 @@ func (b *StageBuilder) SetForMap(keyValues map[string]any) *StageBuilder {
 
 func (b *StageBuilder) Bucket(groupBy any, boundaries []any, opt *types.BucketOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: types.AggregationStageGroupBy, Value: groupBy},
-		bson.E{Key: types.AggregationStageBoundaries, Value: boundaries},
+		bson.E{Key: types.GroupBy, Value: groupBy},
+		bson.E{Key: types.Boundaries, Value: boundaries},
 	}
 	if opt != nil {
 		if opt.DefaultKey != nil {
-			d = append(d, bson.E{Key: types.AggregationStageDefault, Value: opt.DefaultKey})
+			d = append(d, bson.E{Key: types.Default, Value: opt.DefaultKey})
 		}
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: types.AggregationStageOutput, Value: opt.Output})
+			d = append(d, bson.E{Key: types.Output, Value: opt.Output})
 		}
 	}
 	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageBucket, Value: d}})
@@ -100,15 +100,15 @@ func (b *StageBuilder) Bucket(groupBy any, boundaries []any, opt *types.BucketOp
 
 func (b *StageBuilder) BucketAuto(groupBy any, buckets int, opt *types.BucketAutoOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: types.AggregationStageGroupBy, Value: groupBy},
-		bson.E{Key: types.AggregationStageBuckets, Value: buckets},
+		bson.E{Key: types.GroupBy, Value: groupBy},
+		bson.E{Key: types.Buckets, Value: buckets},
 	}
 	if opt != nil {
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: types.AggregationStageOutput, Value: opt.Output})
+			d = append(d, bson.E{Key: types.Output, Value: opt.Output})
 		}
 		if opt.Granularity != "" {
-			d = append(d, bson.E{Key: types.AggregationStageGranularity, Value: opt.Granularity})
+			d = append(d, bson.E{Key: types.Granularity, Value: opt.Granularity})
 		}
 	}
 	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageBucketAuto, Value: d}})
