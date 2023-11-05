@@ -17,6 +17,8 @@ package finder
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -43,8 +45,23 @@ type Finder[T any] struct {
 	filter      bson.D
 }
 
-func (f *Finder[T]) Filter(d bson.D) *Finder[T] {
-	f.filter = d
+// Filter is used to set the filter of the query
+// filter can be bson.D, map[string]any, struct, *struct
+// if the filter is a illegal type, it will be set to nil
+func (f *Finder[T]) Filter(filter any) *Finder[T] {
+	f.filter = converter.ToBson(filter)
+	return f
+}
+
+// FilterKV is used to set the filter of the query
+// bsonElements is key-value pairs, the key must be string
+// if the key is not string, it will be ignored
+// the format of bsonElements is: key1, value1, key2, value2, ...
+func (f *Finder[T]) FilterKV(bsonElements ...any) *Finder[T] {
+	length := len(bsonElements)
+	if length > 0 && length%2 == 0 {
+		f.filter = query.BsonBuilder().Add(bsonElements).Build()
+	}
 	return f
 }
 
