@@ -18,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -258,6 +260,69 @@ func Test_dateBuilder_WeekWithTimezone(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.expected, BsonBuilder().WeekWithTimezone(tc.date, tc.timezone).Build())
+		})
+	}
+}
+
+func Test_dateBuilder_DateToString(t *testing.T) {
+	testCases := []struct {
+		name     string
+		date     time.Time
+		opt      *types.DateToStringOptions
+		expected bson.D
+	}{
+		{
+			name:     "nil opt",
+			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
+			opt:      nil,
+			expected: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
+		},
+		{
+			name: "empty format",
+			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
+			opt: &types.DateToStringOptions{
+				Format:   "",
+				Timezone: "Asia/Shanghai",
+				OnNull:   nil,
+			},
+			expected: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
+				bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
+		},
+		{
+			name: "empty timezone",
+			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
+			opt: &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "",
+				OnNull:   nil,
+			},
+			expected: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
+				bson.E{Key: "format", Value: "%Y-%m-%d"}}}},
+		},
+		{
+			name: "nil onNull",
+			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
+			opt: &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "Asia/Shanghai",
+				OnNull:   nil,
+			},
+			expected: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
+		},
+		{
+			name: "normal",
+			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
+			opt: &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "Asia/Shanghai",
+				OnNull:   "null",
+			},
+			expected: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}, bson.E{Key: "onNull", Value: "null"}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, BsonBuilder().DateToString(tc.date, tc.opt).Build())
 		})
 	}
 }

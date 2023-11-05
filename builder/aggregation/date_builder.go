@@ -27,14 +27,16 @@ type dateBuilder struct {
 
 func (b *dateBuilder) DateToString(date any, opt *types.DateToStringOptions) *Builder {
 	d := bson.D{bson.E{Key: types.Date, Value: date}}
-	if opt.Format != "" {
-		d = append(d, bson.E{Key: types.Format, Value: opt.Format})
-	}
-	if opt.Timezone != "" {
-		d = append(d, bson.E{Key: types.Timezone, Value: opt.Timezone})
-	}
-	if opt.OnNull != nil {
-		d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
+	if opt != nil {
+		if opt.Format != "" {
+			d = append(d, bson.E{Key: types.Format, Value: opt.Format})
+		}
+		if opt.Timezone != "" {
+			d = append(d, bson.E{Key: types.Timezone, Value: opt.Timezone})
+		}
+		if opt.OnNull != nil {
+			d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
+		}
 	}
 	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationDateToString, Value: d})
 	return b.parent

@@ -41,6 +41,15 @@ func TestStageBuilder_AddFields(t *testing.T) {
 			want:      mongo.Pipeline{},
 		},
 		{
+			name: "key contains non-string",
+			keyValues: []any{
+				1, "totalHomework",
+			},
+			want: mongo.Pipeline{
+				bson.D{bson.E{Key: "$addFields", Value: bson.D{}}},
+			},
+		},
+		{
 			name:      "even keyValues",
 			keyValues: []any{"totalHomework", BsonBuilder().Sum("$homework").Build(), "totalQuiz", BsonBuilder().Sum("$quiz").Build()},
 			want: mongo.Pipeline{
@@ -110,6 +119,15 @@ func TestStageBuilder_Set(t *testing.T) {
 			name:      "odd keyValues",
 			keyValues: []any{"totalHomework", BsonBuilder().Sum("$homework").Build(), "totalQuiz"},
 			want:      mongo.Pipeline{},
+		},
+		{
+			name: "key contains non-string",
+			keyValues: []any{
+				1, "totalHomework",
+			},
+			want: mongo.Pipeline{
+				bson.D{bson.E{Key: "$set", Value: bson.D{}}},
+			},
 		},
 		{
 			name:      "even keyValues",
@@ -415,6 +433,28 @@ func TestStageBuilder_Group(t *testing.T) {
 			},
 		},
 		{
+			name: "accumulators key contains non-string",
+			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
+				Format:   "%Y-%m-%d",
+				Timezone: "",
+				OnNull:   nil,
+			}).Build(),
+			accumulators: []any{
+				"totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build(),
+				"averageQuantity", BsonBuilder().Avg("$quantity").Build(),
+				"count", BsonBuilder().Sum(1).Build(),
+				1, "count",
+			},
+			want: mongo.Pipeline{
+				bson.D{bson.E{Key: "$group", Value: bson.D{
+					bson.E{Key: "_id", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: "$date"}, bson.E{Key: "format", Value: "%Y-%m-%d"}}}}},
+					bson.E{Key: "totalSaleAmount", Value: bson.D{bson.E{Key: "$sum", Value: bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}}},
+					bson.E{Key: "averageQuantity", Value: bson.D{bson.E{Key: "$avg", Value: "$quantity"}}},
+					bson.E{Key: "count", Value: bson.D{bson.E{Key: "$sum", Value: 1}}},
+				}}},
+			},
+		},
+		{
 			name: "id and accumulators are not nil",
 			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
 				Format:   "%Y-%m-%d",
@@ -511,6 +551,11 @@ func TestStageBuilder_Sort(t *testing.T) {
 			want:      mongo.Pipeline{},
 		},
 		{
+			name:      "key contains non-string",
+			keyValues: []any{1, "age"},
+			want:      mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: bson.D{}}}},
+		},
+		{
 			// { $sort : { name : 1, age: -1 } }
 			name:      "even",
 			keyValues: []any{"name", 1, "age", -1},
@@ -571,6 +616,11 @@ func TestStageBuilder_Project(t *testing.T) {
 			name:      "odd keyValues",
 			keyValues: []any{"_id", 0, "title", 1, "author"},
 			want:      mongo.Pipeline{},
+		},
+		{
+			name:      "key contains non-string",
+			keyValues: []any{1, "author"},
+			want:      mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: bson.D{}}}},
 		},
 		{
 			name:      "even keyValues",
@@ -737,6 +787,11 @@ func TestStageBuilder_Facet(t *testing.T) {
 			want:   mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{}}}},
 		},
 		{
+			name:   "key contains non-string",
+			facets: []any{1, "author"},
+			want:   mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{}}}},
+		},
+		{
 			// [
 			//  {
 			//    $facet: {
@@ -811,6 +866,68 @@ func TestStageBuilder_Facet(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, StageBsonBuilder().Facet(tc.facets...).Build())
+		})
+	}
+}
+
+func TestStageBuilder_FacetMap(t *testing.T) {
+	testCases := []struct {
+		name   string
+		facets map[string]any
+		want   mongo.Pipeline
+	}{
+		{
+			name:   "nil facets",
+			facets: nil,
+			want:   mongo.Pipeline{},
+		},
+		{
+			name:   "empty facets",
+			facets: map[string]any{},
+			want:   mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{}}}},
+		},
+		{
+			name: "not nil facets",
+			facets: map[string]any{
+				"categorizedByTags": StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build(),
+
+				"categorizedByPrice": StageBsonBuilder().Match(BsonBuilder().AddKeyValues("price", BsonBuilder().AddKeyValues("$exists", 1).Build()).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
+					DefaultKey: "Other",
+					Output:     BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build(), "titles", BsonBuilder().Push("$title").Build()).Build(),
+				}).Build(),
+
+				"categorizedByYears(Auto)": StageBsonBuilder().BucketAuto("$year", 4, nil).Build(),
+			},
+			want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
+				bson.E{Key: "categorizedByTags", Value: mongo.Pipeline{
+					bson.D{bson.E{Key: "$unwind", Value: "$tags"}},
+					bson.D{bson.E{Key: "$sortByCount", Value: "$tags"}},
+				}},
+				bson.E{Key: "categorizedByPrice", Value: mongo.Pipeline{
+					bson.D{bson.E{Key: "$match", Value: bson.D{bson.E{Key: "price", Value: bson.D{bson.E{Key: "$exists", Value: 1}}}}}},
+					bson.D{bson.E{Key: "$bucket", Value: bson.D{
+						bson.E{Key: "groupBy", Value: "$price"},
+						bson.E{Key: "boundaries", Value: []any{0, 150, 200, 300, 400}},
+						bson.E{Key: "default", Value: "Other"},
+						bson.E{Key: "output", Value: bson.D{
+							bson.E{Key: "count", Value: bson.D{bson.E{Key: "$sum", Value: 1}}},
+							bson.E{Key: "titles", Value: bson.D{bson.E{Key: "$push", Value: "$title"}}},
+						}},
+					},
+					}},
+				}},
+				bson.E{Key: "categorizedByYears(Auto)", Value: mongo.Pipeline{
+					bson.D{bson.E{Key: "$bucketAuto", Value: bson.D{
+						bson.E{Key: "groupBy", Value: "$year"},
+						bson.E{Key: "buckets", Value: 4},
+					}}},
+				}},
+			}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, StageBsonBuilder().FacetMap(tc.facets).Build())
 		})
 	}
 }

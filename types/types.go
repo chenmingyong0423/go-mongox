@@ -118,6 +118,10 @@ const (
 	AggregationCond             = "$cond"
 	AggregationIfNull           = "$ifNull"
 	AggregationSwitch           = "$switch"
+	AggregationFirst            = "$first"
+	AggregationLast             = "$last"
+	AggregationMin              = "$min"
+	AggregationMax              = "$max"
 )
 
 const (

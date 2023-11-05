@@ -29,6 +29,7 @@ func BsonBuilder() *Builder {
 	b.arrayBuilder = arrayBuilder{parent: b}
 	b.dateBuilder = dateBuilder{parent: b}
 	b.condBuilder = condBuilder{parent: b}
+	b.accumulatorsBuilder = accumulatorsBuilder{parent: b}
 
 	return b
 }
@@ -41,6 +42,7 @@ type Builder struct {
 	arrayBuilder
 	dateBuilder
 	condBuilder
+	accumulatorsBuilder
 
 	d bson.D
 }
@@ -62,32 +64,7 @@ func (b *Builder) AddKeyValues(keyValues ...any) *Builder {
 	return b
 }
 
-func (b *Builder) Sum(expression any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationSum, Value: expression})
-	return b
-}
-
-func (b *Builder) SumMany(expressions ...any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationSum, Value: expressions})
-	return b
-}
-
 func (b *Builder) Contact(expressions ...any) *Builder {
 	b.d = append(b.d, bson.E{Key: types.AggregationContact, Value: expressions})
-	return b
-}
-
-func (b *Builder) Push(expression any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationPush, Value: expression})
-	return b
-}
-
-func (b *Builder) Avg(expression any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationAvg, Value: expression})
-	return b
-}
-
-func (b *Builder) AvgMany(expressions ...any) *Builder {
-	b.d = append(b.d, bson.E{Key: types.AggregationAvg, Value: expressions})
 	return b
 }
