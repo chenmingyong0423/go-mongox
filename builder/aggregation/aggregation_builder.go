@@ -28,6 +28,7 @@ func BsonBuilder() *Builder {
 	b.stringBuilder = stringBuilder{parent: b}
 	b.arrayBuilder = arrayBuilder{parent: b}
 	b.dateBuilder = dateBuilder{parent: b}
+	b.condBuilder = condBuilder{parent: b}
 
 	return b
 }
@@ -39,6 +40,7 @@ type Builder struct {
 	stringBuilder
 	arrayBuilder
 	dateBuilder
+	condBuilder
 
 	d bson.D
 }

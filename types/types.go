@@ -115,6 +115,8 @@ const (
 	AggregationYear             = "$year"
 	AggregationMonth            = "$month"
 	AggregationWeek             = "$week"
+	AggregationCond             = "$cond"
+	AggregationIfNull           = "$ifNull"
 )
 
 const (
