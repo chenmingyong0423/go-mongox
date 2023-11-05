@@ -17,6 +17,8 @@ package converter
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
@@ -492,7 +494,7 @@ func TestMapToBson(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, MapToBson(tc.data))
+			assert.True(t, utils.EqualBSONDElements(tc.want, MapToBson(tc.data)))
 		})
 	}
 }
