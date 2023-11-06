@@ -17,6 +17,10 @@ package updater
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -41,9 +45,18 @@ type Updater[T any] struct {
 	opts       []*options.UpdateOptions
 }
 
-func (u *Updater[T]) Filter(filter bson.D) *Updater[T] {
-	u.filter = filter
-	return u
+// Filter is used to set the filter of the query
+// filter can be bson.D, map[string]any, struct, *struct
+// if the filter is a illegal type, it will be set to nil
+func (f *Updater[T]) Filter(filter any) *Updater[T] {
+	f.filter = converter.ToBson(filter)
+	return f
+}
+
+// FilterKeyValue is used to set the filter of the query
+func (f *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
+	f.filter = query.BsonBuilder().Add(bsonElements...).Build()
+	return f
 }
 
 func (u *Updater[T]) Updates(updates bson.D) *Updater[T] {
