@@ -17,6 +17,9 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -24,7 +27,7 @@ import (
 func TestBuilder_Add(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 
 		want bson.D
 	}{
@@ -33,18 +36,8 @@ func TestBuilder_Add(t *testing.T) {
 			want: bson.D{},
 		},
 		{
-			name:      "odd params",
-			keyValues: []any{"name", "cmy", "age"},
-			want:      bson.D{},
-		},
-		{
-			name:      "keys contain non-string",
-			keyValues: []any{"name", "cmy", 2, "age"},
-			want:      bson.D{bson.E{Key: "name", Value: "cmy"}},
-		},
-		{
 			name:      "normal params",
-			keyValues: []any{"name", "cmy", "age", 18, "scores", []int{100, 99, 98}},
+			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy"), converter.KeyValue("age", 18), converter.KeyValue("scores", []int{100, 99, 98})},
 			want:      bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}},
 		},
 	}

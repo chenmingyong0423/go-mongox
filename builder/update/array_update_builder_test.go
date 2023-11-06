@@ -181,12 +181,12 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 		},
 		{
 			name:      "keys contain non-string",
-			keyValues: []any{"scores", BsonBuilder().Add("$each", []int{90, 82, 85}).Build(), 1, "letters"},
+			keyValues: []any{"scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build(), 1, "letters"},
 			want:      bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}}}},
 		},
 		{
 			name:      "normal params",
-			keyValues: []any{"scores", BsonBuilder().Add("$each", []int{90, 82, 85}).Build(), "scores", 1},
+			keyValues: []any{"scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build(), "scores", 1},
 			want:      bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
 		},
 	}

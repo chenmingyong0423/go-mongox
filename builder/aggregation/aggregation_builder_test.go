@@ -17,6 +17,9 @@ package aggregation
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -24,7 +27,7 @@ import (
 func TestBuilder_AddKeyValues(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 		expected  bson.D
 	}{
 		{
@@ -33,23 +36,8 @@ func TestBuilder_AddKeyValues(t *testing.T) {
 			expected:  bson.D{},
 		},
 		{
-			name:      "empty keyValues",
-			keyValues: []any{},
-			expected:  bson.D{},
-		},
-		{
-			name:      "keyValues with odd length",
-			keyValues: []any{"a"},
-			expected:  bson.D{},
-		},
-		{
-			name:      "key contains non-string",
-			keyValues: []any{1, "a"},
-			expected:  bson.D{},
-		},
-		{
 			name:      "normal",
-			keyValues: []any{"name", "cmy"},
+			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy")},
 			expected:  bson.D{{Key: "name", Value: "cmy"}},
 		},
 	}

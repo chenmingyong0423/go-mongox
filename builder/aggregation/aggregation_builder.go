@@ -15,6 +15,7 @@
 package aggregation
 
 import (
+	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -50,14 +51,10 @@ func (b *Builder) Build() bson.D {
 	return b.d
 }
 
-func (b *Builder) AddKeyValues(keyValues ...any) *Builder {
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			b.d = append(b.d, bson.E{Key: key, Value: keyValues[i+1]})
+func (b *Builder) AddKeyValues(bsonElements ...types.KeyValue) *Builder {
+	if len(bsonElements) != 0 {
+		for _, element := range bsonElements {
+			b.d = append(b.d, bson.E{Key: element.Key, Value: element.Value})
 		}
 	}
 	return b
