@@ -12,6 +12,8 @@
 English | [中文简体](./README-zh_CN.md)
 
 # Introduction
+> The documentation was written for v0.0.1 and will be updated soon for v0.0.2
+
 The `go-mongox` framework has two cores, one core is the generics-based **collection** form, and the other core is the **builder** constructor.
 
 
@@ -20,7 +22,7 @@ The `go-mongox` framework has two cores, one core is the generics-based **collec
 
 # Install
 
-> go get github.com/chenmingyong0423/go-mongox@latest
+> go get github.com/chenmingyong0423/go-mongox@v0.0.1
 
 # Quick Start
 ```go
