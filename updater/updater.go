@@ -18,6 +18,8 @@ import (
 	"context"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/builder/update"
+
 	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/types"
 
@@ -48,19 +50,32 @@ type Updater[T any] struct {
 // Filter is used to set the filter of the query
 // filter can be bson.D, map[string]any, struct, *struct
 // if the filter is a illegal type, it will be set to nil
-func (f *Updater[T]) Filter(filter any) *Updater[T] {
-	f.filter = converter.ToBson(filter)
-	return f
+func (u *Updater[T]) Filter(filter any) *Updater[T] {
+	u.filter = converter.ToBson(filter)
+	return u
 }
 
 // FilterKeyValue is used to set the filter of the query
-func (f *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
-	f.filter = query.BsonBuilder().Add(bsonElements...).Build()
-	return f
+func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
+	u.filter = query.BsonBuilder().Add(bsonElements...).Build()
+	return u
 }
 
-func (u *Updater[T]) Updates(updates bson.D) *Updater[T] {
-	u.updates = updates
+// Updates is used to set the updates of the update
+// updates can be bson.D, map[string]any, struct, *struct
+// if the updates is a illegal type, it will be set to nil
+func (u *Updater[T]) Updates(updates any) *Updater[T] {
+	u.updates = converter.ToSetBson(updates)
+	return u
+}
+
+// UpdatesKeyValue is used to set the updates of the update
+func (u *Updater[T]) UpdatesKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
+	if len(bsonElements) != 0 {
+		u.updates = bson.D{bson.E{Key: types.Set, Value: update.BsonBuilder().Add(bsonElements...).Build()}}
+	} else {
+		u.updates = nil
+	}
 	return u
 }
 

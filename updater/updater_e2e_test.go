@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -147,8 +149,8 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx     context.Context
-		filter  bson.D
-		updates bson.D
+		filter  []types.KeyValue
+		updates []types.KeyValue
 		opts    *options.UpdateOptions
 
 		want    *mongo.UpdateResult
@@ -180,8 +182,8 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().Set("name", "cmy").Build(),
+			filter:  []types.KeyValue{converter.KeyValue("_id", "456")},
+			updates: []types.KeyValue{converter.KeyValue("name", "cmy")},
 			opts:    options.Update().SetUpsert(true),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -192,7 +194,7 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateOneWithOptions(tc.ctx, tc.opts)
+			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.updates...).UpdateOneWithOptions(tc.ctx, tc.opts)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
