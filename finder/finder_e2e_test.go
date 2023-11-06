@@ -264,7 +264,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Id("123").Build())
+				return finder.FilterKeyValue(converter.KeyValue("_id", "123"))
 			},
 			opts: []*options.FindOneOptions{
 				{

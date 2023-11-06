@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -134,7 +136,7 @@ func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter bson.D
+		filter []types.KeyValue
 		opts   []*options.DeleteOptions
 
 		ctx       context.Context
@@ -162,7 +164,7 @@ func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("456").Build(),
+			filter: []types.KeyValue{converter.KeyValue("_id", "456")},
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			ctx:    context.Background(),
 			want: &mongo.DeleteResult{
@@ -182,7 +184,7 @@ func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("123").Build(),
+			filter: []types.KeyValue{converter.KeyValue("_id", "123")},
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			ctx:    context.Background(),
 			want: &mongo.DeleteResult{
@@ -194,7 +196,7 @@ func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteOneWithOptions(tc.ctx, tc.opts)
+			result, err := deleter.FilterKeyValue(tc.filter...).DeleteOneWithOptions(tc.ctx, tc.opts)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)

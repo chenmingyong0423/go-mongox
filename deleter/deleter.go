@@ -54,7 +54,11 @@ func (f *Deleter[T]) Filter(filter any) *Deleter[T] {
 
 // FilterKeyValue is used to set the filter of the query
 func (f *Deleter[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Deleter[T] {
-	f.filter = query.BsonBuilder().Add(bsonElements...).Build()
+	if bsonElements == nil {
+		f.filter = nil
+	} else {
+		f.filter = query.BsonBuilder().Add(bsonElements...).Build()
+	}
 	return f
 }
 
