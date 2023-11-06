@@ -12,6 +12,8 @@
 [English](./README.md) | 中文简体
 
 # 介绍
+> 该文档是针对 v0.0.1 版本而写的，v0.0.2 版本的文档很快就会更新
+
 `go-mongox` 框架有两个核心，一个核心是基于泛型的 **collection** 形态，另一个核心是 **builder** 构造器。
 
 - 通过 **collection** 对象，我们可以方便地进行相关的 MongoDB 操作，从而减少 bson 数据的编写，提高开发效率；
@@ -19,7 +21,7 @@
 
 # 安装
 
-> go get github.com/chenmingyong0423/go-mongox@latest
+> go get github.com/chenmingyong0423/go-mongox@v0.0.1
 
 # 快速开始
 ```go
