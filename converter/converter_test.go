@@ -498,3 +498,7 @@ func TestMapToBson(t *testing.T) {
 		})
 	}
 }
+
+func TestKeyValue(t *testing.T) {
+	assert.Equal(t, types.KeyValue{Key: "name", Value: "cmy"}, KeyValue("name", "cmy"))
+}
