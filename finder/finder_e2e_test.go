@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-////go:build e2e
+//go:build e2e
 
 package finder
 
@@ -216,7 +216,7 @@ func TestFinder_e2e_One(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			user, err := finder.Filter(tc.filter).FindOneOptions(tc.opts).FindOne(tc.ctx)
+			user, err := finder.Filter(tc.filter).FindOneOptions(tc.opts...).FindOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
@@ -514,7 +514,7 @@ func TestFinder_e2e_All(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			users, err := finder.FilterKeyValue(tc.filter...).FindAllOptions(tc.opts).FindAll(tc.ctx)
+			users, err := finder.FilterKeyValue(tc.filter...).FindAllOptions(tc.opts...).FindAll(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
