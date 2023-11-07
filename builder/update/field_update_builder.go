@@ -53,17 +53,12 @@ func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetOnInsert(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) SetOnInsert(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			value = append(value, bson.E{Key: key, Value: keyValues[i+1]})
-		}
+	for _, element := range bsonElements {
+		value = append(value, bson.E{Key: element.Key, Value: element.Value})
 	}
+
 	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: value})
 	return b.parent
 }
@@ -75,19 +70,13 @@ func (b *fieldUpdateBuilder) SetOnInsertForMap(data map[string]any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) CurrentDate(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) CurrentDate(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			if v, ok := keyValues[i+1].(bool); ok {
-				value = append(value, bson.E{Key: key, Value: v})
-			} else {
-				value = append(value, bson.E{Key: key, Value: bson.M{types.Type: keyValues[i+1]}})
-			}
+	for _, element := range bsonElements {
+		if v, ok := element.Value.(bool); ok {
+			value = append(value, bson.E{Key: element.Key, Value: v})
+		} else {
+			value = append(value, bson.E{Key: element.Key, Value: bson.M{types.Type: element.Value}})
 		}
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: value})
@@ -109,17 +98,11 @@ func (b *fieldUpdateBuilder) CurrentDateForMap(data map[string]any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Inc(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) Inc(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			if val, ok := keyValues[i+1].(int); ok {
-				value = append(value, bson.E{Key: key, Value: val})
-			}
+	for _, element := range bsonElements {
+		if val, ok := element.Value.(int); ok {
+			value = append(value, bson.E{Key: element.Key, Value: val})
 		}
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: value})
@@ -137,16 +120,10 @@ func (b *fieldUpdateBuilder) IncForMap(data map[string]int) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Min(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) Min(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			value = append(value, bson.E{Key: key, Value: keyValues[i+1]})
-		}
+	for _, element := range bsonElements {
+		value = append(value, bson.E{Key: element.Key, Value: element.Value})
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: value})
 	return b.parent
@@ -159,16 +136,10 @@ func (b *fieldUpdateBuilder) MinForMap(data map[string]any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Max(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) Max(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			value = append(value, bson.E{Key: key, Value: keyValues[i+1]})
-		}
+	for _, element := range bsonElements {
+		value = append(value, bson.E{Key: element.Key, Value: element.Value})
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: value})
 	return b.parent
@@ -181,18 +152,12 @@ func (b *fieldUpdateBuilder) MaxForMap(data map[string]any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Mul(keyValues ...any) *Builder {
+func (b *fieldUpdateBuilder) Mul(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			v := keyValues[i+1]
-			if utils.IsNumeric(v) {
-				value = append(value, bson.E{Key: key, Value: v})
-			}
+	for _, element := range bsonElements {
+		v := element.Value
+		if utils.IsNumeric(v) {
+			value = append(value, bson.E{Key: element.Key, Value: v})
 		}
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: value})

@@ -24,16 +24,10 @@ type arrayUpdateBuilder struct {
 	parent *Builder
 }
 
-func (b *arrayUpdateBuilder) AddToSet(keyValues ...any) *Builder {
+func (b *arrayUpdateBuilder) AddToSet(bsonElements ...types.KeyValue) *Builder {
 	d := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			d = append(d, bson.E{Key: key, Value: keyValues[i+1]})
-		}
+	for _, element := range bsonElements {
+		d = append(d, bson.E{Key: element.Key, Value: element.Value})
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.AddToSet, Value: d})
 	return b.parent
@@ -46,17 +40,11 @@ func (b *arrayUpdateBuilder) AddToSetForMap(keyValues map[string]any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Pop(keyValues ...any) *Builder {
+func (b *arrayUpdateBuilder) Pop(bsonElements ...types.KeyValue) *Builder {
 	d := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			if v, ok := keyValues[i+1].(int); ok {
-				d = append(d, bson.E{Key: key, Value: v})
-			}
+	for _, element := range bsonElements {
+		if v, ok := element.Value.(int); ok {
+			d = append(d, bson.E{Key: element.Key, Value: v})
 		}
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Pop, Value: d})
@@ -79,16 +67,10 @@ func (b *arrayUpdateBuilder) Pull(d bson.D) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Push(keyValues ...any) *Builder {
+func (b *arrayUpdateBuilder) Push(bsonElements ...types.KeyValue) *Builder {
 	d := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			d = append(d, bson.E{Key: key, Value: keyValues[i+1]})
-		}
+	for _, element := range bsonElements {
+		d = append(d, bson.E{Key: element.Key, Value: element.Value})
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Push, Value: d})
 	return b.parent
@@ -247,17 +229,11 @@ func (b *arrayUpdateBuilder) Slice(slice int) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Sort(keyValues ...any) *Builder {
+func (b *arrayUpdateBuilder) Sort(bsonElements ...types.KeyValue) *Builder {
 	d := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			key, ok := keyValues[i].(string)
-			if !ok {
-				continue
-			}
-			if v, ok := keyValues[i+1].(int); ok {
-				d = append(d, bson.E{Key: key, Value: v})
-			}
+	for _, element := range bsonElements {
+		if v, ok := element.Value.(int); ok {
+			d = append(d, bson.E{Key: element.Key, Value: v})
 		}
 	}
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: d})

@@ -17,6 +17,8 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/chenmingyong0423/go-mongox/converter"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
@@ -30,7 +32,7 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 
 		want bson.D
 	}{
@@ -38,19 +40,10 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 			name: "zero params",
 			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
 		},
-		{
-			name:      "odd params",
-			keyValues: []any{"colors", "mauve", "letters"},
-			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
-		},
-		{
-			name:      "keys contain non-string",
-			keyValues: []any{"colors", "mauve", 2, "letters"},
-			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}}}},
-		},
+
 		{
 			name:      "normal params",
-			keyValues: []any{"colors", "mauve", "letters", []string{"a", "b", "c"}},
+			keyValues: []types.KeyValue{converter.KeyValue("colors", "mauve"), converter.KeyValue("letters", []string{"a", "b", "c"})},
 			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 	}
@@ -93,7 +86,7 @@ func Test_arrayUpdateBuilder_AddToSetForMap(t *testing.T) {
 func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 		want      bson.D
 	}{
 		{
@@ -101,23 +94,13 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 			want: bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
 		},
 		{
-			name:      "odd params",
-			keyValues: []any{"scores", -1, "letters"},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
-		},
-		{
-			name:      "keys contain non-string",
-			keyValues: []any{"scores", 1, 1, "letters"},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}}}},
-		},
-		{
 			name:      "value contain non-int",
-			keyValues: []any{"scores", 1, "letters", "1"},
+			keyValues: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", "1")},
 			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}}}},
 		},
 		{
 			name:      "normal params",
-			keyValues: []any{"scores", 1, "letters", -1},
+			keyValues: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", -1)},
 			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 	}
@@ -167,7 +150,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 		want      bson.D
 	}{
 		{
@@ -175,18 +158,8 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 			want: bson.D{bson.E{Key: "$push", Value: bson.D{}}},
 		},
 		{
-			name:      "odd params",
-			keyValues: []any{"scores", 1, "letters"},
-			want:      bson.D{bson.E{Key: "$push", Value: bson.D{}}},
-		},
-		{
-			name:      "keys contain non-string",
-			keyValues: []any{"scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build(), 1, "letters"},
-			want:      bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}}}},
-		},
-		{
 			name:      "normal params",
-			keyValues: []any{"scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build(), "scores", 1},
+			keyValues: []types.KeyValue{converter.KeyValue("scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build()), converter.KeyValue("scores", 1)},
 			want:      bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
 		},
 	}
@@ -1202,7 +1175,7 @@ func Test_arrayUpdateBuilder_Slice(t *testing.T) {
 func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 
 		want bson.D
 	}{
@@ -1211,18 +1184,13 @@ func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 			want: bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
 		},
 		{
-			name:      "key contains non-string",
-			keyValues: []any{"score", -1, 1, "name"},
-			want:      bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}}}},
-		},
-		{
 			name:      "values contains non-int",
-			keyValues: []any{"score", -1, "name", "1"},
+			keyValues: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", "1")},
 			want:      bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}}}},
 		},
 		{
 			name:      "normal keyValues",
-			keyValues: []any{"score", -1, "name", 1},
+			keyValues: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", 1)},
 			want:      bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 	}

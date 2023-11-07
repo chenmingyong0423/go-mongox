@@ -18,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/converter"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -98,7 +100,7 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		keyValues []any
+		keyValues []types.KeyValue
 		want      bson.D
 	}{
 		{
@@ -106,19 +108,11 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 			want: bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{}}},
 		},
 		{
-			name:      "odd params",
-			keyValues: []any{"name", "cmy", "age"},
-			want:      bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{}}},
-		},
-		{
-			name:      "keys contain non-string",
-			keyValues: []any{24, "age", "name", "cmy"},
-			want:      bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}},
-		},
-		{
-			name:      "normal params",
-			keyValues: []any{"name", "cmy", "age", 24},
-			want:      bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
+			name: "normal params",
+			keyValues: []types.KeyValue{
+				converter.KeyValue("name", "cmy"),
+				converter.KeyValue("age", 24)},
+			want: bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -160,7 +154,7 @@ func Test_fieldUpdateBuilder_SetOnInsertForMap(t *testing.T) {
 func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	testCases := []struct {
 		name string
-		data []any
+		data []types.KeyValue
 
 		want bson.D
 	}{
@@ -168,19 +162,10 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 			name: "zero params",
 			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
 		},
-		{
-			name: "odd params",
-			data: []any{"lastModified", true, "cancellation.date"},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
-		},
-		{
-			name: "keys contain non-string",
-			data: []any{true, "lastModified", "cancellation.date", "timestamp"},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
-		},
+
 		{
 			name: "normal params",
-			data: []any{"lastModified", true, "cancellation.date", "timestamp"},
+			data: []types.KeyValue{converter.KeyValue("lastModified", true), converter.KeyValue("cancellation.date", "timestamp")},
 			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
 		},
 	}
@@ -223,7 +208,7 @@ func Test_fieldUpdateBuilder_CurrentDateForMap(t *testing.T) {
 func Test_fieldUpdateBuilder_Inc(t *testing.T) {
 	testCases := []struct {
 		name string
-		data []any
+		data []types.KeyValue
 
 		want bson.D
 	}{
@@ -232,23 +217,13 @@ func Test_fieldUpdateBuilder_Inc(t *testing.T) {
 			want: bson.D{bson.E{Key: "$inc", Value: bson.D{}}},
 		},
 		{
-			name: "odd params",
-			data: []any{"read", 1, "likes"},
-			want: bson.D{bson.E{Key: "$inc", Value: bson.D{}}},
-		},
-		{
-			name: "keys contain non-string",
-			data: []any{1, "read", "likes", 1},
-			want: bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "likes", Value: 1}}}},
-		},
-		{
 			name: "values contain non-int",
-			data: []any{"read", 1, "likes", 1.1, "comments", "1"},
+			data: []types.KeyValue{converter.KeyValue("read", 1), converter.KeyValue("likes", 1.1), converter.KeyValue("comments", "1")},
 			want: bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "read", Value: 1}}}},
 		},
 		{
 			name: "normal params",
-			data: []any{"read", 1, "likes", 1, "comments", 1, "score", -1},
+			data: []types.KeyValue{converter.KeyValue("read", 1), converter.KeyValue("likes", 1), converter.KeyValue("comments", 1), converter.KeyValue("score", -1)},
 			want: bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "read", Value: 1}, bson.E{Key: "likes", Value: 1}, bson.E{Key: "comments", Value: 1}, bson.E{Key: "score", Value: -1}}}},
 		},
 	}
@@ -291,7 +266,7 @@ func Test_fieldUpdateBuilder_IncForMap(t *testing.T) {
 func Test_fieldUpdateBuilder_Min(t *testing.T) {
 	testCases := []struct {
 		name string
-		data []any
+		data []types.KeyValue
 
 		want bson.D
 	}{
@@ -300,18 +275,8 @@ func Test_fieldUpdateBuilder_Min(t *testing.T) {
 			want: bson.D{bson.E{Key: "$min", Value: bson.D{}}},
 		},
 		{
-			name: "odd params",
-			data: []any{"stock", 50, "ordered"},
-			want: bson.D{bson.E{Key: "$min", Value: bson.D{}}},
-		},
-		{
-			name: "keys contain non-string",
-			data: []any{50, "stock", "ordered", 100},
-			want: bson.D{bson.E{Key: "$min", Value: bson.D{bson.E{Key: "ordered", Value: 100}}}},
-		},
-		{
 			name: "normal params",
-			data: []any{"stock", 50, "score", -50, "dateExpired", time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC)},
+			data: []types.KeyValue{converter.KeyValue("stock", 50), converter.KeyValue("score", -50), converter.KeyValue("dateExpired", time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC))},
 			want: bson.D{bson.E{Key: "$min", Value: bson.D{bson.E{Key: "stock", Value: 50}, bson.E{Key: "score", Value: -50}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC)}}}},
 		},
 	}
@@ -354,7 +319,7 @@ func Test_fieldUpdateBuilder_MinForMap(t *testing.T) {
 func Test_fieldUpdateBuilder_Max(t *testing.T) {
 	testCases := []struct {
 		name string
-		data []any
+		data []types.KeyValue
 
 		want bson.D
 	}{
@@ -362,19 +327,10 @@ func Test_fieldUpdateBuilder_Max(t *testing.T) {
 			name: "zero params",
 			want: bson.D{bson.E{Key: "$max", Value: bson.D{}}},
 		},
-		{
-			name: "odd params",
-			data: []any{"stock", 100, "ordered"},
-			want: bson.D{bson.E{Key: "$max", Value: bson.D{}}},
-		},
-		{
-			name: "keys contain non-string",
-			data: []any{100, "stock", "ordered", 50},
-			want: bson.D{bson.E{Key: "$max", Value: bson.D{bson.E{Key: "ordered", Value: 50}}}},
-		},
+
 		{
 			name: "normal params",
-			data: []any{"stock", 100, "dateExpired", time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC), "score", -50},
+			data: []types.KeyValue{converter.KeyValue("stock", 100), converter.KeyValue("dateExpired", time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC)), converter.KeyValue("score", -50)},
 			want: bson.D{bson.E{Key: "$max", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 29, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "score", Value: -50}}}},
 		},
 	}
@@ -417,7 +373,7 @@ func Test_fieldUpdateBuilder_MaxForMap(t *testing.T) {
 func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 	testCases := []struct {
 		name string
-		data []any
+		data []types.KeyValue
 
 		want bson.D
 	}{
@@ -426,23 +382,13 @@ func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 			want: bson.D{bson.E{Key: "$mul", Value: bson.D{}}},
 		},
 		{
-			name: "odd params",
-			data: []any{"price", 1.25, "qty"},
-			want: bson.D{bson.E{Key: "$mul", Value: bson.D{}}},
-		},
-		{
-			name: "keys contain non-string",
-			data: []any{1.25, "price", "qty", 2},
-			want: bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "qty", Value: 2}}}},
-		},
-		{
 			name: "values contain non-number",
-			data: []any{"price", 1.25, "qty", "2.5"},
+			data: []types.KeyValue{converter.KeyValue("price", 1.25), converter.KeyValue("qty", "2.5")},
 			want: bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}}}},
 		},
 		{
 			name: "normal params",
-			data: []any{"price", 1.25, "qty", 2, "score", -1, "n", -1.1},
+			data: []types.KeyValue{converter.KeyValue("price", 1.25), converter.KeyValue("qty", 2), converter.KeyValue("score", -1), converter.KeyValue("n", -1.1)},
 			want: bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
 		},
 	}
