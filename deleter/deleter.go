@@ -29,9 +29,7 @@ import (
 //go:generate mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
 type iDeleter[T any] interface {
 	DeleteOne(ctx context.Context) (*mongo.DeleteResult, error)
-	DeleteOneWithOptions(ctx context.Context, opts []*options.DeleteOptions) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context) (*mongo.DeleteResult, error)
-	DeleteManyWithOptions(ctx context.Context, opts []*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
 
 func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
@@ -66,16 +64,11 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context) (*mongo.DeleteResult, error)
 	return d.collection.DeleteOne(ctx, d.filter, d.opts...)
 }
 
-func (d *Deleter[T]) DeleteOneWithOptions(ctx context.Context, opts []*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (d *Deleter[T]) DeleteOptions(opts ...*options.DeleteOptions) *Deleter[T] {
 	d.opts = opts
-	return d.DeleteOne(ctx)
+	return d
 }
 
 func (d *Deleter[T]) DeleteMany(ctx context.Context) (*mongo.DeleteResult, error) {
 	return d.collection.DeleteMany(ctx, d.filter, d.opts...)
-}
-
-func (d *Deleter[T]) DeleteManyWithOptions(ctx context.Context, opts []*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	d.opts = opts
-	return d.DeleteMany(ctx)
 }

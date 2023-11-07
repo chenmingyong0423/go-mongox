@@ -24,7 +24,6 @@ import (
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/mock/gomock"
 )
 
@@ -101,62 +100,6 @@ func TestDeleter_DeleteOne(t *testing.T) {
 
 }
 
-func TestDeleter_DeleteOneWithOptions(t *testing.T) {
-	testCases := []struct {
-		name string
-
-		mock func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser]
-		ctx  context.Context
-		opts []*options.DeleteOptions
-
-		want    *mongo.DeleteResult
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "error: nil filter",
-			mock: func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
-				mockCollection.EXPECT().DeleteOneWithOptions(ctx, opts).Return(nil, errors.New("nil filter")).Times(1)
-				return mockCollection
-			},
-			ctx:  context.Background(),
-			opts: nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Equal(t, errors.New("nil filter"), err)
-			},
-		},
-		{
-			name: "delete success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
-				mockCollection.EXPECT().DeleteOneWithOptions(ctx, opts).Return(&mongo.DeleteResult{DeletedCount: 1}, nil).Times(1)
-				return mockCollection
-			},
-			ctx: context.Background(),
-			opts: []*options.DeleteOptions{
-				options.Delete().SetComment("test"),
-			},
-			want: &mongo.DeleteResult{
-				DeletedCount: 1,
-			},
-			wantErr: assert.NoError,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-			deleter := tc.mock(tc.ctx, ctl, tc.opts)
-
-			got, err := deleter.DeleteOneWithOptions(tc.ctx, tc.opts)
-			if !tc.wantErr(t, err) {
-				return
-			}
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
 func TestDeleter_DeleteMany(t *testing.T) {
 	testCases := []struct {
 		name string
@@ -213,62 +156,6 @@ func TestDeleter_DeleteMany(t *testing.T) {
 			deleter := tc.mock(tc.ctx, ctl)
 
 			got, err := deleter.DeleteMany(tc.ctx)
-			if !tc.wantErr(t, err) {
-				return
-			}
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestDeleter_DeleteManyWithOptions(t *testing.T) {
-	testCases := []struct {
-		name string
-
-		mock func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser]
-		ctx  context.Context
-		opts []*options.DeleteOptions
-
-		want    *mongo.DeleteResult
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "error: nil filter",
-			mock: func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
-				mockCollection.EXPECT().DeleteManyWithOptions(ctx, opts).Return(nil, errors.New("nil filter")).Times(1)
-				return mockCollection
-			},
-			ctx:  context.Background(),
-			opts: nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Equal(t, errors.New("nil filter"), err)
-			},
-		},
-		{
-			name: "delete success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, opts []*options.DeleteOptions) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
-				mockCollection.EXPECT().DeleteManyWithOptions(ctx, opts).Return(&mongo.DeleteResult{DeletedCount: 2}, nil).Times(1)
-				return mockCollection
-			},
-			ctx: context.Background(),
-			opts: []*options.DeleteOptions{
-				options.Delete().SetComment("test"),
-			},
-			want: &mongo.DeleteResult{
-				DeletedCount: 2,
-			},
-			wantErr: assert.NoError,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-			deleter := tc.mock(tc.ctx, ctl, tc.opts)
-
-			got, err := deleter.DeleteManyWithOptions(tc.ctx, tc.opts)
 			if !tc.wantErr(t, err) {
 				return
 			}

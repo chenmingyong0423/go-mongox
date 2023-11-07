@@ -20,8 +20,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
-
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -62,6 +60,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter bson.D
+		opts   []*options.DeleteOptions
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
@@ -73,6 +72,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:  func(_ context.Context, _ *testing.T) {},
 			filter: nil,
 			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want:   nil,
 			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -92,6 +92,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.BsonBuilder().Id("456").Build(),
 			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 			},
@@ -111,6 +112,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.BsonBuilder().Id("123").Build(),
 			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 1,
 			},
@@ -120,83 +122,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteOne(tc.ctx)
-			tc.after(tc.ctx, t)
-			tc.wantError(t, err)
-			assert.Equal(t, tc.want, result)
-		})
-	}
-}
-
-func TestDeleter_e2e_DeleteOneWithOptions(t *testing.T) {
-	collection := newCollection(t)
-	deleter := NewDeleter[types.TestUser](collection)
-	testCases := []struct {
-		name   string
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		filter []types.KeyValue
-		opts   []*options.DeleteOptions
-
-		ctx       context.Context
-		want      *mongo.DeleteResult
-		wantError assert.ErrorAssertionFunc
-	}{
-		{
-			name:      "error: nil filter",
-			before:    func(_ context.Context, _ *testing.T) {},
-			after:     func(_ context.Context, _ *testing.T) {},
-			filter:    nil,
-			ctx:       context.Background(),
-			want:      nil,
-			wantError: assert.Error,
-		},
-		{
-			name: "deleted count: 0",
-			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy"})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", insertResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
-			filter: []types.KeyValue{converter.KeyValue("_id", "456")},
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			ctx:    context.Background(),
-			want: &mongo.DeleteResult{
-				DeletedCount: 0,
-			},
-			wantError: assert.NoError,
-		},
-		{
-			name: "delete success",
-			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy"})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", insertResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), deleteResult.DeletedCount)
-			},
-			filter: []types.KeyValue{converter.KeyValue("_id", "123")},
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			ctx:    context.Background(),
-			want: &mongo.DeleteResult{
-				DeletedCount: 1,
-			},
-			wantError: assert.NoError,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			result, err := deleter.FilterKeyValue(tc.filter...).DeleteOneWithOptions(tc.ctx, tc.opts)
+			result, err := deleter.Filter(tc.filter).DeleteOptions(tc.opts...).DeleteOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)
@@ -212,88 +138,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter bson.D
-
-		ctx       context.Context
-		want      *mongo.DeleteResult
-		wantError assert.ErrorAssertionFunc
-	}{
-		{
-			name:   "error: nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-			filter: nil,
-			ctx:    context.Background(),
-			want:   nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
-			},
-		},
-		{
-			name: "deleted count: 0",
-			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
-					{Id: "123", Name: "cmy"},
-					{Id: "456", Name: "cmy"},
-				}...))
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
-			},
-			filter: query.BsonBuilder().Id("789").Build(),
-			ctx:    context.Background(),
-			want: &mongo.DeleteResult{
-				DeletedCount: 0,
-			},
-			wantError: assert.NoError,
-		},
-		{
-			name: "delete success",
-			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
-					{Id: "123", Name: "cmy"},
-					{Id: "456", Name: "cmy"},
-				}...))
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), deleteResult.DeletedCount)
-			},
-			filter: query.BsonBuilder().Eq("name", "cmy").Build(),
-			ctx:    context.Background(),
-			want: &mongo.DeleteResult{
-				DeletedCount: 2,
-			},
-			wantError: assert.NoError,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteMany(tc.ctx)
-			tc.after(tc.ctx, t)
-			tc.wantError(t, err)
-			assert.Equal(t, tc.want, result)
-		})
-	}
-}
-
-func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
-	collection := newCollection(t)
-	deleter := NewDeleter[types.TestUser](collection)
-	testCases := []struct {
-		name   string
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		filter bson.D
+		filter []types.KeyValue
 		opts   []*options.DeleteOptions
 
 		ctx       context.Context
@@ -306,6 +151,7 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 			after:  func(_ context.Context, _ *testing.T) {},
 			filter: nil,
 			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want:   nil,
 			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -326,9 +172,11 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("789").Build(),
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			ctx:    context.Background(),
+			filter: []types.KeyValue{
+				{Key: "_id", Value: "789"},
+			},
+			ctx:  context.Background(),
+			opts: []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 			},
@@ -349,9 +197,11 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Eq("name", "cmy").Build(),
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			ctx:    context.Background(),
+			filter: []types.KeyValue{
+				{Key: "name", Value: "cmy"},
+			},
+			ctx:  context.Background(),
+			opts: []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 			},
@@ -361,7 +211,7 @@ func TestDeleter_e2e_DeleteManyWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteManyWithOptions(tc.ctx, tc.opts)
+			result, err := deleter.FilterKeyValue(tc.filter...).DeleteOptions(tc.opts...).DeleteMany(tc.ctx)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)
