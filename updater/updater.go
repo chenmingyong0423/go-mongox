@@ -31,9 +31,7 @@ import (
 //go:generate mockgen -source=updater.go -destination=../mock/updater.mock.go -package=mocks
 type iUpdater[T any] interface {
 	UpdateOne(ctx context.Context) (*mongo.UpdateResult, error)
-	UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context) (*mongo.UpdateResult, error)
-	UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 }
 
 func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
@@ -83,16 +81,11 @@ func (u *Updater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error)
 	return u.collection.UpdateOne(ctx, u.filter, u.updates, u.opts...)
 }
 
-func (u *Updater[T]) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateOptions(opts ...*options.UpdateOptions) *Updater[T] {
 	u.opts = opts
-	return u.UpdateOne(ctx)
+	return u
 }
 
 func (u *Updater[T]) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
 	return u.collection.UpdateMany(ctx, u.filter, u.updates, u.opts...)
-}
-
-func (u *Updater[T]) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	u.opts = opts
-	return u.UpdateMany(ctx)
 }

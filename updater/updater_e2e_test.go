@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+////go:build e2e
 
 package updater
 
@@ -67,6 +67,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		ctx     context.Context
 		filter  bson.D
 		updates bson.D
+		opts    []*options.UpdateOptions
 
 		want    *mongo.UpdateResult
 		wantErr assert.ErrorAssertionFunc
@@ -123,52 +124,6 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				return assert.NoError(t, err)
 			},
 		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateOne(tc.ctx)
-			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
-			}
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
-	collection := getCollection(t)
-	updater := NewUpdater[any](collection)
-	assert.NotNil(t, updater)
-
-	testCases := []struct {
-		name string
-
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		ctx     context.Context
-		filter  []types.KeyValue
-		updates []types.KeyValue
-		opts    *options.UpdateOptions
-
-		want    *mongo.UpdateResult
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name:    "failed to update one",
-			before:  func(ctx context.Context, t *testing.T) {},
-			after:   func(ctx context.Context, t *testing.T) {},
-			ctx:     context.Background(),
-			filter:  nil,
-			updates: nil,
-			opts:    nil,
-			want:    nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
-			},
-		},
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
@@ -182,10 +137,12 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  []types.KeyValue{converter.KeyValue("_id", "456")},
-			updates: []types.KeyValue{converter.KeyValue("name", "cmy")},
-			opts:    options.Update().SetUpsert(true),
-			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
+			filter:  query.BsonBuilder().Id("456").Build(),
+			updates: update.BsonBuilder().Set("name", "cmy").Build(),
+			opts: []*options.UpdateOptions{
+				options.Update().SetUpsert(true),
+			},
+			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
 			},
@@ -194,7 +151,7 @@ func TestUpdater_e2e_UpdateOneWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.updates...).UpdateOneWithOptions(tc.ctx, tc.opts)
+			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateOptions(tc.opts...).UpdateOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -216,8 +173,9 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx     context.Context
-		filter  bson.D
-		updates bson.D
+		filter  []types.KeyValue
+		updates []types.KeyValue
+		opts    []*options.UpdateOptions
 
 		want    *mongo.UpdateResult
 		wantErr assert.ErrorAssertionFunc
@@ -250,8 +208,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().InString("_id", []string{"789", "000"}...).Build(),
-			updates: update.BsonBuilder().Set("name", "hhh").Build(),
+			filter:  []types.KeyValue{converter.KeyValue("_id", update.BsonBuilder().Add(converter.KeyValue("$in", []string{"789", "000"})).Build())},
+			updates: []types.KeyValue{converter.KeyValue("name", "cmy")},
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -273,59 +231,11 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().InString("_id", []string{"123", "456"}...).Build(),
-			updates: update.BsonBuilder().Set("name", "hhh").Build(),
+			filter:  []types.KeyValue{converter.KeyValue("_id", update.BsonBuilder().Add(converter.KeyValue("$in", []string{"123", "456"})).Build())},
+			updates: []types.KeyValue{converter.KeyValue("name", "hhh")},
 			want:    &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateMany(tc.ctx)
-			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
-			}
-			assert.Equal(t, tc.want, got)
-		})
-	}
-
-}
-
-func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
-	collection := getCollection(t)
-	updater := NewUpdater[any](collection)
-	assert.NotNil(t, updater)
-
-	testCases := []struct {
-		name string
-
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		ctx     context.Context
-		filter  bson.D
-		updates bson.D
-		opts    *options.UpdateOptions
-
-		want    *mongo.UpdateResult
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name:    "failed to update many",
-			before:  func(ctx context.Context, t *testing.T) {},
-			after:   func(ctx context.Context, t *testing.T) {},
-			ctx:     context.Background(),
-			filter:  nil,
-			updates: nil,
-			opts:    nil,
-			want:    nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
 			},
 		},
 		{
@@ -343,19 +253,22 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().Set("name", "cmy").Build(),
-			opts:    options.Update().SetUpsert(true),
-			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
+			filter:  []types.KeyValue{converter.KeyValue("_id", "456")},
+			updates: []types.KeyValue{converter.KeyValue("name", "cmy")},
+			opts: []*options.UpdateOptions{
+				options.Update().SetUpsert(true),
+			},
+			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "456"},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
 			},
 		},
 	}
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateManyWithOptions(tc.ctx, tc.opts)
+			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.updates...).UpdateOptions(tc.opts...).UpdateMany(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -363,4 +276,5 @@ func TestUpdater_e2e_UpdateManyWithOptions(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+
 }

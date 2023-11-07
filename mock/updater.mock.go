@@ -13,7 +13,6 @@ import (
 	reflect "reflect"
 
 	mongo "go.mongodb.org/mongo-driver/mongo"
-	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -55,26 +54,6 @@ func (mr *MockiUpdaterMockRecorder[T]) UpdateMany(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateMany), ctx)
 }
 
-// UpdateManyWithOptions mocks base method.
-func (m *MockiUpdater[T]) UpdateManyWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateManyWithOptions", varargs...)
-	ret0, _ := ret[0].(*mongo.UpdateResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateManyWithOptions indicates an expected call of UpdateManyWithOptions.
-func (mr *MockiUpdaterMockRecorder[T]) UpdateManyWithOptions(ctx any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateManyWithOptions", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateManyWithOptions), varargs...)
-}
-
 // UpdateOne mocks base method.
 func (m *MockiUpdater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
@@ -88,24 +67,4 @@ func (m *MockiUpdater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, e
 func (mr *MockiUpdaterMockRecorder[T]) UpdateOne(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOne), ctx)
-}
-
-// UpdateOneWithOptions mocks base method.
-func (m *MockiUpdater[T]) UpdateOneWithOptions(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateOneWithOptions", varargs...)
-	ret0, _ := ret[0].(*mongo.UpdateResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateOneWithOptions indicates an expected call of UpdateOneWithOptions.
-func (mr *MockiUpdaterMockRecorder[T]) UpdateOneWithOptions(ctx any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneWithOptions", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOneWithOptions), varargs...)
 }
