@@ -338,7 +338,7 @@ func TestFinder_e2e_All(t *testing.T) {
 			before: func(_ context.Context, _ *testing.T) {},
 			after:  func(_ context.Context, _ *testing.T) {},
 			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(nil)
+				return finder.FilterKeyValue()
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err == nil {

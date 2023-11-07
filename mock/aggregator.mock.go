@@ -13,7 +13,6 @@ import (
 	reflect "reflect"
 
 	types "github.com/chenmingyong0423/go-mongox/types"
-	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,59 +40,30 @@ func (m *MockiAggregator[T]) EXPECT() *MockiAggregatorMockRecorder[T] {
 }
 
 // Aggregation mocks base method.
-func (m *MockiAggregator[T]) Aggregation(ctx context.Context, pipeline any) ([]*T, error) {
+func (m *MockiAggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Aggregation", ctx, pipeline)
+	ret := m.ctrl.Call(m, "Aggregation", ctx)
 	ret0, _ := ret[0].([]*T)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Aggregation indicates an expected call of Aggregation.
-func (mr *MockiAggregatorMockRecorder[T]) Aggregation(ctx, pipeline any) *gomock.Call {
+func (mr *MockiAggregatorMockRecorder[T]) Aggregation(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregation", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregation), ctx, pipeline)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregation", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregation), ctx)
 }
 
 // AggregationWithCallback mocks base method.
-func (m *MockiAggregator[T]) AggregationWithCallback(ctx context.Context, pipeline any, handler types.ResultHandler) error {
+func (m *MockiAggregator[T]) AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AggregationWithCallback", ctx, pipeline, handler)
+	ret := m.ctrl.Call(m, "AggregationWithCallback", ctx, handler)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AggregationWithCallback indicates an expected call of AggregationWithCallback.
-func (mr *MockiAggregatorMockRecorder[T]) AggregationWithCallback(ctx, pipeline, handler any) *gomock.Call {
+func (mr *MockiAggregatorMockRecorder[T]) AggregationWithCallback(ctx, handler any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregationWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregationWithCallback), ctx, pipeline, handler)
-}
-
-// AggregationWithCallbackAndOptions mocks base method.
-func (m *MockiAggregator[T]) AggregationWithCallbackAndOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions, handler types.ResultHandler) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AggregationWithCallbackAndOptions", ctx, pipeline, aggregationOptions, handler)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AggregationWithCallbackAndOptions indicates an expected call of AggregationWithCallbackAndOptions.
-func (mr *MockiAggregatorMockRecorder[T]) AggregationWithCallbackAndOptions(ctx, pipeline, aggregationOptions, handler any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregationWithCallbackAndOptions", reflect.TypeOf((*MockiAggregator[T])(nil).AggregationWithCallbackAndOptions), ctx, pipeline, aggregationOptions, handler)
-}
-
-// AggregationWithOptions mocks base method.
-func (m *MockiAggregator[T]) AggregationWithOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions) ([]*T, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AggregationWithOptions", ctx, pipeline, aggregationOptions)
-	ret0, _ := ret[0].([]*T)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AggregationWithOptions indicates an expected call of AggregationWithOptions.
-func (mr *MockiAggregatorMockRecorder[T]) AggregationWithOptions(ctx, pipeline, aggregationOptions any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregationWithOptions", reflect.TypeOf((*MockiAggregator[T])(nil).AggregationWithOptions), ctx, pipeline, aggregationOptions)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregationWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregationWithCallback), ctx, handler)
 }

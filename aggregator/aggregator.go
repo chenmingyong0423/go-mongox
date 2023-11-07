@@ -24,15 +24,14 @@ import (
 
 //go:generate mockgen -source=aggregator.go -destination=../mock/aggregator.mock.go -package=mocks
 type iAggregator[T any] interface {
-	Aggregation(ctx context.Context, pipeline any) ([]*T, error)
-	AggregationWithOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions) ([]*T, error)
-	AggregationWithCallback(ctx context.Context, pipeline any, handler types.ResultHandler) error
-	AggregationWithCallbackAndOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions, handler types.ResultHandler) error
+	Aggregation(ctx context.Context) ([]*T, error)
+	AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error
 }
 
 type Aggregator[T any] struct {
 	collection         *mongo.Collection
 	aggregationOptions *options.AggregateOptions
+	pipeline           any
 }
 
 func NewAggregator[T any](collection *mongo.Collection) *Aggregator[T] {
@@ -41,8 +40,18 @@ func NewAggregator[T any](collection *mongo.Collection) *Aggregator[T] {
 	}
 }
 
-func (a *Aggregator[T]) Aggregation(ctx context.Context, pipeline any) ([]*T, error) {
-	cursor, err := a.collection.Aggregate(ctx, pipeline, a.aggregationOptions)
+func (a *Aggregator[T]) Pipeline(pipeline any) *Aggregator[T] {
+	a.pipeline = pipeline
+	return a
+}
+
+func (a *Aggregator[T]) AggregateOptions(aggregationOptions *options.AggregateOptions) *Aggregator[T] {
+	a.aggregationOptions = aggregationOptions
+	return a
+}
+
+func (a *Aggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -56,13 +65,8 @@ func (a *Aggregator[T]) Aggregation(ctx context.Context, pipeline any) ([]*T, er
 	return result, nil
 }
 
-func (a *Aggregator[T]) AggregationWithOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions) ([]*T, error) {
-	a.aggregationOptions = aggregationOptions
-	return a.Aggregation(ctx, pipeline)
-}
-
-func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, pipeline any, handler types.ResultHandler) error {
-	cursor, err := a.collection.Aggregate(ctx, pipeline, a.aggregationOptions)
+func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error {
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions)
 	if err != nil {
 		return err
 	}
@@ -71,9 +75,4 @@ func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, pipeline an
 		return err
 	}
 	return nil
-}
-
-func (a *Aggregator[T]) AggregationWithCallbackAndOptions(ctx context.Context, pipeline any, aggregationOptions *options.AggregateOptions, handler types.ResultHandler) error {
-	a.aggregationOptions = aggregationOptions
-	return a.AggregationWithCallback(ctx, pipeline, handler)
 }
