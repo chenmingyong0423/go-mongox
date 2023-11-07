@@ -13,7 +13,6 @@ import (
 	reflect "reflect"
 
 	mongo "go.mongodb.org/mongo-driver/mongo"
-	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -55,26 +54,6 @@ func (mr *MockiCreatorMockRecorder[T]) InsertMany(ctx, docs any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockiCreator[T])(nil).InsertMany), ctx, docs)
 }
 
-// InsertManyWithOptions mocks base method.
-func (m *MockiCreator[T]) InsertManyWithOptions(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx, docs}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "InsertManyWithOptions", varargs...)
-	ret0, _ := ret[0].(*mongo.InsertManyResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InsertManyWithOptions indicates an expected call of InsertManyWithOptions.
-func (mr *MockiCreatorMockRecorder[T]) InsertManyWithOptions(ctx, docs any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, docs}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertManyWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).InsertManyWithOptions), varargs...)
-}
-
 // InsertOne mocks base method.
 func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs T) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
@@ -88,24 +67,4 @@ func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs T) (*mongo.InsertO
 func (mr *MockiCreatorMockRecorder[T]) InsertOne(ctx, docs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockiCreator[T])(nil).InsertOne), ctx, docs)
-}
-
-// InsertOneWithOptions mocks base method.
-func (m *MockiCreator[T]) InsertOneWithOptions(ctx context.Context, doc T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx, doc}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "InsertOneWithOptions", varargs...)
-	ret0, _ := ret[0].(*mongo.InsertOneResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InsertOneWithOptions indicates an expected call of InsertOneWithOptions.
-func (mr *MockiCreatorMockRecorder[T]) InsertOneWithOptions(ctx, doc any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, doc}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOneWithOptions", reflect.TypeOf((*MockiCreator[T])(nil).InsertOneWithOptions), varargs...)
 }
