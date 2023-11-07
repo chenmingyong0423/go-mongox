@@ -30,9 +30,7 @@ import (
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 type iFinder[T any] interface {
 	FindOne(ctx context.Context) (*T, error)
-	FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error)
 	FindAll(ctx context.Context) ([]*T, error)
-	FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error)
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -75,9 +73,9 @@ func (f *Finder[T]) FindOne(ctx context.Context) (*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error) {
+func (f *Finder[T]) FindOneOptions(opts []*options.FindOneOptions) *Finder[T] {
 	f.findOneOpts = opts
-	return f.FindOne(ctx)
+	return f
 }
 
 func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
@@ -94,7 +92,7 @@ func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error) {
+func (f *Finder[T]) FindAllOptions(opts []*options.FindOptions) *Finder[T] {
 	f.findOpts = opts
-	return f.FindAll(ctx)
+	return f
 }

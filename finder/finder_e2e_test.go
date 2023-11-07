@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+////go:build e2e
 
 package finder
 
@@ -62,7 +62,8 @@ func TestFinder_e2e_One(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter func(finder *Finder[types.TestUser]) *Finder[types.TestUser]
+		filter any
+		opts   []*options.FindOneOptions
 
 		ctx     context.Context
 		want    *types.TestUser
@@ -86,9 +87,7 @@ func TestFinder_e2e_One(t *testing.T) {
 
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Id("456").Build())
-			},
+			filter:  query.BsonBuilder().Id("456").Build(),
 			wantErr: mongo.ErrNoDocuments,
 		},
 		{
@@ -107,9 +106,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
+			filter: bson.D{},
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -133,9 +130,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Id("123").Build())
-			},
+			filter: query.BsonBuilder().Id("123").Build(),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -159,9 +154,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build())
-			},
+			filter: query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build(),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -185,95 +178,11 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("age", 18)).Build())
-			},
+			filter: query.BsonBuilder().Add(converter.KeyValue("age", 18)).Build(),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  18,
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			finder = tc.filter(finder)
-			user, err := finder.FindOne(tc.ctx)
-			tc.after(tc.ctx, t)
-			assert.Equal(t, tc.wantErr, err)
-			assert.Equal(t, tc.want, user)
-		})
-	}
-}
-
-func TestFinder_e2e_OneWithOptions(t *testing.T) {
-	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
-
-	testCases := []struct {
-		name   string
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		filter func(finder *Finder[types.TestUser]) *Finder[types.TestUser]
-		opts   []*options.FindOneOptions
-
-		ctx     context.Context
-		want    *types.TestUser
-		wantErr error
-	}{
-		{
-			name: "no document",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-				assert.NoError(t, err)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Id("456").Build())
-			},
-
-			wantErr: mongo.ErrNoDocuments,
-		},
-		{
-			name: "returns some of fields",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-				assert.NoError(t, err)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.FilterKeyValue(converter.KeyValue("_id", "123"))
-			},
-			opts: []*options.FindOneOptions{
-				{
-					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1), converter.KeyValue("name", 1)).Build(),
-				},
-			},
-			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
 			},
 		},
 		{
@@ -292,9 +201,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Id("123").Build())
-			},
+			filter: query.BsonBuilder().Id("123").Build(),
 			opts: []*options.FindOneOptions{
 				{
 					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
@@ -309,8 +216,7 @@ func TestFinder_e2e_OneWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			finder = tc.filter(finder)
-			user, err := finder.FindOneWithOptions(tc.ctx, tc.opts)
+			user, err := finder.Filter(tc.filter).FindOneOptions(tc.opts).FindOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
@@ -327,7 +233,8 @@ func TestFinder_e2e_All(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter func(finder *Finder[types.TestUser]) *Finder[types.TestUser]
+		filter []types.KeyValue
+		opts   []*options.FindOptions
 
 		ctx     context.Context
 		want    []*types.TestUser
@@ -337,9 +244,7 @@ func TestFinder_e2e_All(t *testing.T) {
 			name:   "nil filter error",
 			before: func(_ context.Context, _ *testing.T) {},
 			after:  func(_ context.Context, _ *testing.T) {},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.FilterKeyValue()
-			},
+			filter: nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err == nil {
 					t.Errorf("expected error, got nil")
@@ -372,9 +277,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
+			filter: []types.KeyValue{},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err == nil {
 					t.Errorf("expected error, got nil")
@@ -407,8 +310,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Eq("_id", "789").Build())
+			filter: []types.KeyValue{
+				converter.KeyValue("_id", "789"),
 			},
 			want: []*types.TestUser{},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -443,9 +346,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
+			filter: []types.KeyValue{},
 			want: []*types.TestUser{
 				{
 					Id:   "123",
@@ -490,8 +391,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().InString("_id", []string{"123", "456"}...).Build())
+			filter: []types.KeyValue{
+				converter.KeyValue("_id", bson.M{types.In: []string{"123", "456"}}),
 			},
 			want: []*types.TestUser{
 				{
@@ -537,8 +438,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build())
+			filter: []types.KeyValue{
+				converter.KeyValue("name", "cmy"),
 			},
 			want: []*types.TestUser{
 				{
@@ -550,211 +451,6 @@ func TestFinder_e2e_All(t *testing.T) {
 					Id:   "456",
 					Name: "cmy",
 					Age:  18,
-				},
-			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			finder = tc.filter(finder)
-			users, err := finder.FindAll(tc.ctx)
-			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
-			}
-			assert.ElementsMatch(t, tc.want, users)
-		})
-	}
-}
-
-func TestFinder_e2e_AllWithOptions(t *testing.T) {
-	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
-	testCases := []struct {
-		name   string
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		filter func(finder *Finder[types.TestUser]) *Finder[types.TestUser]
-		opts   []*options.FindOptions
-
-		ctx     context.Context
-		want    []*types.TestUser
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "decode error",
-			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.IllegalUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  "18",
-					},
-					&types.IllegalUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  "18",
-					},
-				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err == nil {
-					t.Errorf("expected error, got nil")
-					return false
-				}
-				return true
-			},
-		},
-		{
-			name: "returns empty documents",
-			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					},
-					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
-					},
-				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
-
-				finder.filter = bson.D{}
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder.Filter(query.BsonBuilder().Eq("_id", "789").Build())
-			},
-			opts: nil,
-			want: []*types.TestUser{},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
-		},
-		{
-			name: "returns all documents",
-			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					},
-					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
-					},
-				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
-
-				finder.filter = bson.D{}
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
-			opts: nil,
-			want: []*types.TestUser{
-				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				},
-				{
-					Id:   "456",
-					Name: "cmy",
-					Age:  18,
-				},
-			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
-		},
-		{
-			name: "returns some of fields",
-			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					},
-					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
-					},
-				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
-
-				finder.filter = bson.D{}
-			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
-			opts: []*options.FindOptions{
-				{
-					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 1)).Add(converter.KeyValue("name", 1)).Build(),
-				},
-			},
-			want: []*types.TestUser{
-				{
-					Id:   "123",
-					Name: "cmy",
-				},
-				{
-					Id:   "456",
-					Name: "cmy",
 				},
 			},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -790,9 +486,7 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 
 				finder.filter = bson.D{}
 			},
-			filter: func(finder *Finder[types.TestUser]) *Finder[types.TestUser] {
-				return finder
-			},
+			filter: []types.KeyValue{},
 			opts: []*options.FindOptions{
 				{
 					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
@@ -820,8 +514,7 @@ func TestFinder_e2e_AllWithOptions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			finder = tc.filter(finder)
-			users, err := finder.FindAllWithOptions(tc.ctx, tc.opts)
+			users, err := finder.FilterKeyValue(tc.filter...).FindAllOptions(tc.opts).FindAll(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return

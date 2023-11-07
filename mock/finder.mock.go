@@ -12,7 +12,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -54,21 +53,6 @@ func (mr *MockiFinderMockRecorder[T]) FindAll(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockiFinder[T])(nil).FindAll), ctx)
 }
 
-// FindAllWithOptions mocks base method.
-func (m *MockiFinder[T]) FindAllWithOptions(ctx context.Context, opts []*options.FindOptions) ([]*T, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAllWithOptions", ctx, opts)
-	ret0, _ := ret[0].([]*T)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindAllWithOptions indicates an expected call of FindAllWithOptions.
-func (mr *MockiFinderMockRecorder[T]) FindAllWithOptions(ctx, opts any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllWithOptions", reflect.TypeOf((*MockiFinder[T])(nil).FindAllWithOptions), ctx, opts)
-}
-
 // FindOne mocks base method.
 func (m *MockiFinder[T]) FindOne(ctx context.Context) (*T, error) {
 	m.ctrl.T.Helper()
@@ -82,19 +66,4 @@ func (m *MockiFinder[T]) FindOne(ctx context.Context) (*T, error) {
 func (mr *MockiFinderMockRecorder[T]) FindOne(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockiFinder[T])(nil).FindOne), ctx)
-}
-
-// FindOneWithOptions mocks base method.
-func (m *MockiFinder[T]) FindOneWithOptions(ctx context.Context, opts []*options.FindOneOptions) (*T, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOneWithOptions", ctx, opts)
-	ret0, _ := ret[0].(*T)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindOneWithOptions indicates an expected call of FindOneWithOptions.
-func (mr *MockiFinderMockRecorder[T]) FindOneWithOptions(ctx, opts any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneWithOptions", reflect.TypeOf((*MockiFinder[T])(nil).FindOneWithOptions), ctx, opts)
 }
