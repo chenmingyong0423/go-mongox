@@ -54,3 +54,8 @@ func TestCollection_Deleter(t *testing.T) {
 	d := NewCollection[any](&mongo.Collection{}).Deleter()
 	assert.NotNil(t, d, "Expected non-nil Deleter")
 }
+
+func TestCollection_Aggregator(t *testing.T) {
+	a := NewCollection[any](&mongo.Collection{}).Aggregator()
+	assert.NotNil(t, a, "Expected non-nil Aggregator")
+}

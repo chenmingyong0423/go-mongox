@@ -15,6 +15,7 @@
 package mongox
 
 import (
+	"github.com/chenmingyong0423/go-mongox/aggregator"
 	"github.com/chenmingyong0423/go-mongox/creator"
 	"github.com/chenmingyong0423/go-mongox/deleter"
 	"github.com/chenmingyong0423/go-mongox/finder"
@@ -44,4 +45,7 @@ func (c *Collection[T]) Updater() *updater.Updater[T] {
 
 func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
 	return deleter.NewDeleter[T](c.collection)
+}
+func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
+	return aggregator.NewAggregator[T](c.collection)
 }

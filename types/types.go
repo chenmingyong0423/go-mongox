@@ -14,6 +14,8 @@
 
 package types
 
+import "go.mongodb.org/mongo-driver/mongo"
+
 const (
 	Id                 = "_id"
 	Set                = "$set"
@@ -189,3 +191,5 @@ type KeyValue struct {
 	Key   string
 	Value any
 }
+
+type ResultHandler func(cursor *mongo.Cursor) error
