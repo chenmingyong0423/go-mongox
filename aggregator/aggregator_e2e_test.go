@@ -60,7 +60,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		pipeline           any
-		aggregationOptions *options.AggregateOptions
+		aggregationOptions []*options.AggregateOptions
 
 		ctx     context.Context
 		want    []*types.TestUser
@@ -165,8 +165,10 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline:           aggregation.StageBsonBuilder().Sort("name", 1).Build(),
-			aggregationOptions: options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
+			pipeline: aggregation.StageBsonBuilder().Sort("name", 1).Build(),
+			aggregationOptions: []*options.AggregateOptions{
+				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
+			},
 			want: []*types.TestUser{
 				{Id: "1", Name: "cmy", Age: 24},
 				{Id: "2", Name: "gopher", Age: 20},
@@ -178,7 +180,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			testUsers, err := aggregator.Pipeline(tc.pipeline).AggregateOptions(tc.aggregationOptions).Aggregation(tc.ctx)
+			testUsers, err := aggregator.Pipeline(tc.pipeline).AggregateOptions(tc.aggregationOptions...).Aggregation(tc.ctx)
 			tc.after(tc.ctx, t)
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, testUsers)

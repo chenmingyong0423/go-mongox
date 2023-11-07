@@ -30,7 +30,7 @@ type iAggregator[T any] interface {
 
 type Aggregator[T any] struct {
 	collection         *mongo.Collection
-	aggregationOptions *options.AggregateOptions
+	aggregationOptions []*options.AggregateOptions
 	pipeline           any
 }
 
@@ -45,13 +45,13 @@ func (a *Aggregator[T]) Pipeline(pipeline any) *Aggregator[T] {
 	return a
 }
 
-func (a *Aggregator[T]) AggregateOptions(aggregationOptions *options.AggregateOptions) *Aggregator[T] {
+func (a *Aggregator[T]) AggregateOptions(aggregationOptions ...*options.AggregateOptions) *Aggregator[T] {
 	a.aggregationOptions = aggregationOptions
 	return a
 }
 
 func (a *Aggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
-	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions)
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (a *Aggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
 }
 
 func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error {
-	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions)
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
 	if err != nil {
 		return err
 	}
