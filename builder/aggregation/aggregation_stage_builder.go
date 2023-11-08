@@ -29,13 +29,9 @@ func StageBsonBuilder() *StageBuilder {
 	return &StageBuilder{pipeline: make([]bson.D, 0, 4)}
 }
 
-func (b *StageBuilder) AddFields(bsonElements ...types.KeyValue) *StageBuilder {
+func (b *StageBuilder) AddFields(bsonElements ...types.KeyValue[any]) *StageBuilder {
 	if bsonElements != nil {
-		d := bson.D{}
-		for _, element := range bsonElements {
-			d = append(d, bson.E{Key: element.Key, Value: element.Value})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: converter.KeyValuesToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -51,13 +47,9 @@ func (b *StageBuilder) AddFieldsForMap(keyValues map[string]any) *StageBuilder {
 	return b
 }
 
-func (b *StageBuilder) Set(bsonElements ...types.KeyValue) *StageBuilder {
+func (b *StageBuilder) Set(bsonElements ...types.KeyValue[any]) *StageBuilder {
 	if bsonElements != nil {
-		d := bson.D{}
-		for _, element := range bsonElements {
-			d = append(d, bson.E{Key: element.Key, Value: element.Value})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: converter.KeyValuesToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -135,13 +127,9 @@ func (b *StageBuilder) GroupMap(id any, accumulators map[string]map[string]any) 
 	return b
 }
 
-func (b *StageBuilder) Sort(bsonElements ...types.KeyValue) *StageBuilder {
+func (b *StageBuilder) Sort(bsonElements ...types.KeyValue[any]) *StageBuilder {
 	if bsonElements != nil {
-		d := bson.D{}
-		for _, element := range bsonElements {
-			d = append(d, bson.E{Key: element.Key, Value: element.Value})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: converter.KeyValuesToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -157,13 +145,9 @@ func (b *StageBuilder) SortMap(keyValues map[string]any) *StageBuilder {
 	return b
 }
 
-func (b *StageBuilder) Project(bsonElements ...types.KeyValue) *StageBuilder {
+func (b *StageBuilder) Project(bsonElements ...types.KeyValue[any]) *StageBuilder {
 	if bsonElements != nil {
-		d := bson.D{}
-		for _, element := range bsonElements {
-			d = append(d, bson.E{Key: element.Key, Value: element.Value})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: converter.KeyValuesToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -210,13 +194,9 @@ func (b *StageBuilder) ReplaceWith(replacementDocument any) *StageBuilder {
 	return b
 }
 
-func (b *StageBuilder) Facet(bsonElements ...types.KeyValue) *StageBuilder {
+func (b *StageBuilder) Facet(bsonElements ...types.KeyValue[any]) *StageBuilder {
 	if bsonElements != nil {
-		d := bson.D{}
-		for _, element := range bsonElements {
-			d = append(d, bson.E{Key: element.Key, Value: element.Value})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: converter.KeyValuesToBson(bsonElements...)}})
 	}
 	return b
 }

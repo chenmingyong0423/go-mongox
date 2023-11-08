@@ -154,7 +154,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: query.BsonBuilder().Add(converter.KeyValue("name", "cmy")).Build(),
+			filter: query.BsonBuilder().Add(converter.KeyValue[any]("name", "cmy")).Build(),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -178,7 +178,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: query.BsonBuilder().Add(converter.KeyValue("age", 18)).Build(),
+			filter: query.BsonBuilder().Add(converter.KeyValue[any]("age", 18)).Build(),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -204,7 +204,7 @@ func TestFinder_e2e_One(t *testing.T) {
 			filter: query.BsonBuilder().Id("123").Build(),
 			opts: []*options.FindOneOptions{
 				{
-					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue[any]("_id", 0)).Build(),
 				},
 			},
 			want: &types.TestUser{
@@ -233,7 +233,7 @@ func TestFinder_e2e_All(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter []types.KeyValue
+		filter []types.KeyValue[any]
 		opts   []*options.FindOptions
 
 		ctx     context.Context
@@ -277,7 +277,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{},
+			filter: []types.KeyValue[any]{},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err == nil {
 					t.Errorf("expected error, got nil")
@@ -310,8 +310,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{
-				converter.KeyValue("_id", "789"),
+			filter: []types.KeyValue[any]{
+				converter.KeyValue[any]("_id", "789"),
 			},
 			want: []*types.TestUser{},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -346,7 +346,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{},
+			filter: []types.KeyValue[any]{},
 			want: []*types.TestUser{
 				{
 					Id:   "123",
@@ -391,8 +391,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{
-				converter.KeyValue("_id", bson.M{types.In: []string{"123", "456"}}),
+			filter: []types.KeyValue[any]{
+				converter.KeyValue[any]("_id", bson.M{types.In: []string{"123", "456"}}),
 			},
 			want: []*types.TestUser{
 				{
@@ -438,8 +438,8 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{
-				converter.KeyValue("name", "cmy"),
+			filter: []types.KeyValue[any]{
+				converter.KeyValue[any]("name", "cmy"),
 			},
 			want: []*types.TestUser{
 				{
@@ -486,10 +486,10 @@ func TestFinder_e2e_All(t *testing.T) {
 
 				finder.filter = bson.D{}
 			},
-			filter: []types.KeyValue{},
+			filter: []types.KeyValue[any]{},
 			opts: []*options.FindOptions{
 				{
-					Projection: query.BsonBuilder().Add(converter.KeyValue("_id", 0)).Build(),
+					Projection: query.BsonBuilder().Add(converter.KeyValue[any]("_id", 0)).Build(),
 				},
 			},
 			want: []*types.TestUser{

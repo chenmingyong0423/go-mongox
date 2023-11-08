@@ -27,7 +27,7 @@ import (
 func TestBuilder_AddKeyValues(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []types.KeyValue
+		keyValues []types.KeyValue[any]
 		expected  bson.D
 	}{
 		{
@@ -37,7 +37,7 @@ func TestBuilder_AddKeyValues(t *testing.T) {
 		},
 		{
 			name:      "normal",
-			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy")},
+			keyValues: []types.KeyValue[any]{converter.KeyValue[any]("name", "cmy")},
 			expected:  bson.D{{Key: "name", Value: "cmy"}},
 		},
 	}

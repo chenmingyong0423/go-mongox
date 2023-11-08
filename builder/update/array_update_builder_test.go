@@ -72,7 +72,7 @@ func Test_arrayUpdateBuilder_AddToSetKeyValues(t *testing.T) {
 
 	testCases := []struct {
 		name         string
-		bsonElements []types.KeyValue
+		bsonElements []types.KeyValue[any]
 		want         bson.D
 	}{
 		{
@@ -81,12 +81,12 @@ func Test_arrayUpdateBuilder_AddToSetKeyValues(t *testing.T) {
 		},
 		{
 			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
+			bsonElements: []types.KeyValue[any]{},
 			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("colors", "mauve"), converter.KeyValue("letters", []string{"a", "b", "c"})},
+			bsonElements: []types.KeyValue[any]{converter.KeyValue[any]("colors", "mauve"), converter.KeyValue[any]("letters", []string{"a", "b", "c"})},
 			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 	}
@@ -138,7 +138,7 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 func Test_arrayUpdateBuilder_PopKeyValues(t *testing.T) {
 	testCases := []struct {
 		name         string
-		bsonElements []types.KeyValue
+		bsonElements []types.KeyValue[int]
 		want         bson.D
 	}{
 		{
@@ -147,12 +147,12 @@ func Test_arrayUpdateBuilder_PopKeyValues(t *testing.T) {
 		},
 		{
 			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
+			bsonElements: []types.KeyValue[int]{},
 			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", -1)},
+			bsonElements: []types.KeyValue[int]{converter.KeyValue[int]("scores", 1), converter.KeyValue[int]("letters", -1)},
 			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 	}
@@ -172,7 +172,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(converter.KeyValue("vegetables", "carrots")).Build(),
+			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(converter.KeyValue[any]("vegetables", "carrots")).Build(),
 			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
 		},
 		{
@@ -209,7 +209,7 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: BsonBuilder().Add(converter.KeyValue("scores", BsonBuilder().EachInt([]int{90, 82, 85}...).Build())).Add(converter.KeyValue("sort", 1)).Build(),
+			value: BsonBuilder().Add(converter.KeyValue[any]("scores", BsonBuilder().EachInt([]int{90, 82, 85}...).Build())).Add(converter.KeyValue[any]("sort", 1)).Build(),
 			want:  bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "sort", Value: 1}}}},
 		},
 		{
@@ -239,7 +239,7 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 func Test_arrayUpdateBuilder_PushKeyValues(t *testing.T) {
 	testCases := []struct {
 		name         string
-		bsonElements []types.KeyValue
+		bsonElements []types.KeyValue[any]
 		want         bson.D
 	}{
 		{
@@ -248,12 +248,12 @@ func Test_arrayUpdateBuilder_PushKeyValues(t *testing.T) {
 		},
 		{
 			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
+			bsonElements: []types.KeyValue[any]{},
 			want:         bson.D{bson.E{Key: "$push", Value: bson.D{}}},
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build()), converter.KeyValue("scores", 1)},
+			bsonElements: []types.KeyValue[any]{converter.KeyValue[any]("scores", BsonBuilder().Add(converter.KeyValue[any]("$each", []int{90, 82, 85})).Build()), converter.KeyValue[any]("scores", 1)},
 			want:         bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
 		},
 	}
@@ -1310,7 +1310,7 @@ func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 func Test_arrayUpdateBuilder_SortKeyValues(t *testing.T) {
 	testCases := []struct {
 		name         string
-		bsonElements []types.KeyValue
+		bsonElements []types.KeyValue[int]
 		want         bson.D
 	}{
 		{
@@ -1319,12 +1319,12 @@ func Test_arrayUpdateBuilder_SortKeyValues(t *testing.T) {
 		},
 		{
 			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
+			bsonElements: []types.KeyValue[int]{},
 			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
 		},
 		{
 			name:         "normal keyValues",
-			bsonElements: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", 1)},
+			bsonElements: []types.KeyValue[int]{converter.KeyValue[int]("score", -1), converter.KeyValue[int]("name", 1)},
 			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 	}
@@ -1339,7 +1339,7 @@ func Test_arrayUpdateBuilder_PullKeyValues(t *testing.T) {
 	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
 	testCases := []struct {
 		name         string
-		bsonElements []types.KeyValue
+		bsonElements []types.KeyValue[any]
 		want         bson.D
 	}{
 		{
@@ -1348,15 +1348,15 @@ func Test_arrayUpdateBuilder_PullKeyValues(t *testing.T) {
 		},
 		{
 			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
+			bsonElements: []types.KeyValue[any]{},
 			want:         bson.D{bson.E{Key: "$pull", Value: bson.D{}}},
 		},
 		{
 			name: "normal bsonElements",
-			bsonElements: []types.KeyValue{
-				converter.KeyValue("fruits", query.BsonBuilder().Add(converter.KeyValue("$in", []string{"apples", "oranges"})).Build()),
-				converter.KeyValue("votes", query.BsonBuilder().Add(converter.KeyValue("$gte", 6)).Build()),
-				converter.KeyValue("vegetables", "carrots"),
+			bsonElements: []types.KeyValue[any]{
+				converter.KeyValue[any]("fruits", query.BsonBuilder().Add(converter.KeyValue[any]("$in", []string{"apples", "oranges"})).Build()),
+				converter.KeyValue[any]("votes", query.BsonBuilder().Add(converter.KeyValue[any]("$gte", 6)).Build()),
+				converter.KeyValue[any]("vegetables", "carrots"),
 			},
 			want: bson.D{bson.E{Key: "$pull", Value: bson.D{
 				bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}},

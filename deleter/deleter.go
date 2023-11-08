@@ -47,7 +47,7 @@ func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 }
 
 // FilterKeyValue is used to set the filter of the query
-func (d *Deleter[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Deleter[T] {
+func (d *Deleter[T]) FilterKeyValue(bsonElements ...types.KeyValue[any]) *Deleter[T] {
 	if bsonElements == nil {
 		d.filter = nil
 	} else {

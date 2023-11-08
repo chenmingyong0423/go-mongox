@@ -29,7 +29,7 @@ func (b *arrayUpdateBuilder) AddToSet(value any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) AddToSetKeyValues(bsonElements ...types.KeyValue) *Builder {
+func (b *arrayUpdateBuilder) AddToSetKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.AddToSet, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -39,14 +39,8 @@ func (b *arrayUpdateBuilder) Pop(value any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) PopKeyValues(bsonElements ...types.KeyValue) *Builder {
-	d := bson.D{}
-	for _, element := range bsonElements {
-		if v, ok := element.Value.(int); ok {
-			d = append(d, bson.E{Key: element.Key, Value: v})
-		}
-	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Pop, Value: d})
+func (b *arrayUpdateBuilder) PopKeyValues(bsonElements ...types.KeyValue[int]) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Pop, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -55,7 +49,7 @@ func (b *arrayUpdateBuilder) Pull(value any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) PullKeyValues(bsonElements ...types.KeyValue) *Builder {
+func (b *arrayUpdateBuilder) PullKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Pull, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -65,7 +59,7 @@ func (b *arrayUpdateBuilder) Push(value any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) PushKeyValues(bsonElements ...types.KeyValue) *Builder {
+func (b *arrayUpdateBuilder) PushKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Push, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -228,13 +222,7 @@ func (b *arrayUpdateBuilder) Sort(value any) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) SortKeyValues(bsonElements ...types.KeyValue) *Builder {
-	d := bson.D{}
-	for _, element := range bsonElements {
-		if v, ok := element.Value.(int); ok {
-			d = append(d, bson.E{Key: element.Key, Value: v})
-		}
-	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: d})
+func (b *arrayUpdateBuilder) SortKeyValues(bsonElements ...types.KeyValue[int]) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }

@@ -52,7 +52,7 @@ func (u *Updater[T]) Filter(filter any) *Updater[T] {
 }
 
 // FilterKeyValue is used to set the filter of the query
-func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
+func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue[any]) *Updater[T] {
 	u.filter = query.BsonBuilder().Add(bsonElements...).Build()
 	return u
 }
@@ -71,7 +71,7 @@ func (u *Updater[T]) Updates(updates any) *Updater[T] {
 }
 
 // UpdatesKeyValue is used to set the updates of the update
-func (u *Updater[T]) UpdatesKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
+func (u *Updater[T]) UpdatesKeyValue(bsonElements ...types.KeyValue[any]) *Updater[T] {
 	if len(bsonElements) != 0 {
 		u.updates = bson.D{bson.E{Key: types.Set, Value: update.BsonBuilder().Add(bsonElements...).Build()}}
 	} else {

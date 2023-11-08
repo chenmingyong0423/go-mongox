@@ -146,11 +146,11 @@ func ToSetBson(updates any) bson.D {
 	return nil
 }
 
-func KeyValue(key string, value any) types.KeyValue {
-	return types.KeyValue{Key: key, Value: value}
+func KeyValue[T any](key string, value T) types.KeyValue[T] {
+	return types.KeyValue[T]{Key: key, Value: value}
 }
 
-func KeyValuesToBson(bsonElements ...types.KeyValue) bson.D {
+func KeyValuesToBson[T any](bsonElements ...types.KeyValue[T]) bson.D {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		value = append(value, bson.E{Key: element.Key, Value: element.Value})

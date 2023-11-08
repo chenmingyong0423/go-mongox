@@ -37,7 +37,7 @@ func TestQueryBuilder_Id(t *testing.T) {
 func TestQueryBuilder_Add(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []types.KeyValue
+		keyValues []types.KeyValue[any]
 
 		want bson.D
 	}{
@@ -47,7 +47,7 @@ func TestQueryBuilder_Add(t *testing.T) {
 		},
 		{
 			name:      "normal params",
-			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy"), converter.KeyValue("age", 18), converter.KeyValue("scores", []int{100, 99, 98})},
+			keyValues: []types.KeyValue[any]{converter.KeyValue[any]("name", "cmy"), converter.KeyValue[any]("age", 18), converter.KeyValue[any]("scores", []int{100, 99, 98})},
 			want:      bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}},
 		},
 	}
