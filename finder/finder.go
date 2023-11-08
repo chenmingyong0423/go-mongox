@@ -21,7 +21,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -43,14 +42,12 @@ type Finder[T any] struct {
 	collection  *mongo.Collection
 	findOneOpts []*options.FindOneOptions
 	findOpts    []*options.FindOptions
-	filter      bson.D
+	filter      any
 }
 
 // Filter is used to set the filter of the query
-// filter can be bson.D, map[string]any, struct, *struct
-// if the filter is a illegal type, it will be set to nil
 func (f *Finder[T]) Filter(filter any) *Finder[T] {
-	f.filter = converter.ToBson(filter)
+	f.filter = filter
 	return f
 }
 

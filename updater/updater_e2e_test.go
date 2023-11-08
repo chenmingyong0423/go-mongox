@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build e2e
+////go:build e2e
 
 package updater
 
@@ -30,7 +30,6 @@ import (
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -65,15 +64,27 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx     context.Context
-		filter  bson.D
-		updates bson.D
+		filter  any
+		updates any
 		opts    []*options.UpdateOptions
 
 		want    *mongo.UpdateResult
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name:    "failed to update one",
+			name:    "invalid updates",
+			before:  func(ctx context.Context, t *testing.T) {},
+			after:   func(ctx context.Context, t *testing.T) {},
+			ctx:     context.Background(),
+			filter:  nil,
+			updates: 6,
+			want:    nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Error(t, err)
+			},
+		},
+		{
+			name:    "nil filter and nil updates,failed to update one",
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),

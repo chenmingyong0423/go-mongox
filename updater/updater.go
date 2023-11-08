@@ -40,16 +40,14 @@ func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
 
 type Updater[T any] struct {
 	collection *mongo.Collection
-	filter     bson.D
-	updates    bson.D
+	filter     any
+	updates    any
 	opts       []*options.UpdateOptions
 }
 
 // Filter is used to set the filter of the query
-// filter can be bson.D, map[string]any, struct, *struct
-// if the filter is a illegal type, it will be set to nil
 func (u *Updater[T]) Filter(filter any) *Updater[T] {
-	u.filter = converter.ToBson(filter)
+	u.filter = filter
 	return u
 }
 
@@ -60,10 +58,15 @@ func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] 
 }
 
 // Updates is used to set the updates of the update
-// updates can be bson.D, map[string]any, struct, *struct
-// if the updates is a illegal type, it will be set to nil
+// if the type of updates is in [map[string]any, map[string]any pointer, struct, struct pointer], it will be converted to bson.D
+// or it will be set to updates directly
 func (u *Updater[T]) Updates(updates any) *Updater[T] {
-	u.updates = converter.ToSetBson(updates)
+	d := converter.ToSetBson(updates)
+	if d != nil {
+		u.updates = d
+	} else {
+		u.updates = updates
+	}
 	return u
 }
 
