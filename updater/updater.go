@@ -20,7 +20,6 @@ import (
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -58,22 +57,20 @@ func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue[any]) *Update
 }
 
 // Updates is used to set the updates of the update
-// if the type of updates is in [map[string]any, map[string]any pointer, struct, struct pointer], it will be converted to bson.D
-// or it will be set to updates directly
 func (u *Updater[T]) Updates(updates any) *Updater[T] {
-	d := converter.ToSetBson(updates)
-	if d != nil {
-		u.updates = d
-	} else {
-		u.updates = updates
-	}
+	u.updates = updates
+	return u
+}
+
+func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T] {
+	u.updates = bson.D{bson.E{Key: operator, Value: value}}
 	return u
 }
 
 // UpdatesKeyValue is used to set the updates of the update
-func (u *Updater[T]) UpdatesKeyValue(bsonElements ...types.KeyValue[any]) *Updater[T] {
+func (u *Updater[T]) UpdatesKeyValue(operator string, bsonElements ...types.KeyValue[any]) *Updater[T] {
 	if len(bsonElements) != 0 {
-		u.updates = bson.D{bson.E{Key: types.Set, Value: update.BsonBuilder().Add(bsonElements...).Build()}}
+		u.updates = bson.D{bson.E{Key: operator, Value: update.BsonBuilder().Add(bsonElements...).Build()}}
 	} else {
 		u.updates = nil
 	}
