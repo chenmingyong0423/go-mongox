@@ -17,13 +17,14 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/builder/query"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/chenmingyong0423/go-mongox/converter"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -31,141 +32,234 @@ import (
 func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-
-		want bson.D
+		name  string
+		value any
+		want  bson.D
 	}{
 		{
-			name: "zero params",
-			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
+			name: "bson",
+			value: bson.D{
+				bson.E{Key: "colors", Value: "mauve"},
+				bson.E{Key: "letters", Value: []string{"a", "b", "c"}},
+			},
+			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
-
 		{
-			name:      "normal params",
-			keyValues: []types.KeyValue{converter.KeyValue("colors", "mauve"), converter.KeyValue("letters", []string{"a", "b", "c"})},
-			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
+			name:  "map",
+			value: map[string]any{"colors": "mauve", "letters": []string{"a", "b", "c"}},
+			want:  bson.D{bson.E{Key: "$addToSet", Value: map[string]any{"colors": "mauve", "letters": []string{"a", "b", "c"}}}},
+		},
+		{
+			name: "struct",
+			value: struct {
+				Colors  string   `bson:"colors"`
+				Letters []string `bson:"letters"`
+			}{Colors: "mauve", Letters: []string{"a", "b", "c"}},
+			want: bson.D{bson.E{Key: "$addToSet", Value: struct {
+				Colors  string   `bson:"colors"`
+				Letters []string `bson:"letters"`
+			}{Colors: "mauve", Letters: []string{"a", "b", "c"}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().AddToSet(tc.keyValues...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().AddToSet(tc.value).Build())
 		})
 	}
 }
 
-func Test_arrayUpdateBuilder_AddToSetForMap(t *testing.T) {
+func Test_arrayUpdateBuilder_AddToSetKeyValues(t *testing.T) {
 
 	testCases := []struct {
-		name      string
-		keyValues map[string]any
-		want      bson.D
+		name         string
+		bsonElements []types.KeyValue
+		want         bson.D
 	}{
 		{
-			name: "nil map",
-			want: bson.D{},
+			name: "nil bsonElements",
+			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
 		},
 		{
-			name:      "empty map",
-			keyValues: map[string]any{},
-			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
+			name:         "empty bsonElements",
+			bsonElements: []types.KeyValue{},
+			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
 		},
 		{
-			name:      "normal map",
-			keyValues: map[string]any{"colors": "mauve", "letters": []string{"a", "b", "c"}},
-			want:      bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
+			name:         "normal params",
+			bsonElements: []types.KeyValue{converter.KeyValue("colors", "mauve"), converter.KeyValue("letters", []string{"a", "b", "c"})},
+			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().AddToSetForMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, BsonBuilder().AddToSetKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
 
 func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      bson.D
+		name  string
+		value any
+		want  bson.D
 	}{
 		{
-			name: "zero params",
-			want: bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
+			name: "bson",
+			value: bson.D{
+				bson.E{Key: "scores", Value: 1},
+				bson.E{Key: "letters", Value: -1},
+			},
+			want: bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 		{
-			name:      "value contain non-int",
-			keyValues: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", "1")},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}}}},
+			name:  "map",
+			value: map[string]any{"scores": 1, "letters": -1},
+			want:  bson.D{bson.E{Key: "$pop", Value: map[string]any{"scores": 1, "letters": -1}}},
 		},
 		{
-			name:      "normal params",
-			keyValues: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", -1)},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
+			name: "struct",
+			value: struct {
+				Scores  int `bson:"scores"`
+				Letters int `bson:"letters"`
+			}{Scores: 1, Letters: -1},
+			want: bson.D{bson.E{Key: "$pop", Value: struct {
+				Scores  int `bson:"scores"`
+				Letters int `bson:"letters"`
+			}{Scores: 1, Letters: -1}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Pop(tc.keyValues...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().Pop(tc.value).Build())
 		})
 	}
 }
 
-func Test_arrayUpdateBuilder_PopForMap(t *testing.T) {
+func Test_arrayUpdateBuilder_PopKeyValues(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues map[string]int
-		want      bson.D
+		name         string
+		bsonElements []types.KeyValue
+		want         bson.D
 	}{
 		{
-			name: "nil map",
-			want: bson.D{},
+			name: "nil bsonElements",
+			want: bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
 		},
 		{
-			name:      "empty map",
-			keyValues: map[string]int{},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
+			name:         "empty bsonElements",
+			bsonElements: []types.KeyValue{},
+			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
 		},
 		{
-			name:      "normal map",
-			keyValues: map[string]int{"scores": 1, "letters": -1},
-			want:      bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
+			name:         "normal params",
+			bsonElements: []types.KeyValue{converter.KeyValue("scores", 1), converter.KeyValue("letters", -1)},
+			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().PopForMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, BsonBuilder().PopKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
 
 func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
-	assert.Equal(t, bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}}, BsonBuilder().Pull(
-		// 可以使用 query 构造
-		query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(converter.KeyValue("vegetables", "carrots")).Build(),
-	).Build())
-}
-
-func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      bson.D
+		name  string
+		value any
+		want  bson.D
 	}{
 		{
-			name: "zero params",
-			want: bson.D{bson.E{Key: "$push", Value: bson.D{}}},
+			name:  "bson",
+			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(converter.KeyValue("vegetables", "carrots")).Build(),
+			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
 		},
 		{
-			name:      "normal params",
-			keyValues: []types.KeyValue{converter.KeyValue("scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build()), converter.KeyValue("scores", 1)},
-			want:      bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
+			name:  "map",
+			value: map[string]any{"fruits": bson.M{"$in": []string{"apples", "oranges"}}, "votes": bson.M{"$gte": 6}, "vegetables": "carrots"},
+			want:  bson.D{bson.E{Key: "$pull", Value: map[string]any{"fruits": bson.M{"$in": []string{"apples", "oranges"}}, "votes": bson.M{"$gte": 6}, "vegetables": "carrots"}}},
+		},
+		{
+			name: "struct",
+			value: struct {
+				Fruits     bson.M `bson:"fruits"`
+				Votes      bson.M `bson:"votes"`
+				Vegetables string `bson:"vegetables"`
+			}{Fruits: bson.M{"$in": []string{"apples", "oranges"}}, Votes: bson.M{"$gte": 6}, Vegetables: "carrots"},
+			want: bson.D{bson.E{Key: "$pull", Value: struct {
+				Fruits     bson.M `bson:"fruits"`
+				Votes      bson.M `bson:"votes"`
+				Vegetables string `bson:"vegetables"`
+			}{Fruits: bson.M{"$in": []string{"apples", "oranges"}}, Votes: bson.M{"$gte": 6}, Vegetables: "carrots"}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Push(tc.keyValues...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().Pull(tc.value).Build())
+		})
+	}
+}
+
+func Test_arrayUpdateBuilder_Push(t *testing.T) {
+	testCases := []struct {
+		name  string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "bson",
+			value: BsonBuilder().Add(converter.KeyValue("scores", BsonBuilder().EachInt([]int{90, 82, 85}...).Build())).Add(converter.KeyValue("sort", 1)).Build(),
+			want:  bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "sort", Value: 1}}}},
+		},
+		{
+			name:  "map",
+			value: map[string]any{"scores": bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}, "sort": 1},
+			want:  bson.D{bson.E{Key: "$push", Value: map[string]any{"scores": bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}, "sort": 1}}},
+		},
+		{
+			name: "struct",
+			value: struct {
+				Scores bson.D `bson:"scores"`
+				Sort   int    `bson:"sort"`
+			}{Scores: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}, Sort: 1},
+			want: bson.D{bson.E{Key: "$push", Value: struct {
+				Scores bson.D `bson:"scores"`
+				Sort   int    `bson:"sort"`
+			}{Scores: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}, Sort: 1}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, BsonBuilder().Push(tc.value).Build())
+		})
+	}
+}
+
+func Test_arrayUpdateBuilder_PushKeyValues(t *testing.T) {
+	testCases := []struct {
+		name         string
+		bsonElements []types.KeyValue
+		want         bson.D
+	}{
+		{
+			name: "nil bsonElements",
+			want: bson.D{bson.E{Key: "$push", Value: bson.D{}}},
+		},
+		{
+			name:         "empty bsonElements",
+			bsonElements: []types.KeyValue{},
+			want:         bson.D{bson.E{Key: "$push", Value: bson.D{}}},
+		},
+		{
+			name:         "normal params",
+			bsonElements: []types.KeyValue{converter.KeyValue("scores", BsonBuilder().Add(converter.KeyValue("$each", []int{90, 82, 85})).Build()), converter.KeyValue("scores", 1)},
+			want:         bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, BsonBuilder().PushKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
@@ -1174,59 +1268,106 @@ func Test_arrayUpdateBuilder_Slice(t *testing.T) {
 
 func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-
-		want bson.D
+		name  string
+		value any
+		want  bson.D
 	}{
 		{
-			name: "zero keyValues",
-			want: bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
+			name:  "bson",
+			value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}},
+			want:  bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 		{
-			name:      "values contains non-int",
-			keyValues: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", "1")},
-			want:      bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}}}},
+			name: "map",
+			value: map[string]int{
+				"score": -1,
+				"name":  1,
+			},
+			want: bson.D{bson.E{Key: "$sort", Value: map[string]int{
+				"score": -1,
+				"name":  1,
+			}}},
 		},
 		{
-			name:      "normal keyValues",
-			keyValues: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", 1)},
-			want:      bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
+			name: "struct",
+			value: struct {
+				Score int `bson:"score"`
+				Name  int `bson:"name"`
+			}{Score: -1, Name: 1},
+			want: bson.D{bson.E{Key: "$sort", Value: struct {
+				Score int `bson:"score"`
+				Name  int `bson:"name"`
+			}{Score: -1, Name: 1}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Sort(tc.keyValues...).Build())
+			assert.Equal(t, tc.want, BsonBuilder().Sort(tc.value).Build())
 		})
 	}
 }
 
-func Test_arrayUpdateBuilder_SortForMap(t *testing.T) {
+func Test_arrayUpdateBuilder_SortKeyValues(t *testing.T) {
 	testCases := []struct {
-		name  string
-		value map[string]int
-
-		want bson.D
+		name         string
+		bsonElements []types.KeyValue
+		want         bson.D
 	}{
 		{
-			name:  "nil value",
-			value: nil,
-			want:  bson.D{},
+			name: "nil bsonElements",
+			want: bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
 		},
 		{
-			name:  "empty value",
-			value: map[string]int{},
-			want:  bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
+			name:         "empty bsonElements",
+			bsonElements: []types.KeyValue{},
+			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
 		},
 		{
-			name:  "normal value",
-			value: map[string]int{"score": -1, "name": 1},
-			want:  bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
+			name:         "normal keyValues",
+			bsonElements: []types.KeyValue{converter.KeyValue("score", -1), converter.KeyValue("name", 1)},
+			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().SortForMap(tc.value).Build()))
+			assert.Equal(t, tc.want, BsonBuilder().SortKeyValues(tc.bsonElements...).Build())
+		})
+	}
+}
+
+func Test_arrayUpdateBuilder_PullKeyValues(t *testing.T) {
+	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
+	testCases := []struct {
+		name         string
+		bsonElements []types.KeyValue
+		want         bson.D
+	}{
+		{
+			name: "nil bsonElements",
+			want: bson.D{bson.E{Key: "$pull", Value: bson.D{}}},
+		},
+		{
+			name:         "empty bsonElements",
+			bsonElements: []types.KeyValue{},
+			want:         bson.D{bson.E{Key: "$pull", Value: bson.D{}}},
+		},
+		{
+			name: "normal bsonElements",
+			bsonElements: []types.KeyValue{
+				converter.KeyValue("fruits", query.BsonBuilder().Add(converter.KeyValue("$in", []string{"apples", "oranges"})).Build()),
+				converter.KeyValue("votes", query.BsonBuilder().Add(converter.KeyValue("$gte", 6)).Build()),
+				converter.KeyValue("vegetables", "carrots"),
+			},
+			want: bson.D{bson.E{Key: "$pull", Value: bson.D{
+				bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}},
+				bson.E{Key: "votes", Value: bson.D{bson.E{Key: "$gte", Value: 6}}},
+				bson.E{Key: "vegetables", Value: "carrots"},
+			}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, BsonBuilder().PullKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
