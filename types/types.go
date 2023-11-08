@@ -161,10 +161,9 @@ type UpdatedUser struct {
 	Age  int64
 }
 
-//
-//type userName struct {
-//	Name string `bson:"name"`
-//}
+type UserName struct {
+	Name string `bson:"name"`
+}
 
 type UnWindOptions struct {
 	IncludeArrayIndex          string

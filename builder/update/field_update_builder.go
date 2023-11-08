@@ -25,22 +25,13 @@ type fieldUpdateBuilder struct {
 	parent *Builder
 }
 
-func (b *fieldUpdateBuilder) Set(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: bson.D{bson.E{Key: key, Value: value}}})
+func (b *fieldUpdateBuilder) Set(value any) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: value})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetForMap(data map[string]any) *Builder {
-	if d := converter.MapToBson(data); len(d) != 0 {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: d})
-	}
-	return b.parent
-}
-
-func (b *fieldUpdateBuilder) SetForStruct(data any) *Builder {
-	if d := converter.StructToBson(data); len(d) != 0 {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: d})
-	}
+func (b *fieldUpdateBuilder) SetKeyValues(bsonElements ...types.KeyValue) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -53,24 +44,22 @@ func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetOnInsert(bsonElements ...types.KeyValue) *Builder {
-	value := bson.D{}
-	for _, element := range bsonElements {
-		value = append(value, bson.E{Key: element.Key, Value: element.Value})
-	}
-
+func (b *fieldUpdateBuilder) SetOnInsert(value any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: value})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetOnInsertForMap(data map[string]any) *Builder {
-	if data != nil {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: converter.MapToBson(data)})
-	}
+func (b *fieldUpdateBuilder) SetOnInsertKeyValues(bsonElements ...types.KeyValue) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) CurrentDate(bsonElements ...types.KeyValue) *Builder {
+func (b *fieldUpdateBuilder) CurrentDate(value any) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: value})
+	return b.parent
+}
+
+func (b *fieldUpdateBuilder) CurrentDateKeyValues(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		if v, ok := element.Value.(bool); ok {
@@ -84,21 +73,24 @@ func (b *fieldUpdateBuilder) CurrentDate(bsonElements ...types.KeyValue) *Builde
 }
 
 func (b *fieldUpdateBuilder) CurrentDateForMap(data map[string]any) *Builder {
-	if data != nil {
-		d := bson.D{}
-		for k, v := range data {
-			if val, ok := v.(bool); ok {
-				d = append(d, bson.E{Key: k, Value: val})
-			} else {
-				d = append(d, bson.E{Key: k, Value: bson.M{types.Type: v}})
-			}
+	d := bson.D{}
+	for k, v := range data {
+		if val, ok := v.(bool); ok {
+			d = append(d, bson.E{Key: k, Value: val})
+		} else {
+			d = append(d, bson.E{Key: k, Value: bson.M{types.Type: v}})
 		}
-		b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: d})
 	}
+	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: d})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Inc(bsonElements ...types.KeyValue) *Builder {
+func (b *fieldUpdateBuilder) Inc(value any) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: value})
+	return b.parent
+}
+
+func (b *fieldUpdateBuilder) IncKeyValues(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		if val, ok := element.Value.(int); ok {
@@ -109,50 +101,32 @@ func (b *fieldUpdateBuilder) Inc(bsonElements ...types.KeyValue) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) IncForMap(data map[string]int) *Builder {
-	if data != nil {
-		d := bson.D{}
-		for k, v := range data {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: d})
-	}
-	return b.parent
-}
-
-func (b *fieldUpdateBuilder) Min(bsonElements ...types.KeyValue) *Builder {
-	value := bson.D{}
-	for _, element := range bsonElements {
-		value = append(value, bson.E{Key: element.Key, Value: element.Value})
-	}
+func (b *fieldUpdateBuilder) Min(value any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: value})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MinForMap(data map[string]any) *Builder {
-	if data != nil {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: converter.MapToBson(data)})
-	}
+func (b *fieldUpdateBuilder) MinKeyValues(bsonElements ...types.KeyValue) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Max(bsonElements ...types.KeyValue) *Builder {
-	value := bson.D{}
-	for _, element := range bsonElements {
-		value = append(value, bson.E{Key: element.Key, Value: element.Value})
-	}
+func (b *fieldUpdateBuilder) Max(value any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: value})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MaxForMap(data map[string]any) *Builder {
-	if data != nil {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: converter.MapToBson(data)})
-	}
+func (b *fieldUpdateBuilder) MaxKeyValues(bsonElements ...types.KeyValue) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Mul(bsonElements ...types.KeyValue) *Builder {
+func (b *fieldUpdateBuilder) Mul(value any) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: value})
+	return b.parent
+}
+
+func (b *fieldUpdateBuilder) MulKeyValues(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		v := element.Value
@@ -164,37 +138,18 @@ func (b *fieldUpdateBuilder) Mul(bsonElements ...types.KeyValue) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MulForMap(data map[string]any) *Builder {
-	if data != nil {
-		d := bson.D{}
-		for k, v := range data {
-			if utils.IsNumeric(v) {
-				d = append(d, bson.E{Key: k, Value: v})
-			}
-		}
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: d})
-	}
-	return b.parent
-}
-
-func (b *fieldUpdateBuilder) Rename(keyValues ...string) *Builder {
-	value := bson.D{}
-	if len(keyValues)%2 == 0 {
-		for i := 0; i < len(keyValues); i += 2 {
-			value = append(value, bson.E{Key: keyValues[i], Value: keyValues[i+1]})
-		}
-	}
+func (b *fieldUpdateBuilder) Rename(value any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: value})
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) RenameForMap(data map[string]string) *Builder {
-	if data != nil {
-		d := bson.D{}
-		for k, v := range data {
-			d = append(d, bson.E{Key: k, Value: v})
+func (b *fieldUpdateBuilder) RenameKeyValues(bsonElements ...types.KeyValue) *Builder {
+	value := bson.D{}
+	for _, element := range bsonElements {
+		if v, ok := element.Value.(string); ok {
+			value = append(value, bson.E{Key: element.Key, Value: v})
 		}
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: d})
 	}
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: value})
 	return b.parent
 }
