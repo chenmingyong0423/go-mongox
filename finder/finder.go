@@ -70,7 +70,7 @@ func (f *Finder[T]) FindOne(ctx context.Context) (*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) FindOneOptions(opts ...*options.FindOneOptions) *Finder[T] {
+func (f *Finder[T]) OneOptions(opts ...*options.FindOneOptions) *Finder[T] {
 	f.findOneOpts = opts
 	return f
 }
@@ -89,7 +89,7 @@ func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) FindAllOptions(opts ...*options.FindOptions) *Finder[T] {
+func (f *Finder[T]) AllOptions(opts ...*options.FindOptions) *Finder[T] {
 	f.findOpts = opts
 	return f
 }
