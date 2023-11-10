@@ -30,6 +30,7 @@ import (
 type iFinder[T any] interface {
 	FindOne(ctx context.Context) (*T, error)
 	FindAll(ctx context.Context) ([]*T, error)
+	Count(ctx context.Context) (int64, error)
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -39,10 +40,11 @@ func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
 var _ iFinder[any] = (*Finder[any])(nil)
 
 type Finder[T any] struct {
-	collection  *mongo.Collection
-	findOneOpts []*options.FindOneOptions
-	findOpts    []*options.FindOptions
-	filter      any
+	collection   *mongo.Collection
+	findOneOpts  []*options.FindOneOptions
+	findOpts     []*options.FindOptions
+	countOptions []*options.CountOptions
+	filter       any
 }
 
 // Filter is used to set the filter of the query
@@ -92,4 +94,17 @@ func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
 func (f *Finder[T]) AllOptions(opts ...*options.FindOptions) *Finder[T] {
 	f.findOpts = opts
 	return f
+}
+
+func (f *Finder[T]) CountOptions(opts ...*options.CountOptions) *Finder[T] {
+	f.countOptions = opts
+	return f
+}
+
+func (f *Finder[T]) Count(ctx context.Context) (int64, error) {
+	cnt, err := f.collection.CountDocuments(ctx, f.filter, f.countOptions...)
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
 }

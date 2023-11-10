@@ -523,3 +523,69 @@ func TestFinder_e2e_All(t *testing.T) {
 		})
 	}
 }
+
+func TestFinder_e2e_Count(t *testing.T) {
+	collection := getCollection(t)
+	finder := NewFinder[types.TestUser](collection)
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter any
+		opts   []*options.CountOptions
+
+		ctx     context.Context
+		want    int64
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:    "nil filter error",
+			before:  func(_ context.Context, _ *testing.T) {},
+			after:   func(_ context.Context, _ *testing.T) {},
+			filter:  nil,
+			wantErr: assert.Error,
+		},
+		{
+			name:    "returns 0",
+			before:  func(_ context.Context, _ *testing.T) {},
+			after:   func(_ context.Context, _ *testing.T) {},
+			filter:  bson.D{},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "returns 1",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Id:   "123",
+					Name: "cmy",
+					Age:  24,
+				})
+				assert.NoError(t, err)
+				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			opts: []*options.CountOptions{
+				options.Count().SetComment("test"),
+			},
+			filter:  bson.D{},
+			want:    1,
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			count, err := finder.Filter(tc.filter).CountOptions(tc.opts...).Count(tc.ctx)
+			tc.after(tc.ctx, t)
+			if tc.wantErr(t, err) {
+				assert.Equal(t, tc.want, count)
+			}
+		})
+	}
+}

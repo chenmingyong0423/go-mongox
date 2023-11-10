@@ -16,6 +16,7 @@ package finder
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -140,6 +141,57 @@ func TestFinder_All(t *testing.T) {
 			finder := tc.mock(tc.ctx, ctl)
 
 			users, err := finder.FindAll(tc.ctx)
+			assert.Equal(t, tc.wantErr, err)
+			assert.Equal(t, tc.want, users)
+		})
+	}
+}
+
+func TestFinder_Count(t *testing.T) {
+	testCases := []struct {
+		name string
+		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser]
+		ctx  context.Context
+
+		want    int64
+		wantErr error
+	}{
+		{
+			name: "error",
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().Count(ctx).Return(int64(0), errors.New("nil filter error")).Times(1)
+				return mockCollection
+			},
+			want:    0,
+			wantErr: errors.New("nil filter error"),
+		},
+		{
+			name: "matched 0",
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().Count(ctx).Return(int64(0), nil).Times(1)
+				return mockCollection
+			},
+			want: 0,
+		},
+		{
+			name: "matched 1",
+			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
+				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
+				mockCollection.EXPECT().Count(ctx).Return(int64(1), nil).Times(1)
+				return mockCollection
+			},
+			want: 1,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			finder := tc.mock(tc.ctx, ctl)
+
+			users, err := finder.Count(tc.ctx)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})
