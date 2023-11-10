@@ -70,7 +70,7 @@ func Test_accumulatorsBuilder_Push(t *testing.T) {
 		{
 			name: "normal",
 			// { item: "$item", quantity: "$quantity" }
-			expression: BsonBuilder().AddKeyValues(converter.KeyValue[any]("item", "$item"), converter.KeyValue[any]("quantity", "$quantity")).Build(),
+			expression: BsonBuilder().AddKeyValues(converter.KeyValue("item", "$item"), converter.KeyValue("quantity", "$quantity")).Build(),
 			expected:   bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
 		},
 	}

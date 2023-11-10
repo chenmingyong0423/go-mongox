@@ -159,7 +159,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue[any]("name", "cmy")).Build(),
+			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue("name", "cmy")).Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -179,7 +179,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("123").Build(),
-			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue[any]("name", "hhh")).Build(),
+			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue("name", "hhh")).Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -223,7 +223,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue[any]("name", "cmy")).Build(),
+			updates: update.BsonBuilder().SetKeyValues(converter.KeyValue("name", "cmy")).Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
@@ -258,9 +258,9 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx      context.Context
-		filter   []types.KeyValue[any]
+		filter   []types.KeyValue
 		operator string
-		updates  []types.KeyValue[any]
+		updates  []types.KeyValue
 		opts     []*options.UpdateOptions
 
 		want    *mongo.UpdateResult
@@ -286,7 +286,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			ctx:      context.Background(),
 			filter:   nil,
 			operator: "",
-			updates:  []types.KeyValue[any]{converter.KeyValue[any]("name", "cmy")},
+			updates:  []types.KeyValue{converter.KeyValue("name", "cmy")},
 			want:     nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -309,8 +309,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			ctx:      context.Background(),
 			operator: types.Set,
-			filter:   []types.KeyValue[any]{converter.KeyValue[any]("_id", update.BsonBuilder().Add(converter.KeyValue[any]("$in", []string{"789", "000"})).Build())},
-			updates:  []types.KeyValue[any]{converter.KeyValue[any]("name", "cmy")},
+			filter:   []types.KeyValue{converter.KeyValue("_id", update.BsonBuilder().Add(converter.KeyValue("$in", []string{"789", "000"})).Build())},
+			updates:  []types.KeyValue{converter.KeyValue("name", "cmy")},
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -333,8 +333,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			operator: types.Set,
 			ctx:      context.Background(),
-			filter:   []types.KeyValue[any]{converter.KeyValue[any]("_id", update.BsonBuilder().Add(converter.KeyValue[any]("$in", []string{"123", "456"})).Build())},
-			updates:  []types.KeyValue[any]{converter.KeyValue[any]("name", "hhh")},
+			filter:   []types.KeyValue{converter.KeyValue("_id", update.BsonBuilder().Add(converter.KeyValue("$in", []string{"123", "456"})).Build())},
+			updates:  []types.KeyValue{converter.KeyValue("name", "hhh")},
 			want:     &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -356,8 +356,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			operator: types.Set,
 			ctx:      context.Background(),
-			filter:   []types.KeyValue[any]{converter.KeyValue[any]("_id", "456")},
-			updates:  []types.KeyValue[any]{converter.KeyValue[any]("name", "cmy")},
+			filter:   []types.KeyValue{converter.KeyValue("_id", "456")},
+			updates:  []types.KeyValue{converter.KeyValue("name", "cmy")},
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
@@ -478,7 +478,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: types.Set,
 			ctx:      context.Background(),
 			filter:   query.BsonBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSetKeyValues(converter.KeyValue[any]("name", "cmy")).Build(),
+			updates:  update.BsonBuilder().AddToSetKeyValues(converter.KeyValue("name", "cmy")).Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -499,7 +499,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: types.Set,
 			ctx:      context.Background(),
 			filter:   query.BsonBuilder().Id("123").Build(),
-			updates:  update.BsonBuilder().Add(converter.KeyValue[any]("name", "hhh")).Build(),
+			updates:  update.BsonBuilder().Add(converter.KeyValue("name", "hhh")).Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -543,7 +543,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			ctx:      context.Background(),
 			operator: types.Set,
 			filter:   query.BsonBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSetKeyValues(converter.KeyValue[any]("name", "cmy")).Build(),
+			updates:  update.BsonBuilder().AddToSetKeyValues(converter.KeyValue("name", "cmy")).Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},

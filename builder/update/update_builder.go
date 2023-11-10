@@ -32,7 +32,7 @@ type Builder struct {
 	arrayUpdateBuilder
 }
 
-func (b *Builder) Add(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
 	if len(bsonElements) != 0 {
 		for _, element := range bsonElements {
 			b.data = append(b.data, bson.E{Key: element.Key, Value: element.Value})

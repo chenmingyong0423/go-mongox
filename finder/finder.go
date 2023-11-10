@@ -54,7 +54,7 @@ func (f *Finder[T]) Filter(filter any) *Finder[T] {
 }
 
 // FilterKeyValue is used to set the filter of the query
-func (f *Finder[T]) FilterKeyValue(bsonElements ...types.KeyValue[any]) *Finder[T] {
+func (f *Finder[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Finder[T] {
 	if bsonElements == nil {
 		f.filter = nil
 	} else {

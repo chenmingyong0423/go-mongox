@@ -51,7 +51,7 @@ func (b *Builder) Build() bson.D {
 	return b.d
 }
 
-func (b *Builder) AddKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *Builder) AddKeyValues(bsonElements ...types.KeyValue) *Builder {
 	if len(bsonElements) != 0 {
 		for _, element := range bsonElements {
 			b.d = append(b.d, bson.E{Key: element.Key, Value: element.Value})

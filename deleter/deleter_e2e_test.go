@@ -138,7 +138,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter []types.KeyValue[any]
+		filter []types.KeyValue
 		opts   []*options.DeleteOptions
 
 		ctx       context.Context
@@ -172,7 +172,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			filter: []types.KeyValue[any]{
+			filter: []types.KeyValue{
 				{Key: "_id", Value: "789"},
 			},
 			ctx:  context.Background(),
@@ -197,7 +197,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: []types.KeyValue[any]{
+			filter: []types.KeyValue{
 				{Key: "name", Value: "cmy"},
 			},
 			ctx:  context.Background(),

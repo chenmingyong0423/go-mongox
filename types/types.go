@@ -186,9 +186,9 @@ type DateToStringOptions struct {
 	OnNull   any
 }
 
-type KeyValue[T any] struct {
+type KeyValue struct {
 	Key   string
-	Value T
+	Value any
 }
 
 type ResultHandler func(cursor *mongo.Cursor) error

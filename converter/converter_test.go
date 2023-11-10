@@ -500,13 +500,13 @@ func TestMapToBson(t *testing.T) {
 }
 
 func TestKeyValue(t *testing.T) {
-	assert.Equal(t, types.KeyValue[string]{Key: "name", Value: "cmy"}, KeyValue("name", "cmy"))
+	assert.Equal(t, types.KeyValue{Key: "name", Value: "cmy"}, KeyValue("name", "cmy"))
 }
 
 func TestKeyValuesToBson(t *testing.T) {
 	testCases := []struct {
 		name      string
-		keyValues []types.KeyValue[any]
+		keyValues []types.KeyValue
 		want      bson.D
 	}{
 		{
@@ -516,14 +516,14 @@ func TestKeyValuesToBson(t *testing.T) {
 		},
 		{
 			name:      "empty keyValues",
-			keyValues: []types.KeyValue[any]{},
+			keyValues: []types.KeyValue{},
 			want:      bson.D{},
 		},
 		{
 			name: "normal keyValues",
-			keyValues: []types.KeyValue[any]{
-				KeyValue[any]("name", "cmy"),
-				KeyValue[any]("age", int64(24)),
+			keyValues: []types.KeyValue{
+				KeyValue("name", "cmy"),
+				KeyValue("age", int64(24)),
 			},
 			want: bson.D{
 				bson.E{Key: "name", Value: "cmy"},

@@ -55,7 +55,7 @@ func (b *Builder) Id(v any) *Builder {
 	return b
 }
 
-func (b *Builder) Add(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
 	if len(bsonElements) != 0 {
 		converter.KeyValuesToBson(bsonElements...)
 		for _, element := range bsonElements {

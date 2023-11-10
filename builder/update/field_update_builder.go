@@ -30,7 +30,7 @@ func (b *fieldUpdateBuilder) Set(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) SetKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -49,7 +49,7 @@ func (b *fieldUpdateBuilder) SetOnInsert(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetOnInsertKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) SetOnInsertKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -59,7 +59,7 @@ func (b *fieldUpdateBuilder) CurrentDate(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) CurrentDateKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) CurrentDateKeyValues(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		if v, ok := element.Value.(bool); ok {
@@ -90,7 +90,7 @@ func (b *fieldUpdateBuilder) Inc(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) IncKeyValues(bsonElements ...types.KeyValue[int]) *Builder {
+func (b *fieldUpdateBuilder) IncKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -100,7 +100,7 @@ func (b *fieldUpdateBuilder) Min(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MinKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) MinKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -110,7 +110,7 @@ func (b *fieldUpdateBuilder) Max(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MaxKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) MaxKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
@@ -120,7 +120,7 @@ func (b *fieldUpdateBuilder) Mul(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) MulKeyValues(bsonElements ...types.KeyValue[any]) *Builder {
+func (b *fieldUpdateBuilder) MulKeyValues(bsonElements ...types.KeyValue) *Builder {
 	value := bson.D{}
 	for _, element := range bsonElements {
 		v := element.Value
@@ -137,7 +137,7 @@ func (b *fieldUpdateBuilder) Rename(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) RenameKeyValues(bsonElements ...types.KeyValue[string]) *Builder {
+func (b *fieldUpdateBuilder) RenameKeyValues(bsonElements ...types.KeyValue) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: converter.KeyValuesToBson(bsonElements...)})
 	return b.parent
 }
