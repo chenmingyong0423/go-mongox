@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
@@ -256,9 +258,9 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx      context.Context
-		filter   []types.KeyValue
+		filter   any
 		operator string
-		updates  []types.KeyValue
+		updates  any
 		opts     []*options.UpdateOptions
 
 		want    *mongo.UpdateResult
@@ -284,7 +286,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			ctx:      context.Background(),
 			filter:   nil,
 			operator: "",
-			updates:  []types.KeyValue{types.KV("name", "cmy")},
+			updates:  bsonx.M("name", "cmy"),
 			want:     nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -307,8 +309,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			ctx:      context.Background(),
 			operator: types.Set,
-			filter:   []types.KeyValue{types.KV("_id", update.BsonBuilder().Add(types.KV("$in", []string{"789", "000"})).Build())},
-			updates:  []types.KeyValue{types.KV("name", "cmy")},
+			filter:   query.BsonBuilder().InString("_id", "789", "000").Build(),
+			updates:  bsonx.M("name", "cmy"),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -331,8 +333,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			operator: types.Set,
 			ctx:      context.Background(),
-			filter:   []types.KeyValue{types.KV("_id", update.BsonBuilder().Add(types.KV("$in", []string{"123", "456"})).Build())},
-			updates:  []types.KeyValue{types.KV("name", "hhh")},
+			filter:   query.BsonBuilder().InString("_id", "123", "456").Build(),
+			updates:  bsonx.M("name", "hhh"),
 			want:     &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -354,8 +356,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			},
 			operator: types.Set,
 			ctx:      context.Background(),
-			filter:   []types.KeyValue{types.KV("_id", "456")},
-			updates:  []types.KeyValue{types.KV("name", "cmy")},
+			filter:   bsonx.Id("456"),
+			updates:  bsonx.M("name", "cmy"),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
@@ -369,7 +371,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.operator, tc.updates...).Options(tc.opts...).UpdateMany(tc.ctx)
+			got, err := updater.Filter(tc.filter).UpdatesWithOperator(tc.operator, tc.updates).Options(tc.opts...).UpdateMany(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return

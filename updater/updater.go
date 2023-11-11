@@ -17,11 +17,6 @@ package updater
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/builder/update"
-
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -50,12 +45,6 @@ func (u *Updater[T]) Filter(filter any) *Updater[T] {
 	return u
 }
 
-// FilterKeyValue is used to set the filter of the query
-func (u *Updater[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Updater[T] {
-	u.filter = query.BsonBuilder().Add(bsonElements...).Build()
-	return u
-}
-
 // Updates is used to set the updates of the update
 func (u *Updater[T]) Updates(updates any) *Updater[T] {
 	u.updates = updates
@@ -64,16 +53,6 @@ func (u *Updater[T]) Updates(updates any) *Updater[T] {
 
 func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T] {
 	u.updates = bson.D{bson.E{Key: operator, Value: value}}
-	return u
-}
-
-// UpdatesKeyValue is used to set the updates of the update
-func (u *Updater[T]) UpdatesKeyValue(operator string, bsonElements ...types.KeyValue) *Updater[T] {
-	if len(bsonElements) != 0 {
-		u.updates = bson.D{bson.E{Key: operator, Value: update.BsonBuilder().Add(bsonElements...).Build()}}
-	} else {
-		u.updates = nil
-	}
 	return u
 }
 
