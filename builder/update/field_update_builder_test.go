@@ -18,8 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
-
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -109,7 +107,7 @@ func Test_fieldUpdateBuilder_CurrentDateKeyValues(t *testing.T) {
 		},
 		{
 			name: "normal params",
-			data: []types.KeyValue{converter.KeyValue("lastModified", true), converter.KeyValue("cancellation.date", "timestamp")},
+			data: []types.KeyValue{types.KV("lastModified", true), types.KV("cancellation.date", "timestamp")},
 			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
 		},
 	}
@@ -275,7 +273,7 @@ func Test_fieldUpdateBuilder_MaxKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("stock", 100), converter.KeyValue("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), converter.KeyValue("score", -50)},
+			bsonElements: []types.KeyValue{types.KV("stock", 100), types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), types.KV("score", -50)},
 			want:         bson.D{bson.E{Key: "$max", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "score", Value: -50}}}},
 		},
 	}
@@ -342,12 +340,12 @@ func Test_fieldUpdateBuilder_MulKeyValues(t *testing.T) {
 		},
 		{
 			name:         "values contain non-number",
-			bsonElements: []types.KeyValue{converter.KeyValue("price", 1.25), converter.KeyValue("qty", "2.5")},
+			bsonElements: []types.KeyValue{types.KV("price", 1.25), types.KV("qty", "2.5")},
 			want:         bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}}}},
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("price", 1.25), converter.KeyValue("qty", 2), converter.KeyValue("score", -1), converter.KeyValue("n", -1.1)},
+			bsonElements: []types.KeyValue{types.KV("price", 1.25), types.KV("qty", 2), types.KV("score", -1), types.KV("n", -1.1)},
 			want:         bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
 		},
 	}
@@ -412,7 +410,7 @@ func Test_fieldUpdateBuilder_RenameKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("nmae", "name"), converter.KeyValue("name.first", "name.last")},
+			bsonElements: []types.KeyValue{types.KV("nmae", "name"), types.KV("name.first", "name.last")},
 			want:         bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
 		},
 	}
@@ -436,7 +434,7 @@ func Test_fieldUpdateBuilder_SetKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("name", "cmy"), converter.KeyValue("age", 24)},
+			bsonElements: []types.KeyValue{types.KV("name", "cmy"), types.KV("age", 24)},
 			want:         bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
 		},
 	}
@@ -464,7 +462,7 @@ func Test_fieldUpdateBuilder_SetOnInsertKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal bsonElements",
-			bsonElements: []types.KeyValue{converter.KeyValue("name", "cmy"), converter.KeyValue("age", 24)},
+			bsonElements: []types.KeyValue{types.KV("name", "cmy"), types.KV("age", 24)},
 			want:         bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
 		},
 	}
@@ -516,7 +514,7 @@ func Test_fieldUpdateBuilder_IncKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("read", 1), converter.KeyValue("likes", 1), converter.KeyValue("comments", 1), converter.KeyValue("score", -1)},
+			bsonElements: []types.KeyValue{types.KV("read", 1), types.KV("likes", 1), types.KV("comments", 1), types.KV("score", -1)},
 			want:         bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "read", Value: 1}, bson.E{Key: "likes", Value: 1}, bson.E{Key: "comments", Value: 1}, bson.E{Key: "score", Value: -1}}}},
 		},
 	}
@@ -544,7 +542,7 @@ func Test_fieldUpdateBuilder_MinKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{converter.KeyValue("stock", 100), converter.KeyValue("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), converter.KeyValue("score", -50)},
+			bsonElements: []types.KeyValue{types.KV("stock", 100), types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), types.KV("score", -50)},
 			want:         bson.D{bson.E{Key: "$min", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "score", Value: -50}}}},
 		},
 	}

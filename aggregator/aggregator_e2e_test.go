@@ -21,8 +21,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
-
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -144,7 +142,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Sort(converter.KeyValue("age", -1)).Build(),
+			pipeline: aggregation.StageBsonBuilder().Sort(types.KV("age", -1)).Build(),
 			want: []*types.TestUser{
 				{Id: "1", Name: "cmy", Age: 24},
 				{Id: "2", Name: "gopher", Age: 20},
@@ -167,7 +165,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Sort(converter.KeyValue("name", 1)).Build(),
+			pipeline: aggregation.StageBsonBuilder().Sort(types.KV("name", 1)).Build(),
 			aggregationOptions: []*options.AggregateOptions{
 				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
 			},
@@ -240,7 +238,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(converter.KeyValue("is_programmer", true)).Build(),
+			pipeline: aggregation.StageBsonBuilder().Set(types.KV("is_programmer", true)).Build(),
 			preUsers: make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
@@ -264,7 +262,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(converter.KeyValue("is_programmer", true)).Sort(converter.KeyValue("name", 1)).Build(),
+			pipeline: aggregation.StageBsonBuilder().Set(types.KV("is_programmer", true)).Sort(types.KV("name", 1)).Build(),
 			preUsers: make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
@@ -289,7 +287,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(converter.KeyValue("is_programmer", true)).Sort(converter.KeyValue("name", 1)).Build(),
+			pipeline: aggregation.StageBsonBuilder().Set(types.KV("is_programmer", true)).Sort(types.KV("name", 1)).Build(),
 			preUsers: make([]*User, 0),
 			callback: func(ctx context.Context, cursor *mongo.Cursor) error {
 				return errors.New("got error from cursor")

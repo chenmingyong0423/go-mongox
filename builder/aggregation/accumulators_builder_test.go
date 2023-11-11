@@ -17,7 +17,7 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -70,7 +70,7 @@ func Test_accumulatorsBuilder_Push(t *testing.T) {
 		{
 			name: "normal",
 			// { item: "$item", quantity: "$quantity" }
-			expression: BsonBuilder().AddKeyValues(converter.KeyValue("item", "$item"), converter.KeyValue("quantity", "$quantity")).Build(),
+			expression: BsonBuilder().AddKeyValues(types.KV("item", "$item"), types.KV("quantity", "$quantity")).Build(),
 			expected:   bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
 		},
 	}

@@ -17,7 +17,6 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
@@ -37,7 +36,7 @@ func TestBuilder_AddKeyValues(t *testing.T) {
 		},
 		{
 			name:      "normal",
-			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy")},
+			keyValues: []types.KeyValue{types.KV("name", "cmy")},
 			expected:  bson.D{{Key: "name", Value: "cmy"}},
 		},
 	}

@@ -17,7 +17,7 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -76,7 +76,7 @@ func Test_arrayBuilder_ArrayToObject(t *testing.T) {
 		},
 		{
 			name:       "array expression",
-			expression: []any{BsonBuilder().AddKeyValues(converter.KeyValue("k", "item"), converter.KeyValue("v", "abc123")).Build()},
+			expression: []any{BsonBuilder().AddKeyValues(types.KV("k", "item"), types.KV("v", "abc123")).Build()},
 			expected:   bson.D{{Key: "$arrayToObject", Value: []any{bson.D{{Key: "k", Value: "item"}, {Key: "v", Value: "abc123"}}}}},
 		},
 	}
