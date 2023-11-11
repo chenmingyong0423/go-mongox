@@ -84,7 +84,7 @@ func Test_arrayUpdateBuilder_AddToSetKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{KV("colors", "mauve"), KV("letters", []string{"a", "b", "c"})},
+			bsonElements: []types.KeyValue{types.KV("colors", "mauve"), types.KV("letters", []string{"a", "b", "c"})},
 			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 	}
@@ -150,7 +150,7 @@ func Test_arrayUpdateBuilder_PopKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{KV("scores", 1), KV("letters", -1)},
+			bsonElements: []types.KeyValue{types.KV("scores", 1), types.KV("letters", -1)},
 			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 	}
@@ -170,7 +170,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(KV("vegetables", "carrots")).Build(),
+			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(types.KV("vegetables", "carrots")).Build(),
 			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
 		},
 		{
@@ -207,7 +207,7 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: BsonBuilder().Add(KV("scores", BsonBuilder().EachInt([]int{90, 82, 85}...).Build())).Add(KV("sort", 1)).Build(),
+			value: BsonBuilder().Add(types.KV("scores", BsonBuilder().EachInt([]int{90, 82, 85}...).Build())).Add(types.KV("sort", 1)).Build(),
 			want:  bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "sort", Value: 1}}}},
 		},
 		{
@@ -251,7 +251,7 @@ func Test_arrayUpdateBuilder_PushKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal params",
-			bsonElements: []types.KeyValue{KV("scores", BsonBuilder().Add(KV("$each", []int{90, 82, 85})).Build()), KV("scores", 1)},
+			bsonElements: []types.KeyValue{types.KV("scores", BsonBuilder().Add(types.KV("$each", []int{90, 82, 85})).Build()), types.KV("scores", 1)},
 			want:         bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
 		},
 	}
@@ -1322,7 +1322,7 @@ func Test_arrayUpdateBuilder_SortKeyValues(t *testing.T) {
 		},
 		{
 			name:         "normal keyValues",
-			bsonElements: []types.KeyValue{KV("score", -1), KV("name", 1)},
+			bsonElements: []types.KeyValue{types.KV("score", -1), types.KV("name", 1)},
 			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 	}
@@ -1352,9 +1352,9 @@ func Test_arrayUpdateBuilder_PullKeyValues(t *testing.T) {
 		{
 			name: "normal bsonElements",
 			bsonElements: []types.KeyValue{
-				KV("fruits", query.BsonBuilder().Add(KV("$in", []string{"apples", "oranges"})).Build()),
-				KV("votes", query.BsonBuilder().Add(KV("$gte", 6)).Build()),
-				KV("vegetables", "carrots"),
+				types.KV("fruits", query.BsonBuilder().Add(types.KV("$in", []string{"apples", "oranges"})).Build()),
+				types.KV("votes", query.BsonBuilder().Add(types.KV("$gte", 6)).Build()),
+				types.KV("vegetables", "carrots"),
 			},
 			want: bson.D{bson.E{Key: "$pull", Value: bson.D{
 				bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}},

@@ -19,10 +19,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func KV(key string, value any) types.KeyValue {
-	return types.KeyValue{Key: key, Value: value}
-}
-
 func BsonBuilder() *Builder {
 	b := &Builder{data: bson.D{}}
 	b.fieldUpdateBuilder = fieldUpdateBuilder{parent: b}
