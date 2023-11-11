@@ -17,7 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/converter"
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
@@ -47,7 +46,7 @@ func TestQueryBuilder_Add(t *testing.T) {
 		},
 		{
 			name:      "normal params",
-			keyValues: []types.KeyValue{converter.KeyValue("name", "cmy"), converter.KeyValue("age", 18), converter.KeyValue("scores", []int{100, 99, 98})},
+			keyValues: []types.KeyValue{KV("name", "cmy"), KV("age", 18), KV("scores", []int{100, 99, 98})},
 			want:      bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}},
 		},
 	}
