@@ -71,7 +71,7 @@ func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, handler typ
 		return err
 	}
 	defer cursor.Close(ctx)
-	if err = handler(cursor); err != nil {
+	if err = handler(ctx, cursor); err != nil {
 		return err
 	}
 	return nil

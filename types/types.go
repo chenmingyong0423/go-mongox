@@ -14,7 +14,11 @@
 
 package types
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"context"
+
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 const (
 	Id                 = "_id"
@@ -191,7 +195,7 @@ type KeyValue struct {
 	Value any
 }
 
-type ResultHandler func(cursor *mongo.Cursor) error
+type ResultHandler func(ctx context.Context, cursor *mongo.Cursor) error
 
 type Numeric interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |

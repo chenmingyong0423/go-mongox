@@ -131,8 +131,8 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			var callback types.ResultHandler = func(cursor *mongo.Cursor) error {
-				return cursor.All(tc.ctx, &tc.callbackParam)
+			var callback types.ResultHandler = func(ctx context.Context, cursor *mongo.Cursor) error {
+				return cursor.All(ctx, &tc.callbackParam)
 			}
 			aggregator := tc.mock(tc.ctx, ctl)
 			err := aggregator.AggregationWithCallback(tc.ctx, callback)

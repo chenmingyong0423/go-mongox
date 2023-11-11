@@ -291,7 +291,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 			},
 			pipeline: aggregation.StageBsonBuilder().Set(converter.KeyValue("is_programmer", true)).Sort(converter.KeyValue("name", 1)).Build(),
 			preUsers: make([]*User, 0),
-			callback: func(cursor *mongo.Cursor) error {
+			callback: func(ctx context.Context, cursor *mongo.Cursor) error {
 				return errors.New("got error from cursor")
 			},
 			want:               []*User{},
@@ -303,8 +303,8 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			callback := func(cursor *mongo.Cursor) error {
-				return cursor.All(context.Background(), &tc.preUsers)
+			callback := func(ctx context.Context, cursor *mongo.Cursor) error {
+				return cursor.All(ctx, &tc.preUsers)
 			}
 			if tc.callback != nil {
 				callback = tc.callback
