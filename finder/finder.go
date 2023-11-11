@@ -17,10 +17,6 @@ package finder
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -50,16 +46,6 @@ type Finder[T any] struct {
 // Filter is used to set the filter of the query
 func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	f.filter = filter
-	return f
-}
-
-// FilterKeyValue is used to set the filter of the query
-func (f *Finder[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Finder[T] {
-	if bsonElements == nil {
-		f.filter = nil
-	} else {
-		f.filter = query.BsonBuilder().Add(bsonElements...).Build()
-	}
 	return f
 }
 
