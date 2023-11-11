@@ -20,7 +20,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/filter"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
@@ -81,13 +81,13 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  filter.Id("456"),
+			filter:  bsonx.Id("456"),
 			wantErr: mongo.ErrNoDocuments,
 		},
 		{
@@ -102,7 +102,7 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
@@ -125,12 +125,12 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.Id("123"),
+			filter: bsonx.Id("123"),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -149,12 +149,12 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.M("name", "cmy"),
+			filter: bsonx.M("name", "cmy"),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -173,12 +173,12 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.M("age", 18),
+			filter: bsonx.M("age", 18),
 			want: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
@@ -197,14 +197,14 @@ func TestFinder_e2e_One(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
 			},
-			filter: filter.Id("123"),
+			filter: bsonx.Id("123"),
 			opts: []*options.FindOneOptions{
 				{
-					Projection: filter.M("_id", 0),
+					Projection: bsonx.M("_id", 0),
 				},
 			},
 			want: &types.TestUser{
@@ -277,7 +277,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.D(),
+			filter: bsonx.D(),
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err == nil {
 					t.Errorf("expected error, got nil")
@@ -310,7 +310,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.Id("789"),
+			filter: bsonx.Id("789"),
 			want:   []*types.TestUser{},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err != nil {
@@ -344,7 +344,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.D(),
+			filter: bsonx.D(),
 			want: []*types.TestUser{
 				{
 					Id:   "123",
@@ -434,7 +434,7 @@ func TestFinder_e2e_All(t *testing.T) {
 				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: filter.M("name", "cmy"),
+			filter: bsonx.M("name", "cmy"),
 			want: []*types.TestUser{
 				{
 					Id:   "123",
@@ -480,10 +480,10 @@ func TestFinder_e2e_All(t *testing.T) {
 
 				finder.filter = bson.D{}
 			},
-			filter: filter.D(),
+			filter: bsonx.D(),
 			opts: []*options.FindOptions{
 				{
-					Projection: filter.M("_id", 0),
+					Projection: bsonx.M("_id", 0),
 				},
 			},
 			want: []*types.TestUser{
@@ -560,7 +560,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, filter.Id("123"))
+				deleteResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},

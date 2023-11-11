@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package filter
+package bsonx
 
 import (
 	"testing"
@@ -21,10 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
-
-func TestM(t *testing.T) {
-	assert.Equal(t, bson.M{"name": "chenmingyong"}, M("name", "chenmingyong"))
-}
 
 func TestD(t *testing.T) {
 	testCases := []struct {
