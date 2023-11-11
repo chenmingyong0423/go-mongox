@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
@@ -138,7 +140,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter []types.KeyValue
+		filter any
 		opts   []*options.DeleteOptions
 
 		ctx       context.Context
@@ -172,11 +174,9 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			filter: []types.KeyValue{
-				{Key: "_id", Value: "789"},
-			},
-			ctx:  context.Background(),
-			opts: []*options.DeleteOptions{options.Delete().SetComment("test")},
+			filter: bsonx.Id("789"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 			},
@@ -197,11 +197,9 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: []types.KeyValue{
-				{Key: "name", Value: "cmy"},
-			},
-			ctx:  context.Background(),
-			opts: []*options.DeleteOptions{options.Delete().SetComment("test")},
+			filter: bsonx.M("name", "cmy"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 			},
@@ -211,7 +209,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.FilterKeyValue(tc.filter...).Options(tc.opts...).DeleteMany(tc.ctx)
+			result, err := deleter.Filter(tc.filter).Options(tc.opts...).DeleteMany(tc.ctx)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)

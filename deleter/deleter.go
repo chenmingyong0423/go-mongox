@@ -17,9 +17,6 @@ package deleter
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -43,16 +40,6 @@ type Deleter[T any] struct {
 // Filter is used to set the filter of the query
 func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 	d.filter = filter
-	return d
-}
-
-// FilterKeyValue is used to set the filter of the query
-func (d *Deleter[T]) FilterKeyValue(bsonElements ...types.KeyValue) *Deleter[T] {
-	if bsonElements == nil {
-		d.filter = nil
-	} else {
-		d.filter = query.BsonBuilder().Add(bsonElements...).Build()
-	}
 	return d
 }
 
