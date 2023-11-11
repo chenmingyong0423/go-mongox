@@ -34,3 +34,7 @@ func D(bsonElements ...types.KeyValue) bson.D {
 func KV(key string, value any) types.KeyValue {
 	return types.KeyValue{Key: key, Value: value}
 }
+
+func Id(value any) bson.M {
+	return M("_id", value)
+}
