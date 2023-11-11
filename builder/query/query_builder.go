@@ -20,10 +20,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func KV(key string, value any) types.KeyValue {
-	return types.KeyValue{Key: key, Value: value}
-}
-
 func BsonBuilder() *Builder {
 	query := &Builder{
 		data: bson.D{},

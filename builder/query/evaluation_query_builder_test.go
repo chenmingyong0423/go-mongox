@@ -17,6 +17,8 @@ package query
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -24,7 +26,7 @@ import (
 func Test_evaluationQueryBuilder_Expr(t *testing.T) {
 	assert.Equal(t,
 		bson.D{{Key: "$expr", Value: bson.D{{Key: "$gt", Value: []any{"$spent", "$budget"}}}}},
-		BsonBuilder().Expr(BsonBuilder().Add(KV("$gt", []any{
+		BsonBuilder().Expr(BsonBuilder().Add(types.KV("$gt", []any{
 			"$spent",
 			"$budget",
 		})).Build()).Build())
@@ -70,26 +72,26 @@ func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
 		}}},
 		BsonBuilder().JsonSchema(
 			BsonBuilder().
-				Add(KV("required", []string{"name", "major", "gpa", "address"})).
-				Add(KV("properties",
+				Add(types.KV("required", []string{"name", "major", "gpa", "address"})).
+				Add(types.KV("properties",
 					BsonBuilder().
-						Add(KV("name",
+						Add(types.KV("name",
 							BsonBuilder().
-								Add(KV("bsonType", "string")).
-								Add(KV("description", "must be a string and is required")).
+								Add(types.KV("bsonType", "string")).
+								Add(types.KV("description", "must be a string and is required")).
 								Build())).
-						Add(KV("address",
-							BsonBuilder().Add(KV("bsonType", "object")).
-								Add(KV("required", []string{"zipcode"})).
-								Add(KV("properties",
+						Add(types.KV("address",
+							BsonBuilder().Add(types.KV("bsonType", "object")).
+								Add(types.KV("required", []string{"zipcode"})).
+								Add(types.KV("properties",
 									BsonBuilder().
-										Add(KV("street",
+										Add(types.KV("street",
 											BsonBuilder().
-												Add(KV("bsonType", "string")).
+												Add(types.KV("bsonType", "string")).
 												Build())).
-										Add(KV("zipcode",
+										Add(types.KV("zipcode",
 											BsonBuilder().
-												Add(KV("bsonType", "string")).
+												Add(types.KV("bsonType", "string")).
 												Build())).
 										Build())).
 								Build())).
