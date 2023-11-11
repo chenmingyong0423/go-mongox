@@ -53,19 +53,19 @@ func (mr *MockiFinderMockRecorder[T]) Count(ctx any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockiFinder[T])(nil).Count), ctx)
 }
 
-// FindAll mocks base method.
-func (m *MockiFinder[T]) FindAll(ctx context.Context) ([]*T, error) {
+// Find mocks base method.
+func (m *MockiFinder[T]) Find(ctx context.Context) ([]*T, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ctx)
+	ret := m.ctrl.Call(m, "Find", ctx)
 	ret0, _ := ret[0].([]*T)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindAll indicates an expected call of FindAll.
-func (mr *MockiFinderMockRecorder[T]) FindAll(ctx any) *gomock.Call {
+// Find indicates an expected call of Find.
+func (mr *MockiFinderMockRecorder[T]) Find(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockiFinder[T])(nil).FindAll), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockiFinder[T])(nil).Find), ctx)
 }
 
 // FindOne mocks base method.

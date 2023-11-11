@@ -25,7 +25,7 @@ import (
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 type iFinder[T any] interface {
 	FindOne(ctx context.Context) (*T, error)
-	FindAll(ctx context.Context) ([]*T, error)
+	Find(ctx context.Context) ([]*T, error)
 	Count(ctx context.Context) (int64, error)
 }
 
@@ -63,7 +63,7 @@ func (f *Finder[T]) OneOptions(opts ...*options.FindOneOptions) *Finder[T] {
 	return f
 }
 
-func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
+func (f *Finder[T]) Find(ctx context.Context) ([]*T, error) {
 	t := make([]*T, 0)
 	cursor, err := f.collection.Find(ctx, f.filter, f.findOpts...)
 	if err != nil {
@@ -77,7 +77,7 @@ func (f *Finder[T]) FindAll(ctx context.Context) ([]*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) AllOptions(opts ...*options.FindOptions) *Finder[T] {
+func (f *Finder[T]) Options(opts ...*options.FindOptions) *Finder[T] {
 	f.findOpts = opts
 	return f
 }

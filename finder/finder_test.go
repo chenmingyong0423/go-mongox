@@ -97,7 +97,7 @@ func TestFinder_All(t *testing.T) {
 			name: "empty documents",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
 				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
-				mockCollection.EXPECT().FindAll(ctx).Return([]*types.TestUser{}, nil).Times(1)
+				mockCollection.EXPECT().Find(ctx).Return([]*types.TestUser{}, nil).Times(1)
 				return mockCollection
 			},
 			want: []*types.TestUser{},
@@ -106,7 +106,7 @@ func TestFinder_All(t *testing.T) {
 			name: "matched",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
 				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
-				mockCollection.EXPECT().FindAll(ctx).Return([]*types.TestUser{
+				mockCollection.EXPECT().Find(ctx).Return([]*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -140,7 +140,7 @@ func TestFinder_All(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			users, err := finder.FindAll(tc.ctx)
+			users, err := finder.Find(tc.ctx)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})
