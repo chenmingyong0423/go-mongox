@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,39 +28,13 @@ func StageBsonBuilder() *StageBuilder {
 	return &StageBuilder{pipeline: make([]bson.D, 0, 4)}
 }
 
-func (b *StageBuilder) AddFields(bsonElements ...types.KeyValue) *StageBuilder {
-	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: bsonx.KVsToBson(bsonElements...)}})
-	}
+func (b *StageBuilder) AddFields(value any) *StageBuilder {
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: value}})
 	return b
 }
 
-func (b *StageBuilder) AddFieldsForMap(keyValues map[string]any) *StageBuilder {
-	if keyValues != nil {
-		d := bson.D{}
-		for k, v := range keyValues {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: d}})
-	}
-	return b
-}
-
-func (b *StageBuilder) Set(bsonElements ...types.KeyValue) *StageBuilder {
-	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: bsonx.KVsToBson(bsonElements...)}})
-	}
-	return b
-}
-
-func (b *StageBuilder) SetForMap(keyValues map[string]any) *StageBuilder {
-	if keyValues != nil {
-		d := bson.D{}
-		for k, v := range keyValues {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: d}})
-	}
+func (b *StageBuilder) Set(value any) *StageBuilder {
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: value}})
 	return b
 }
 
@@ -104,63 +77,20 @@ func (b *StageBuilder) Match(expression any) *StageBuilder {
 	return b
 }
 
-func (b *StageBuilder) Group(id any, accumulators ...any) *StageBuilder {
+func (b *StageBuilder) Group(id any, accumulators ...bson.E) *StageBuilder {
 	d := bson.D{{Key: "_id", Value: id}}
-	if accumulators != nil && len(accumulators)%2 == 0 {
-		for i := 0; i < len(accumulators); i += 2 {
-			k, ok := accumulators[i].(string)
-			if !ok {
-				continue
-			}
-			d = append(d, bson.E{Key: k, Value: accumulators[i+1]})
-		}
-	}
+	d = append(d, accumulators...)
 	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageGroup, Value: d}})
 	return b
 }
 
-func (b *StageBuilder) GroupMap(id any, accumulators map[string]map[string]any) *StageBuilder {
-	d := bson.D{{Key: "_id", Value: id}}
-	for k, v := range accumulators {
-		d = append(d, bson.E{Key: k, Value: v})
-	}
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageGroup, Value: d}})
+func (b *StageBuilder) Sort(value any) *StageBuilder {
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: value}})
 	return b
 }
 
-func (b *StageBuilder) Sort(bsonElements ...types.KeyValue) *StageBuilder {
-	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: bsonx.KVsToBson(bsonElements...)}})
-	}
-	return b
-}
-
-func (b *StageBuilder) SortMap(keyValues map[string]any) *StageBuilder {
-	if keyValues != nil {
-		d := bson.D{}
-		for k, v := range keyValues {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: d}})
-	}
-	return b
-}
-
-func (b *StageBuilder) Project(bsonElements ...types.KeyValue) *StageBuilder {
-	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: bsonx.KVsToBson(bsonElements...)}})
-	}
-	return b
-}
-
-func (b *StageBuilder) ProjectMap(keyValues map[string]any) *StageBuilder {
-	if keyValues != nil {
-		d := bson.D{}
-		for k, v := range keyValues {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: d}})
-	}
+func (b *StageBuilder) Project(value any) *StageBuilder {
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: value}})
 	return b
 }
 
@@ -195,21 +125,8 @@ func (b *StageBuilder) ReplaceWith(replacementDocument any) *StageBuilder {
 	return b
 }
 
-func (b *StageBuilder) Facet(bsonElements ...types.KeyValue) *StageBuilder {
-	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: bsonx.KVsToBson(bsonElements...)}})
-	}
-	return b
-}
-
-func (b *StageBuilder) FacetMap(keyValues map[string]any) *StageBuilder {
-	if keyValues != nil {
-		d := bson.D{}
-		for k, v := range keyValues {
-			d = append(d, bson.E{Key: k, Value: v})
-		}
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: d}})
-	}
+func (b *StageBuilder) Facet(value any) *StageBuilder {
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: value}})
 	return b
 }
 

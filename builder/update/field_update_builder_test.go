@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
@@ -85,64 +85,6 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, BsonBuilder().SetOnInsert(tc.value).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_CurrentDateKeyValues(t *testing.T) {
-	testCases := []struct {
-		name string
-		data []types.KeyValue
-
-		want bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
-		},
-		{
-			name: "empty params",
-			data: []types.KeyValue{},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
-		},
-		{
-			name: "normal params",
-			data: []types.KeyValue{types.KV("lastModified", true), types.KV("cancellation.date", "timestamp")},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().CurrentDateKeyValues(tc.data...).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_CurrentDateForMap(t *testing.T) {
-	testCases := []struct {
-		name string
-		data map[string]any
-
-		want bson.D
-	}{
-		{
-			name: "nil values",
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
-		},
-		{
-			name: "empty values",
-			data: map[string]any{},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{}}},
-		},
-		{
-			name: "normal values",
-			data: map[string]any{"lastModified": true, "cancellation.date": "timestamp"},
-			want: bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().CurrentDateForMap(tc.data).Build()))
 		})
 	}
 }
@@ -481,12 +423,12 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bson.D{{Key: "lastModified", Value: true}, {Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}},
+			value: bsonx.D(types.KV("lastModified", true), types.KV("cancellation.date", bsonx.M("$type", "timestamp"))),
 			want:  bson.D{{Key: "$currentDate", Value: bson.D{{Key: "lastModified", Value: true}, {Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
 		},
 		{
 			name:  "map",
-			value: map[string]any{"lastModified": true, "cancellation.date": bson.M{"$type": "timestamp"}},
+			value: map[string]any{"lastModified": true, "cancellation.date": bsonx.M("$type", "timestamp")},
 			want:  bson.D{{Key: "$currentDate", Value: map[string]any{"lastModified": true, "cancellation.date": bson.M{"$type": "timestamp"}}}},
 		},
 	}

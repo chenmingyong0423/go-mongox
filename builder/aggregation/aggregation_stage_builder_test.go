@@ -17,7 +17,8 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,54 +27,20 @@ import (
 
 func TestStageBuilder_AddFields(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      mongo.Pipeline
+		name  string
+		value any
+		want  mongo.Pipeline
 	}{
 		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
+			name:  "nil value",
+			value: nil,
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$addFields", Value: nil}}},
 		},
 		{
-			name:      "even keyValues",
-			keyValues: []types.KeyValue{types.KV("totalHomework", BsonBuilder().Sum("$homework").Build()), types.KV("totalQuiz", BsonBuilder().Sum("$quiz").Build())},
-			want: mongo.Pipeline{
-				bson.D{bson.E{Key: "$addFields", Value: bson.D{
-					bson.E{Key: "totalHomework", Value: bson.D{bson.E{Key: "$sum", Value: "$homework"}}},
-					bson.E{Key: "totalQuiz", Value: bson.D{bson.E{Key: "$sum", Value: "$quiz"}}},
-				}}},
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().AddFields(tc.keyValues...).Build())
-		})
-	}
-}
-
-func TestStageBuilder_AddFieldsForMap(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues map[string]any
-		want      mongo.Pipeline
-	}{
-		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
-		},
-		{
-			name:      "empty keyValues",
-			keyValues: map[string]any{},
-			want:      mongo.Pipeline{bson.D{bson.E{Key: "$addFields", Value: bson.D{}}}},
-		},
-		{
-			name: "not nil keyValues",
-			keyValues: map[string]any{
-				"totalHomework": BsonBuilder().Sum("$homework").Build(),
-				"totalQuiz":     BsonBuilder().Sum("$quiz").Build(),
+			name: "bson value",
+			value: bson.D{
+				bson.E{Key: "totalHomework", Value: bson.D{bson.E{Key: "$sum", Value: "$homework"}}},
+				bson.E{Key: "totalQuiz", Value: bson.D{bson.E{Key: "$sum", Value: "$quiz"}}},
 			},
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$addFields", Value: bson.D{
@@ -82,64 +49,43 @@ func TestStageBuilder_AddFieldsForMap(t *testing.T) {
 				}}},
 			},
 		},
+		{
+			name: "map value",
+			value: map[string]any{
+				"totalHomework": bson.D{bson.E{Key: "$sum", Value: "$homework"}},
+				"totalQuiz":     bson.D{bson.E{Key: "$sum", Value: "$quiz"}},
+			},
+			want: mongo.Pipeline{
+				bson.D{bson.E{Key: "$addFields", Value: map[string]any{
+					"totalHomework": bson.D{bson.E{Key: "$sum", Value: "$homework"}},
+					"totalQuiz":     bson.D{bson.E{Key: "$sum", Value: "$quiz"}},
+				}}},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().AddFieldsForMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, StageBsonBuilder().AddFields(tc.value).Build())
 		})
 	}
 }
 
 func TestStageBuilder_Set(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      mongo.Pipeline
+		name  string
+		value any
+		want  mongo.Pipeline
 	}{
 		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
+			name:  "nil value",
+			value: nil,
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$set", Value: nil}}},
 		},
 		{
-			name:      "even keyValues",
-			keyValues: []types.KeyValue{types.KV("totalHomework", BsonBuilder().Sum("$homework").Build()), types.KV("totalQuiz", BsonBuilder().Sum("$quiz").Build())},
-			want: mongo.Pipeline{
-				bson.D{bson.E{Key: "$set", Value: bson.D{
-					bson.E{Key: "totalHomework", Value: bson.D{bson.E{Key: "$sum", Value: "$homework"}}},
-					bson.E{Key: "totalQuiz", Value: bson.D{bson.E{Key: "$sum", Value: "$quiz"}}},
-				}}},
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Set(tc.keyValues...).Build())
-		})
-	}
-}
-
-func TestStageBuilder_SetForMap(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues map[string]any
-		want      mongo.Pipeline
-	}{
-		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
-		},
-		{
-			name:      "empty keyValues",
-			keyValues: map[string]any{},
-			want:      mongo.Pipeline{bson.D{bson.E{Key: "$set", Value: bson.D{}}}},
-		},
-		{
-			name: "not nil keyValues",
-			keyValues: map[string]any{
-				"totalHomework": BsonBuilder().Sum("$homework").Build(),
-				"totalQuiz":     BsonBuilder().Sum("$quiz").Build(),
+			name: "bson value",
+			value: bson.D{
+				bson.E{Key: "totalHomework", Value: bson.D{bson.E{Key: "$sum", Value: "$homework"}}},
+				bson.E{Key: "totalQuiz", Value: bson.D{bson.E{Key: "$sum", Value: "$quiz"}}},
 			},
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$set", Value: bson.D{
@@ -148,10 +94,23 @@ func TestStageBuilder_SetForMap(t *testing.T) {
 				}}},
 			},
 		},
+		{
+			name: "map value",
+			value: map[string]any{
+				"totalHomework": bson.D{bson.E{Key: "$sum", Value: "$homework"}},
+				"totalQuiz":     bson.D{bson.E{Key: "$sum", Value: "$quiz"}},
+			},
+			want: mongo.Pipeline{
+				bson.D{bson.E{Key: "$set", Value: map[string]any{
+					"totalHomework": bson.D{bson.E{Key: "$sum", Value: "$homework"}},
+					"totalQuiz":     bson.D{bson.E{Key: "$sum", Value: "$quiz"}},
+				}}},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().SetForMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, StageBsonBuilder().Set(tc.value).Build())
 		})
 	}
 }
@@ -364,7 +323,7 @@ func TestStageBuilder_Group(t *testing.T) {
 	testCases := []struct {
 		name         string
 		id           any
-		accumulators []any
+		accumulators []bson.E
 		want         mongo.Pipeline
 	}{
 		{
@@ -376,10 +335,10 @@ func TestStageBuilder_Group(t *testing.T) {
 		{
 			name: "id is nil",
 			id:   nil,
-			accumulators: []any{
-				"totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build(),
-				"averageQuantity", BsonBuilder().Avg("$quantity").Build(),
-				"count", BsonBuilder().Sum(1).Build(),
+			accumulators: []bson.E{
+				bsonx.E("totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build()),
+				bsonx.E("averageQuantity", BsonBuilder().Avg("$quantity").Build()),
+				bsonx.E("count", BsonBuilder().Sum(1).Build()),
 			},
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$group", Value: bson.D{
@@ -405,38 +364,16 @@ func TestStageBuilder_Group(t *testing.T) {
 			},
 		},
 		{
-			name: "accumulators key contains non-string",
-			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
-				Format:   "%Y-%m-%d",
-				Timezone: "",
-				OnNull:   nil,
-			}).Build(),
-			accumulators: []any{
-				"totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build(),
-				"averageQuantity", BsonBuilder().Avg("$quantity").Build(),
-				"count", BsonBuilder().Sum(1).Build(),
-				1, "count",
-			},
-			want: mongo.Pipeline{
-				bson.D{bson.E{Key: "$group", Value: bson.D{
-					bson.E{Key: "_id", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: "$date"}, bson.E{Key: "format", Value: "%Y-%m-%d"}}}}},
-					bson.E{Key: "totalSaleAmount", Value: bson.D{bson.E{Key: "$sum", Value: bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}}},
-					bson.E{Key: "averageQuantity", Value: bson.D{bson.E{Key: "$avg", Value: "$quantity"}}},
-					bson.E{Key: "count", Value: bson.D{bson.E{Key: "$sum", Value: 1}}},
-				}}},
-			},
-		},
-		{
 			name: "id and accumulators are not nil",
 			id: BsonBuilder().DateToString("$date", &types.DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
 			}).Build(),
-			accumulators: []any{
-				"totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build(),
-				"averageQuantity", BsonBuilder().Avg("$quantity").Build(),
-				"count", BsonBuilder().Sum(1).Build(),
+			accumulators: []bson.E{
+				bsonx.E("totalSaleAmount", BsonBuilder().Sum(BsonBuilder().Multiply("$price", "$quantity").Build()).Build()),
+				bsonx.E("averageQuantity", BsonBuilder().Avg("$quantity").Build()),
+				bsonx.E("count", BsonBuilder().Sum(1).Build()),
 			},
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$group", Value: bson.D{
@@ -455,175 +392,60 @@ func TestStageBuilder_Group(t *testing.T) {
 	}
 }
 
-func TestStageBuilder_GroupMap(t *testing.T) {
-	testCases := []struct {
-		name         string
-		id           any
-		accumulators map[string]map[string]any
-		want         mongo.Pipeline
-	}{
-		{
-			name:         "id and accumulators are nil",
-			id:           nil,
-			accumulators: nil,
-			want:         mongo.Pipeline{bson.D{bson.E{Key: "$group", Value: bson.D{bson.E{Key: "_id", Value: nil}}}}},
-		},
-		{
-			name:         "accumulators are nil",
-			id:           "$author",
-			accumulators: nil,
-			want:         mongo.Pipeline{bson.D{bson.E{Key: "$group", Value: bson.D{bson.E{Key: "_id", Value: "$author"}}}}},
-		},
-		{
-			name: "string of id",
-			id:   "$author",
-			accumulators: map[string]map[string]any{
-				"totalSaleAmount": {types.AggregationSum: BsonBuilder().Multiply("$price", "$quantity").Build()},
-			},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$group", Value: bson.D{
-				bson.E{Key: "_id", Value: "$author"},
-				bson.E{Key: "totalSaleAmount", Value: map[string]any{"$sum": bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
-			}}}},
-		},
-		{
-			name: "bsonD of id",
-			id:   BsonBuilder().AddKeyValues(types.KV("x", 1), types.KV("y", 1)).Build(),
-			accumulators: map[string]map[string]any{
-				"totalSaleAmount": {types.AggregationSum: BsonBuilder().Multiply("$price", "$quantity").Build()},
-			},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$group", Value: bson.D{bson.E{Key: "_id", Value: bson.D{
-				bson.E{Key: "x", Value: 1},
-				bson.E{Key: "y", Value: 1},
-			}},
-				bson.E{Key: "totalSaleAmount", Value: map[string]any{"$sum": bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
-			}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().GroupMap(tc.id, tc.accumulators).Build())
-		})
-	}
-}
-
 func TestStageBuilder_Sort(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      mongo.Pipeline
+		name  string
+		value any
+		want  mongo.Pipeline
 	}{
 		{
-			name:      "empty",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
+			name:  "nil value",
+			value: nil,
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: nil}}},
 		},
 		{
-			// { $sort : { name : 1, age: -1 } }
-			name:      "even",
-			keyValues: []types.KeyValue{types.KV("name", 1), types.KV("age", -1)},
-			want:      mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "name", Value: 1}, bson.E{Key: "age", Value: -1}}}}},
+			name:  "bson value",
+			value: bson.D{bson.E{Key: "name", Value: 1}, bson.E{Key: "age", Value: -1}},
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "name", Value: 1}, bson.E{Key: "age", Value: -1}}}}},
+		},
+		{
+			name:  "map value",
+			value: map[string]any{"name": 1, "age": -1},
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: map[string]any{"name": 1, "age": -1}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Sort(tc.keyValues...).Build())
-		})
-	}
-}
-
-func TestStageBuilder_SortMap(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues map[string]any
-		want      mongo.Pipeline
-	}{
-		{
-			name:      "empty",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
-		},
-		{
-			name:      "empty",
-			keyValues: map[string]any{},
-			want:      mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: bson.D{}}}},
-		},
-		{
-			name: "not empty",
-			keyValues: map[string]any{
-				"name": 1,
-				"age":  -1,
-			},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "name", Value: 1}, bson.E{Key: "age", Value: -1}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().SortMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, StageBsonBuilder().Sort(tc.value).Build())
 		})
 	}
 }
 
 func TestStageBuilder_Project(t *testing.T) {
 	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		want      mongo.Pipeline
+		name  string
+		value any
+		want  mongo.Pipeline
 	}{
 		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
+			name:  "nil value",
+			value: nil,
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: nil}}},
 		},
 		{
-			name:      "even keyValues",
-			keyValues: []types.KeyValue{types.KV("_id", 0), types.KV("title", 1), types.KV("author", 1)},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: bson.D{
-				bson.E{Key: "_id", Value: 0},
-				bson.E{Key: "title", Value: 1},
-				bson.E{Key: "author", Value: 1},
-			}}}},
+			name:  "bson value",
+			value: bson.D{bson.E{Key: "title", Value: 1}, bson.E{Key: "author", Value: 1}},
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: bson.D{bson.E{Key: "title", Value: 1}, bson.E{Key: "author", Value: 1}}}}},
+		},
+		{
+			name:  "map value",
+			value: map[string]any{"title": 1, "author": 1},
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: map[string]any{"title": 1, "author": 1}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Project(tc.keyValues...).Build())
-		})
-	}
-}
-
-func TestStageBuilder_ProjectMap(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues map[string]any
-		want      mongo.Pipeline
-	}{
-		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			want:      mongo.Pipeline{},
-		},
-		{
-			name:      "empty keyValues",
-			keyValues: map[string]any{},
-			want:      mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: bson.D{}}}},
-		},
-		{
-			name: "not nil keyValues",
-			keyValues: map[string]any{
-				"_id":    0,
-				"title":  1,
-				"author": 1,
-			},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$project", Value: bson.D{
-				bson.E{Key: "_id", Value: 0},
-				bson.E{Key: "title", Value: 1},
-				bson.E{Key: "author", Value: 1},
-			}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().ProjectMap(tc.keyValues).Build()))
+			assert.Equal(t, tc.want, StageBsonBuilder().Project(tc.value).Build())
 		})
 	}
 }
@@ -724,19 +546,14 @@ func TestStageBuilder_ReplaceWith(t *testing.T) {
 
 func TestStageBuilder_Facet(t *testing.T) {
 	testCases := []struct {
-		name   string
-		facets []types.KeyValue
-		want   mongo.Pipeline
+		name  string
+		value any
+		want  mongo.Pipeline
 	}{
 		{
-			name:   "nil facets",
-			facets: nil,
-			want:   mongo.Pipeline{},
-		},
-		{
-			name:   "empty facets",
-			facets: []types.KeyValue{},
-			want:   mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{}}}},
+			name:  "nil facets",
+			value: nil,
+			want:  mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: nil}}},
 		},
 		{
 			// [
@@ -773,7 +590,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 			//  }
 			//]
 			name: "replacementDocument of bson.D",
-			facets: []types.KeyValue{
+			value: bsonx.KVsToBson(
 				types.KV("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()),
 
 				types.KV("categorizedByPrice", StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
@@ -782,7 +599,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 				}).Build()),
 
 				types.KV("categorizedByYears(Auto)", StageBsonBuilder().BucketAuto("$year", 4, nil).Build()),
-			},
+			),
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
 				bson.E{Key: "categorizedByTags", Value: mongo.Pipeline{
 					bson.D{bson.E{Key: "$unwind", Value: "$tags"}},
@@ -812,69 +629,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Facet(tc.facets...).Build())
-		})
-	}
-}
-
-func TestStageBuilder_FacetMap(t *testing.T) {
-	testCases := []struct {
-		name   string
-		facets map[string]any
-		want   mongo.Pipeline
-	}{
-		{
-			name:   "nil facets",
-			facets: nil,
-			want:   mongo.Pipeline{},
-		},
-		{
-			name:   "empty facets",
-			facets: map[string]any{},
-			want:   mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{}}}},
-		},
-		{
-			name: "not nil facets",
-			facets: map[string]any{
-				"categorizedByTags": StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build(),
-
-				"categorizedByPrice": StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
-					DefaultKey: "Other",
-					Output:     BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build()), types.KV("titles", BsonBuilder().Push("$title").Build())).Build(),
-				}).Build(),
-
-				"categorizedByYears(Auto)": StageBsonBuilder().BucketAuto("$year", 4, nil).Build(),
-			},
-			want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
-				bson.E{Key: "categorizedByTags", Value: mongo.Pipeline{
-					bson.D{bson.E{Key: "$unwind", Value: "$tags"}},
-					bson.D{bson.E{Key: "$sortByCount", Value: "$tags"}},
-				}},
-				bson.E{Key: "categorizedByPrice", Value: mongo.Pipeline{
-					bson.D{bson.E{Key: "$match", Value: bson.D{bson.E{Key: "price", Value: bson.D{bson.E{Key: "$exists", Value: 1}}}}}},
-					bson.D{bson.E{Key: "$bucket", Value: bson.D{
-						bson.E{Key: "groupBy", Value: "$price"},
-						bson.E{Key: "boundaries", Value: []any{0, 150, 200, 300, 400}},
-						bson.E{Key: "default", Value: "Other"},
-						bson.E{Key: "output", Value: bson.D{
-							bson.E{Key: "count", Value: bson.D{bson.E{Key: "$sum", Value: 1}}},
-							bson.E{Key: "titles", Value: bson.D{bson.E{Key: "$push", Value: "$title"}}},
-						}},
-					},
-					}},
-				}},
-				bson.E{Key: "categorizedByYears(Auto)", Value: mongo.Pipeline{
-					bson.D{bson.E{Key: "$bucketAuto", Value: bson.D{
-						bson.E{Key: "groupBy", Value: "$year"},
-						bson.E{Key: "buckets", Value: 4},
-					}}},
-				}},
-			}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.True(t, utils.EqualPipelineElements(tc.want, StageBsonBuilder().FacetMap(tc.facets).Build()))
+			assert.Equal(t, tc.want, StageBsonBuilder().Facet(tc.value).Build())
 		})
 	}
 }

@@ -77,10 +77,6 @@ func EqualPipelineElements(p1, p2 mongo.Pipeline) bool {
 	return true
 }
 
-func IsMap(value any) bool {
-	return reflect.TypeOf(value).Kind() == reflect.Map
-}
-
 func IsNumeric(value any) bool {
 	switch reflect.TypeOf(value).Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:

@@ -23,6 +23,10 @@ func M(key string, value any) bson.M {
 	return bson.M{key: value}
 }
 
+func E(key string, value any) bson.E {
+	return bson.E{Key: key, Value: value}
+}
+
 func D(bsonElements ...types.KeyValue) bson.D {
 	value := bson.D{}
 	for _, element := range bsonElements {

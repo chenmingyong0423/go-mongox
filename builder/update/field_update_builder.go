@@ -59,32 +59,6 @@ func (b *fieldUpdateBuilder) CurrentDate(value any) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) CurrentDateKeyValues(bsonElements ...types.KeyValue) *Builder {
-	value := bson.D{}
-	for _, element := range bsonElements {
-		if v, ok := element.Value.(bool); ok {
-			value = append(value, bson.E{Key: element.Key, Value: v})
-		} else {
-			value = append(value, bson.E{Key: element.Key, Value: bson.M{types.Type: element.Value}})
-		}
-	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: value})
-	return b.parent
-}
-
-func (b *fieldUpdateBuilder) CurrentDateForMap(data map[string]any) *Builder {
-	d := bson.D{}
-	for k, v := range data {
-		if val, ok := v.(bool); ok {
-			d = append(d, bson.E{Key: k, Value: val})
-		} else {
-			d = append(d, bson.E{Key: k, Value: bson.M{types.Type: v}})
-		}
-	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: d})
-	return b.parent
-}
-
 func (b *fieldUpdateBuilder) Inc(value any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: value})
 	return b.parent

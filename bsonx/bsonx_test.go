@@ -69,3 +69,7 @@ func TestD(t *testing.T) {
 func TestId(t *testing.T) {
 	assert.Equal(t, bson.M{"_id": "1"}, Id("1"))
 }
+
+func TestE(t *testing.T) {
+	assert.Equal(t, bson.E{Key: "name", Value: "chenmingyong"}, E("name", "chenmingyong"))
+}
