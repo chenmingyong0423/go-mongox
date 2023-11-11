@@ -45,7 +45,7 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc T) (*mongo.InsertOneResu
 	return c.collection.InsertOne(ctx, doc, c.insertOneOptions...)
 }
 
-func (c *Creator[T]) InsertOneOptions(opts ...*options.InsertOneOptions) *Creator[T] {
+func (c *Creator[T]) OneOptions(opts ...*options.InsertOneOptions) *Creator[T] {
 	c.insertOneOptions = opts
 	return c
 }
@@ -54,7 +54,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []T) (*mongo.InsertMan
 	return c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), c.insertManyOptions...)
 }
 
-func (c *Creator[T]) InsertManyOptions(opts ...*options.InsertManyOptions) *Creator[T] {
+func (c *Creator[T]) ManyOptions(opts ...*options.InsertManyOptions) *Creator[T] {
 	c.insertManyOptions = opts
 	return c
 }

@@ -236,7 +236,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateOptions(tc.opts...).UpdateOne(tc.ctx)
+			got, err := updater.Filter(tc.filter).Updates(tc.updates).Options(tc.opts...).UpdateOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -371,7 +371,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.operator, tc.updates...).UpdateOptions(tc.opts...).UpdateMany(tc.ctx)
+			got, err := updater.FilterKeyValue(tc.filter...).UpdatesKeyValue(tc.operator, tc.updates...).Options(tc.opts...).UpdateMany(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return
@@ -556,7 +556,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			got, err := updater.Filter(tc.filter).UpdatesWithOperator(tc.operator, tc.updates).UpdateOptions(tc.opts...).UpdateOne(tc.ctx)
+			got, err := updater.Filter(tc.filter).UpdatesWithOperator(tc.operator, tc.updates).Options(tc.opts...).UpdateOne(tc.ctx)
 			tc.after(tc.ctx, t)
 			if !tc.wantErr(t, err) {
 				return

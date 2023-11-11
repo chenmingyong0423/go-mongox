@@ -81,7 +81,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error)
 	return u.collection.UpdateOne(ctx, u.filter, u.updates, u.opts...)
 }
 
-func (u *Updater[T]) UpdateOptions(opts ...*options.UpdateOptions) *Updater[T] {
+func (u *Updater[T]) Options(opts ...*options.UpdateOptions) *Updater[T] {
 	u.opts = opts
 	return u
 }

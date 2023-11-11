@@ -60,7 +60,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context) (*mongo.DeleteResult, error)
 	return d.collection.DeleteOne(ctx, d.filter, d.opts...)
 }
 
-func (d *Deleter[T]) DeleteOptions(opts ...*options.DeleteOptions) *Deleter[T] {
+func (d *Deleter[T]) Options(opts ...*options.DeleteOptions) *Deleter[T] {
 	d.opts = opts
 	return d
 }
