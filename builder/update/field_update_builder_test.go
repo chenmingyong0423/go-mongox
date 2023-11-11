@@ -33,7 +33,7 @@ func Test_fieldUpdateBuilder_Set(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bson.D{{Key: "name", Value: "cmy"}},
+			value: bsonx.D(types.KV("name", "cmy")),
 			want:  bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: "cmy"}}}},
 		},
 		{
@@ -68,7 +68,7 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bson.D{{Key: "name", Value: "cmy"}},
+			value: bsonx.D(types.KV("name", "cmy")),
 			want:  bson.D{{Key: "$setOnInsert", Value: bson.D{{Key: "name", Value: "cmy"}}}},
 		},
 		{
@@ -96,9 +96,12 @@ func Test_fieldUpdateBuilder_Inc(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name:  "bson",
-			value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}},
-			want:  bson.D{{Key: "$inc", Value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}}}},
+			name: "bson",
+			value: bsonx.D(
+				types.KV("comments", 1),
+				types.KV("score", 1),
+			),
+			want: bson.D{{Key: "$inc", Value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}}}},
 		},
 		{
 			name:  "map",
@@ -131,9 +134,13 @@ func Test_fieldUpdateBuilder_Min(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name:  "bson",
-			value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}},
-			want:  bson.D{{Key: "$min", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
+			name: "bson",
+			value: bsonx.D(
+				types.KV("stock", 100),
+				types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)),
+				types.KV("score", -50),
+			),
+			want: bson.D{{Key: "$min", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
 		},
 		{
 			name:  "map",
@@ -168,9 +175,13 @@ func Test_fieldUpdateBuilder_Max(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name:  "bson",
-			value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}},
-			want:  bson.D{{Key: "$max", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
+			name: "bson",
+			value: bsonx.D(
+				types.KV("stock", 100),
+				types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)),
+				types.KV("score", -50),
+			),
+			want: bson.D{{Key: "$max", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
 		},
 		{
 			name:  "map",
@@ -198,34 +209,6 @@ func Test_fieldUpdateBuilder_Max(t *testing.T) {
 	}
 }
 
-func Test_fieldUpdateBuilder_MaxKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$max", Value: bson.D{}}},
-		},
-		{
-			name:         "empty params",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$max", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("stock", 100), types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), types.KV("score", -50)},
-			want:         bson.D{bson.E{Key: "$max", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "score", Value: -50}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().MaxKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
 func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 	testCases := []struct {
 		name  string
@@ -234,8 +217,12 @@ func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 	}{
 		{
 			name: "bson",
-			value: bson.D{{Key: "price", Value: 1.25}, {Key: "qty", Value: 2}, {Key: "score", Value: -1},
-				{Key: "n", Value: -1.1}},
+			value: bsonx.D(
+				types.KV("price", 1.25),
+				types.KV("qty", 2),
+				types.KV("score", -1),
+				types.KV("n", -1.1),
+			),
 			want: bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
 		},
 		{
@@ -265,38 +252,6 @@ func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 		})
 	}
 }
-func Test_fieldUpdateBuilder_MulKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$mul", Value: bson.D{}}},
-		},
-		{
-			name:         "empty params",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$mul", Value: bson.D{}}},
-		},
-		{
-			name:         "values contain non-number",
-			bsonElements: []types.KeyValue{types.KV("price", 1.25), types.KV("qty", "2.5")},
-			want:         bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("price", 1.25), types.KV("qty", 2), types.KV("score", -1), types.KV("n", -1.1)},
-			want:         bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().MulKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
 
 func Test_fieldUpdateBuilder_Rename(t *testing.T) {
 	testCases := []struct {
@@ -306,9 +261,12 @@ func Test_fieldUpdateBuilder_Rename(t *testing.T) {
 		want bson.D
 	}{
 		{
-			name:  "bson",
-			value: bson.D{{Key: "nmae", Value: "name"}, {Key: "name.first", Value: "name.last"}},
-			want:  bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
+			name: "bson",
+			value: bsonx.D(
+				types.KV("nmae", "name"),
+				types.KV("name.first", "name.last"),
+			),
+			want: bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
 		},
 		{
 			name:  "map",
@@ -334,87 +292,6 @@ func Test_fieldUpdateBuilder_Rename(t *testing.T) {
 	}
 }
 
-func Test_fieldUpdateBuilder_RenameKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-
-		want bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$rename", Value: bson.D{}}},
-		},
-		{
-			name:         "empty params",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$rename", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("nmae", "name"), types.KV("name.first", "name.last")},
-			want:         bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().RenameKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_SetKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name:         "zero params",
-			bsonElements: nil,
-			want:         bson.D{bson.E{Key: "$set", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("name", "cmy"), types.KV("age", 24)},
-			want:         bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SetKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_SetOnInsertKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{}}},
-		},
-		{
-			name:         "normal bsonElements",
-			bsonElements: []types.KeyValue{types.KV("name", "cmy"), types.KV("age", 24)},
-			want:         bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SetOnInsertKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
 func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	testCases := []struct {
 		name  string
@@ -435,62 +312,6 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, BsonBuilder().CurrentDate(tc.value).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_IncKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$inc", Value: bson.D{}}},
-		},
-		{
-			name:         "empty params",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$inc", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("read", 1), types.KV("likes", 1), types.KV("comments", 1), types.KV("score", -1)},
-			want:         bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "read", Value: 1}, bson.E{Key: "likes", Value: 1}, bson.E{Key: "comments", Value: 1}, bson.E{Key: "score", Value: -1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().IncKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_MinKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil params",
-			want: bson.D{bson.E{Key: "$min", Value: bson.D{}}},
-		},
-		{
-			name:         "empty params",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$min", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("stock", 100), types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)), types.KV("score", -50)},
-			want:         bson.D{bson.E{Key: "$min", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "score", Value: -50}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().MinKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }

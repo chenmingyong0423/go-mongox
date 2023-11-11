@@ -27,8 +27,16 @@ func E(key string, value any) bson.E {
 	return bson.E{Key: key, Value: value}
 }
 
+func A[T any](values ...T) bson.A {
+	value := make(bson.A, 0, len(values))
+	for _, v := range values {
+		value = append(value, v)
+	}
+	return value
+}
+
 func D(bsonElements ...types.KeyValue) bson.D {
-	value := bson.D{}
+	value := make(bson.D, 0, len(bsonElements))
 	for _, element := range bsonElements {
 		value = append(value, bson.E{Key: element.Key, Value: element.Value})
 	}
@@ -41,12 +49,4 @@ func KV(key string, value any) types.KeyValue {
 
 func Id(value any) bson.M {
 	return M("_id", value)
-}
-
-func KVsToBson(bsonElements ...types.KeyValue) bson.D {
-	value := bson.D{}
-	for _, element := range bsonElements {
-		value = append(value, bson.E{Key: element.Key, Value: element.Value})
-	}
-	return value
 }

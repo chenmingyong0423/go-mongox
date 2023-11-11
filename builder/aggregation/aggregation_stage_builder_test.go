@@ -590,7 +590,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 			//  }
 			//]
 			name: "replacementDocument of bson.D",
-			value: bsonx.KVsToBson(
+			value: bsonx.D(
 				types.KV("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()),
 
 				types.KV("categorizedByPrice", StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{

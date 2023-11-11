@@ -15,7 +15,6 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -57,7 +56,6 @@ func (b *Builder) Id(v any) *Builder {
 
 func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
 	if len(bsonElements) != 0 {
-		bsonx.KVsToBson(bsonElements...)
 		for _, element := range bsonElements {
 			b.data = append(b.data, bson.E{Key: element.Key, Value: element.Value})
 		}

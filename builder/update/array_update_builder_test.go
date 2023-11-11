@@ -17,6 +17,8 @@ package update
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -36,10 +38,10 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 	}{
 		{
 			name: "bson",
-			value: bson.D{
-				bson.E{Key: "colors", Value: "mauve"},
-				bson.E{Key: "letters", Value: []string{"a", "b", "c"}},
-			},
+			value: bsonx.D(
+				types.KV("colors", "mauve"),
+				types.KV("letters", []string{"a", "b", "c"}),
+			),
 			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 		{
@@ -66,35 +68,6 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 	}
 }
 
-func Test_arrayUpdateBuilder_AddToSetKeyValues(t *testing.T) {
-
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("colors", "mauve"), types.KV("letters", []string{"a", "b", "c"})},
-			want:         bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().AddToSetKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
 func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	testCases := []struct {
 		name  string
@@ -103,10 +76,10 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	}{
 		{
 			name: "bson",
-			value: bson.D{
-				bson.E{Key: "scores", Value: 1},
-				bson.E{Key: "letters", Value: -1},
-			},
+			value: bsonx.D(
+				types.KV("scores", 1),
+				types.KV("letters", -1),
+			),
 			want: bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 		{
@@ -129,34 +102,6 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, BsonBuilder().Pop(tc.value).Build())
-		})
-	}
-}
-
-func Test_arrayUpdateBuilder_PopKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("scores", 1), types.KV("letters", -1)},
-			want:         bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().PopKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
@@ -230,34 +175,6 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, BsonBuilder().Push(tc.value).Build())
-		})
-	}
-}
-
-func Test_arrayUpdateBuilder_PushKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$push", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$push", Value: bson.D{}}},
-		},
-		{
-			name:         "normal params",
-			bsonElements: []types.KeyValue{types.KV("scores", BsonBuilder().Add(types.KV("$each", []int{90, 82, 85})).Build()), types.KV("scores", 1)},
-			want:         bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []int{90, 82, 85}}}}, bson.E{Key: "scores", Value: 1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().PushKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
@@ -1271,9 +1188,12 @@ func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name:  "bson",
-			value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}},
-			want:  bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
+			name: "bson",
+			value: bsonx.D(
+				types.KV("score", -1),
+				types.KV("name", 1),
+			),
+			want: bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
 		},
 		{
 			name: "map",
@@ -1301,71 +1221,6 @@ func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			assert.Equal(t, tc.want, BsonBuilder().Sort(tc.value).Build())
-		})
-	}
-}
-
-func Test_arrayUpdateBuilder_SortKeyValues(t *testing.T) {
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{}}},
-		},
-		{
-			name:         "normal keyValues",
-			bsonElements: []types.KeyValue{types.KV("score", -1), types.KV("name", 1)},
-			want:         bson.D{bson.E{Key: "$sort", Value: bson.D{bson.E{Key: "score", Value: -1}, bson.E{Key: "name", Value: 1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SortKeyValues(tc.bsonElements...).Build())
-		})
-	}
-}
-
-func Test_arrayUpdateBuilder_PullKeyValues(t *testing.T) {
-	// { $pull: { fruits: { $in: [ "apples", "oranges" ] }, votes: { $gte: 6 }, vegetables: "carrots" } }
-	testCases := []struct {
-		name         string
-		bsonElements []types.KeyValue
-		want         bson.D
-	}{
-		{
-			name: "nil bsonElements",
-			want: bson.D{bson.E{Key: "$pull", Value: bson.D{}}},
-		},
-		{
-			name:         "empty bsonElements",
-			bsonElements: []types.KeyValue{},
-			want:         bson.D{bson.E{Key: "$pull", Value: bson.D{}}},
-		},
-		{
-			name: "normal bsonElements",
-			bsonElements: []types.KeyValue{
-				types.KV("fruits", query.BsonBuilder().Add(types.KV("$in", []string{"apples", "oranges"})).Build()),
-				types.KV("votes", query.BsonBuilder().Add(types.KV("$gte", 6)).Build()),
-				types.KV("vegetables", "carrots"),
-			},
-			want: bson.D{bson.E{Key: "$pull", Value: bson.D{
-				bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}},
-				bson.E{Key: "votes", Value: bson.D{bson.E{Key: "$gte", Value: 6}}},
-				bson.E{Key: "vegetables", Value: "carrots"},
-			}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().PullKeyValues(tc.bsonElements...).Build())
 		})
 	}
 }
