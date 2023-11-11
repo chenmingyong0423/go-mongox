@@ -482,7 +482,7 @@ func TestStageBuilder_GroupMap(t *testing.T) {
 			},
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$group", Value: bson.D{
 				bson.E{Key: "_id", Value: "$author"},
-				bson.E{Key: "totalSaleAmount", Value: bson.D{bson.E{Key: "$sum", Value: bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}}},
+				bson.E{Key: "totalSaleAmount", Value: map[string]any{"$sum": bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
 			}}}},
 		},
 		{
@@ -495,7 +495,7 @@ func TestStageBuilder_GroupMap(t *testing.T) {
 				bson.E{Key: "x", Value: 1},
 				bson.E{Key: "y", Value: 1},
 			}},
-				bson.E{Key: "totalSaleAmount", Value: bson.D{bson.E{Key: "$sum", Value: bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}}},
+				bson.E{Key: "totalSaleAmount", Value: map[string]any{"$sum": bson.D{bson.E{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
 			}}}},
 		},
 	}

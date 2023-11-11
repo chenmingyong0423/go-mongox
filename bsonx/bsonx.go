@@ -38,3 +38,11 @@ func KV(key string, value any) types.KeyValue {
 func Id(value any) bson.M {
 	return M("_id", value)
 }
+
+func KVsToBson(bsonElements ...types.KeyValue) bson.D {
+	value := bson.D{}
+	for _, element := range bsonElements {
+		value = append(value, bson.E{Key: element.Key, Value: element.Value})
+	}
+	return value
+}

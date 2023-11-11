@@ -15,7 +15,7 @@
 package update
 
 import (
-	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +31,7 @@ func (b *fieldUpdateBuilder) Set(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) SetKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -50,7 +50,7 @@ func (b *fieldUpdateBuilder) SetOnInsert(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) SetOnInsertKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -91,7 +91,7 @@ func (b *fieldUpdateBuilder) Inc(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) IncKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -101,7 +101,7 @@ func (b *fieldUpdateBuilder) Min(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) MinKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -111,7 +111,7 @@ func (b *fieldUpdateBuilder) Max(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) MaxKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -138,6 +138,6 @@ func (b *fieldUpdateBuilder) Rename(value any) *Builder {
 }
 
 func (b *fieldUpdateBuilder) RenameKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }

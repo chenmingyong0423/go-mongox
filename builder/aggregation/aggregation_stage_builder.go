@@ -15,7 +15,7 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,7 +31,7 @@ func StageBsonBuilder() *StageBuilder {
 
 func (b *StageBuilder) AddFields(bsonElements ...types.KeyValue) *StageBuilder {
 	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: converter.KeyValuesToBson(bsonElements...)}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: bsonx.KVsToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -49,7 +49,7 @@ func (b *StageBuilder) AddFieldsForMap(keyValues map[string]any) *StageBuilder {
 
 func (b *StageBuilder) Set(bsonElements ...types.KeyValue) *StageBuilder {
 	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: converter.KeyValuesToBson(bsonElements...)}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: bsonx.KVsToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -121,15 +121,16 @@ func (b *StageBuilder) Group(id any, accumulators ...any) *StageBuilder {
 
 func (b *StageBuilder) GroupMap(id any, accumulators map[string]map[string]any) *StageBuilder {
 	d := bson.D{{Key: "_id", Value: id}}
-	bsonAccumulators := converter.MapToBson(accumulators)
-	d = append(d, bsonAccumulators...)
+	for k, v := range accumulators {
+		d = append(d, bson.E{Key: k, Value: v})
+	}
 	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageGroup, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) Sort(bsonElements ...types.KeyValue) *StageBuilder {
 	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: converter.KeyValuesToBson(bsonElements...)}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: bsonx.KVsToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -147,7 +148,7 @@ func (b *StageBuilder) SortMap(keyValues map[string]any) *StageBuilder {
 
 func (b *StageBuilder) Project(bsonElements ...types.KeyValue) *StageBuilder {
 	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: converter.KeyValuesToBson(bsonElements...)}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: bsonx.KVsToBson(bsonElements...)}})
 	}
 	return b
 }
@@ -196,7 +197,7 @@ func (b *StageBuilder) ReplaceWith(replacementDocument any) *StageBuilder {
 
 func (b *StageBuilder) Facet(bsonElements ...types.KeyValue) *StageBuilder {
 	if bsonElements != nil {
-		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: converter.KeyValuesToBson(bsonElements...)}})
+		b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: bsonx.KVsToBson(bsonElements...)}})
 	}
 	return b
 }

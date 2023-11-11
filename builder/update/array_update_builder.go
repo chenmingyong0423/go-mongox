@@ -15,7 +15,7 @@
 package update
 
 import (
-	"github.com/chenmingyong0423/go-mongox/converter"
+	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -30,7 +30,7 @@ func (b *arrayUpdateBuilder) AddToSet(value any) *Builder {
 }
 
 func (b *arrayUpdateBuilder) AddToSetKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.AddToSet, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.AddToSet, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -40,7 +40,7 @@ func (b *arrayUpdateBuilder) Pop(value any) *Builder {
 }
 
 func (b *arrayUpdateBuilder) PopKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Pop, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Pop, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -50,7 +50,7 @@ func (b *arrayUpdateBuilder) Pull(value any) *Builder {
 }
 
 func (b *arrayUpdateBuilder) PullKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Pull, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Pull, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -60,7 +60,7 @@ func (b *arrayUpdateBuilder) Push(value any) *Builder {
 }
 
 func (b *arrayUpdateBuilder) PushKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Push, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Push, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
 
@@ -223,6 +223,6 @@ func (b *arrayUpdateBuilder) Sort(value any) *Builder {
 }
 
 func (b *arrayUpdateBuilder) SortKeyValues(bsonElements ...types.KeyValue) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: converter.KeyValuesToBson(bsonElements...)})
+	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: bsonx.KVsToBson(bsonElements...)})
 	return b.parent
 }
