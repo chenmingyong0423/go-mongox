@@ -29,8 +29,8 @@ func (b *evaluationQueryBuilder) Expr(d bson.D) *Builder {
 	return b.parent
 }
 
-func (b *evaluationQueryBuilder) JsonSchema(d bson.D) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.JsonSchema, Value: d})
+func (b *evaluationQueryBuilder) JsonSchema(value any) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.JsonSchema, Value: value})
 	return b.parent
 }
 

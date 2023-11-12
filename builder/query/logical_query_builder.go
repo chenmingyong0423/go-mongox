@@ -25,26 +25,26 @@ type logicalQueryBuilder struct {
 
 // And
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
-func (b *logicalQueryBuilder) And(conditions ...bson.D) *Builder {
+func (b *logicalQueryBuilder) And(conditions ...any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.And, Value: conditions})
 	return b.parent
 }
 
-func (b *logicalQueryBuilder) Not(condition bson.D) *Builder {
+func (b *logicalQueryBuilder) Not(condition any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Not, Value: condition})
 	return b.parent
 }
 
 // Nor
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
-func (b *logicalQueryBuilder) Nor(conditions ...bson.D) *Builder {
+func (b *logicalQueryBuilder) Nor(conditions ...any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Nor, Value: conditions})
 	return b.parent
 }
 
 // Or
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
-func (b *logicalQueryBuilder) Or(conditions ...bson.D) *Builder {
+func (b *logicalQueryBuilder) Or(conditions ...any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: types.Or, Value: conditions})
 	return b.parent
 }

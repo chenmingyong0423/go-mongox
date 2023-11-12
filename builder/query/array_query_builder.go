@@ -93,7 +93,7 @@ func (b *arrayQueryBuilder) AllFloat64(key string, values ...float64) *Builder {
 	return b.parent
 }
 
-func (b *arrayQueryBuilder) ElemMatch(key string, condition bson.D) *Builder {
+func (b *arrayQueryBuilder) ElemMatch(key string, condition any) *Builder {
 	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.ElemMatch: condition}})
 	return b.parent
 }
