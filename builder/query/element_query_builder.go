@@ -25,26 +25,41 @@ type elementQueryBuilder struct {
 }
 
 func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Exists, Value: exists}}})
+	e := bson.E{Key: types.Exists, Value: exists}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: t}}})
+	e := bson.E{Key: types.Type, Value: t}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: alias}}})
+	e := bson.E{Key: types.Type, Value: alias}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: ts}}})
+	e := bson.E{Key: types.Type, Value: ts}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeArrayAlias(key string, aliases ...string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: aliases}}})
+	e := bson.E{Key: types.Type, Value: aliases}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

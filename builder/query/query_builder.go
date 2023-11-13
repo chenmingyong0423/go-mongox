@@ -62,3 +62,16 @@ func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
 	}
 	return b
 }
+
+func (b *Builder) TryMergeValue(key string, e ...bson.E) bool {
+	for idx, datum := range b.data {
+		if datum.Key == key {
+			if m, ok := datum.Value.(bson.D); ok {
+				m = append(m, e...)
+				b.data[idx].Value = m
+				return true
+			}
+		}
+	}
+	return false
+}
