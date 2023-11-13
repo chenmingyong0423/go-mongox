@@ -24,171 +24,273 @@ type comparisonQueryBuilder struct {
 }
 
 func (b *comparisonQueryBuilder) Eq(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Eq: value}})
+	e := bson.E{Key: types.Eq, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Gt(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Gt: value}})
+	e := bson.E{Key: types.Gt, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Gte(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Gte: value}})
+	e := bson.E{Key: types.Gte, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) In(key string, values ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint(key string, values ...uint) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint8(key string, values ...uint8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint16(key string, values ...uint16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint32(key string, values ...uint32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InUint64(key string, values ...uint64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt(key string, values ...int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt8(key string, values ...int8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt16(key string, values ...int16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt32(key string, values ...int32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InInt64(key string, values ...int64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InString(key string, values ...string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InFloat32(key string, values ...float32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) InFloat64(key string, values ...float64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.In: values}})
+	e := bson.E{Key: types.In, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Nin(key string, values ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint(key string, values ...uint) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint8(key string, values ...uint8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint16(key string, values ...uint16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint32(key string, values ...uint32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinUint64(key string, values ...uint64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt(key string, values ...int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt8(key string, values ...int8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt16(key string, values ...int16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt32(key string, values ...int32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinInt64(key string, values ...int64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinString(key string, values ...string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinFloat32(key string, values ...float32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) NinFloat64(key string, values ...float64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Nin: values}})
+	e := bson.E{Key: types.Nin, Value: values}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Lt(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Lt: value}})
+	e := bson.E{Key: types.Lt, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Lte(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Lte: value}})
+	e := bson.E{Key: types.Lte, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *comparisonQueryBuilder) Ne(key string, value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Ne: value}})
+	e := bson.E{Key: types.Ne, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

@@ -24,11 +24,17 @@ type projectionQueryBuilder struct {
 }
 
 func (b *projectionQueryBuilder) Slice(key string, number int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Slice: number}})
+	e := bson.E{Key: types.Slice, Value: number}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *projectionQueryBuilder) SliceRanger(key string, start, end int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Slice: []int{start, end}}})
+	e := bson.E{Key: types.Slice, Value: []int{start, end}}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

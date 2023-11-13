@@ -22,9 +22,9 @@ import (
 )
 
 func Test_projectionQueryBuilder_Slice(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "key", Value: bson.M{"$slice": 1}}}, BsonBuilder().Slice("key", 1).Build())
+	assert.Equal(t, bson.D{{Key: "key", Value: bson.D{bson.E{Key: "$slice", Value: 1}}}}, BsonBuilder().Slice("key", 1).Build())
 }
 
 func Test_projectionQueryBuilder_SliceRanger(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "key", Value: bson.M{"$slice": []int{1, 2}}}}, BsonBuilder().SliceRanger("key", 1, 2).Build())
+	assert.Equal(t, bson.D{{Key: "key", Value: bson.D{bson.E{Key: "$slice", Value: []int{1, 2}}}}}, BsonBuilder().SliceRanger("key", 1, 2).Build())
 }

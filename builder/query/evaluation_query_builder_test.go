@@ -122,14 +122,14 @@ func Test_evaluationQueryBuilder_Mod(t *testing.T) {
 			key:       "qty",
 			divisor:   4,
 			remainder: 0,
-			want:      bson.D{{Key: "qty", Value: bson.M{"$mod": []any{4, 0}}}},
+			want:      bson.D{{Key: "qty", Value: bson.D{{Key: "$mod", Value: bson.A{4, 0}}}}},
 		},
 		{
 			name:      "divisor float",
 			key:       "qty",
 			divisor:   4.0,
 			remainder: 0,
-			want:      bson.D{{Key: "qty", Value: bson.M{"$mod": []any{4.0, 0}}}},
+			want:      bson.D{{Key: "qty", Value: bson.D{{Key: "$mod", Value: bson.A{4.0, 0}}}}},
 		},
 	}
 	for _, tt := range testCases {

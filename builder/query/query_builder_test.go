@@ -56,3 +56,45 @@ func TestQueryBuilder_Add(t *testing.T) {
 		})
 	}
 }
+
+func TestBuilder_TryMergeValue(t *testing.T) {
+	testCases := []struct {
+		name     string
+		builder  *Builder
+		key      string
+		value    bson.E
+		wantBool bool
+		wantBson bson.D
+	}{
+		{
+			name:     "not merge when key is not exist",
+			builder:  BsonBuilder(),
+			key:      "age",
+			value:    bson.E{Key: types.Lt, Value: 25},
+			wantBool: false,
+			wantBson: bson.D{},
+		},
+		{
+			name:     "not merge when key is different",
+			builder:  BsonBuilder().Gt("age", 18),
+			key:      "name",
+			value:    bson.E{Key: types.Eq, Value: "cmy"},
+			wantBool: false,
+			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}}}},
+		},
+		{
+			name:     "merge when key is same",
+			builder:  BsonBuilder().Gt("age", 18),
+			key:      "age",
+			value:    bson.E{Key: types.Lt, Value: 25},
+			wantBool: true,
+			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.Lt, Value: 25}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.wantBool, tc.builder.TryMergeValue(tc.key, tc.value))
+			assert.Equal(t, tc.wantBson, tc.builder.Build())
+		})
+	}
+}

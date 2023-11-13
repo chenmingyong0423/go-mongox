@@ -36,18 +36,26 @@ func (b *evaluationQueryBuilder) JsonSchema(value any) *Builder {
 
 func (b *evaluationQueryBuilder) Mod(key string, divisor any, remainder int) *Builder {
 	if utils.IsNumeric(divisor) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Mod: []any{divisor, remainder}}})
+		e := bson.E{Key: types.Mod, Value: bson.A{divisor, remainder}}
+		if !b.parent.TryMergeValue(key, e) {
+			b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+		}
 	}
 	return b.parent
 }
 
 func (b *evaluationQueryBuilder) Regex(key, value string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Regex, Value: value}}})
+	e := bson.E{Key: types.Regex, Value: value}
+	if !b.parent.TryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
 func (b *evaluationQueryBuilder) RegexOptions(key, value, options string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Regex, Value: value}, bson.E{Key: types.Options, Value: options}}})
+	if !b.parent.TryMergeValue(key, bson.E{Key: types.Regex, Value: value}, bson.E{Key: types.Options, Value: options}) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Regex, Value: value}, bson.E{Key: types.Options, Value: options}}})
+	}
 	return b.parent
 }
 
