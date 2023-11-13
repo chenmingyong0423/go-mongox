@@ -25,26 +25,26 @@ type elementQueryBuilder struct {
 }
 
 func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Exists: exists}})
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Exists, Value: exists}}})
 	return b.parent
 }
 
 func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: t}})
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: t}}})
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: alias}})
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: alias}}})
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: ts}})
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: ts}}})
 	return b.parent
 }
 
 func (b *elementQueryBuilder) TypeArrayAlias(key string, aliases ...string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Type: aliases}})
+	b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Type, Value: aliases}}})
 	return b.parent
 }

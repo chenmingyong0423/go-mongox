@@ -36,7 +36,7 @@ func (b *evaluationQueryBuilder) JsonSchema(value any) *Builder {
 
 func (b *evaluationQueryBuilder) Mod(key string, divisor any, remainder int) *Builder {
 	if utils.IsNumeric(divisor) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.M{types.Mod: []any{divisor, remainder}}})
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Mod, Value: bson.A{divisor, remainder}}}})
 	}
 	return b.parent
 }
