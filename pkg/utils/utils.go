@@ -15,6 +15,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -57,6 +58,9 @@ func EqualBSONDElements(d1, d2 bson.D) bool {
 			return EqualBSONDElements(bv, e.Value.(bson.D))
 		}
 		if !reflect.DeepEqual(e.Value, v) {
+			fmt.Printf("Not equal: \n"+
+				"expected: %#v\n"+
+				"actual  : %#v\n", d1, d2)
 			return false
 		}
 	}

@@ -63,7 +63,7 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().AddToSet(tc.value).Build())
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().AddToSet(tc.value).Build()))
 		})
 	}
 }
@@ -101,7 +101,7 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Pop(tc.value).Build())
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().Pop(tc.value).Build()))
 		})
 	}
 }
@@ -116,7 +116,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 		{
 			name:  "bson",
 			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(types.KV("vegetables", "carrots")).Build(),
-			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.M{"$in": []string{"apples", "oranges"}}}, bson.E{Key: "votes", Value: bson.M{"$gte": 6}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
+			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}}, bson.E{Key: "votes", Value: bson.D{bson.E{Key: "$gte", Value: 6}}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
 		},
 		{
 			name:  "map",
@@ -139,7 +139,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Pull(tc.value).Build())
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().Pull(tc.value).Build()))
 		})
 	}
 }
@@ -174,7 +174,7 @@ func Test_arrayUpdateBuilder_Push(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Push(tc.value).Build())
+			assert.True(t, utils.EqualBSONDElements(tc.want, BsonBuilder().Push(tc.value).Build()))
 		})
 	}
 }

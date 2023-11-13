@@ -99,7 +99,7 @@ func Test_logicalBuilder_Or(t *testing.T) {
 		{
 			name:        "normal expressions",
 			expressions: []any{query.BsonBuilder().Eq("x", 0).Build(), query.BsonBuilder().Expr(BsonBuilder().Eq(BsonBuilder().Divide(1, "$x").Build(), 3).Build()).Build()},
-			expected:    bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "x", Value: bson.M{"$eq": 0}}}, bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$eq", Value: []any{bson.D{bson.E{Key: "$divide", Value: []any{1, "$x"}}}, 3}}}}}}}},
+			expected:    bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "x", Value: bson.D{bson.E{Key: "$eq", Value: 0}}}}, bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$eq", Value: []any{bson.D{bson.E{Key: "$divide", Value: []any{1, "$x"}}}, 3}}}}}}}},
 		},
 	}
 	for _, tc := range testCases {
