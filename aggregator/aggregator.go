@@ -24,8 +24,8 @@ import (
 
 //go:generate mockgen -source=aggregator.go -destination=../mock/aggregator.mock.go -package=mocks
 type iAggregator[T any] interface {
-	Aggregation(ctx context.Context) ([]*T, error)
-	AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error
+	Aggregate(ctx context.Context) ([]*T, error)
+	AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error
 }
 
 type Aggregator[T any] struct {
@@ -50,7 +50,7 @@ func (a *Aggregator[T]) AggregateOptions(aggregationOptions ...*options.Aggregat
 	return a
 }
 
-func (a *Aggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
+func (a *Aggregator[T]) Aggregate(ctx context.Context) ([]*T, error) {
 	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (a *Aggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
 	return result, nil
 }
 
-func (a *Aggregator[T]) AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error {
+func (a *Aggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error {
 	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
 	if err != nil {
 		return err

@@ -46,7 +46,7 @@ func TestAggregator_Aggregation(t *testing.T) {
 			name: "got error",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().Aggregation(ctx).Return(nil, errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
+				aggregator.EXPECT().Aggregate(ctx).Return(nil, errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
 			ctx:     context.Background(),
@@ -56,7 +56,7 @@ func TestAggregator_Aggregation(t *testing.T) {
 			name: "got result",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().Aggregation(ctx).Return([]*types.TestUser{
+				aggregator.EXPECT().Aggregate(ctx).Return([]*types.TestUser{
 					{Id: "1", Name: "cmy", Age: 24},
 					{Id: "2", Name: "gopher", Age: 20},
 				}, nil).Times(1)
@@ -76,7 +76,7 @@ func TestAggregator_Aggregation(t *testing.T) {
 			defer ctl.Finish()
 			aggregator := tc.mock(tc.ctx, ctl)
 
-			result, err := aggregator.Aggregation(tc.ctx)
+			result, err := aggregator.Aggregate(tc.ctx)
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, result)
 			}
@@ -103,7 +103,7 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 			name: "got error",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().AggregationWithCallback(ctx, gomock.Any()).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
+				aggregator.EXPECT().AggregateWithCallback(ctx, gomock.Any()).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
 			ctx:           context.Background(),
@@ -114,7 +114,7 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 			name: "got result",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().AggregationWithCallback(ctx, gomock.Any()).Return(nil).Times(1)
+				aggregator.EXPECT().AggregateWithCallback(ctx, gomock.Any()).Return(nil).Times(1)
 				return aggregator
 			},
 			ctx: context.Background(),
@@ -135,7 +135,7 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 				return cursor.All(ctx, &tc.callbackParam)
 			}
 			aggregator := tc.mock(tc.ctx, ctl)
-			err := aggregator.AggregationWithCallback(tc.ctx, callback)
+			err := aggregator.AggregateWithCallback(tc.ctx, callback)
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, tc.callbackParam)
 			}

@@ -39,31 +39,31 @@ func (m *MockiAggregator[T]) EXPECT() *MockiAggregatorMockRecorder[T] {
 	return m.recorder
 }
 
-// Aggregation mocks base method.
-func (m *MockiAggregator[T]) Aggregation(ctx context.Context) ([]*T, error) {
+// Aggregate mocks base method.
+func (m *MockiAggregator[T]) Aggregate(ctx context.Context) ([]*T, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Aggregation", ctx)
+	ret := m.ctrl.Call(m, "Aggregate", ctx)
 	ret0, _ := ret[0].([]*T)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Aggregation indicates an expected call of Aggregation.
-func (mr *MockiAggregatorMockRecorder[T]) Aggregation(ctx any) *gomock.Call {
+// Aggregate indicates an expected call of Aggregate.
+func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregation", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregation), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregate), ctx)
 }
 
-// AggregationWithCallback mocks base method.
-func (m *MockiAggregator[T]) AggregationWithCallback(ctx context.Context, handler types.ResultHandler) error {
+// AggregateWithCallback mocks base method.
+func (m *MockiAggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AggregationWithCallback", ctx, handler)
+	ret := m.ctrl.Call(m, "AggregateWithCallback", ctx, handler)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AggregationWithCallback indicates an expected call of AggregationWithCallback.
-func (mr *MockiAggregatorMockRecorder[T]) AggregationWithCallback(ctx, handler any) *gomock.Call {
+// AggregateWithCallback indicates an expected call of AggregateWithCallback.
+func (mr *MockiAggregatorMockRecorder[T]) AggregateWithCallback(ctx, handler any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregationWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregationWithCallback), ctx, handler)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithCallback), ctx, handler)
 }
