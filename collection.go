@@ -49,3 +49,7 @@ func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
 func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
 	return aggregator.NewAggregator[T](c.collection)
 }
+
+func (c *Collection[T]) Collection() *mongo.Collection {
+	return c.collection
+}

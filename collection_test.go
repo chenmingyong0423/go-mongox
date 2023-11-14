@@ -59,3 +59,8 @@ func TestCollection_Aggregator(t *testing.T) {
 	a := NewCollection[any](&mongo.Collection{}).Aggregator()
 	assert.NotNil(t, a, "Expected non-nil Aggregator")
 }
+
+func TestCollection_Collection(t *testing.T) {
+	a := NewCollection[any](&mongo.Collection{})
+	assert.NotNil(t, a.Collection(), "Expected non-nil *mongo.Collection")
+}
