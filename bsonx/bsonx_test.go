@@ -73,3 +73,33 @@ func TestId(t *testing.T) {
 func TestE(t *testing.T) {
 	assert.Equal(t, bson.E{Key: "name", Value: "chenmingyong"}, E("name", "chenmingyong"))
 }
+
+func TestA(t *testing.T) {
+	testCases := []struct {
+		name   string
+		values []string
+		want   bson.A
+	}{
+		{
+			name:   "nil values",
+			values: nil,
+			want:   bson.A{},
+		},
+		{
+			name:   "empty values",
+			values: []string{},
+			want:   bson.A{},
+		},
+		{
+			name:   "multiple values",
+			values: []string{"1", "2"},
+			want:   bson.A{"1", "2"},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, A(tc.values...))
+		})
+	}
+
+}
