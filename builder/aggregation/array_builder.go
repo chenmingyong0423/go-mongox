@@ -52,3 +52,26 @@ func (b *arrayBuilder) SliceWithPosition(array any, position, nElements int64) *
 	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSlice, Value: []any{array, position, nElements}})
 	return b.parent
 }
+
+func (b *arrayBuilder) Map(inputArray any, as string, in any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMap, Value: bson.D{
+		{Key: types.AggregationInput, Value: inputArray},
+		{Key: types.AggregationAs, Value: as},
+		{Key: types.AggregationIn, Value: in},
+	}})
+	return b.parent
+}
+
+func (b *arrayBuilder) Filter(inputArray any, cond any, opt *types.FilterOptions) *Builder {
+	d := bson.D{{Key: types.AggregationInput, Value: inputArray}, {Key: types.AggregationCondWithoutOperator, Value: cond}}
+	if opt != nil {
+		if opt.As != "" {
+			d = append(d, bson.E{Key: types.AggregationAs, Value: opt.As})
+		}
+		if opt.Limit != 0 {
+			d = append(d, bson.E{Key: types.AggregationLimit, Value: opt.Limit})
+		}
+	}
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationFilter, Value: d})
+	return b.parent
+}

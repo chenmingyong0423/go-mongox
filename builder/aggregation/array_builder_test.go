@@ -149,3 +149,56 @@ func Test_arrayBuilder_SliceWithPosition(t *testing.T) {
 		})
 	}
 }
+
+func Test_arrayBuilder_Map(t *testing.T) {
+	testCases := []struct {
+		name       string
+		inputArray any
+		as         string
+		in         any
+		expected   bson.D
+	}{
+		{
+			name:       "valid expression",
+			inputArray: "$items",
+			as:         "item",
+			in:         "$$item.price * 1.25",
+			expected:   bson.D{{Key: "$map", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "as", Value: "item"}, {Key: "in", Value: "$$item.price * 1.25"}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, BsonBuilder().Map(tc.inputArray, tc.as, tc.in).Build())
+		})
+	}
+}
+
+func Test_arrayBuilder_Filter(t *testing.T) {
+	testCases := []struct {
+		name       string
+		inputArray any
+		cond       any
+		opt        *types.FilterOptions
+		expected   bson.D
+	}{
+		{
+			name:       "valid expression",
+			inputArray: "$items",
+			cond:       "$$item.price > 100",
+			opt:        nil,
+			expected:   bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}}}},
+		},
+		{
+			name:       "valid expression with options",
+			inputArray: "$items",
+			cond:       "$$item.price > 100",
+			opt:        &types.FilterOptions{As: "item", Limit: 5},
+			expected:   bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, BsonBuilder().Filter(tc.inputArray, tc.cond, tc.opt).Build())
+		})
+	}
+}
