@@ -191,8 +191,8 @@ func (b *arrayUpdateBuilder) Position(value int) *Builder {
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Slice(slice int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.SliceForUpdate, Value: slice})
+func (b *arrayUpdateBuilder) Slice(num int) *Builder {
+	b.parent.data = append(b.parent.data, bson.E{Key: types.SliceForUpdate, Value: num})
 	return b.parent
 }
 
