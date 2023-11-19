@@ -38,6 +38,9 @@ func ToAnySlice[T any](values ...T) []any {
 func EqualBSONDElements(d1, d2 bson.D) bool {
 	// 如果长度不同，它们不相等
 	if len(d1) != len(d2) {
+		fmt.Printf("Not equal: \n"+
+			"expected: %#v\n"+
+			"actual  : %#v\n", d1, d2)
 		return false
 	}
 
@@ -52,6 +55,9 @@ func EqualBSONDElements(d1, d2 bson.D) bool {
 	for _, e := range d2 {
 		v, ok := elementsMap1[e.Key]
 		if !ok {
+			fmt.Printf("Not equal: \n"+
+				"expected: %#v\n"+
+				"actual  : %#v\n", d1, d2)
 			return false
 		}
 		if bv, ok := v.(bson.D); ok {

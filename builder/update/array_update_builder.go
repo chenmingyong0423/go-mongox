@@ -116,87 +116,138 @@ func (b *arrayUpdateBuilder) PullAllString(key string, values ...string) *Builde
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Each(values ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) Each(key string, values ...any) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachInt(values ...int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachInt(key string, values ...int) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachInt8(values ...int8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachInt8(key string, values ...int8) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachInt16(values ...int16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachInt16(key string, values ...int16) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachInt32(values ...int32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachInt32(key string, values ...int32) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachInt64(values ...int64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachInt64(key string, values ...int64) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachUint(values ...uint) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachUint(key string, values ...uint) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachUint8(values ...uint8) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachUint8(key string, values ...uint8) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachUint16(values ...uint16) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachUint16(key string, values ...uint16) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachUint32(values ...uint32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachUint32(key string, values ...uint32) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachUint64(values ...uint64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachUint64(key string, values ...uint64) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachFloat32(values ...float32) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachFloat32(key string, values ...float32) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachFloat64(values ...float64) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachFloat64(key string, values ...float64) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) EachString(values ...string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Each, Value: values})
+func (b *arrayUpdateBuilder) EachString(key string, values ...string) *Builder {
+	e := bson.E{Key: types.Each, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Position(value int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Position, Value: value})
+func (b *arrayUpdateBuilder) Position(key string, value int) *Builder {
+	e := bson.E{Key: types.Position, Value: value}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Slice(num int) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.SliceForUpdate, Value: num})
+func (b *arrayUpdateBuilder) Slice(key string, num int) *Builder {
+	e := bson.E{Key: types.SliceForUpdate, Value: num}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayUpdateBuilder) Sort(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Sort, Value: value})
+func (b *arrayUpdateBuilder) Sort(key string, value any) *Builder {
+	e := bson.E{Key: types.Sort, Value: value}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
