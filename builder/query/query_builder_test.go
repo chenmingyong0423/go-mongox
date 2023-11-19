@@ -93,7 +93,7 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.wantBool, tc.builder.TryMergeValue(tc.key, tc.value))
+			assert.Equal(t, tc.wantBool, tc.builder.tryMergeValue(tc.key, tc.value))
 			assert.Equal(t, tc.wantBson, tc.builder.Build())
 		})
 	}

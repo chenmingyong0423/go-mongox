@@ -202,6 +202,12 @@ type FilterOptions struct {
 	Limit int64
 }
 
+type TextOptions struct {
+	Language           string
+	CaseSensitive      bool
+	DiacriticSensitive bool
+}
+
 type ResultHandler func(ctx context.Context, cursor *mongo.Cursor) error
 
 type Numeric interface {
