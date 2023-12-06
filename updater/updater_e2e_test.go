@@ -159,7 +159,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().Set(bsonx.D(types.KV("name", "cmy"))).Build(),
+			updates: update.BsonBuilder().Set(bsonx.D(bsonx.E("name", "cmy"))).Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -179,7 +179,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("123").Build(),
-			updates: update.BsonBuilder().Set(bsonx.D(types.KV("name", "hhh"))).Build(),
+			updates: update.BsonBuilder().Set(bsonx.D(bsonx.E("name", "hhh"))).Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -223,7 +223,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.BsonBuilder().Id("456").Build(),
-			updates: update.BsonBuilder().Set(bsonx.D(types.KV("name", "cmy"))).Build(),
+			updates: update.BsonBuilder().Set(bsonx.D(bsonx.E("name", "cmy"))).Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
@@ -478,7 +478,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: types.Set,
 			ctx:      context.Background(),
 			filter:   query.BsonBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSet(bsonx.D(types.KV("name", "cmy"))).Build(),
+			updates:  update.BsonBuilder().AddToSet(bsonx.D(bsonx.E("name", "cmy"))).Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -543,7 +543,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			ctx:      context.Background(),
 			operator: types.Set,
 			filter:   query.BsonBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSet(bsonx.D(types.KV("name", "cmy"))).Build(),
+			updates:  update.BsonBuilder().AddToSet(bsonx.D(bsonx.E("name", "cmy"))).Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},

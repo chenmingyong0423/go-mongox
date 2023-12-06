@@ -14,34 +14,22 @@
 
 package bsonx
 
-import (
-	"go.mongodb.org/mongo-driver/bson"
-)
+import "go.mongodb.org/mongo-driver/bson"
 
-func M(key string, value any) bson.M {
-	return bson.M{key: value}
+// DBuilder is a builder for bson.D
+type DBuilder struct {
+	d bson.D
 }
 
-func E(key string, value any) bson.E {
-	return bson.E{Key: key, Value: value}
+func NewD() *DBuilder {
+	return &DBuilder{d: bson.D{}}
 }
 
-func A[T any](values ...T) bson.A {
-	value := make(bson.A, 0, len(values))
-	for _, v := range values {
-		value = append(value, v)
-	}
-	return value
+func (b *DBuilder) Add(key string, value any) *DBuilder {
+	b.d = append(b.d, bson.E{Key: key, Value: value})
+	return b
 }
 
-func D(bsonElements ...bson.E) bson.D {
-	value := make(bson.D, 0, len(bsonElements))
-	for _, element := range bsonElements {
-		value = append(value, element)
-	}
-	return value
-}
-
-func Id(value any) bson.M {
-	return M("_id", value)
+func (b *DBuilder) Build() bson.D {
+	return b.d
 }

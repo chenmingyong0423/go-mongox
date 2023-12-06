@@ -75,7 +75,7 @@ func TestPush(t *testing.T) {
 	}{
 		{
 			name:       "test push",
-			expression: bsonx.D(bsonx.KV("item", "$item"), bsonx.KV("quantity", "$quantity")),
+			expression: bsonx.NewD().Add("item", "$item").Add("quantity", "$quantity").Build(),
 			want:       bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
 		},
 	}
@@ -440,7 +440,7 @@ func Test_ArrayToObject(t *testing.T) {
 		},
 		{
 			name:       "array expression",
-			expression: []any{bsonx.D(bsonx.KV("k", "item"), bsonx.KV("v", "abc123"))},
+			expression: []any{bsonx.NewD().Add("k", "item").Add("v", "abc123").Build()},
 			want:       bson.D{{Key: "$arrayToObject", Value: []any{bson.D{{Key: "k", Value: "item"}, {Key: "v", Value: "abc123"}}}}},
 		},
 	}

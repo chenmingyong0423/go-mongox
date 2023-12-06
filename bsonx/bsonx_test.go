@@ -17,7 +17,6 @@ package bsonx
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -25,7 +24,7 @@ import (
 func TestD(t *testing.T) {
 	testCases := []struct {
 		name     string
-		input    []types.KeyValue
+		input    []bson.E
 		expected bson.D
 	}{
 		{
@@ -35,13 +34,13 @@ func TestD(t *testing.T) {
 		},
 		{
 			name:     "empty input",
-			input:    []types.KeyValue{},
+			input:    []bson.E{},
 			expected: bson.D{},
 		},
 		{
 			name: "one element",
-			input: []types.KeyValue{
-				KV("name", "chenmingyong"),
+			input: []bson.E{
+				E("name", "chenmingyong"),
 			},
 			expected: bson.D{
 				{Key: "name", Value: "chenmingyong"},
@@ -49,9 +48,9 @@ func TestD(t *testing.T) {
 		},
 		{
 			name: "many elements",
-			input: []types.KeyValue{
-				KV("name", "chenmingyong"),
-				KV("age", 24),
+			input: []bson.E{
+				E("name", "chenmingyong"),
+				E("age", 24),
 			},
 			expected: bson.D{
 				{Key: "name", Value: "chenmingyong"},

@@ -37,12 +37,9 @@ func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("colors", "mauve"),
-				types.KV("letters", []string{"a", "b", "c"}),
-			),
-			want: bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("colors", "mauve").Add("letters", []string{"a", "b", "c"}).Build(),
+			want:  bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}, bson.E{Key: "letters", Value: []string{"a", "b", "c"}}}}},
 		},
 		{
 			name:  "map",
@@ -75,12 +72,9 @@ func Test_arrayUpdateBuilder_Pop(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("scores", 1),
-				types.KV("letters", -1),
-			),
-			want: bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("scores", 1).Add("letters", -1).Build(),
+			want:  bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}, bson.E{Key: "letters", Value: -1}}}},
 		},
 		{
 			name:  "map",
@@ -1259,12 +1253,9 @@ func Test_arrayUpdateBuilder_Sort(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			key:  "scores",
-			value: bsonx.D(
-				types.KV("score", -1),
-				types.KV("name", 1),
-			),
+			name:  "bson",
+			key:   "scores",
+			value: bsonx.NewD().Add("score", -1).Add("name", 1).Build(),
 			want: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$sort", Value: bson.D{
 				bson.E{Key: "score", Value: -1},
 				bson.E{Key: "name", Value: 1},

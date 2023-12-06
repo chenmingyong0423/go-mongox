@@ -33,7 +33,7 @@ func Test_fieldUpdateBuilder_Set(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bsonx.D(types.KV("name", "cmy")),
+			value: bsonx.D(bsonx.E("name", "cmy")),
 			want:  bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: "cmy"}}}},
 		},
 		{
@@ -68,7 +68,7 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bsonx.D(types.KV("name", "cmy")),
+			value: bsonx.D(bsonx.E("name", "cmy")),
 			want:  bson.D{{Key: "$setOnInsert", Value: bson.D{{Key: "name", Value: "cmy"}}}},
 		},
 		{
@@ -96,12 +96,9 @@ func Test_fieldUpdateBuilder_Inc(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("comments", 1),
-				types.KV("score", 1),
-			),
-			want: bson.D{{Key: "$inc", Value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("comments", 1).Add("score", 1).Build(),
+			want:  bson.D{{Key: "$inc", Value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}}}},
 		},
 		{
 			name:  "map",
@@ -134,13 +131,9 @@ func Test_fieldUpdateBuilder_Min(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("stock", 100),
-				types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)),
-				types.KV("score", -50),
-			),
-			want: bson.D{{Key: "$min", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("stock", 100).Add("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Add("score", -50).Build(),
+			want:  bson.D{{Key: "$min", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
 		},
 		{
 			name:  "map",
@@ -175,13 +168,9 @@ func Test_fieldUpdateBuilder_Max(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("stock", 100),
-				types.KV("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)),
-				types.KV("score", -50),
-			),
-			want: bson.D{{Key: "$max", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("stock", 100).Add("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Add("score", -50).Build(),
+			want:  bson.D{{Key: "$max", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
 		},
 		{
 			name:  "map",
@@ -216,14 +205,9 @@ func Test_fieldUpdateBuilder_Mul(t *testing.T) {
 		want  bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("price", 1.25),
-				types.KV("qty", 2),
-				types.KV("score", -1),
-				types.KV("n", -1.1),
-			),
-			want: bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("price", 1.25).Add("qty", 2).Add("score", -1).Add("n", -1.1).Build(),
+			want:  bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
 		},
 		{
 			name:  "map",
@@ -261,12 +245,9 @@ func Test_fieldUpdateBuilder_Rename(t *testing.T) {
 		want bson.D
 	}{
 		{
-			name: "bson",
-			value: bsonx.D(
-				types.KV("nmae", "name"),
-				types.KV("name.first", "name.last"),
-			),
-			want: bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
+			name:  "bson",
+			value: bsonx.NewD().Add("nmae", "name").Add("name.first", "name.last").Build(),
+			want:  bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
 		},
 		{
 			name:  "map",
@@ -300,7 +281,7 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: bsonx.D(types.KV("lastModified", true), types.KV("cancellation.date", bsonx.M("$type", "timestamp"))),
+			value: bsonx.NewD().Add("lastModified", true).Add("cancellation.date", bsonx.M("$type", "timestamp")).Build(),
 			want:  bson.D{{Key: "$currentDate", Value: bson.D{{Key: "lastModified", Value: true}, {Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
 		},
 		{

@@ -590,16 +590,13 @@ func TestStageBuilder_Facet(t *testing.T) {
 			//  }
 			//]
 			name: "replacementDocument of bson.D",
-			value: bsonx.D(
-				types.KV("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()),
-
-				types.KV("categorizedByPrice", StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
+			value: bsonx.NewD().
+				Add("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()).
+				Add("categorizedByPrice", StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
 					DefaultKey: "Other",
 					Output:     BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build()), types.KV("titles", BsonBuilder().Push("$title").Build())).Build(),
-				}).Build()),
-
-				types.KV("categorizedByYears(Auto)", StageBsonBuilder().BucketAuto("$year", 4, nil).Build()),
-			),
+				}).Build()).
+				Add("categorizedByYears(Auto)", StageBsonBuilder().BucketAuto("$year", 4, nil).Build()).Build(),
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
 				bson.E{Key: "categorizedByTags", Value: mongo.Pipeline{
 					bson.D{bson.E{Key: "$unwind", Value: "$tags"}},

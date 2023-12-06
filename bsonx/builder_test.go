@@ -15,33 +15,12 @@
 package bsonx
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func M(key string, value any) bson.M {
-	return bson.M{key: value}
-}
-
-func E(key string, value any) bson.E {
-	return bson.E{Key: key, Value: value}
-}
-
-func A[T any](values ...T) bson.A {
-	value := make(bson.A, 0, len(values))
-	for _, v := range values {
-		value = append(value, v)
-	}
-	return value
-}
-
-func D(bsonElements ...bson.E) bson.D {
-	value := make(bson.D, 0, len(bsonElements))
-	for _, element := range bsonElements {
-		value = append(value, element)
-	}
-	return value
-}
-
-func Id(value any) bson.M {
-	return M("_id", value)
+func TestDBuilder(t *testing.T) {
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "chenmingyong"}, bson.E{Key: "age", Value: 24}}, NewD().Add("name", "chenmingyong").Add("age", 24).Build())
 }

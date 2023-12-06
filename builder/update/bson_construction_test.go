@@ -268,7 +268,7 @@ func TestCurrentDate(t *testing.T) {
 	}{
 		{
 			name:  "test CurrentDate",
-			value: bsonx.D(bsonx.KV("lastModified", true), bsonx.KV("cancellation.date", bsonx.M("$type", "timestamp"))),
+			value: bsonx.NewD().Add("lastModified", true).Add("cancellation.date", bsonx.M("$type", "timestamp")).Build(),
 			want:  bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
 		},
 	}
