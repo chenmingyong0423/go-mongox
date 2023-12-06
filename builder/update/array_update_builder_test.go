@@ -21,8 +21,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/stretchr/testify/assert"
@@ -109,7 +107,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 	}{
 		{
 			name:  "bson",
-			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add(types.KV("vegetables", "carrots")).Build(),
+			value: query.BsonBuilder().InString("fruits", []string{"apples", "oranges"}...).Gte("votes", 6).Add("vegetables", "carrots").Build(),
 			want:  bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}}, bson.E{Key: "votes", Value: bson.D{bson.E{Key: "$gte", Value: 6}}}, bson.E{Key: "vegetables", Value: "carrots"}}}},
 		},
 		{

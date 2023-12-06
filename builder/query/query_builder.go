@@ -57,12 +57,8 @@ func (b *Builder) Id(v any) *Builder {
 
 // Add appends given types.KeyValue elements to the builder's data slice. Each types.KeyValue
 // is converted into a bson.E before appending.
-func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
-	if len(bsonElements) != 0 {
-		for _, element := range bsonElements {
-			b.data = append(b.data, bson.E{Key: element.Key, Value: element.Value})
-		}
-	}
+func (b *Builder) Add(key string, value any) *Builder {
+	b.data = append(b.data, bson.E{Key: key, Value: value})
 	return b
 }
 

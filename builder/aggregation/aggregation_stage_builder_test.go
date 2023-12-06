@@ -156,7 +156,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 			groupBy: "$year_born",
 			opt: &types.BucketOptions{
 				DefaultKey: nil,
-				Output:     BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build())).Build(),
+				Output:     BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).Build(),
 			},
 			boundaries: []any{1840, 1850, 1860, 1870, 1880},
 			want: mongo.Pipeline{
@@ -172,7 +172,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 			groupBy: "$year_born",
 			opt: &types.BucketOptions{
 				DefaultKey: "Other",
-				Output:     BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build())).Build(),
+				Output:     BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).Build(),
 			},
 			boundaries: nil,
 			want: mongo.Pipeline{
@@ -190,9 +190,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 			opt: &types.BucketOptions{
 				DefaultKey: "Other",
 				Output: BsonBuilder().AddKeyValues(
-					types.KV("count", BsonBuilder().Sum(1).Build()),
-					types.KV("artists", BsonBuilder().Push(BsonBuilder().AddKeyValues(types.KV("name", BsonBuilder().Contact("$first_name", " ", "$last_name").Build()), types.KV("year_born", "$year_born")).Build()).Build()),
-				).Build(),
+					"count", BsonBuilder().Sum(1).Build()).AddKeyValues("artists", BsonBuilder().Push(BsonBuilder().AddKeyValues("name", BsonBuilder().Contact("$first_name", " ", "$last_name").Build()).AddKeyValues("year_born", "$year_born").Build()).Build()).Build(),
 			},
 			boundaries: []any{1840, 1850, 1860, 1870, 1880},
 			want: mongo.Pipeline{
@@ -259,7 +257,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 			name:    "granularity is empty",
 			groupBy: "$price",
 			opt: &types.BucketAutoOptions{
-				Output: BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build())).Build(),
+				Output: BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).Build(),
 			},
 			buckets: 4,
 			want: mongo.Pipeline{
@@ -274,7 +272,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 			name:    "normal",
 			groupBy: "$price",
 			opt: &types.BucketAutoOptions{
-				Output:      BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build())).Build(),
+				Output:      BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).Build(),
 				Granularity: "R5",
 			},
 			buckets: 4,
@@ -308,7 +306,7 @@ func TestStageBuilder_Match(t *testing.T) {
 		},
 		{
 			name:       "expression is not nil",
-			expression: BsonBuilder().AddKeyValues(types.KV("author", "dave")).Build(),
+			expression: BsonBuilder().AddKeyValues("author", "dave").Build(),
 			want:       mongo.Pipeline{bson.D{bson.E{Key: "$match", Value: bson.D{bson.E{Key: "author", Value: "dave"}}}}},
 		},
 	}
@@ -592,9 +590,10 @@ func TestStageBuilder_Facet(t *testing.T) {
 			name: "replacementDocument of bson.D",
 			value: bsonx.NewD().
 				Add("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()).
-				Add("categorizedByPrice", StageBsonBuilder().Match(BsonBuilder().AddKeyValues(types.KV("price", BsonBuilder().AddKeyValues(types.KV("$exists", 1)).Build())).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
+				Add("categorizedByPrice", StageBsonBuilder().Match(
+					BsonBuilder().AddKeyValues("price", BsonBuilder().AddKeyValues("$exists", 1).Build()).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
 					DefaultKey: "Other",
-					Output:     BsonBuilder().AddKeyValues(types.KV("count", BsonBuilder().Sum(1).Build()), types.KV("titles", BsonBuilder().Push("$title").Build())).Build(),
+					Output:     BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).AddKeyValues("titles", BsonBuilder().Push("$title").Build()).Build(),
 				}).Build()).
 				Add("categorizedByYears(Auto)", StageBsonBuilder().BucketAuto("$year", 4, nil).Build()).Build(),
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
@@ -649,11 +648,8 @@ func TestStageBuilder_SortByCount(t *testing.T) {
 		},
 		// { $sortByCount: { lname: "$employee.last", fname: "$employee.first" } }
 		{
-			name: "expression of bson.D",
-			expression: BsonBuilder().AddKeyValues(
-				types.KV("lname", "$employee.last"),
-				types.KV("fname", "$employee.first"),
-			).Build(),
+			name:       "expression of bson.D",
+			expression: BsonBuilder().AddKeyValues("lname", "$employee.last").AddKeyValues("fname", "$employee.first").Build(),
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$sortByCount", Value: bson.D{
 				bson.E{Key: "lname", Value: "$employee.last"},
 				bson.E{Key: "fname", Value: "$employee.first"},

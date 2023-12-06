@@ -23,7 +23,7 @@ import (
 )
 
 func Test_arrayQueryBuilder_ElemMatch(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gt", Value: 1}}}}}}, BsonBuilder().ElemMatch("age", BsonBuilder().Add(types.KV("$gt", 1)).Build()).Build())
+	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gt", Value: 1}}}}}}, BsonBuilder().ElemMatch("age", BsonBuilder().Add("$gt", 1).Build()).Build())
 }
 
 func TestBsonBuilder_All(t *testing.T) {

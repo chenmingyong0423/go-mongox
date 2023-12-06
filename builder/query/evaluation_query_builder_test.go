@@ -17,8 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -26,10 +24,10 @@ import (
 func Test_evaluationQueryBuilder_Expr(t *testing.T) {
 	assert.Equal(t,
 		bson.D{{Key: "$expr", Value: bson.D{{Key: "$gt", Value: []any{"$spent", "$budget"}}}}},
-		BsonBuilder().Expr(BsonBuilder().Add(types.KV("$gt", []any{
+		BsonBuilder().Expr(BsonBuilder().Add("$gt", []any{
 			"$spent",
 			"$budget",
-		})).Build()).Build())
+		}).Build()).Build())
 }
 
 func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
@@ -72,30 +70,30 @@ func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
 		}}},
 		BsonBuilder().JsonSchema(
 			BsonBuilder().
-				Add(types.KV("required", []string{"name", "major", "gpa", "address"})).
-				Add(types.KV("properties",
+				Add("required", []string{"name", "major", "gpa", "address"}).
+				Add("properties",
 					BsonBuilder().
-						Add(types.KV("name",
+						Add("name",
 							BsonBuilder().
-								Add(types.KV("bsonType", "string")).
-								Add(types.KV("description", "must be a string and is required")).
-								Build())).
-						Add(types.KV("address",
-							BsonBuilder().Add(types.KV("bsonType", "object")).
-								Add(types.KV("required", []string{"zipcode"})).
-								Add(types.KV("properties",
+								Add("bsonType", "string").
+								Add("description", "must be a string and is required").
+								Build()).
+						Add("address",
+							BsonBuilder().Add("bsonType", "object").
+								Add("required", []string{"zipcode"}).
+								Add("properties",
 									BsonBuilder().
-										Add(types.KV("street",
+										Add("street",
 											BsonBuilder().
-												Add(types.KV("bsonType", "string")).
-												Build())).
-										Add(types.KV("zipcode",
+												Add("bsonType", "string").
+												Build()).
+										Add("zipcode",
 											BsonBuilder().
-												Add(types.KV("bsonType", "string")).
-												Build())).
-										Build())).
-								Build())).
-						Build())).
+												Add("bsonType", "string").
+												Build()).
+										Build()).
+								Build()).
+						Build()).
 				Build()).
 			Build())
 }

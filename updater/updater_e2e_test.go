@@ -499,7 +499,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: types.Set,
 			ctx:      context.Background(),
 			filter:   query.BsonBuilder().Id("123").Build(),
-			updates:  update.BsonBuilder().Add(types.KV("name", "hhh")).Build(),
+			updates:  update.BsonBuilder().Add("name", "hhh").Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)

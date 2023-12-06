@@ -17,32 +17,11 @@ package update
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestBuilder_Add(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}}, BsonBuilder().Add("name", "cmy").Add("age", 18).Add("scores", []int{100, 99, 98}).Build())
 
-		want bson.D
-	}{
-		{
-			name: "zero params",
-			want: bson.D{},
-		},
-		{
-			name:      "normal params",
-			keyValues: []types.KeyValue{types.KV("name", "cmy"), types.KV("age", 18), types.KV("scores", []int{100, 99, 98})},
-			want:      bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}},
-		},
-	}
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			assert.Equal(t, testCase.want, BsonBuilder().Add(testCase.keyValues...).Build())
-		})
-	}
 }

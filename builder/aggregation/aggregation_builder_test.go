@@ -17,32 +17,10 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestBuilder_AddKeyValues(t *testing.T) {
-	testCases := []struct {
-		name      string
-		keyValues []types.KeyValue
-		expected  bson.D
-	}{
-		{
-			name:      "nil keyValues",
-			keyValues: nil,
-			expected:  bson.D{},
-		},
-		{
-			name:      "normal",
-			keyValues: []types.KeyValue{types.KV("name", "cmy")},
-			expected:  bson.D{{Key: "name", Value: "cmy"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().AddKeyValues(tc.keyValues...).Build())
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "chenmingyong"}}, BsonBuilder().AddKeyValues("name", "chenmingyong").Build())
 }

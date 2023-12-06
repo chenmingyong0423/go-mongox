@@ -215,12 +215,3 @@ type Numeric interface {
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
 		~float32 | ~float64
 }
-
-type KeyValue struct {
-	Key   string
-	Value any
-}
-
-func KV(key string, value any) KeyValue {
-	return KeyValue{Key: key, Value: value}
-}

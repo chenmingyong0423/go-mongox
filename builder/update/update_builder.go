@@ -15,7 +15,6 @@
 package update
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -32,12 +31,9 @@ type Builder struct {
 	arrayUpdateBuilder
 }
 
-func (b *Builder) Add(bsonElements ...types.KeyValue) *Builder {
-	if len(bsonElements) != 0 {
-		for _, element := range bsonElements {
-			b.data = append(b.data, bson.E{Key: element.Key, Value: element.Value})
-		}
-	}
+func (b *Builder) Add(key string, value any) *Builder {
+	b.data = append(b.data, bson.E{Key: key, Value: value})
+
 	return b
 }
 
