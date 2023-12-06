@@ -184,7 +184,13 @@ result := make([]*DiffPost, 0)
 //  Rename the 'author' field to 'name,' exclude the 'content' field, add the 'outstanding' field, and return the result as []*DiffPost.
 err = postCollection.Aggregator().
 	Pipeline(aggregation.StageBsonBuilder().Project(
-		bsonx.D(types.KV("name", "$author"), types.KV("author", 1), types.KV("_id", 1), types.KV("title", 1), types.KV("outstanding", aggregation.BsonBuilder().Eq("$author", "陈明勇").Build()))).Build(),
+		bsonx.NewD().
+			Add("name", "$author").
+			Add("author", 1).
+			Add("_id", 1).
+			Add("title", 1).
+			Add("outstanding", aggregation.BsonBuilder().Eq("$author", "陈明勇").Build()).Build(),
+	).Build(),
 	).
 	AggregateWithCallback(context.Background(), func(ctx context.Context, cursor *mongo.Cursor) error {
 		return cursor.All(ctx, &result)
@@ -212,7 +218,8 @@ m := bsonx.M("name", "chenmingyong")
 id := bsonx.Id("chenmingyong")
 
 // bson.D{bson.E{Key:"name", Value:"chenmingyong"}, bson.E{Key:"telephone", Value:"1888***1234"}}
-d := bsonx.D(bsonx.KV("name", "chenmingyong"), bsonx.KV("telephone", "1888***1234"))
+d := bsonx.NewD().Add("name", "chenmingyong").Add("telephone", "1888***1234").Build()
+d := bsonx.D(bsonx.E("name", "chenmingyong"), bsonx.E("telephone", "1888***1234"))
 
 // bson.E{Key:"name", Value:"chenmingyong"}
 e := bsonx.E("name", "chenmingyong")
@@ -229,7 +236,7 @@ The `query` package can help us construct `bson` data related to queries, such a
 
 ```go
 // bson.D{bson.E{Key:"name", Value:"陈明勇"}}
-d := query.BsonBuilder().Add(bsonx.KV("name", "chenmingyong")).Build()
+d := query.BsonBuilder().Add("name", "chenmingyong").Build()
 
 // bson.D{bson.E{Key:"age", Value:bson.D{{Key:"$gt", Value:18}, bson.E{Key:"$lt", Value:25}}}}
 d = query.BsonBuilder().Gt("age", 18).Lt("age", 25).Build()
@@ -248,7 +255,7 @@ d = query.BsonBuilder().Exists("qty", true).NinInt("qty", 5, 15).Build()
 
 // elemMatch
 // bson.D{bson.E{Key: "result", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gte", Value: 80}, bson.E{Key: "$lt", Value: 85}}}}}}
-d = query.BsonBuilder().ElemMatch("result", bsonx.D(bsonx.KV("$gte", 80), bsonx.KV("$lt", 85))).Build()
+d = query.BsonBuilder().ElemMatch("result", bsonx.NewD().Add("$gte", 80).Add("$lt", 85)).Build()
 
 ```
 The methods provided by the `query` package are not limited to these. The examples listed above are just a few typical ones, and there are more usages waiting for you to explore.
@@ -261,7 +268,7 @@ The `update` package can help us construct `bson` data related to update operati
 u := update.BsonBuilder().Set(bsonx.M("name", "chenmingyong")).Build()
 
 // bson.D{bson.E{Key:"$inc", Value:bson.D{bson.E{Key:"orders", Value:1}, bson.E{Key:"ratings", Value:-1}}}}
-u = update.BsonBuilder().Inc(bsonx.D(bsonx.KV("orders", 1), bsonx.KV("ratings", -1))).Build()
+u = update.BsonBuilder().Inc(bsonx.NewD().Add("orders", 1).Add("ratings", -1)).Build()
 
 // bson.D{bson.E{Key:"$push", Value:bson.M{"scores":95}}}
 u = update.BsonBuilder().Push(bsonx.M("scores", 95)).Build()
@@ -281,7 +288,7 @@ The `aggregation` package provides two builders:
 gt := aggregation.BsonBuilder().Gt("$qty", 250).Build()
 
 // mongo.Pipeline{bson.D{bson.E{Key:"$project", Value:bson.D{bson.E{Key:"name", Value:1}, bson.E{Key:"age", Value:1}, bson.E{Key:"qtyGt250", Value:bson.D{bson.E{Key:"$gt", Value:[]interface {}{"$qty", 250}}}}}}}}
-pipeline := aggregation.StageBsonBuilder().Project(bsonx.D(bsonx.KV("name", 1), bsonx.KV("age", 1), bsonx.KV("qtyGt250", gt))).Build()
+pipeline := aggregation.StageBsonBuilder().Project(bsonx.NewD().Add("name", 1).Add("age", 1).Add("qtyGt250", gt)).Build()
 
 // bson.D{bson.E{Key:"$or", Value:[]interface {}{bson.D{bson.E{Key:"score", Value:bson.D{bson.E{Key:"$gt", Value:70}, bson.E{Key:"$lt", Value:90}}}}, bson.D{bson.E{Key:"views", Value:bson.D{bson.E{Key:"$gte", Value:90}}}}}}}
 or := aggregation.BsonBuilder().Or(
