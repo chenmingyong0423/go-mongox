@@ -28,6 +28,17 @@ func (b *fieldUpdateBuilder) Set(value any) *Builder {
 	return b.parent
 }
 
+// SetSimple sets the value of a simple key in a document.
+// pay attention to the following example:
+// - don't use it with Set, if you want to set the multiple key at once, you can use Set directly.
+func (b *fieldUpdateBuilder) SetSimple(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Set, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: bson.D{e}})
+	}
+	return b.parent
+}
+
 func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	value := bson.D{}
 	for i := range keys {

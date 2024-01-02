@@ -296,3 +296,12 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 		})
 	}
 }
+
+func Test_fieldUpdateBuilder_SetSimpleKey(t *testing.T) {
+	t.Run("one key-value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}}, BsonBuilder().SetSimple("name", "cmy").Build())
+	})
+	t.Run("multiple key-value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}}}}, BsonBuilder().SetSimple("name", "cmy").SetSimple("age", 18).Build())
+	})
+}

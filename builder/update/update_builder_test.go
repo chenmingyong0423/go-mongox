@@ -23,5 +23,4 @@ import (
 
 func TestBuilder_Add(t *testing.T) {
 	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}}, BsonBuilder().Add("name", "cmy").Add("age", 18).Add("scores", []int{100, 99, 98}).Build())
-
 }
