@@ -183,7 +183,13 @@ result := make([]*DiffPost, 0)
 //  将 author 字段更名为 name，排除 content 字段，添加 outstanding 字段，返回结果为 []*DiffPost
 err = postCollection.Aggregator().
 	Pipeline(aggregation.StageBsonBuilder().Project(
-		bsonx.D(types.KV("name", "$author"), types.KV("author", 1), types.KV("_id", 1), types.KV("title", 1), types.KV("outstanding", aggregation.BsonBuilder().Eq("$author", "陈明勇").Build()))).Build(),
+		bsonx.NewD().
+			Add("name", "$author").
+			Add("author", 1).
+			Add("_id", 1).
+			Add("title", 1).
+			Add("outstanding", aggregation.BsonBuilder().Eq("$author", "陈明勇").Build()).Build(),
+	).Build(),
 	).
 	AggregateWithCallback(context.Background(), func(ctx context.Context, cursor *mongo.Cursor) error {
 		return cursor.All(ctx, &result)
@@ -210,7 +216,8 @@ m := bsonx.M("姓名", "陈明勇")
 id := bsonx.Id("陈明勇")
 
 // bson.D{bson.E{Key:"姓名", Value:"陈明勇"}, bson.E{Key:"手机号", Value:"1888***1234"}}
-d := bsonx.D(bsonx.KV("姓名", "陈明勇"), bsonx.KV("手机号", "1888***1234"))
+d := bsonx.NewD().Add("name", "chenmingyong").Add("telephone", "1888***1234").Build()
+d := bsonx.D(bsonx.E("name", "chenmingyong"), bsonx.E("telephone", "1888***1234"))
 
 // bson.E{Key:"姓名", Value:"陈明勇"}
 e := bsonx.E("姓名", "陈明勇")
@@ -225,7 +232,7 @@ a := bsonx.A("陈明勇", "1888***1234")
 
 ```go
 // bson.D{bson.E{Key:"姓名", Value:"陈明勇"}}
-d := query.BsonBuilder().Add(bsonx.KV("姓名", "陈明勇")).Build()
+d := query.BsonBuilder().Add("name", "chenmingyong").Build()
 
 // bson.D{bson.E{Key:"age", Value:bson.D{{Key:"$gt", Value:18}, bson.E{Key:"$lt", Value:25}}}}
 d = query.BsonBuilder().Gt("age", 18).Lt("age", 25).Build()
@@ -244,8 +251,7 @@ d = query.BsonBuilder().Exists("qty", true).NinInt("qty", 5, 15).Build()
 
 // elemMatch
 // bson.D{bson.E{Key: "result", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gte", Value: 80}, bson.E{Key: "$lt", Value: 85}}}}}}
-d = query.BsonBuilder().ElemMatch("result", bsonx.D(bsonx.KV("$gte", 80), bsonx.KV("$lt", 85))).Build()
-
+d = query.BsonBuilder().ElemMatch("result", bsonx.NewD().Add("$gte", 80).Add("$lt", 85)).Build()
 ```
 `query` 包提供的方法不止这些，以上只是列举出一些典型的例子，还有更多的用法等着你去探索。
 
@@ -257,7 +263,7 @@ d = query.BsonBuilder().ElemMatch("result", bsonx.D(bsonx.KV("$gte", 80), bsonx.
 u := update.BsonBuilder().Set(bsonx.M("name", "陈明勇")).Build()
 
 // bson.D{bson.E{Key:"$inc", Value:bson.D{bson.E{Key:"orders", Value:1}, bson.E{Key:"ratings", Value:-1}}}}
-u = update.BsonBuilder().Inc(bsonx.D(bsonx.KV("orders", 1), bsonx.KV("ratings", -1))).Build()
+u = update.BsonBuilder().Inc(bsonx.NewD().Add("orders", 1).Add("ratings", -1)).Build()
 
 // bson.D{bson.E{Key:"$push", Value:bson.M{"scores":95}}}
 u = update.BsonBuilder().Push(bsonx.M("scores", 95)).Build()
@@ -277,7 +283,7 @@ u = update.BsonBuilder().Unset("quantity", "instock").Build()
 gt := aggregation.BsonBuilder().Gt("$qty", 250).Build()
 
 // mongo.Pipeline{bson.D{bson.E{Key:"$project", Value:bson.D{bson.E{Key:"name", Value:1}, bson.E{Key:"age", Value:1}, bson.E{Key:"qtyGt250", Value:bson.D{bson.E{Key:"$gt", Value:[]interface {}{"$qty", 250}}}}}}}}
-pipeline := aggregation.StageBsonBuilder().Project(bsonx.D(bsonx.KV("name", 1), bsonx.KV("age", 1), bsonx.KV("qtyGt250", gt))).Build()
+pipeline := aggregation.StageBsonBuilder().Project(bsonx.NewD().Add("name", 1).Add("age", 1).Add("qtyGt250", gt)).Build()
 
 // bson.D{bson.E{Key:"$or", Value:[]interface {}{bson.D{bson.E{Key:"score", Value:bson.D{bson.E{Key:"$gt", Value:70}, bson.E{Key:"$lt", Value:90}}}}, bson.D{bson.E{Key:"views", Value:bson.D{bson.E{Key:"$gte", Value:90}}}}}}}
 or := aggregation.BsonBuilder().Or(
