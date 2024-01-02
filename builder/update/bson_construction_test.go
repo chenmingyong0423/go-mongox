@@ -373,3 +373,24 @@ func TestRename(t *testing.T) {
 		})
 	}
 }
+
+func TestSetSimple(t *testing.T) {
+	testCases := []struct {
+		name  string
+		key   string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "test Set",
+			key:   "name",
+			value: "chenmingyong",
+			want:  bson.D{bson.E{Key: "$set", Value: bson.E{Key: "name", Value: "chenmingyong"}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, SetSimple(tc.key, tc.value))
+		})
+	}
+}

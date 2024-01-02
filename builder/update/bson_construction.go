@@ -59,6 +59,10 @@ func Set(value any) bson.D {
 	return bson.D{{Key: types.Set, Value: value}}
 }
 
+func SetSimple(key string, value any) bson.D {
+	return bson.D{{Key: types.Set, Value: bson.E{Key: key, Value: value}}}
+}
+
 func Unset(keys ...string) bson.D {
 	value := bson.D{}
 	for i := range keys {
