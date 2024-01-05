@@ -124,7 +124,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).Options(tc.opts...).DeleteOne(tc.ctx)
+			result, err := deleter.Filter(tc.filter).DeleteOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)
@@ -209,7 +209,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).Options(tc.opts...).DeleteMany(tc.ctx)
+			result, err := deleter.Filter(tc.filter).DeleteMany(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			assert.Equal(t, tc.want, result)

@@ -23,8 +23,8 @@ import (
 
 //go:generate mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
 type iDeleter[T any] interface {
-	DeleteOne(ctx context.Context) (*mongo.DeleteResult, error)
-	DeleteMany(ctx context.Context) (*mongo.DeleteResult, error)
+	DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+	DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
 
 func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
@@ -34,7 +34,6 @@ func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
 type Deleter[T any] struct {
 	collection *mongo.Collection
 	filter     any
-	opts       []*options.DeleteOptions
 }
 
 // Filter is used to set the filter of the query
@@ -43,15 +42,10 @@ func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 	return d
 }
 
-func (d *Deleter[T]) DeleteOne(ctx context.Context) (*mongo.DeleteResult, error) {
-	return d.collection.DeleteOne(ctx, d.filter, d.opts...)
+func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	return d.collection.DeleteOne(ctx, d.filter, opts...)
 }
 
-func (d *Deleter[T]) Options(opts ...*options.DeleteOptions) *Deleter[T] {
-	d.opts = opts
-	return d
-}
-
-func (d *Deleter[T]) DeleteMany(ctx context.Context) (*mongo.DeleteResult, error) {
-	return d.collection.DeleteMany(ctx, d.filter, d.opts...)
+func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+	return d.collection.DeleteMany(ctx, d.filter, opts...)
 }
