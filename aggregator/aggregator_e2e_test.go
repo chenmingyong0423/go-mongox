@@ -182,7 +182,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			testUsers, err := aggregator.Pipeline(tc.pipeline).AggregateOptions(tc.aggregationOptions...).Aggregate(tc.ctx)
+			testUsers, err := aggregator.Pipeline(tc.pipeline).Aggregate(tc.ctx, tc.aggregationOptions...)
 			tc.after(tc.ctx, t)
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, testUsers)
@@ -309,7 +309,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 			if tc.callback != nil {
 				callback = tc.callback
 			}
-			err := aggregator.Pipeline(tc.pipeline).AggregateOptions(tc.aggregationOptions).AggregateWithCallback(tc.ctx, callback)
+			err := aggregator.Pipeline(tc.pipeline).AggregateWithCallback(tc.ctx, callback, tc.aggregationOptions)
 			tc.after(tc.ctx, t)
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, tc.preUsers)

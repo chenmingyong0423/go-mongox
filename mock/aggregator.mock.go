@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	types "github.com/chenmingyong0423/go-mongox/types"
+	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,30 +41,40 @@ func (m *MockiAggregator[T]) EXPECT() *MockiAggregatorMockRecorder[T] {
 }
 
 // Aggregate mocks base method.
-func (m *MockiAggregator[T]) Aggregate(ctx context.Context) ([]*T, error) {
+func (m *MockiAggregator[T]) Aggregate(ctx context.Context, opts ...*options.AggregateOptions) ([]*T, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Aggregate", ctx)
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Aggregate", varargs...)
 	ret0, _ := ret[0].([]*T)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Aggregate indicates an expected call of Aggregate.
-func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any) *gomock.Call {
+func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregate), ctx)
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregate), varargs...)
 }
 
 // AggregateWithCallback mocks base method.
-func (m *MockiAggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error {
+func (m *MockiAggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AggregateWithCallback", ctx, handler)
+	varargs := []any{ctx, handler}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AggregateWithCallback", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AggregateWithCallback indicates an expected call of AggregateWithCallback.
-func (mr *MockiAggregatorMockRecorder[T]) AggregateWithCallback(ctx, handler any) *gomock.Call {
+func (mr *MockiAggregatorMockRecorder[T]) AggregateWithCallback(ctx, handler any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithCallback), ctx, handler)
+	varargs := append([]any{ctx, handler}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithCallback), varargs...)
 }

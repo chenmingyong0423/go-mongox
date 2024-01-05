@@ -24,14 +24,13 @@ import (
 
 //go:generate mockgen -source=aggregator.go -destination=../mock/aggregator.mock.go -package=mocks
 type iAggregator[T any] interface {
-	Aggregate(ctx context.Context) ([]*T, error)
-	AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error
+	Aggregate(ctx context.Context, opts ...*options.AggregateOptions) ([]*T, error)
+	AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error
 }
 
 type Aggregator[T any] struct {
-	collection         *mongo.Collection
-	aggregationOptions []*options.AggregateOptions
-	pipeline           any
+	collection *mongo.Collection
+	pipeline   any
 }
 
 func NewAggregator[T any](collection *mongo.Collection) *Aggregator[T] {
@@ -45,13 +44,8 @@ func (a *Aggregator[T]) Pipeline(pipeline any) *Aggregator[T] {
 	return a
 }
 
-func (a *Aggregator[T]) AggregateOptions(aggregationOptions ...*options.AggregateOptions) *Aggregator[T] {
-	a.aggregationOptions = aggregationOptions
-	return a
-}
-
-func (a *Aggregator[T]) Aggregate(ctx context.Context) ([]*T, error) {
-	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
+func (a *Aggregator[T]) Aggregate(ctx context.Context, opts ...*options.AggregateOptions) ([]*T, error) {
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +59,8 @@ func (a *Aggregator[T]) Aggregate(ctx context.Context) ([]*T, error) {
 	return result, nil
 }
 
-func (a *Aggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler) error {
-	cursor, err := a.collection.Aggregate(ctx, a.pipeline, a.aggregationOptions...)
+func (a *Aggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error {
+	cursor, err := a.collection.Aggregate(ctx, a.pipeline, opts...)
 	if err != nil {
 		return err
 	}
