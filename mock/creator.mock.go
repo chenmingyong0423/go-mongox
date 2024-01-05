@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	mongo "go.mongodb.org/mongo-driver/mongo"
+	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,31 +41,41 @@ func (m *MockiCreator[T]) EXPECT() *MockiCreatorMockRecorder[T] {
 }
 
 // InsertMany mocks base method.
-func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []T) (*mongo.InsertManyResult, error) {
+func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertMany", ctx, docs)
+	varargs := []any{ctx, docs}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InsertMany", varargs...)
 	ret0, _ := ret[0].(*mongo.InsertManyResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InsertMany indicates an expected call of InsertMany.
-func (mr *MockiCreatorMockRecorder[T]) InsertMany(ctx, docs any) *gomock.Call {
+func (mr *MockiCreatorMockRecorder[T]) InsertMany(ctx, docs any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockiCreator[T])(nil).InsertMany), ctx, docs)
+	varargs := append([]any{ctx, docs}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockiCreator[T])(nil).InsertMany), varargs...)
 }
 
 // InsertOne mocks base method.
-func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs T) (*mongo.InsertOneResult, error) {
+func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertOne", ctx, docs)
+	varargs := []any{ctx, docs}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InsertOne", varargs...)
 	ret0, _ := ret[0].(*mongo.InsertOneResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InsertOne indicates an expected call of InsertOne.
-func (mr *MockiCreatorMockRecorder[T]) InsertOne(ctx, docs any) *gomock.Call {
+func (mr *MockiCreatorMockRecorder[T]) InsertOne(ctx, docs any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockiCreator[T])(nil).InsertOne), ctx, docs)
+	varargs := append([]any{ctx, docs}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockiCreator[T])(nil).InsertOne), varargs...)
 }

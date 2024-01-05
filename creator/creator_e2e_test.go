@@ -117,7 +117,7 @@ func TestCreator_e2e_One(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertOneResult, err := creator.OneOptions(tc.opts...).InsertOne(tc.ctx, tc.t)
+			insertOneResult, err := creator.InsertOne(tc.ctx, tc.t, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
@@ -207,7 +207,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertManyResult, err := creator.ManyOptions(tc.opts...).InsertMany(tc.ctx, tc.t)
+			insertManyResult, err := creator.InsertMany(tc.ctx, tc.t, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
