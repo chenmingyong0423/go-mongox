@@ -24,9 +24,9 @@ import (
 
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 type iFinder[T any] interface {
-	FindOne(ctx context.Context) (*T, error)
-	Find(ctx context.Context) ([]*T, error)
-	Count(ctx context.Context) (int64, error)
+	FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error)
+	Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error)
+	Count(ctx context.Context, opts ...*options.CountOptions) (int64, error)
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -36,11 +36,8 @@ func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
 var _ iFinder[any] = (*Finder[any])(nil)
 
 type Finder[T any] struct {
-	collection   *mongo.Collection
-	findOneOpts  []*options.FindOneOptions
-	findOpts     []*options.FindOptions
-	countOptions []*options.CountOptions
-	filter       any
+	collection *mongo.Collection
+	filter     any
 }
 
 // Filter is used to set the filter of the query
@@ -49,23 +46,18 @@ func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	return f
 }
 
-func (f *Finder[T]) FindOne(ctx context.Context) (*T, error) {
+func (f *Finder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
 	t := new(T)
-	err := f.collection.FindOne(ctx, f.filter, f.findOneOpts...).Decode(t)
+	err := f.collection.FindOne(ctx, f.filter, opts...).Decode(t)
 	if err != nil {
 		return nil, err
 	}
 	return t, nil
 }
 
-func (f *Finder[T]) OneOptions(opts ...*options.FindOneOptions) *Finder[T] {
-	f.findOneOpts = opts
-	return f
-}
-
-func (f *Finder[T]) Find(ctx context.Context) ([]*T, error) {
+func (f *Finder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
 	t := make([]*T, 0)
-	cursor, err := f.collection.Find(ctx, f.filter, f.findOpts...)
+	cursor, err := f.collection.Find(ctx, f.filter, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,18 +69,8 @@ func (f *Finder[T]) Find(ctx context.Context) ([]*T, error) {
 	return t, nil
 }
 
-func (f *Finder[T]) Options(opts ...*options.FindOptions) *Finder[T] {
-	f.findOpts = opts
-	return f
-}
-
-func (f *Finder[T]) CountOptions(opts ...*options.CountOptions) *Finder[T] {
-	f.countOptions = opts
-	return f
-}
-
-func (f *Finder[T]) Count(ctx context.Context) (int64, error) {
-	cnt, err := f.collection.CountDocuments(ctx, f.filter, f.countOptions...)
+func (f *Finder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
+	cnt, err := f.collection.CountDocuments(ctx, f.filter, opts...)
 	if err != nil {
 		return 0, err
 	}
