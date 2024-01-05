@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	mongo "go.mongodb.org/mongo-driver/mongo"
+	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,31 +41,41 @@ func (m *MockiUpdater[T]) EXPECT() *MockiUpdaterMockRecorder[T] {
 }
 
 // UpdateMany mocks base method.
-func (m *MockiUpdater[T]) UpdateMany(ctx context.Context) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateMany", ctx)
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateMany", varargs...)
 	ret0, _ := ret[0].(*mongo.UpdateResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateMany indicates an expected call of UpdateMany.
-func (mr *MockiUpdaterMockRecorder[T]) UpdateMany(ctx any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateMany(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateMany), ctx)
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateMany), varargs...)
 }
 
 // UpdateOne mocks base method.
-func (m *MockiUpdater[T]) UpdateOne(ctx context.Context) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateOne", ctx)
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateOne", varargs...)
 	ret0, _ := ret[0].(*mongo.UpdateResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UpdateOne indicates an expected call of UpdateOne.
-func (mr *MockiUpdaterMockRecorder[T]) UpdateOne(ctx any) *gomock.Call {
+func (mr *MockiUpdaterMockRecorder[T]) UpdateOne(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOne), ctx)
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockiUpdater[T])(nil).UpdateOne), varargs...)
 }
