@@ -19,48 +19,44 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func AddToSet(value any) bson.D {
-	return bson.D{{Key: types.AddToSet, Value: value}}
+func AddToSet(key string, value any) bson.D {
+	return bson.D{{Key: types.AddToSet, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Pop(value any) bson.D {
-	return bson.D{{Key: types.Pop, Value: value}}
+func Pop(key string, value any) bson.D {
+	return bson.D{{Key: types.Pop, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Pull(value any) bson.D {
-	return bson.D{{Key: types.Pull, Value: value}}
+func Pull(key string, value any) bson.D {
+	return bson.D{{Key: types.Pull, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Push(value any) bson.D {
-	return bson.D{{Key: types.Push, Value: value}}
+func Push(key string, value any) bson.D {
+	return bson.D{{Key: types.Push, Value: bson.D{{Key: key, Value: value}}}}
 }
 
 func PullAll[T any](key string, values ...T) bson.D {
 	return bson.D{{Key: types.PullAll, Value: bson.D{bson.E{Key: key, Value: values}}}}
 }
 
-func Each[T any](key string, values ...T) bson.D {
-	return bson.D{{Key: key, Value: bson.D{{Key: types.Each, Value: values}}}}
+func Each[T any](values ...T) bson.D {
+	return bson.D{{Key: types.Each, Value: values}}
 }
 
-func Position(key string, value any) bson.D {
-	return bson.D{{Key: key, Value: bson.D{{Key: types.Position, Value: value}}}}
+func Position(value any) bson.D {
+	return bson.D{{Key: types.Position, Value: value}}
 }
 
-func Slice(key string, num int) bson.D {
-	return bson.D{{Key: key, Value: bson.D{{Key: types.SliceForUpdate, Value: num}}}}
+func Slice(num int) bson.D {
+	return bson.D{{Key: types.SliceForUpdate, Value: num}}
 }
 
-func Sort(key string, value any) bson.D {
-	return bson.D{{Key: key, Value: bson.D{{Key: types.Sort, Value: value}}}}
+func Sort(value any) bson.D {
+	return bson.D{{Key: types.Sort, Value: value}}
 }
 
-func Set(value any) bson.D {
-	return bson.D{{Key: types.Set, Value: value}}
-}
-
-func SetSimple(key string, value any) bson.D {
-	return bson.D{{Key: types.Set, Value: bson.E{Key: key, Value: value}}}
+func Set(key string, value any) bson.D {
+	return bson.D{{Key: types.Set, Value: bson.D{{Key: key, Value: value}}}}
 }
 
 func Unset(keys ...string) bson.D {
@@ -71,30 +67,30 @@ func Unset(keys ...string) bson.D {
 	return bson.D{{Key: types.Unset, Value: value}}
 }
 
-func SetOnInsert(value any) bson.D {
-	return bson.D{{Key: types.SetOnInsert, Value: value}}
+func SetOnInsert(key string, value any) bson.D {
+	return bson.D{{Key: types.SetOnInsert, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func CurrentDate(value any) bson.D {
-	return bson.D{{Key: types.CurrentDate, Value: value}}
+func CurrentDate(key string, value any) bson.D {
+	return bson.D{{Key: types.CurrentDate, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Inc(value any) bson.D {
-	return bson.D{{Key: types.Inc, Value: value}}
+func Inc(key string, value any) bson.D {
+	return bson.D{{Key: types.Inc, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Min(value any) bson.D {
-	return bson.D{{Key: types.Min, Value: value}}
+func Min(key string, value any) bson.D {
+	return bson.D{{Key: types.Min, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Max(value any) bson.D {
-	return bson.D{{Key: types.Max, Value: value}}
+func Max(key string, value any) bson.D {
+	return bson.D{{Key: types.Max, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Mul(value any) bson.D {
-	return bson.D{{Key: types.Mul, Value: value}}
+func Mul(key string, value any) bson.D {
+	return bson.D{{Key: types.Mul, Value: bson.D{{Key: key, Value: value}}}}
 }
 
-func Rename(value any) bson.D {
-	return bson.D{{Key: types.Rename, Value: value}}
+func Rename(key string, value any) bson.D {
+	return bson.D{{Key: types.Rename, Value: bson.D{{Key: key, Value: value}}}}
 }

@@ -20,38 +20,17 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Test_fieldUpdateBuilder_Set(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.D(bsonx.E("name", "cmy")),
-			want:  bson.D{{Key: "$set", Value: bson.D{{Key: "name", Value: "cmy"}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"name": "cmy"},
-			want:  bson.D{{Key: "$set", Value: map[string]any{"name": "cmy"}}},
-		},
-		{
-			name:  "struct",
-			value: types.UserName{Name: "cmy"},
-			want:  bson.D{{Key: "$set", Value: types.UserName{Name: "cmy"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Set(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}}, BsonBuilder().Set("name", "cmy").Build())
+	})
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}}, BsonBuilder().Set("name", "cmy").Set("age", 24).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Unset(t *testing.T) {
@@ -61,247 +40,67 @@ func Test_fieldUpdateBuilder_Unset(t *testing.T) {
 }
 
 func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.D(bsonx.E("name", "cmy")),
-			want:  bson.D{{Key: "$setOnInsert", Value: bson.D{{Key: "name", Value: "cmy"}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"name": "cmy"},
-			want:  bson.D{{Key: "$setOnInsert", Value: map[string]any{"name": "cmy"}}},
-		},
-		{
-			name:  "struct",
-			value: types.UserName{Name: "cmy"},
-			want:  bson.D{{Key: "$setOnInsert", Value: types.UserName{Name: "cmy"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().SetOnInsert(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}}, BsonBuilder().SetOnInsert("name", "cmy").Build())
+	})
+
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}}, BsonBuilder().SetOnInsert("name", "cmy").SetOnInsert("age", 24).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Inc(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("comments", 1).Add("score", 1).Build(),
-			want:  bson.D{{Key: "$inc", Value: bson.D{{Key: "comments", Value: 1}, {Key: "score", Value: 1}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"comments": 1, "score": 1},
-			want:  bson.D{{Key: "$inc", Value: map[string]any{"comments": 1, "score": 1}}},
-		},
-		{
-			name: "struct",
-			value: struct {
-				Comments int `bson:"comments"`
-				Score    int `bson:"score"`
-			}{Comments: 1, Score: 1},
-			want: bson.D{{Key: "$inc", Value: struct {
-				Comments int `bson:"comments"`
-				Score    int `bson:"score"`
-			}{Comments: 1, Score: 1}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Inc(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$inc", Value: bson.D{bson.E{Key: "orders", Value: 1}}}}, BsonBuilder().Inc("orders", 1).Build())
+	})
+
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$inc", Value: bson.D{bson.E{Key: "orders", Value: 1}, bson.E{Key: "ratings", Value: -1}}}}, BsonBuilder().Inc("orders", 1).Inc("ratings", -1).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Min(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("stock", 100).Add("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Add("score", -50).Build(),
-			want:  bson.D{{Key: "$min", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"stock": 100, "dateExpired": time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "score": -50},
-			want:  bson.D{{Key: "$min", Value: map[string]any{"stock": 100, "dateExpired": time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "score": -50}}},
-		},
-		{
-			name: "struct",
-			value: struct {
-				Stock       int       `bson:"stock"`
-				DateExpired time.Time `bson:"dateExpired"`
-				Score       int       `bson:"score"`
-			}{Stock: 100, DateExpired: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), Score: -50},
-			want: bson.D{{Key: "$min", Value: struct {
-				Stock       int       `bson:"stock"`
-				DateExpired time.Time `bson:"dateExpired"`
-				Score       int       `bson:"score"`
-			}{Stock: 100, DateExpired: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), Score: -50}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Min(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$min", Value: bson.D{bson.E{Key: "stock", Value: 100}}}}, BsonBuilder().Min("stock", 100).Build())
+	})
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$min", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, BsonBuilder().Min("stock", 100).Min("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Max(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("stock", 100).Add("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Add("score", -50).Build(),
-			want:  bson.D{{Key: "$max", Value: bson.D{{Key: "stock", Value: 100}, {Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, {Key: "score", Value: -50}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"stock": 100, "dateExpired": time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "score": -50},
-			want:  bson.D{{Key: "$max", Value: map[string]any{"stock": 100, "dateExpired": time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "score": -50}}},
-		},
-		{
-			name: "struct",
-			value: struct {
-				Stock       int       `bson:"stock"`
-				DateExpired time.Time `bson:"dateExpired"`
-				Score       int       `bson:"score"`
-			}{Stock: 100, DateExpired: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), Score: -50},
-			want: bson.D{{Key: "$max", Value: struct {
-				Stock       int       `bson:"stock"`
-				DateExpired time.Time `bson:"dateExpired"`
-				Score       int       `bson:"score"`
-			}{Stock: 100, DateExpired: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), Score: -50}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Max(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$max", Value: bson.D{bson.E{Key: "stock", Value: 100}}}}, BsonBuilder().Max("stock", 100).Build())
+	})
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$max", Value: bson.D{bson.E{Key: "stock", Value: 100}, bson.E{Key: "dateExpired", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, BsonBuilder().Max("stock", 100).Max("dateExpired", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Mul(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("price", 1.25).Add("qty", 2).Add("score", -1).Add("n", -1.1).Build(),
-			want:  bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "qty", Value: 2}, bson.E{Key: "score", Value: -1}, bson.E{Key: "n", Value: -1.1}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"price": 1.25, "qty": 2, "score": -1, "n": -1.1},
-			want:  bson.D{bson.E{Key: "$mul", Value: map[string]any{"price": 1.25, "qty": 2, "score": -1, "n": -1.1}}},
-		},
-		{
-			name: "struct",
-			value: struct {
-				Price float64 `bson:"price"`
-				Qty   int     `bson:"qty"`
-				Score int     `bson:"score"`
-				N     float64 `bson:"n"`
-			}{Price: 1.25, Qty: 2, Score: -1, N: -1.1},
-			want: bson.D{bson.E{Key: "$mul", Value: struct {
-				Price float64 `bson:"price"`
-				Qty   int     `bson:"qty"`
-				Score int     `bson:"score"`
-				N     float64 `bson:"n"`
-			}{Price: 1.25, Qty: 2, Score: -1, N: -1.1}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Mul(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}}}}, BsonBuilder().Mul("price", 1.25).Build())
+	})
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$mul", Value: bson.D{bson.E{Key: "price", Value: 1.25}, bson.E{Key: "quantity", Value: 2}}}}, BsonBuilder().Mul("price", 1.25).Mul("quantity", 2).Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_Rename(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-
-		want bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("nmae", "name").Add("name.first", "name.last").Build(),
-			want:  bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nmae", Value: "name"}, bson.E{Key: "name.first", Value: "name.last"}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"nmae": "name", "name.first": "name.last"},
-			want:  bson.D{bson.E{Key: "$rename", Value: map[string]any{"nmae": "name", "name.first": "name.last"}}},
-		},
-		{
-			name: "struct",
-			value: struct {
-				Nmae      string `bson:"nmae"`
-				NameFirst string `bson:"name.first"`
-			}{Nmae: "name", NameFirst: "name.last"},
-			want: bson.D{bson.E{Key: "$rename", Value: struct {
-				Nmae      string `bson:"nmae"`
-				NameFirst string `bson:"name.first"`
-			}{Nmae: "name", NameFirst: "name.last"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Rename(tc.value).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$rename", Value: bson.D{bson.E{Key: "name", Value: "name"}}}}, BsonBuilder().Rename("name", "name").Build())
+	})
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$rename", Value: bson.D{bson.E{Key: "name", Value: "name"}, bson.E{Key: "age", Value: "age"}}}}, BsonBuilder().Rename("name", "name").Rename("age", "age").Build())
+	})
 }
 
 func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "bson",
-			value: bsonx.NewD().Add("lastModified", true).Add("cancellation.date", bsonx.M("$type", "timestamp")).Build(),
-			want:  bson.D{{Key: "$currentDate", Value: bson.D{{Key: "lastModified", Value: true}, {Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
-		},
-		{
-			name:  "map",
-			value: map[string]any{"lastModified": true, "cancellation.date": bsonx.M("$type", "timestamp")},
-			want:  bson.D{{Key: "$currentDate", Value: map[string]any{"lastModified": true, "cancellation.date": bson.M{"$type": "timestamp"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().CurrentDate(tc.value).Build())
-		})
-	}
-}
-
-func Test_fieldUpdateBuilder_SetSimpleKey(t *testing.T) {
-	t.Run("one key-value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}}, BsonBuilder().SetSimple("name", "cmy").Build())
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}}}}, BsonBuilder().CurrentDate("lastModified", true).Build())
 	})
-	t.Run("multiple key-value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}}}}, BsonBuilder().SetSimple("name", "cmy").SetSimple("age", 18).Build())
+
+	t.Run("multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.D{bson.E{Key: "$type", Value: "timestamp"}}}}}}, BsonBuilder().CurrentDate("lastModified", true).CurrentDate("cancellation.date", bsonx.D(bsonx.E("$type", "timestamp"))).Build())
 	})
 }

@@ -17,85 +17,32 @@ package update
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestAddToSet(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test AddToSet",
-			value: bsonx.M("colors", "mauve"),
-			want:  bson.D{bson.E{Key: "$addToSet", Value: bsonx.M("colors", "mauve")}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, AddToSet(tc.value))
-		})
-	}
+	t.Run("test AddToSet", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$addToSet", Value: bson.D{bson.E{Key: "colors", Value: "mauve"}}}}, AddToSet("colors", "mauve"))
+	})
 }
 
 func TestPop(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Pop",
-			value: bsonx.M("scores", 1),
-			want:  bson.D{bson.E{Key: "$pop", Value: bsonx.M("scores", 1)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Pop(tc.value))
-		})
-	}
+	t.Run("test Pop", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$pop", Value: bson.D{bson.E{Key: "scores", Value: 1}}}}, Pop("scores", 1))
+	})
 }
 
 func TestPull(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Pull",
-			value: bsonx.M("fruit", "apples"),
-			want:  bson.D{bson.E{Key: "$pull", Value: bsonx.M("fruit", "apples")}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Pull(tc.value))
-		})
-	}
+	t.Run("test Pull", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruit", Value: "apples"}}}}, Pull("fruit", "apples"))
+	})
 }
 
 func TestPush(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Push",
-			value: bsonx.M("scores", 89),
-			want:  bson.D{bson.E{Key: "$push", Value: bsonx.M("scores", 89)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Push(tc.value))
-		})
-	}
+	t.Run("test Push", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$push", Value: bson.D{bson.E{Key: "scores", Value: 89}}}}, Push("scores", 89))
+	})
 }
 
 func TestPullAll(t *testing.T) {
@@ -128,98 +75,39 @@ func TestEach(t *testing.T) {
 	}{
 		{
 			name:   "test Each",
-			key:    "scores",
 			values: []any{3, 4, 5},
-			want:   bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$each", Value: []any{3, 4, 5}}}}},
+			want:   bson.D{bson.E{Key: "$each", Value: []any{3, 4, 5}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Each(tc.key, tc.values...))
+			assert.Equal(t, tc.want, Each(tc.values...))
 		})
 	}
 }
 
 func TestPosition(t *testing.T) {
-	testCases := []struct {
-		name  string
-		key   string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Position",
-			key:   "scores",
-			value: 3,
-			want:  bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$position", Value: 3}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Position(tc.key, tc.value))
-		})
-	}
+	t.Run("test Position", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$position", Value: 0}}, Position(0))
+	})
 }
 
 func TestSlice(t *testing.T) {
-	testCases := []struct {
-		name string
-		key  string
-		num  int
-		want bson.D
-	}{
-		{
-			name: "test Slice",
-			key:  "scores",
-			num:  3,
-			want: bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$slice", Value: 3}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Slice(tc.key, tc.num))
-		})
-	}
+	t.Run("test Slice", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$slice", Value: 3}}, Slice(3))
+	})
 }
 
 func TestSort(t *testing.T) {
-	testCases := []struct {
-		name  string
-		key   string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Sort",
-			key:   "scores",
-			value: 1,
-			want:  bson.D{bson.E{Key: "scores", Value: bson.D{bson.E{Key: "$sort", Value: 1}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Sort(tc.key, tc.value))
-		})
-	}
+	t.Run("test Sort", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$sort", Value: 1}}, Sort(1))
+	})
 }
 
 func TestSet(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Set",
-			value: bsonx.M("name", "Alice"),
-			want:  bson.D{bson.E{Key: "$set", Value: bson.M{"name": "Alice"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Set(tc.value))
-		})
-	}
+	t.Run("test Set", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}}, Set("name", "Alice"))
+	})
 }
 
 func TestUnset(t *testing.T) {
@@ -242,155 +130,43 @@ func TestUnset(t *testing.T) {
 }
 
 func TestSetOnInsert(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test SetOnInsert",
-			value: bsonx.M("name", "Alice"),
-			want:  bson.D{bson.E{Key: "$setOnInsert", Value: bson.M{"name": "Alice"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, SetOnInsert(tc.value))
-		})
-	}
+	t.Run("test SetOnInsert", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}}, SetOnInsert("name", "Alice"))
+	})
 }
 
 func TestCurrentDate(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test CurrentDate",
-			value: bsonx.NewD().Add("lastModified", true).Add("cancellation.date", bsonx.M("$type", "timestamp")).Build(),
-			want:  bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.M{"$type": "timestamp"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, CurrentDate(tc.value))
-		})
-	}
+	t.Run("test CurrentDate", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}}}}, CurrentDate("lastModified", true))
+	})
 }
 
 func TestInc(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Inc",
-			value: bsonx.M("age", 1),
-			want:  bson.D{bson.E{Key: "$inc", Value: bson.M{"age": 1}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, bson.D{bson.E{Key: "$inc", Value: bson.M{"age": 1}}}, Inc(tc.value))
-		})
-	}
+	t.Run("test Inc", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$inc", Value: bson.D{bson.E{Key: "count", Value: 1}}}}, Inc("count", 1))
+	})
 }
 
 func TestMin(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Min",
-			value: bsonx.M("age", 18),
-			want:  bson.D{bson.E{Key: "$min", Value: bson.M{"age": 18}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, bson.D{bson.E{Key: "$min", Value: bson.M{"age": 18}}}, Min(tc.value))
-		})
-	}
+	t.Run("test Min", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$min", Value: bson.D{bson.E{Key: "lowScore", Value: 200}}}}, Min("lowScore", 200))
+	})
 }
 
 func TestMax(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Max",
-			value: bsonx.M("age", 18),
-			want:  bson.D{bson.E{Key: "$max", Value: bson.M{"age": 18}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, bson.D{bson.E{Key: "$max", Value: bson.M{"age": 18}}}, Max(tc.value))
-		})
-	}
+	t.Run("test Max", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$max", Value: bson.D{bson.E{Key: "highScore", Value: 800}}}}, Max("highScore", 800))
+	})
 }
 
 func TestMul(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Mul",
-			value: bsonx.M("age", 2),
-			want:  bson.D{bson.E{Key: "$mul", Value: bson.M{"age": 2}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, bson.D{bson.E{Key: "$mul", Value: bson.M{"age": 2}}}, Mul(tc.value))
-		})
-	}
+	t.Run("test Mul", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$mul", Value: bson.D{bson.E{Key: "qty", Value: 2}}}}, Mul("qty", 2))
+	})
 }
 
 func TestRename(t *testing.T) {
-	testCases := []struct {
-		name  string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Rename",
-			value: bsonx.M("name", "nickname"),
-			want:  bson.D{bson.E{Key: "$rename", Value: bson.M{"name": "nickname"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, bson.D{bson.E{Key: "$rename", Value: bson.M{"name": "nickname"}}}, Rename(tc.value))
-		})
-	}
-}
-
-func TestSetSimple(t *testing.T) {
-	testCases := []struct {
-		name  string
-		key   string
-		value any
-		want  bson.D
-	}{
-		{
-			name:  "test Set",
-			key:   "name",
-			value: "chenmingyong",
-			want:  bson.D{bson.E{Key: "$set", Value: bson.E{Key: "name", Value: "chenmingyong"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, SetSimple(tc.key, tc.value))
-		})
-	}
+	t.Run("test Rename", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$rename", Value: bson.D{bson.E{Key: "nickname", Value: "alias"}}}}, Rename("nickname", "alias"))
+	})
 }

@@ -23,15 +23,7 @@ type fieldUpdateBuilder struct {
 	parent *Builder
 }
 
-func (b *fieldUpdateBuilder) Set(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: value})
-	return b.parent
-}
-
-// SetSimple sets the value of a simple key in a document.
-// pay attention to the following example:
-// - don't use it with Set, if you want to set the multiple key at once, you can use Set directly.
-func (b *fieldUpdateBuilder) SetSimple(key string, value any) *Builder {
+func (b *fieldUpdateBuilder) Set(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
 	if !b.parent.tryMergeValue(types.Set, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: bson.D{e}})
@@ -48,37 +40,58 @@ func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) SetOnInsert(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: value})
+func (b *fieldUpdateBuilder) SetOnInsert(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.SetOnInsert, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) CurrentDate(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: value})
+func (b *fieldUpdateBuilder) CurrentDate(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.CurrentDate, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Inc(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: value})
+func (b *fieldUpdateBuilder) Inc(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Inc, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Min(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: value})
+func (b *fieldUpdateBuilder) Min(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Min, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Max(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: value})
+func (b *fieldUpdateBuilder) Max(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Max, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Mul(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: value})
+func (b *fieldUpdateBuilder) Mul(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Mul, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *fieldUpdateBuilder) Rename(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: value})
+func (b *fieldUpdateBuilder) Rename(key string, value any) *Builder {
+	e := bson.E{Key: key, Value: value}
+	if !b.parent.tryMergeValue(types.Rename, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: bson.D{e}})
+	}
 	return b.parent
 }
