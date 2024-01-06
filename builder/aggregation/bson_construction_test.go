@@ -19,52 +19,15 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestSum(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test sum",
-			expression: "$price",
-			want:       bson.D{{Key: "$sum", Value: "$price"}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Sum(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestSumMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "test sum many",
-			expressions: []any{"$price", "$fee"},
-			want:        bson.D{{Key: "$sum", Value: []any{"$price", "$fee"}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := SumMany(tc.expressions...)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test sum", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "totalAmount", Value: bson.D{bson.E{Key: "$sum", Value: "$qty"}}}}, Sum("totalAmount", "$qty"))
+	})
 }
 
 func TestPush(t *testing.T) {
@@ -89,204 +52,71 @@ func TestPush(t *testing.T) {
 }
 
 func TestAvg(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test avg",
-			expression: Multiply("$price", "$quantity"),
-			want:       bson.D{{Key: "$avg", Value: bson.D{{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Avg(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestAvgMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "test avg many",
-			expressions: []any{"$price", "$fee"},
-			want:        bson.D{{Key: "$avg", Value: []any{"$price", "$fee"}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := AvgMany(tc.expressions...)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test avg", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "avgAmount", Value: bson.D{bson.E{Key: "$avg", Value: "$qty"}}}}, Avg("avgAmount", "$qty"))
+	})
 }
 
 func TestFirst(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test first",
-			expression: "$type",
-			want:       bson.D{{Key: "$first", Value: "$type"}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := First(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test first", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "firstSale", Value: bson.D{bson.E{Key: "$first", Value: "$date"}}}}, First("firstSale", "$date"))
+	})
 }
 
 func TestLast(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test last",
-			expression: "$type",
-			want:       bson.D{{Key: "$last", Value: "$type"}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Last(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test last", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "lastSale", Value: bson.D{bson.E{Key: "$last", Value: "$date"}}}}, Last("lastSale", "$date"))
+	})
 }
 
 func TestMin(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test min",
-			expression: "$price",
-			want:       bson.D{{Key: "$min", Value: "$price"}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Min(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestMinMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "test min many",
-			expressions: []any{"$price", "$fee"},
-			want:        bson.D{{Key: "$min", Value: []any{"$price", "$fee"}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := MinMany(tc.expressions...)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test min", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "minQuantity", Value: bson.D{bson.E{Key: "$min", Value: "$quantity"}}}}, Min("minQuantity", "$quantity"))
+	})
 }
 
 func TestMax(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test max",
-			expression: "$price",
-			want:       bson.D{{Key: "$max", Value: "$price"}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Max(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
-}
-
-func TestMaxMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "test max many",
-			expressions: []any{"$price", "$fee"},
-			want:        bson.D{{Key: "$max", Value: []any{"$price", "$fee"}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := MaxMany(tc.expressions...)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test max", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "maxQuantity", Value: bson.D{bson.E{Key: "$max", Value: "$quantity"}}}}, Max("maxQuantity", "$quantity"))
+	})
 }
 
 func TestAdd(t *testing.T) {
 	testCases := []struct {
 		name        string
+		key         string
 		expressions []any
 		want        bson.D
 	}{
 		{
-			name:        "nil",
+			name:        "nil value",
+			key:         "total",
 			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$add", Value: []any{nil}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{nil}}}}},
 		},
 		{
 			name:        "empty",
+			key:         "total",
 			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$add", Value: []any{}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{}}}}},
 		},
 		{
 			name:        "single type",
+			key:         "total",
 			expressions: []any{1, 2, 3, 4},
-			want:        bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, 4}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, 4}}}}},
 		},
 		{
 			name:        "multiple types",
+			key:         "total",
 			expressions: []any{1, 2, 3, "$a", "$b", "$c"},
-			want:        bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, "$a", "$b", "$c"}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := Add(tc.expressions)
+			got := Add(tc.key, tc.expressions...)
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -295,1053 +125,351 @@ func TestAdd(t *testing.T) {
 func TestMultiply(t *testing.T) {
 	testCases := []struct {
 		name        string
+		key         string
 		expressions []any
 		want        bson.D
 	}{
 		{
 			name:        "nil",
+			key:         "total",
 			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$multiply", Value: []any{nil}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{nil}}}}},
 		},
 		{
 			name:        "empty",
+			key:         "total",
 			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$multiply", Value: []any{}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{}}}}},
 		},
 		{
 			name:        "single type",
+			key:         "total",
 			expressions: []any{1, 2, 3, 4},
-			want:        bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, 4}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, 4}}}}},
 		},
 		{
 			name:        "multiple types",
+			key:         "total",
 			expressions: []any{1, 2, 3, "$a", "$b", "$c"},
-			want:        bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, "$a", "$b", "$c"}}},
+			want:        bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Multiply(tc.expressions...))
+			assert.Equal(t, tc.want, Multiply(tc.key, tc.expressions...))
 		})
 	}
 }
 
 func TestSubtract(t *testing.T) {
 	testCases := []struct {
-		name   string
-		s      string
-		start  int64
-		length int64
-		want   bson.D
+		name        string
+		key         string
+		expressions []any
+		want        bson.D
 	}{
 		{
-			name:   "normal",
-			s:      "$quarter",
-			start:  0,
-			length: 2,
-			want:   bson.D{bson.E{Key: "$subtract", Value: []any{"$quarter", int64(0), int64(2)}}},
+			name:        "nil value",
+			key:         "dateDifference",
+			expressions: []any{nil},
+			want:        bson.D{bson.E{Key: "dateDifference", Value: bson.D{bson.E{Key: "$subtract", Value: []any{nil}}}}},
+		},
+		{
+			name:        "empty",
+			key:         "dateDifference",
+			expressions: []any{},
+			want:        bson.D{bson.E{Key: "dateDifference", Value: bson.D{bson.E{Key: "$subtract", Value: []any{}}}}},
+		},
+		{
+			name:        "single type",
+			key:         "dateDifference",
+			expressions: []any{1, 2, 3, 4},
+			want:        bson.D{bson.E{Key: "dateDifference", Value: bson.D{bson.E{Key: "$subtract", Value: []any{1, 2, 3, 4}}}}},
+		},
+		{
+			name:        "multiple types",
+			key:         "dateDifference",
+			expressions: []any{"$date", 5 * 60 * 1000},
+			want:        bson.D{bson.E{Key: "dateDifference", Value: bson.D{bson.E{Key: "$subtract", Value: []any{"$date", 5 * 60 * 1000}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Subtract(tc.s, tc.start, tc.length))
+			assert.Equal(t, tc.want, Subtract(tc.key, tc.expressions...))
 		})
 	}
 }
 
 func Test_Divide(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"hours", 8},
-			want:        bson.D{bson.E{Key: "$divide", Value: []any{"hours", 8}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Divide(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "workdays", Value: bson.D{bson.E{Key: "$divide", Value: []any{"$hours", 8}}}}}, Divide("workdays", "$hours", 8))
 }
 
 func Test_Mod(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$hours", "$tasks"},
-			want:        bson.D{bson.E{Key: "$mod", Value: []any{"$hours", "$tasks"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Mod(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "remainder", Value: bson.D{bson.E{Key: "$mod", Value: []any{"$distance", 5}}}}}, Mod("remainder", "$distance", 5))
 }
 
 func Test_ArrayElemAt(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		index      int64
-		want       bson.D
-	}{
-		{
-			name:       "valid expression",
-			expression: "$favorites",
-			index:      0,
-			want:       bson.D{{Key: "$arrayElemAt", Value: []any{"$favorites", int64(0)}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, ArrayElemAt(tc.expression, tc.index))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "first", Value: bson.D{bson.E{Key: "$arrayElemAt", Value: []any{"$favorites", int64(0)}}}}}, ArrayElemAt("first", "$favorites", int64(0)))
 }
 
 func Test_ConcatArrays(t *testing.T) {
-	testCases := []struct {
-		name   string
-		arrays []any
-		want   bson.D
-	}{
-		{
-			name:   "valid arrays",
-			arrays: []any{"$instock", "$ordered"},
-			want:   bson.D{{Key: "$concatArrays", Value: []any{"$instock", "$ordered"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, ConcatArrays(tc.arrays...))
-		})
-	}
+	// { items: { $concatArrays: [ "$instock", "$ordered" ] }
+	assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$concatArrays", Value: []any{"$instock", "$ordered"}}}}}, ConcatArrays("items", "$instock", "$ordered"))
 }
 
 func Test_ArrayToObject(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "string expression",
-			expression: "$dimensions",
-			want:       bson.D{{Key: "$arrayToObject", Value: "$dimensions"}},
-		},
-		{
-			name:       "array expression",
-			expression: []any{bsonx.NewD().Add("k", "item").Add("v", "abc123").Build()},
-			want:       bson.D{{Key: "$arrayToObject", Value: []any{bson.D{{Key: "k", Value: "item"}, {Key: "v", Value: "abc123"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, ArrayToObject(tc.expression))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$arrayToObject", Value: "$item"}}}}, ArrayToObject("item", "$item"))
 }
 
 func Test_Size(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "valid expression",
-			expression: "$items",
-			want:       bson.D{{Key: "$size", Value: "$items"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Size(tc.expression))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "numOfScores", Value: bson.D{bson.E{Key: "$size", Value: "$scores"}}}}, Size("numOfScores", "$scores"))
 }
 
 func Test_Slice(t *testing.T) {
-	testCases := []struct {
-		name      string
-		array     any
-		nElements int64
-		want      bson.D
-	}{
-		{
-			name:      "valid expression",
-			array:     "$items",
-			nElements: 5,
-			want:      bson.D{{Key: "$slice", Value: []any{"$items", int64(5)}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Slice(tc.array, tc.nElements))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "firstThree", Value: bson.D{bson.E{Key: "$slice", Value: []any{"$array", int64(3)}}}}}, Slice("firstThree", "$array", int64(3)))
 }
 
 func Test_SliceWithPosition(t *testing.T) {
-	testCases := []struct {
-		name      string
-		array     any
-		position  int64
-		nElements int64
-		want      bson.D
-	}{
-		{
-			name:      "valid expression",
-			array:     "$items",
-			position:  20,
-			nElements: 5,
-			want:      bson.D{{Key: "$slice", Value: []any{"$items", int64(20), int64(5)}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, SliceWithPosition(tc.array, tc.position, tc.nElements))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "firstThree", Value: bson.D{bson.E{Key: "$slice", Value: []any{"$array", int64(1), int64(3)}}}}}, SliceWithPosition("firstThree", "$array", int64(1), int64(3)))
 }
 
 func Test_Map(t *testing.T) {
-	testCases := []struct {
-		name       string
-		inputArray any
-		as         string
-		in         any
-		want       bson.D
-	}{
-		{
-			name:       "valid expression",
-			inputArray: "$items",
-			as:         "item",
-			in:         "$$item.price * 1.25",
-			want:       bson.D{{Key: "$map", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "as", Value: "item"}, {Key: "in", Value: "$$item.price * 1.25"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Map(tc.inputArray, tc.as, tc.in))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "result", Value: bson.D{bson.E{Key: "$map", Value: bson.D{bson.E{Key: "input", Value: "$quizzes"}, {Key: "as", Value: "grade"}, {Key: "in", Value: bson.D{bson.E{Key: "adjustedGrade", Value: bson.D{bson.E{Key: "$add", Value: []any{"$$grade", 2}}}}}}}}}}}, Map("result", "$quizzes", "grade", bson.D{bson.E{Key: "adjustedGrade", Value: bson.D{bson.E{Key: "$add", Value: []any{"$$grade", 2}}}}}))
 }
 
 func Test_Filter(t *testing.T) {
 	testCases := []struct {
 		name       string
+		key        string
 		inputArray any
 		cond       any
 		opt        *types.FilterOptions
 		want       bson.D
 	}{
 		{
-			name:       "valid expression",
+			name:       "nil options",
+			key:        "items",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
 			opt:        nil,
-			want:       bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}}}},
+			want:       bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}}}}}},
 		},
 		{
-			name:       "valid expression with options",
+			name:       "with options",
+			key:        "items",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
-			opt:        &types.FilterOptions{As: "item", Limit: 5},
-			want:       bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}},
+			opt:        &types.FilterOptions{As: "item", Limit: int64(5)},
+			want:       bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Filter(tc.inputArray, tc.cond, tc.opt))
+			assert.Equal(t, tc.want, Filter(tc.key, tc.inputArray, tc.cond, tc.opt))
 		})
 	}
 }
 
 func Test_Eq(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$eq", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$eq", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$eq", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Eq(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$eq", Value: []any{"$item", 1}}}}}, Eq("item", "$item", 1))
 }
 
 func Test_Ne(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$ne", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$ne", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$ne", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Ne(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$ne", Value: []any{"$item", 1}}}}}, Ne("item", "$item", 1))
 }
 
 func Test_Gt(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$gt", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$gt", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Gt(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$gt", Value: []any{"$item", 1}}}}}, Gt("item", "$item", 1))
 }
 
 func Test_Gte(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$gte", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$gte", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$gte", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Gte(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$gte", Value: []any{"$item", 1}}}}}, Gte("item", "$item", 1))
 }
 
 func Test_Lt(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$lt", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$lt", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Lt(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$lt", Value: []any{"$item", 1}}}}}, Lt("item", "$item", 1))
 }
 
 func Test_Lte(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$lte", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$lte", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			want:        bson.D{bson.E{Key: "$lte", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Lte(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$lte", Value: []any{"$item", 1}}}}}, Lte("item", "$item", 1))
 }
 
 func Test_Cond(t *testing.T) {
-	testCases := []struct {
-		name      string
-		boolExpr  any
-		trueExpr  any
-		falseExpr any
-		want      bson.D
-	}{
-		{
-			name:      "normal",
-			boolExpr:  Gte("$qty", 250),
-			trueExpr:  30,
-			falseExpr: 20,
-			want:      bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Cond(tc.boolExpr, tc.trueExpr, tc.falseExpr))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}}}}, Cond("discount", bsonx.D(bsonx.E("$gte", []any{"$qty", 250})), 30, 20))
 }
 
 func Test_IfNull(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expr        any
-		replacement any
-		want        bson.D
-	}{
-		{
-			name:        "nil expr",
-			expr:        nil,
-			replacement: "Unspecified",
-			want:        bson.D{{Key: "$ifNull", Value: []any{nil, "Unspecified"}}},
-		},
-		{
-			name:        "nil replacement",
-			expr:        "$description",
-			replacement: nil,
-			want:        bson.D{{Key: "$ifNull", Value: []any{"$description", nil}}},
-		},
-		{
-			name:        "normal",
-			expr:        "$description",
-			replacement: "Unspecified",
-			want:        bson.D{{Key: "$ifNull", Value: []any{"$description", "Unspecified"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, IfNull(tc.expr, tc.replacement))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: []any{"$coupon", int64(0)}}}}}, IfNull("discount", "$coupon", int64(0)))
+
 }
 
 func Test_Switch(t *testing.T) {
-	testCases := []struct {
-		name        string
-		cases       []any
-		defaultCase any
-		want        bson.D
-	}{
-		{
-			name:        "nil cases",
-			cases:       nil,
-			defaultCase: "Did not match",
-			want:        bson.D{},
-		},
-		{
-			name:        "empty cases",
-			cases:       []any{},
-			defaultCase: "Did not match",
-			want:        bson.D{},
-		},
-		{
-			name: "normal",
-			cases: []any{
-				Eq(0, 5), "equals",
-				Gt(0, 5), "greater than",
+	assert.Equal(t, bson.D{bson.E{Key: "summary", Value: bson.D{
+		{Key: "$switch", Value: bson.D{
+			{Key: "branches", Value: bson.A{
+				bson.D{{Key: "case", Value: bson.D{{Key: "$eq", Value: []any{0, 5}}}}, {Key: "then", Value: "equals"}},
+				bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: []any{0, 5}}}}, {Key: "then", Value: "greater than"}},
+			}},
+			{Key: "default", Value: "Did not match"},
+		}},
+	}}},
+		Switch("summary", []types.CaseThen{
+			{
+				Case: bsonx.D(bsonx.E("$eq", []any{0, 5})), Then: "equals",
 			},
-			defaultCase: "Did not match",
-			want: bson.D{
-				{Key: "$switch", Value: bson.D{
-					{Key: "branches", Value: bson.A{
-						bson.D{{Key: "case", Value: bson.D{{Key: "$eq", Value: []any{0, 5}}}}, {Key: "then", Value: "equals"}},
-						bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: []any{0, 5}}}}, {Key: "then", Value: "greater than"}},
-					}},
-					{Key: "default", Value: "Did not match"},
-				}},
+			{
+				Case: bsonx.D(bsonx.E("$gt", []any{0, 5})), Then: "greater than",
 			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Switch(tc.cases, tc.defaultCase))
-		})
-	}
+		}, "Did not match"),
+	)
 }
 
-func Test_DateOfMonth(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$dayOfMonth", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfMonth(tc.date))
-		})
-	}
+func Test_DayOfMonth(t *testing.T) {
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfMonth", Value: bson.D{bson.E{Key: "$dayOfMonth", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, DayOfMonth("dayOfMonth", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_DayOfMonthWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$dayOfMonth", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfMonthWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfMonth", Value: bson.D{bson.E{Key: "$dayOfMonth", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, DayOfMonthWithTimezone("dayOfMonth", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_DayOfWeek(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$dayOfWeek", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfWeek(tc.date))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfWeek", Value: bson.D{bson.E{Key: "$dayOfWeek", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, DayOfWeek("dayOfWeek", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_DayOfWeekWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$dayOfWeek", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfWeekWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfWeek", Value: bson.D{bson.E{Key: "$dayOfWeek", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, DayOfWeekWithTimezone("dayOfWeek", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_DayOfYear(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$dayOfYear", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfYear(tc.date))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfYear", Value: bson.D{bson.E{Key: "$dayOfYear", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, DayOfYear("dayOfYear", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_DayOfYearWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$dayOfYear", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DayOfYearWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "dayOfYear", Value: bson.D{bson.E{Key: "$dayOfYear", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, DayOfYearWithTimezone("dayOfYear", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_Year(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$year", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Year(tc.date))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "year", Value: bson.D{bson.E{Key: "$year", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, Year("year", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_YearWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$year", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, YearWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "year", Value: bson.D{bson.E{Key: "$year", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, YearWithTimezone("year", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_Month(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$month", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Month(tc.date))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "month", Value: bson.D{bson.E{Key: "$month", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, Month("month", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_MonthWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$month", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, MonthWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "month", Value: bson.D{bson.E{Key: "$month", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, MonthWithTimezone("month", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_Week(t *testing.T) {
-	testCases := []struct {
-		name string
-		date time.Time
-		want bson.D
-	}{
-		{
-			name: "normal date",
-			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			want: bson.D{bson.E{Key: "$week", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Week(tc.date))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "week", Value: bson.D{bson.E{Key: "$week", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}, Week("week", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)))
 }
 
 func Test_WeekWithTimezone(t *testing.T) {
-	testCases := []struct {
-		name     string
-		date     time.Time
-		timezone string
-		want     bson.D
-	}{
-		{
-			name:     "normal date",
-			date:     time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			timezone: "Asia/Shanghai",
-			want:     bson.D{bson.E{Key: "$week", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, WeekWithTimezone(tc.date, tc.timezone))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "week", Value: bson.D{bson.E{Key: "$week", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, WeekWithTimezone("week", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai"))
 }
 
 func Test_DateToString(t *testing.T) {
 	testCases := []struct {
 		name string
+		key  string
 		date time.Time
 		opt  *types.DateToStringOptions
 		want bson.D
 	}{
 		{
 			name: "nil opt",
+			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
 			opt:  nil,
-			want: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
+			want: bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}}}},
 		},
 		{
 			name: "empty format",
+			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
 			opt: &types.DateToStringOptions{
 				Format:   "",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
 			},
-			want: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
-				bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
+			want: bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
+				bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
 		},
 		{
 			name: "empty timezone",
+			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
 			opt: &types.DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
 			},
-			want: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
-				bson.E{Key: "format", Value: "%Y-%m-%d"}}}},
+			want: bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)},
+				bson.E{Key: "format", Value: "%Y-%m-%d"}}}}}},
 		},
 		{
 			name: "nil onNull",
+			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
 			opt: &types.DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
 			},
-			want: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}},
+			want: bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
 		},
 		{
 			name: "normal",
+			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
 			opt: &types.DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   "null",
 			},
-			want: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}, bson.E{Key: "onNull", Value: "null"}}}},
+			want: bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dateToString", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "format", Value: "%Y-%m-%d"}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}, bson.E{Key: "onNull", Value: "null"}}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, DateToString(tc.date, tc.opt))
+			assert.Equal(t, tc.want, DateToString(tc.key, tc.date, tc.opt))
 		})
 	}
 }
 
 func Test_And(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil expressions",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$and", Value: []any{nil}}},
-		},
-		{
-			name:        "empty expressions",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$and", Value: []any{}}},
-		},
-		{
-			name:        "normal expressions",
-			expressions: []any{Gt("$qty", 100), Lt("$qty", 250)},
-			want:        bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, And(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}}}}, And("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 100})), bsonx.D(bsonx.E("$lt", []any{"$qty", 250}))))
 }
 
 func Test_Not(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil expressions",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$not", Value: []any{nil}}},
-		},
-		{
-			name:        "empty expressions",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$not", Value: []any{}}},
-		},
-		{
-			name:        "normal expressions",
-			expressions: []any{Gt("$qty", 250)},
-			want:        bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Not(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, Not("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250}))))
+
 }
 
 func Test_Or(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil expressions",
-			expressions: []any{nil},
-			want:        bson.D{bson.E{Key: "$or", Value: []any{nil}}},
-		},
-		{
-			name:        "empty expressions",
-			expressions: []any{},
-			want:        bson.D{bson.E{Key: "$or", Value: []any{}}},
-		},
-		{
-			name:        "normal expressions",
-			expressions: []any{query.Eq("x", 0), query.Expr(Eq(Divide(1, "$x"), 3))},
-			want:        bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "x", Value: bson.D{bson.E{Key: "$eq", Value: 0}}}}, bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$eq", Value: []any{bson.D{bson.E{Key: "$divide", Value: []any{1, "$x"}}}, 3}}}}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Or(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 50}}}}}}}}, Or("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250})), bsonx.D(bsonx.E("$lt", []any{"$qty", 50}))))
 }
 
 func Test_Concat(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "nil expressions",
-			expressions: []any{nil},
-			want:        bson.D{{Key: "$concat", Value: []any{nil}}},
-		},
-		{
-			name:        "empty expressions",
-			expressions: []any{},
-			want:        bson.D{{Key: "$concat", Value: []any{}}},
-		},
-		{
-			name:        "normal expression",
-			expressions: []any{"$item", " - ", "$description"},
-			want:        bson.D{{Key: "$concat", Value: []any{"$item", " - ", "$description"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Concat(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, Concat("item", "$item", " - ", "$description"))
 }
 
 func Test_SubstrBytes(t *testing.T) {
-	testCases := []struct {
-		name             string
-		stringExpression string
-		byteIndex        int64
-		byteCount        int64
-		want             bson.D
-	}{
-		{
-			name:             "normal expression",
-			stringExpression: "$quarter",
-			byteIndex:        0,
-			byteCount:        2,
-			want:             bson.D{{Key: "$substrBytes", Value: []any{"$quarter", int64(0), int64(2)}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, SubstrBytes(tc.stringExpression, tc.byteIndex, tc.byteCount))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "quarterSubtring", Value: bson.D{{Key: "$substrBytes", Value: []any{"$quarter", int64(0), int64(2)}}}}}, SubstrBytes("quarterSubtring", "$quarter", int64(0), int64(2)))
 }
 
 func Test_ToLower(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "normal expression",
-			expression: "$item",
-			want:       bson.D{{Key: "$toLower", Value: "$item"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, ToLower(tc.expression))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toLower", Value: "$item"}}}}, ToLower("item", "$item"))
 }
 
 func Test_ToUpper(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "normal expression",
-			expression: "$item",
-			want:       bson.D{{Key: "$toUpper", Value: "$item"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, ToUpper(tc.expression))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toUpper", Value: "$item"}}}}, ToUpper("item", "$item"))
 }
 
 func Test_Contact(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		want        bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$item", " - ", "$description"},
-			want:        bson.D{{Key: "$concat", Value: []any{"$item", " - ", "$description"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, Contact(tc.expressions...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, Contact("item", "$item", " - ", "$description"))
 }

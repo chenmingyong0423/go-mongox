@@ -21,104 +21,84 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Sum(expression any) bson.D {
-	return bson.D{{Key: types.AggregationSum, Value: expression}}
-}
-
-func SumMany(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationSum, Value: expressions}}
+func Sum(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSum, Value: expression}}}}
 }
 
 func Push(expression any) bson.D {
-	return bson.D{{Key: types.AggregationPush, Value: expression}}
+	return bson.D{bson.E{Key: types.AggregationPush, Value: expression}}
 }
 
-func Avg(expression any) bson.D {
-	return bson.D{{Key: types.AggregationAvg, Value: expression}}
+func Avg(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationAvg, Value: expression}}}}
 }
 
-func AvgMany(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationAvg, Value: expressions}}
+func First(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationFirst, Value: expression}}}}
 }
 
-func First(expression any) bson.D {
-	return bson.D{{Key: types.AggregationFirst, Value: expression}}
+func Last(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationLast, Value: expression}}}}
 }
 
-func Last(expression any) bson.D {
-	return bson.D{{Key: types.AggregationLast, Value: expression}}
+func Min(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMin, Value: expression}}}}
 }
 
-func Min(expression any) bson.D {
-	return bson.D{{Key: types.AggregationMin, Value: expression}}
+func Max(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMax, Value: expression}}}}
 }
 
-func MinMany(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationMin, Value: expressions}}
+func Add(key string, expression ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationAdd, Value: expression}}}}
 }
 
-func Max(expression any) bson.D {
-	return bson.D{{Key: types.AggregationMax, Value: expression}}
+func Multiply(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMultiply, Value: expressions}}}}
 }
 
-func MaxMany(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationMax, Value: expressions}}
+func Subtract(key string, expression ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSubtract, Value: expression}}}}
 }
 
-func Add(expression any) bson.D {
-	return bson.D{{Key: types.AggregationAdd, Value: expression}}
+func Divide(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDivide, Value: expressions}}}}
 }
 
-func Multiply(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationMultiply, Value: expressions}}
+func Mod(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMod, Value: expressions}}}}
 }
 
-func Subtract(s string, start, length int64) bson.D {
-	return bson.D{{Key: types.AggregationSubtract, Value: []any{s, start, length}}}
+func ArrayElemAt(key string, expression any, index int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationArrayElemAt, Value: []any{expression, index}}}}}
 }
 
-func Divide(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationDivide, Value: expressions}}
+func ConcatArrays(key string, arrays ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationConcatArrays, Value: arrays}}}}
 }
 
-func Mod(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationMod, Value: expressions}}
+func ArrayToObject(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationArrayToObject, Value: expression}}}}
 }
 
-func ArrayElemAt(expression any, index int64) bson.D {
-	return bson.D{{Key: types.AggregationArrayElemAt, Value: []any{expression, index}}}
+func Size(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSize, Value: expression}}}}
 }
 
-func ConcatArrays(arrays ...any) bson.D {
-	return bson.D{{Key: types.AggregationConcatArrays, Value: arrays}}
+func Slice(key string, array any, nElements int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSlice, Value: []any{array, nElements}}}}}
 }
 
-func ArrayToObject(expression any) bson.D {
-	return bson.D{{Key: types.AggregationArrayToObject, Value: expression}}
+func SliceWithPosition(key string, array any, position, nElements int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSlice, Value: []any{array, position, nElements}}}}}
 }
 
-func Size(expression any) bson.D {
-	return bson.D{{Key: types.AggregationSize, Value: expression}}
+func Map(key string, inputArray any, as string, in any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMap, Value: bson.D{bson.E{Key: types.AggregationInput, Value: inputArray}, {Key: types.AggregationAs, Value: as}, {Key: types.AggregationIn, Value: in}}}}}}
 }
 
-func Slice(array any, nElements int64) bson.D {
-	return bson.D{{Key: types.AggregationSlice, Value: []any{array, nElements}}}
-}
-
-func SliceWithPosition(array any, position, nElements int64) bson.D {
-	return bson.D{{Key: types.AggregationSlice, Value: []any{array, position, nElements}}}
-}
-
-func Map(inputArray any, as string, in any) bson.D {
-	return bson.D{{Key: types.AggregationMap, Value: bson.D{
-		{Key: types.AggregationInput, Value: inputArray},
-		{Key: types.AggregationAs, Value: as},
-		{Key: types.AggregationIn, Value: in},
-	}}}
-}
-
-func Filter(inputArray any, cond any, opt *types.FilterOptions) bson.D {
-	d := bson.D{{Key: types.AggregationInput, Value: inputArray}, {Key: types.AggregationCondWithoutOperator, Value: cond}}
+func Filter(key string, inputArray any, cond any, opt *types.FilterOptions) bson.D {
+	d := bson.D{bson.E{Key: types.AggregationInput, Value: inputArray}, {Key: types.AggregationCondWithoutOperator, Value: cond}}
 	if opt != nil {
 		if opt.As != "" {
 			d = append(d, bson.E{Key: types.AggregationAs, Value: opt.As})
@@ -127,55 +107,52 @@ func Filter(inputArray any, cond any, opt *types.FilterOptions) bson.D {
 			d = append(d, bson.E{Key: types.AggregationLimit, Value: opt.Limit})
 		}
 	}
-	return bson.D{{Key: types.AggregationFilter, Value: d}}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationFilter, Value: d}}}}
 }
 
-func Eq(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationEq, Value: expressions}}
+func Eq(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationEq, Value: expressions}}}}
 }
 
-func Ne(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationNe, Value: expressions}}
+func Ne(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationNe, Value: expressions}}}}
 }
 
-func Gt(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationGt, Value: expressions}}
+func Gt(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationGt, Value: expressions}}}}
 }
 
-func Gte(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationGte, Value: expressions}}
+func Gte(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationGte, Value: expressions}}}}
 }
 
-func Lt(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationLt, Value: expressions}}
+func Lt(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationLt, Value: expressions}}}}
 }
 
-func Lte(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationLte, Value: expressions}}
+func Lte(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationLte, Value: expressions}}}}
 }
 
-func Cond(boolExpr, tureExpr, falseExpr any) bson.D {
-	return bson.D{{Key: types.AggregationCond, Value: []any{boolExpr, tureExpr, falseExpr}}}
+func Cond(key string, boolExpr, tureExpr, falseExpr any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationCond, Value: []any{boolExpr, tureExpr, falseExpr}}}}}
 }
 
-func IfNull(expr, replacement any) bson.D {
-	return bson.D{{Key: types.AggregationIfNull, Value: []any{expr, replacement}}}
+func IfNull(key string, expr, replacement any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationIfNull, Value: []any{expr, replacement}}}}}
 }
 
 // Switch
 // cases: [case, then, case, then]
-func Switch(cases []any, defaultCase any) bson.D {
-	if len(cases) != 0 && len(cases)%2 == 0 {
-		branches := bson.A{}
-		for i := 0; i < len(cases); i += 2 {
-			branches = append(branches, bson.D{{Key: types.Case, Value: cases[i]}, {Key: types.Then, Value: cases[i+1]}})
-		}
-		return bson.D{bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}}}
+func Switch(key string, cases []types.CaseThen, defaultCase any) bson.D {
+	branches := bson.A{}
+	for _, caseThen := range cases {
+		branches = append(branches, bson.D{bson.E{Key: types.Case, Value: caseThen.Case}, {Key: types.Then, Value: caseThen.Then}})
 	}
-	return bson.D{}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}}}}}
 }
 
-func DateToString(date any, opt *types.DateToStringOptions) bson.D {
+func DateToString(key string, date any, opt *types.DateToStringOptions) bson.D {
 	d := bson.D{bson.E{Key: types.Date, Value: date}}
 	if opt != nil {
 		if opt.Format != "" {
@@ -188,85 +165,85 @@ func DateToString(date any, opt *types.DateToStringOptions) bson.D {
 			d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
 		}
 	}
-	return bson.D{{Key: types.AggregationDateToString, Value: d}}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDateToString, Value: d}}}}
 }
 
-func DayOfMonth(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationDayOfMonth, Value: date}}
+func DayOfMonth(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfMonth, Value: date}}}}
 }
 
-func DayOfMonthWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationDayOfMonth, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func DayOfMonthWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfMonth, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func DayOfWeek(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationDayOfWeek, Value: date}}
+func DayOfWeek(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfWeek, Value: date}}}}
 }
 
-func DayOfWeekWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationDayOfWeek, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func DayOfWeekWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfWeek, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func DayOfYear(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationDayOfYear, Value: date}}
+func DayOfYear(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfYear, Value: date}}}}
 }
 
-func DayOfYearWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationDayOfYear, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func DayOfYearWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationDayOfYear, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func Year(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationYear, Value: date}}
+func Year(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationYear, Value: date}}}}
 }
 
-func YearWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationYear, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func YearWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationYear, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func Month(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationMonth, Value: date}}
+func Month(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMonth, Value: date}}}}
 }
 
-func MonthWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationMonth, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func MonthWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationMonth, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func Week(date time.Time) bson.D {
-	return bson.D{{Key: types.AggregationWeek, Value: date}}
+func Week(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationWeek, Value: date}}}}
 }
 
-func WeekWithTimezone(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: types.AggregationWeek, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+func WeekWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationWeek, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}}}
 }
 
-func And(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationAnd, Value: expressions}}
+func And(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationAnd, Value: expressions}}}}
 }
 
-func Or(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationOr, Value: expressions}}
+func Or(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationOr, Value: expressions}}}}
 }
 
-func Not(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationNot, Value: expressions}}
+func Not(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationNot, Value: expressions}}}}
 }
 
-func Concat(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationConcat, Value: expressions}}
+func Concat(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationConcat, Value: expressions}}}}
 }
 
-func SubstrBytes(stringExpression string, byteIndex int64, byteCount int64) bson.D {
-	return bson.D{{Key: types.AggregationSubstrBytes, Value: []any{stringExpression, byteIndex, byteCount}}}
+func SubstrBytes(key string, stringExpression string, byteIndex int64, byteCount int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSubstrBytes, Value: []any{stringExpression, byteIndex, byteCount}}}}}
 }
 
-func ToLower(expression any) bson.D {
-	return bson.D{{Key: types.AggregationToLower, Value: expression}}
+func ToLower(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationToLower, Value: expression}}}}
 }
 
-func ToUpper(expression any) bson.D {
-	return bson.D{{Key: types.AggregationToUpper, Value: expression}}
+func ToUpper(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationToUpper, Value: expression}}}}
 }
 
-func Contact(expressions ...any) bson.D {
-	return bson.D{{Key: types.AggregationContact, Value: expressions}}
+func Contact(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationContact, Value: expressions}}}}
 }

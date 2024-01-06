@@ -215,3 +215,8 @@ type Numeric interface {
 		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
 		~float32 | ~float64
 }
+
+type CaseThen struct {
+	Case any
+	Then any
+}
