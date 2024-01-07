@@ -30,11 +30,22 @@ func (b *stringBuilder) Concat(key string, expressions ...any) *Builder {
 	}
 	return b.parent
 }
+
+func (b *stringBuilder) ConcatWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationConcat, Value: expressions})
+	return b.parent
+}
+
 func (b *stringBuilder) SubstrBytes(key string, stringExpression string, byteIndex int64, byteCount int64) *Builder {
 	e := bson.E{Key: types.AggregationSubstrBytes, Value: []any{stringExpression, byteIndex, byteCount}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *stringBuilder) SubstrBytesWithoutKey(stringExpression string, byteIndex int64, byteCount int64) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSubstrBytes, Value: []any{stringExpression, byteIndex, byteCount}})
 	return b.parent
 }
 
@@ -46,6 +57,11 @@ func (b *stringBuilder) ToLower(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *stringBuilder) ToLowerWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationToLower, Value: expression})
+	return b.parent
+}
+
 func (b *stringBuilder) ToUpper(key string, expression any) *Builder {
 	e := bson.E{Key: types.AggregationToUpper, Value: expression}
 	if !b.parent.tryMergeValue(key, e) {
@@ -54,10 +70,20 @@ func (b *stringBuilder) ToUpper(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *stringBuilder) ToUpperWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationToUpper, Value: expression})
+	return b.parent
+}
+
 func (b *stringBuilder) Contact(key string, expressions ...any) *Builder {
 	e := bson.E{Key: types.AggregationContact, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *stringBuilder) ContactWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationContact, Value: expressions})
 	return b.parent
 }

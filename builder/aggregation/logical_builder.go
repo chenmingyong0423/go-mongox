@@ -31,6 +31,11 @@ func (b *logicalBuilder) And(key string, expressions ...any) *Builder {
 	return b.parent
 }
 
+func (b *logicalBuilder) AndWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAnd, Value: expressions})
+	return b.parent
+}
+
 func (b *logicalBuilder) Not(key string, expressions ...any) *Builder {
 	e := bson.E{Key: types.AggregationNot, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
@@ -39,10 +44,20 @@ func (b *logicalBuilder) Not(key string, expressions ...any) *Builder {
 	return b.parent
 }
 
+func (b *logicalBuilder) NotWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationNot, Value: expressions})
+	return b.parent
+}
+
 func (b *logicalBuilder) Or(key string, expressions ...any) *Builder {
 	e := bson.E{Key: types.AggregationOr, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *logicalBuilder) OrWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationOr, Value: expressions})
 	return b.parent
 }

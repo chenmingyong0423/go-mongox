@@ -722,7 +722,7 @@ func Test_IfNullWithoutKey(t *testing.T) {
 func Test_SwitchWithoutKey(t *testing.T) {
 	testCases := []struct {
 		name        string
-		cases       []any
+		cases       []types.CaseThen
 		defaultCase any
 		want        bson.D
 	}{
@@ -730,19 +730,35 @@ func Test_SwitchWithoutKey(t *testing.T) {
 			name:        "nil cases",
 			cases:       nil,
 			defaultCase: "Did not match",
-			want:        bson.D{},
+			want: bson.D{
+				{Key: "$switch", Value: bson.D{
+					{Key: "branches", Value: bson.A{}},
+					{Key: "default", Value: "Did not match"},
+				}},
+			},
 		},
 		{
 			name:        "empty cases",
-			cases:       []any{},
+			cases:       []types.CaseThen{},
 			defaultCase: "Did not match",
-			want:        bson.D{},
+			want: bson.D{
+				{Key: "$switch", Value: bson.D{
+					{Key: "branches", Value: bson.A{}},
+					{Key: "default", Value: "Did not match"},
+				}},
+			},
 		},
 		{
 			name: "normal",
-			cases: []any{
-				EqWithoutKey(0, 5), "equals",
-				GtWithoutKey(0, 5), "greater than",
+			cases: []types.CaseThen{
+				{
+					Case: EqWithoutKey(0, 5),
+					Then: "equals",
+				},
+				{
+					Case: GtWithoutKey(0, 5),
+					Then: "greater than",
+				},
 			},
 			defaultCase: "Did not match",
 			want: bson.D{

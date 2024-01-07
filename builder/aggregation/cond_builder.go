@@ -31,11 +31,21 @@ func (b condBuilder) Cond(key string, boolExpr, tureExpr, falseExpr any) *Builde
 	return b.parent
 }
 
+func (b condBuilder) CondWithoutKey(boolExpr, tureExpr, falseExpr any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationCond, Value: []any{boolExpr, tureExpr, falseExpr}})
+	return b.parent
+}
+
 func (b condBuilder) IfNull(key string, expr, replacement any) *Builder {
 	e := bson.E{Key: types.AggregationIfNull, Value: []any{expr, replacement}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b condBuilder) IfNullWithoutKey(expr, replacement any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationIfNull, Value: []any{expr, replacement}})
 	return b.parent
 }
 
@@ -48,5 +58,14 @@ func (b condBuilder) Switch(key string, cases []types.CaseThen, defaultCase any)
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b condBuilder) SwitchWithoutKey(cases []types.CaseThen, defaultCase any) *Builder {
+	branches := bson.A{}
+	for _, caseThen := range cases {
+		branches = append(branches, bson.D{bson.E{Key: types.Case, Value: caseThen.Case}, {Key: types.Then, Value: caseThen.Then}})
+	}
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}})
 	return b.parent
 }

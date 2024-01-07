@@ -31,11 +31,21 @@ func (b *accumulatorsBuilder) Sum(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *accumulatorsBuilder) SumWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSum, Value: expression})
+	return b.parent
+}
+
 func (b *accumulatorsBuilder) Push(key string, expression any) *Builder {
 	e := bson.E{Key: types.AggregationPush, Value: expression}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *accumulatorsBuilder) PushWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationPush, Value: expression})
 	return b.parent
 }
 
@@ -47,11 +57,21 @@ func (b *accumulatorsBuilder) Avg(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *accumulatorsBuilder) AvgWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAvg, Value: expression})
+	return b.parent
+}
+
 func (b *accumulatorsBuilder) First(key string, expression any) *Builder {
 	e := bson.E{Key: types.AggregationFirst, Value: expression}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *accumulatorsBuilder) FirstWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationFirst, Value: expression})
 	return b.parent
 }
 
@@ -63,6 +83,11 @@ func (b *accumulatorsBuilder) Last(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *accumulatorsBuilder) LastWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationLast, Value: expression})
+	return b.parent
+}
+
 func (b *accumulatorsBuilder) Min(key string, expression any) *Builder {
 	e := bson.E{Key: types.AggregationMin, Value: expression}
 	if !b.parent.tryMergeValue(key, e) {
@@ -71,10 +96,20 @@ func (b *accumulatorsBuilder) Min(key string, expression any) *Builder {
 	return b.parent
 }
 
+func (b *accumulatorsBuilder) MinWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMin, Value: expression})
+	return b.parent
+}
+
 func (b *accumulatorsBuilder) Max(key string, expression any) *Builder {
 	e := bson.E{Key: types.AggregationMax, Value: expression}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
+	return b.parent
+}
+
+func (b *accumulatorsBuilder) MaxWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMax, Value: expression})
 	return b.parent
 }

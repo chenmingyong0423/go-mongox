@@ -145,16 +145,12 @@ func CondWithoutKey(boolExpr, tureExpr, falseExpr any) bson.D {
 func IfNullWithoutKey(expr, replacement any) bson.D {
 	return bson.D{{Key: types.AggregationIfNull, Value: []any{expr, replacement}}}
 }
-
-func SwitchWithoutKey(cases []any, defaultCase any) bson.D {
-	if len(cases) != 0 && len(cases)%2 == 0 {
-		branches := bson.A{}
-		for i := 0; i < len(cases); i += 2 {
-			branches = append(branches, bson.D{{Key: types.Case, Value: cases[i]}, {Key: types.Then, Value: cases[i+1]}})
-		}
-		return bson.D{bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}}}
+func SwitchWithoutKey(cases []types.CaseThen, defaultCase any) bson.D {
+	branches := bson.A{}
+	for _, caseThen := range cases {
+		branches = append(branches, bson.D{bson.E{Key: types.Case, Value: caseThen.Case}, {Key: types.Then, Value: caseThen.Then}})
 	}
-	return bson.D{}
+	return bson.D{bson.E{Key: types.AggregationSwitch, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}}}
 }
 
 func DateToStringWithoutKey(date any, opt *types.DateToStringOptions) bson.D {
