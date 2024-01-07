@@ -649,25 +649,25 @@ func Test_arrayUpdateBuilder_EachInt(t *testing.T) {
 
 func Test_arrayUpdateBuilder_EachInt8(t *testing.T) {
 	t.Run("test EachInt8", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int{99, 98, 97}}}, BsonBuilder().EachInt(99, 98, 97).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int8{99, 98, 97}}}, BsonBuilder().EachInt8(99, 98, 97).Build())
 	})
 }
 
 func Test_arrayUpdateBuilder_EachInt16(t *testing.T) {
 	t.Run("test EachInt16", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int{99, 98, 97}}}, BsonBuilder().EachInt(99, 98, 97).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int16{99, 98, 97}}}, BsonBuilder().EachInt16(99, 98, 97).Build())
 	})
 }
 
 func Test_arrayUpdateBuilder_EachInt32(t *testing.T) {
 	t.Run("test EachInt32", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int{99, 98, 97}}}, BsonBuilder().EachInt(99, 98, 97).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int32{99, 98, 97}}}, BsonBuilder().EachInt32(99, 98, 97).Build())
 	})
 }
 
 func Test_arrayUpdateBuilder_EachInt64(t *testing.T) {
 	t.Run("test EachInt64", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int{99, 98, 97}}}, BsonBuilder().EachInt(99, 98, 97).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "$each", Value: []int64{99, 98, 97}}}, BsonBuilder().EachInt64(99, 98, 97).Build())
 	})
 }
 
