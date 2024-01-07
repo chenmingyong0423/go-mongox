@@ -25,8 +25,8 @@ func Sum(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationSum, Value: expression}}}}
 }
 
-func Push(expression any) bson.D {
-	return bson.D{bson.E{Key: types.AggregationPush, Value: expression}}
+func Push(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationPush, Value: expression}}}}
 }
 
 func Avg(key string, expression any) bson.D {

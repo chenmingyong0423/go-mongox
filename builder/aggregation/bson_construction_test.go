@@ -31,24 +31,9 @@ func TestSum(t *testing.T) {
 }
 
 func TestPush(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		want       bson.D
-	}{
-		{
-			name:       "test push",
-			expression: bsonx.NewD().Add("item", "$item").Add("quantity", "$quantity").Build(),
-			want:       bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Push(tc.expression)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	t.Run("test push", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "allItems", Value: bson.D{bson.E{Key: "$push", Value: "$item"}}}}, Push("allItems", "$item"))
+	})
 }
 
 func TestAvg(t *testing.T) {
