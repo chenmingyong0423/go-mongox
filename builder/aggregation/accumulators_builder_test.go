@@ -22,212 +22,64 @@ import (
 )
 
 func Test_accumulatorsBuilder_Sum(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name:       "normal",
-			expression: "$price",
-			expected:   bson.D{{Key: "$sum", Value: "$price"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Sum(tc.expression).Build())
-		})
-	}
-}
-
-func Test_accumulatorsBuilder_SumMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$price", "$fee"},
-			expected:    bson.D{{Key: "$sum", Value: []any{"$price", "$fee"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SumMany(tc.expressions...).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "totalAmount", Value: bson.D{{Key: "$sum", Value: "$price"}}}}, BsonBuilder().Sum("totalAmount", "$price").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "totalAmount", Value: bson.D{{Key: "$sum", Value: "$price"}}}, bson.E{Key: "totalFee", Value: bson.D{{Key: "$sum", Value: "$fee"}}}}, BsonBuilder().Sum("totalAmount", "$price").Sum("totalFee", "$fee").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_Push(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name: "normal",
-			// { item: "$item", quantity: "$quantity" }
-			expression: BsonBuilder().AddKeyValues("item", "$item").AddKeyValues("quantity", "$quantity").Build(),
-			expected:   bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Push(tc.expression).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$push", Value: "$item"}}}}, BsonBuilder().Push("items", "$item").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$push", Value: "$item"}}}, bson.E{Key: "types", Value: bson.D{{Key: "$push", Value: "$type"}}}}, BsonBuilder().Push("items", "$item").Push("types", "$type").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_Avg(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name: "normal",
-			// { $multiply: [ "$price", "$quantity" ] }
-			expression: BsonBuilder().Multiply("$price", "$quantity").Build(),
-			expected:   bson.D{{Key: "$avg", Value: bson.D{{Key: "$multiply", Value: []any{"$price", "$quantity"}}}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Avg(tc.expression).Build())
-		})
-	}
-}
-
-func Test_accumulatorsBuilder_AvgMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$price", "$fee"},
-			expected:    bson.D{{Key: "$avg", Value: []any{"$price", "$fee"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().AvgMany(tc.expressions...).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "avgAmount", Value: bson.D{{Key: "$avg", Value: "$price"}}}}, BsonBuilder().Avg("avgAmount", "$price").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "avgAmount", Value: bson.D{{Key: "$avg", Value: "$price"}}}, bson.E{Key: "avgFee", Value: bson.D{{Key: "$avg", Value: "$fee"}}}}, BsonBuilder().Avg("avgAmount", "$price").Avg("avgFee", "$fee").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_First(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name:       "normal",
-			expression: "$type",
-			expected:   bson.D{{Key: "$first", Value: "$type"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().First(tc.expression).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "firstType", Value: bson.D{{Key: "$first", Value: "$type"}}}}, BsonBuilder().First("firstType", "$type").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "firstType", Value: bson.D{{Key: "$first", Value: "$type"}}}, bson.E{Key: "firstPrice", Value: bson.D{{Key: "$first", Value: "$price"}}}}, BsonBuilder().First("firstType", "$type").First("firstPrice", "$price").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_Last(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name:       "normal",
-			expression: "$type",
-			expected:   bson.D{{Key: "$last", Value: "$type"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Last(tc.expression).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "lastType", Value: bson.D{{Key: "$last", Value: "$type"}}}}, BsonBuilder().Last("lastType", "$type").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "lastType", Value: bson.D{{Key: "$last", Value: "$type"}}}, bson.E{Key: "lastPrice", Value: bson.D{{Key: "$last", Value: "$price"}}}}, BsonBuilder().Last("lastType", "$type").Last("lastPrice", "$price").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_Min(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name:       "normal",
-			expression: "$price",
-			expected:   bson.D{{Key: "$min", Value: "$price"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Min(tc.expression).Build())
-		})
-	}
-}
-
-func Test_accumulatorsBuilder_MinMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$price", "$fee"},
-			expected:    bson.D{{Key: "$min", Value: []any{"$price", "$fee"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MinMany(tc.expressions...).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "minPrice", Value: bson.D{{Key: "$min", Value: "$price"}}}}, BsonBuilder().Min("minPrice", "$price").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "minPrice", Value: bson.D{{Key: "$min", Value: "$price"}}}, bson.E{Key: "minFee", Value: bson.D{{Key: "$min", Value: "$fee"}}}}, BsonBuilder().Min("minPrice", "$price").Min("minFee", "$fee").Build())
+	})
 }
 
 func Test_accumulatorsBuilder_Max(t *testing.T) {
-	testCases := []struct {
-		name       string
-		expression any
-		expected   bson.D
-	}{
-		{
-			name:       "normal",
-			expression: "$price",
-			expected:   bson.D{{Key: "$max", Value: "$price"}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Max(tc.expression).Build())
-		})
-	}
-}
-
-func Test_accumulatorsBuilder_MaxMany(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$price", "$fee"},
-			expected:    bson.D{{Key: "$max", Value: []any{"$price", "$fee"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MaxMany(tc.expressions...).Build())
-		})
-	}
+	t.Run("single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "maxPrice", Value: bson.D{{Key: "$max", Value: "$price"}}}}, BsonBuilder().Max("maxPrice", "$price").Build())
+	})
+	t.Run("multiple operations", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "maxPrice", Value: bson.D{{Key: "$max", Value: "$price"}}}, bson.E{Key: "maxFee", Value: bson.D{{Key: "$max", Value: "$fee"}}}}, BsonBuilder().Max("maxPrice", "$price").Max("maxFee", "$fee").Build())
+	})
 }

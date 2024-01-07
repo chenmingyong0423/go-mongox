@@ -22,130 +22,42 @@ import (
 )
 
 func Test_arithmeticBuilder_Add(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$add", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$add", Value: []any{}}},
-		},
-		{
-			name:        "single type",
-			expressions: []any{1, 2, 3, 4},
-			expected:    bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, 4}}},
-		},
-		{
-			name:        "multiple types",
-			expressions: []any{1, 2, 3, "$a", "$b", "$c"},
-			expected:    bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, "$a", "$b", "$c"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Add(tc.expressions...).Build())
-		})
-	}
+	t.Run("test add", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
+			BsonBuilder().Add("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+		)
+	})
 }
 
 func Test_arithmeticBuilder_Multiply(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$multiply", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$multiply", Value: []any{}}},
-		},
-		{
-			name:        "single type",
-			expressions: []any{1, 2, 3, 4},
-			expected:    bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, 4}}},
-		},
-		{
-			name:        "multiple types",
-			expressions: []any{1, 2, 3, "$a", "$b", "$c"},
-			expected:    bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, "$a", "$b", "$c"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Multiply(tc.expressions...).Build())
-		})
-	}
+	t.Run("test multiply", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
+			BsonBuilder().Multiply("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+		)
+	})
 }
 
 func Test_arithmeticBuilder_Subtract(t *testing.T) {
-	testCases := []struct {
-		name     string
-		s        string
-		start    int64
-		length   int64
-		expected bson.D
-	}{
-		{
-			name:     "normal",
-			s:        "$quarter",
-			start:    0,
-			length:   2,
-			expected: bson.D{bson.E{Key: "$subtract", Value: []any{"$quarter", int64(0), int64(2)}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Subtract(tc.s, tc.start, tc.length).Build())
-		})
-	}
+	t.Run("test subtract", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$subtract", Value: []any{"$quarter", int64(0), int64(2)}}}}},
+			BsonBuilder().Subtract("total", "$quarter", int64(0), int64(2)).Build(),
+		)
+	})
+
 }
 
 func Test_arithmeticBuilder_Divide(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"hours", 8},
-			expected:    bson.D{bson.E{Key: "$divide", Value: []any{"hours", 8}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Divide(tc.expressions...).Build())
-		})
-	}
+	t.Run("test divide", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$divide", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
+			BsonBuilder().Divide("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+		)
+	})
 }
 
 func Test_arithmeticBuilder_Mod(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "normal",
-			expressions: []any{"$hours", "$tasks"},
-			expected:    bson.D{bson.E{Key: "$mod", Value: []any{"$hours", "$tasks"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Mod(tc.expressions...).Build())
-		})
-	}
+	t.Run("test mod", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$mod", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
+			BsonBuilder().Mod("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+		)
+	})
 }

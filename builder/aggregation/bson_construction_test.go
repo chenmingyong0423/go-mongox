@@ -447,7 +447,6 @@ func Test_And(t *testing.T) {
 
 func Test_Not(t *testing.T) {
 	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, Not("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250}))))
-
 }
 
 func Test_Or(t *testing.T) {

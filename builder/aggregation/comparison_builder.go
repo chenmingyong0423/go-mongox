@@ -23,32 +23,50 @@ type comparisonBuilder struct {
 	parent *Builder
 }
 
-func (b *comparisonBuilder) Eq(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationEq, Value: expressions})
+func (b *comparisonBuilder) Eq(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationEq, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *comparisonBuilder) Ne(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationNe, Value: expressions})
+func (b *comparisonBuilder) Ne(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationNe, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *comparisonBuilder) Gt(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationGt, Value: expressions})
+func (b *comparisonBuilder) Gt(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationGt, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *comparisonBuilder) Gte(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationGte, Value: expressions})
+func (b *comparisonBuilder) Gte(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationGte, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *comparisonBuilder) Lt(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationLt, Value: expressions})
+func (b *comparisonBuilder) Lt(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationLt, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *comparisonBuilder) Lte(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationLte, Value: expressions})
+func (b *comparisonBuilder) Lte(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationLte, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

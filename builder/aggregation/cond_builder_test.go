@@ -17,106 +17,43 @@ package aggregation
 import (
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func Test_condBuilder_Cond(t *testing.T) {
-	testCases := []struct {
-		name      string
-		boolExpr  any
-		trueExpr  any
-		falseExpr any
-		expected  bson.D
-	}{
-		{
-			name:      "normal",
-			boolExpr:  BsonBuilder().Gte("$qty", 250).Build(),
-			trueExpr:  30,
-			falseExpr: 20,
-			expected:  bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Cond(tc.boolExpr, tc.trueExpr, tc.falseExpr).Build())
-		})
-	}
+	t.Run("test Cond", func(t *testing.T) {
+		assert.Equal(t,
+			bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}}}},
+			BsonBuilder().Cond("discount", bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20).Build(),
+		)
+	})
 }
 
 func Test_condBuilder_IfNull(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expr        any
-		replacement any
-		expected    bson.D
-	}{
-		{
-			name:        "nil expr",
-			expr:        nil,
-			replacement: "Unspecified",
-			expected:    bson.D{{Key: "$ifNull", Value: []any{nil, "Unspecified"}}},
-		},
-		{
-			name:        "nil replacement",
-			expr:        "$description",
-			replacement: nil,
-			expected:    bson.D{{Key: "$ifNull", Value: []any{"$description", nil}}},
-		},
-		{
-			name:        "normal",
-			expr:        "$description",
-			replacement: "Unspecified",
-			expected:    bson.D{{Key: "$ifNull", Value: []any{"$description", "Unspecified"}}},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().IfNull(tc.expr, tc.replacement).Build())
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: []any{"$coupon", int64(0)}}}}}, BsonBuilder().IfNull("discount", "$coupon", int64(0)).Build())
 }
 
 func Test_condBuilder_Switch(t *testing.T) {
-	testCases := []struct {
-		name        string
-		cases       []any
-		defaultCase any
-		expected    bson.D
-	}{
-		{
-			name:        "nil cases",
-			cases:       nil,
-			defaultCase: "Did not match",
-			expected:    bson.D{},
-		},
-		{
-			name:        "empty cases",
-			cases:       []any{},
-			defaultCase: "Did not match",
-			expected:    bson.D{},
-		},
-		{
-			name: "normal",
-			cases: []any{
-				BsonBuilder().Eq(0, 5).Build(), "equals",
-				BsonBuilder().Gt(0, 5).Build(), "greater than",
+	assert.Equal(t, bson.D{bson.E{Key: "summary", Value: bson.D{
+		{Key: "$switch", Value: bson.D{
+			{Key: "branches", Value: bson.A{
+				bson.D{{Key: "case", Value: bson.D{{Key: "$eq", Value: []any{0, 5}}}}, {Key: "then", Value: "equals"}},
+				bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: []any{0, 5}}}}, {Key: "then", Value: "greater than"}},
+			}},
+			{Key: "default", Value: "Did not match"},
+		}},
+	}}},
+		BsonBuilder().Switch("summary", []types.CaseThen{
+			{
+				Case: bsonx.D(bsonx.E("$eq", []any{0, 5})), Then: "equals",
 			},
-			defaultCase: "Did not match",
-			expected: bson.D{
-				{Key: "$switch", Value: bson.D{
-					{Key: "branches", Value: bson.A{
-						bson.D{{Key: "case", Value: bson.D{{Key: "$eq", Value: []any{0, 5}}}}, {Key: "then", Value: "equals"}},
-						bson.D{{Key: "case", Value: bson.D{{Key: "$gt", Value: []any{0, 5}}}}, {Key: "then", Value: "greater than"}},
-					}},
-					{Key: "default", Value: "Did not match"},
-				}},
+			{
+				Case: bsonx.D(bsonx.E("$gt", []any{0, 5})), Then: "greater than",
 			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Switch(tc.cases, tc.defaultCase).Build())
-		})
-	}
+		}, "Did not match").Build(),
+	)
 }

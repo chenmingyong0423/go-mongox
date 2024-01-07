@@ -23,27 +23,42 @@ type arithmeticBuilder struct {
 	parent *Builder
 }
 
-func (b *arithmeticBuilder) Add(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAdd, Value: expressions})
+func (b *arithmeticBuilder) Add(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationAdd, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arithmeticBuilder) Multiply(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMultiply, Value: expressions})
+func (b *arithmeticBuilder) Multiply(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationMultiply, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arithmeticBuilder) Subtract(s string, start, length int64) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSubtract, Value: []any{s, start, length}})
+func (b *arithmeticBuilder) Subtract(key string, s string, start, length int64) *Builder {
+	e := bson.E{Key: types.AggregationSubtract, Value: []any{s, start, length}}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arithmeticBuilder) Divide(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationDivide, Value: expressions})
+func (b *arithmeticBuilder) Divide(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationDivide, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arithmeticBuilder) Mod(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMod, Value: expressions})
+func (b *arithmeticBuilder) Mod(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationMod, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

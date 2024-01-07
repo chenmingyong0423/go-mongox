@@ -142,8 +142,6 @@ func IfNull(key string, expr, replacement any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: types.AggregationIfNull, Value: []any{expr, replacement}}}}}
 }
 
-// Switch
-// cases: [case, then, case, then]
 func Switch(key string, cases []types.CaseThen, defaultCase any) bson.D {
 	branches := bson.A{}
 	for _, caseThen := range cases {

@@ -23,46 +23,67 @@ type arrayBuilder struct {
 	parent *Builder
 }
 
-func (b *arrayBuilder) ArrayElemAt(expression any, index int64) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationArrayElemAt, Value: []any{expression, index}})
+func (b *arrayBuilder) ArrayElemAt(key string, expression any, index int64) *Builder {
+	e := bson.E{Key: types.AggregationArrayElemAt, Value: []any{expression, index}}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) ConcatArrays(arrays ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationConcatArrays, Value: arrays})
+func (b *arrayBuilder) ConcatArrays(key string, arrays ...any) *Builder {
+	e := bson.E{Key: types.AggregationConcatArrays, Value: arrays}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) ArrayToObject(expression any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationArrayToObject, Value: expression})
+func (b *arrayBuilder) ArrayToObject(key string, expression any) *Builder {
+	e := bson.E{Key: types.AggregationArrayToObject, Value: expression}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) Size(expression any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSize, Value: expression})
+func (b *arrayBuilder) Size(key string, expression any) *Builder {
+	e := bson.E{Key: types.AggregationSize, Value: expression}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) Slice(array any, nElements int64) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSlice, Value: []any{array, nElements}})
+func (b *arrayBuilder) Slice(key string, array any, nElements int64) *Builder {
+	e := bson.E{Key: types.AggregationSlice, Value: []any{array, nElements}}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) SliceWithPosition(array any, position, nElements int64) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSlice, Value: []any{array, position, nElements}})
+func (b *arrayBuilder) SliceWithPosition(key string, array any, position, nElements int64) *Builder {
+	e := bson.E{Key: types.AggregationSlice, Value: []any{array, position, nElements}}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) Map(inputArray any, as string, in any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMap, Value: bson.D{
+func (b *arrayBuilder) Map(key string, inputArray any, as string, in any) *Builder {
+	e := bson.E{Key: types.AggregationMap, Value: bson.D{
 		{Key: types.AggregationInput, Value: inputArray},
 		{Key: types.AggregationAs, Value: as},
 		{Key: types.AggregationIn, Value: in},
-	}})
+	}}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *arrayBuilder) Filter(inputArray any, cond any, opt *types.FilterOptions) *Builder {
+func (b *arrayBuilder) Filter(key string, inputArray any, cond any, opt *types.FilterOptions) *Builder {
 	d := bson.D{{Key: types.AggregationInput, Value: inputArray}, {Key: types.AggregationCondWithoutOperator, Value: cond}}
 	if opt != nil {
 		if opt.As != "" {
@@ -72,6 +93,9 @@ func (b *arrayBuilder) Filter(inputArray any, cond any, opt *types.FilterOptions
 			d = append(d, bson.E{Key: types.AggregationLimit, Value: opt.Limit})
 		}
 	}
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationFilter, Value: d})
+	e := bson.E{Key: types.AggregationFilter, Value: d}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }

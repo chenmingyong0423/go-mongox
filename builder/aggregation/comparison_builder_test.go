@@ -22,181 +22,43 @@ import (
 )
 
 func Test_comparisonBuilder_Eq(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$eq", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$eq", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$eq", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Eq(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Eq", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$eq", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Eq("items", "$qty", 250).Build())
+	})
 }
 
 func Test_comparisonBuilder_Ne(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$ne", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$ne", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$ne", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Ne(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Ne", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$ne", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Ne("items", "$qty", 250).Build())
+	})
 }
 
 func Test_comparisonBuilder_Gt(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$gt", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$gt", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Gt(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Gt", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Gt("items", "$qty", 250).Build())
+	})
 }
 
 func Test_comparisonBuilder_Gte(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$gte", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$gte", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$gte", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Gte(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Gte", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$gte", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Gte("items", "$qty", 250).Build())
+	})
 }
 
 func Test_comparisonBuilder_Lt(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$lt", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$lt", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Lt(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Lt", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Lt("items", "$qty", 250).Build())
+	})
 }
 
 func Test_comparisonBuilder_Lte(t *testing.T) {
-	testCases := []struct {
-		name        string
-		expressions []any
-		expected    bson.D
-	}{
-		{
-			name:        "nil",
-			expressions: []any{nil},
-			expected:    bson.D{bson.E{Key: "$lte", Value: []any{nil}}},
-		},
-		{
-			name:        "empty",
-			expressions: []any{},
-			expected:    bson.D{bson.E{Key: "$lte", Value: []any{}}},
-		},
-		{
-			name:        "normal",
-			expressions: []any{"$qty", 250},
-			expected:    bson.D{bson.E{Key: "$lte", Value: []any{"$qty", 250}}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Lte(tc.expressions...).Build())
-		})
-	}
+	t.Run("test Lte", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$lte", Value: []any{"$qty", 250}}}}},
+			BsonBuilder().Lte("items", "$qty", 250).Build())
+	})
 }

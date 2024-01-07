@@ -54,3 +54,18 @@ func (b *Builder) AddKeyValues(key string, value any) *Builder {
 	b.d = append(b.d, bson.E{Key: key, Value: value})
 	return b
 }
+
+// tryMergeValue attempts to merge the provided bson.E elements into an existing bson.D element
+// in the builder's data slice, identified by the specified key.
+func (b *Builder) tryMergeValue(key string, e ...bson.E) bool {
+	for idx, datum := range b.d {
+		if datum.Key == key {
+			if m, ok := datum.Value.(bson.D); ok {
+				m = append(m, e...)
+				b.d[idx].Value = m
+				return true
+			}
+		}
+	}
+	return false
+}

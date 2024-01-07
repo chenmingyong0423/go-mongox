@@ -23,17 +23,26 @@ type logicalBuilder struct {
 	parent *Builder
 }
 
-func (b *logicalBuilder) And(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAnd, Value: expressions})
+func (b *logicalBuilder) And(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationAnd, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *logicalBuilder) Not(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationNot, Value: expressions})
+func (b *logicalBuilder) Not(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationNot, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
 
-func (b *logicalBuilder) Or(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationOr, Value: expressions})
+func (b *logicalBuilder) Or(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationOr, Value: expressions}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
 	return b.parent
 }
