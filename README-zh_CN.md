@@ -19,6 +19,8 @@
 
 [English](./README.md) | 中文简体
 
+> 最新详细教程 → [go-mongox：简单高效，让文档操作和 bson 数据构造更流畅](https://chenmingyong.cn/posts/go-%08mongox)
+
 # 介绍
 `go-mongox` 框架有两个核心，一个核心是基于泛型的 **collection** 形态，另一个核心是 **builder** 构造器。
 
