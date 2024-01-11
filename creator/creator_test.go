@@ -40,7 +40,7 @@ func TestCreator_One(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser]
 		ctx  context.Context
-		doc  types.TestUser
+		doc  *types.TestUser
 
 		wantId  string
 		wantErr error
@@ -49,7 +49,7 @@ func TestCreator_One(t *testing.T) {
 			name: "duplicate",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertOne(ctx, types.TestUser{
+				mockCollection.EXPECT().InsertOne(ctx, &types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  18,
@@ -57,7 +57,7 @@ func TestCreator_One(t *testing.T) {
 				return mockCollection
 			},
 			ctx:     context.Background(),
-			doc:     types.TestUser{Id: "123", Name: "cmy", Age: 18},
+			doc:     &types.TestUser{Id: "123", Name: "cmy", Age: 18},
 			wantId:  "",
 			wantErr: errors.New("duplicate key"),
 		},
@@ -65,7 +65,7 @@ func TestCreator_One(t *testing.T) {
 			name: "success",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertOne(ctx, types.TestUser{
+				mockCollection.EXPECT().InsertOne(ctx, &types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  18,
@@ -73,7 +73,7 @@ func TestCreator_One(t *testing.T) {
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: types.TestUser{
+			doc: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  18,
@@ -101,7 +101,7 @@ func TestCreator_Many(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser]
 		ctx  context.Context
-		doc  []types.TestUser
+		doc  []*types.TestUser
 
 		wantIds []string
 		wantErr error
@@ -110,7 +110,7 @@ func TestCreator_Many(t *testing.T) {
 			name: "duplicate",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertMany(ctx, []types.TestUser{
+				mockCollection.EXPECT().InsertMany(ctx, []*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -124,7 +124,7 @@ func TestCreator_Many(t *testing.T) {
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: []types.TestUser{
+			doc: []*types.TestUser{
 				{Id: "123", Name: "cmy", Age: 18},
 				{Id: "123", Name: "cmy", Age: 18},
 			},
@@ -135,7 +135,7 @@ func TestCreator_Many(t *testing.T) {
 			name: "success",
 			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertMany(ctx, []types.TestUser{
+				mockCollection.EXPECT().InsertMany(ctx, []*types.TestUser{
 					{
 						Id:   "123",
 						Name: "cmy",
@@ -149,7 +149,7 @@ func TestCreator_Many(t *testing.T) {
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: []types.TestUser{
+			doc: []*types.TestUser{
 				{Id: "123", Name: "cmy", Age: 18},
 				{Id: "456", Name: "cmy", Age: 18},
 			},

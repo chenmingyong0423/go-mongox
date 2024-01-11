@@ -25,8 +25,8 @@ import (
 
 //go:generate mockgen -source=creator.go -destination=../mock/creator.mock.go -package=mocks
 type iCreator[T any] interface {
-	InsertOne(ctx context.Context, docs T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
-	InsertMany(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
+	InsertOne(ctx context.Context, docs *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+	InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
 }
 
 type Creator[T any] struct {
@@ -39,10 +39,10 @@ func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
 	}
 }
 
-func (c *Creator[T]) InsertOne(ctx context.Context, doc T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	return c.collection.InsertOne(ctx, doc, opts...)
 }
 
-func (c *Creator[T]) InsertMany(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	return c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), opts...)
 }
