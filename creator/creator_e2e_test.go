@@ -52,7 +52,7 @@ func TestCreator_e2e_One(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 		opts   []*options.InsertOneOptions
 		ctx    context.Context
-		t      types.TestUser
+		t      *types.TestUser
 
 		wantId    string
 		wantError assert.ErrorAssertionFunc
@@ -60,7 +60,7 @@ func TestCreator_e2e_One(t *testing.T) {
 		{
 			name: "duplicate",
 			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, types.TestUser{
+				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  24,
@@ -77,7 +77,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: types.TestUser{
+			t: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  24,
@@ -99,7 +99,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: types.TestUser{
+			t: &types.TestUser{
 				Id:   "123",
 				Name: "cmy",
 				Age:  24,
@@ -138,7 +138,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx  context.Context
-		t    []types.TestUser
+		t    []*types.TestUser
 		opts []*options.InsertManyOptions
 
 		wantIds   []string
@@ -147,7 +147,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 		{
 			name: "duplicate",
 			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, types.TestUser{
+				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
 					Id:   "123",
 					Name: "cmy",
 					Age:  24,
@@ -164,7 +164,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
-			t: []types.TestUser{
+			t: []*types.TestUser{
 				{
 					Id:   "123",
 					Name: "cmy",
@@ -188,7 +188,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
-			t: []types.TestUser{
+			t: []*types.TestUser{
 				{
 					Id:   "123",
 					Name: "cmy",
