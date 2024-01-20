@@ -554,13 +554,13 @@ func TestWhere(t *testing.T) {
 func TestAnd(t *testing.T) {
 	testCases := []struct {
 		name       string
-		conditions []bson.D
+		conditions []any
 		want       bson.D
 	}{
 		{
 			name:       "test and",
-			conditions: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
-			want:       bson.D{bson.E{Key: "$and", Value: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
+			conditions: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
+			want:       bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -592,13 +592,13 @@ func TestNot(t *testing.T) {
 func TestNor(t *testing.T) {
 	testCases := []struct {
 		name       string
-		conditions []bson.D
+		conditions []any
 		want       bson.D
 	}{
 		{
 			name:       "test nor",
-			conditions: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
-			want:       bson.D{bson.E{Key: "$nor", Value: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
+			conditions: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
+			want:       bson.D{bson.E{Key: "$nor", Value: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -611,13 +611,13 @@ func TestNor(t *testing.T) {
 func TestOr(t *testing.T) {
 	testCases := []struct {
 		name       string
-		conditions []bson.D
+		conditions []any
 		want       bson.D
 	}{
 		{
 			name:       "test or",
-			conditions: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
-			want:       bson.D{bson.E{Key: "$or", Value: []bson.D{{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, {bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
+			conditions: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}},
+			want:       bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$gt", Value: 18}}}}, bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$lt", Value: 30}}}}}}},
 		},
 	}
 	for _, tc := range testCases {

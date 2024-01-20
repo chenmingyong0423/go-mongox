@@ -129,19 +129,19 @@ func Where(value string) bson.D {
 	return bson.D{bson.E{Key: types.Where, Value: value}}
 }
 
-func And(conditions ...bson.D) bson.D {
+func And(conditions ...any) bson.D {
 	return bson.D{bson.E{Key: types.And, Value: conditions}}
 }
 
-func Not(cond bson.D) bson.D {
+func Not(cond any) bson.D {
 	return bson.D{bson.E{Key: types.Not, Value: cond}}
 }
 
-func Nor(conditions ...bson.D) bson.D {
+func Nor(conditions ...any) bson.D {
 	return bson.D{bson.E{Key: types.Nor, Value: conditions}}
 }
 
-func Or(conditions ...bson.D) bson.D {
+func Or(conditions ...any) bson.D {
 	return bson.D{bson.E{Key: types.Or, Value: conditions}}
 }
 
