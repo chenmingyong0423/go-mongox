@@ -1,8 +1,9 @@
 ---
-name: 问题 | Question
-about: 你想问的问题 | The question you want to ask
+name: 重构请求 | Refactor request
+about: 重构已有代码 | Refactor existing code
 title: ''
-labels: [ question ]
+labels: [ refactor ]
+assignees: ''
 ---
 
 在提交之前请先查找 [已有 issues](https://github.com/chenmingyong0423/go-mongox/issues)，避免重复上报。| Before submitting, please search for [existing issues](https://github.com/chenmingyong0423/go-mongox/issues) to avoid duplicate reports.
