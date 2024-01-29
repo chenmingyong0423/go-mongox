@@ -18,7 +18,11 @@ package finder
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
@@ -39,9 +43,8 @@ func getCollection(t *testing.T) *mongo.Collection {
 		Password:   "test",
 		AuthSource: "db-test",
 	}))
-	assert.NoError(t, err)
-	assert.NoError(t, client.Ping(context.Background(), readpref.Primary()))
-
+	require.NoError(t, err)
+	require.NoError(t, client.Ping(context.Background(), readpref.Primary()))
 	return client.Database("db-test").Collection("test_user")
 }
 
@@ -580,6 +583,297 @@ func TestFinder_e2e_Count(t *testing.T) {
 			if tc.wantErr(t, err) {
 				assert.Equal(t, tc.want, count)
 			}
+		})
+	}
+}
+
+func TestFinder_e2e_Distinct(t *testing.T) {
+	collection := getCollection(t)
+	finder := NewFinder[types.TestUser](collection)
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		fieldName string
+		filter    any
+		opts      []*options.DistinctOptions
+
+		ctx     context.Context
+		want    []any
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:   "nil filter error",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+
+			filter: "name",
+			ctx:    context.Background(),
+			want:   nil,
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected error, got nil")
+					return false
+				}
+				return errors.Is(err, mongo.ErrNilDocument)
+			},
+		},
+		{
+			name:      "returns empty documents",
+			before:    func(ctx context.Context, t *testing.T) {},
+			after:     func(ctx context.Context, t *testing.T) {},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			want:      []any{},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "returns all documents",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+					{
+						Id:   "1",
+						Name: "chenmingyong",
+						Age:  24,
+					},
+					{
+						Id:   "2",
+						Name: "burt",
+						Age:  45,
+					},
+				}...))
+				require.NoError(t, err)
+				assert.ElementsMatch(t, []string{"1", "2"}, insertManyResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			want: []any{
+				"chenmingyong",
+				"burt",
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "name distinct",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+					{
+						Id:   "1",
+						Name: "chenmingyong",
+						Age:  24,
+					},
+					{
+						Id:   "2",
+						Name: "chenmingyong",
+						Age:  25,
+					},
+					{
+						Id:   "3",
+						Name: "burt",
+						Age:  26,
+					},
+				}...))
+				require.NoError(t, err)
+				assert.ElementsMatch(t, []string{"1", "2", "3"}, insertManyResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2", "3"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(3), deleteResult.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			want: []any{
+				"chenmingyong",
+				"burt",
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			result, err := finder.Filter(tc.filter).Distinct(tc.ctx, tc.fieldName, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			assert.ElementsMatch(t, tc.want, result)
+		})
+	}
+}
+
+func TestFinder_e2e_DistinctWithParse(t *testing.T) {
+	collection := getCollection(t)
+	finder := NewFinder[types.TestUser](collection)
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		fieldName string
+		filter    any
+		result    []string
+		opts      []*options.DistinctOptions
+
+		ctx     context.Context
+		want    []string
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name:   "nil filter error",
+			before: func(_ context.Context, _ *testing.T) {},
+			after:  func(_ context.Context, _ *testing.T) {},
+
+			filter: "name",
+			ctx:    context.Background(),
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err == nil {
+					t.Errorf("expected error, got nil")
+					return false
+				}
+				return errors.Is(err, mongo.ErrNilDocument)
+			},
+		},
+		{
+			name:      "returns empty documents",
+			before:    func(ctx context.Context, t *testing.T) {},
+			after:     func(ctx context.Context, t *testing.T) {},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			result:    []string{},
+			want:      []string{},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "returns all documents",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+					{
+						Id:   "1",
+						Name: "chenmingyong",
+						Age:  24,
+					},
+					{
+						Id:   "2",
+						Name: "burt",
+						Age:  45,
+					},
+				}...))
+				require.NoError(t, err)
+				assert.ElementsMatch(t, []string{"1", "2"}, insertManyResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			result:    []string{},
+			want: []string{
+				"chenmingyong",
+				"burt",
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+		{
+			name: "name distinct",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+					{
+						Id:   "1",
+						Name: "chenmingyong",
+						Age:  24,
+					},
+					{
+						Id:   "2",
+						Name: "chenmingyong",
+						Age:  25,
+					},
+					{
+						Id:   "3",
+						Name: "burt",
+						Age:  26,
+					},
+				}...))
+				require.NoError(t, err)
+				assert.ElementsMatch(t, []string{"1", "2", "3"}, insertManyResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2", "3"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(3), deleteResult.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			result:    []string{},
+			want: []string{
+				"chenmingyong",
+				"burt",
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				if err != nil {
+					t.Errorf("expected nil, got error: %v", err)
+					return false
+				}
+				return true
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			err := finder.Filter(tc.filter).DistinctWithParse(tc.ctx, tc.fieldName, &tc.result, tc.opts...)
+			tc.after(tc.ctx, t)
+			if !tc.wantErr(t, err) {
+				return
+			}
+			assert.ElementsMatch(t, tc.want, tc.result)
 		})
 	}
 }
