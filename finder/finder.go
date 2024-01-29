@@ -27,6 +27,8 @@ type iFinder[T any] interface {
 	FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error)
 	Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error)
 	Count(ctx context.Context, opts ...*options.CountOptions) (int64, error)
+	Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error)
+	DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -75,4 +77,28 @@ func (f *Finder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (i
 		return 0, err
 	}
 	return cnt, nil
+}
+
+func (f *Finder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {
+	return f.collection.Distinct(ctx, fieldName, f.filter, opts...)
+}
+
+// DistinctWithParse is used to parse the result of Distinct
+// result must be a pointer
+func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error {
+	docs, err := f.collection.Distinct(ctx, fieldName, f.filter, opts...)
+	if err != nil {
+		return err
+	}
+
+	valueType, valueBytes, err := bson.MarshalValue(docs)
+	if err != nil {
+		return err
+	}
+	rawValue := bson.RawValue{Type: valueType, Value: valueBytes}
+	err = rawValue.Unmarshal(result)
+	if err != nil {
+		return err
+	}
+	return nil
 }
