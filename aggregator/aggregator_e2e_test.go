@@ -18,7 +18,6 @@ package aggregator
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -191,7 +190,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 	}
 }
 
-func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
+func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 	collection := getCollection(t)
 	aggregator := NewAggregator[types.TestUser](collection)
 
@@ -209,8 +208,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 		pipeline           any
 		aggregationOptions *options.AggregateOptions
 		ctx                context.Context
-		preUsers           []*User
-		callback           types.ResultHandler
+		result             any
 		want               []*User
 		wantErr            assert.ErrorAssertionFunc
 	}{
@@ -241,7 +239,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			pipeline: aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Build(),
-			preUsers: make([]*User, 0, 4),
+			result:   make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
 				{Id: "2", Name: "gopher", Age: 20, IsProgrammer: true},
@@ -265,7 +263,7 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			pipeline: aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
-			preUsers: make([]*User, 0, 4),
+			result:   make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
 				{Id: "2", Name: "gopher", Age: 20, IsProgrammer: true},
@@ -289,11 +287,8 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
-			preUsers: make([]*User, 0),
-			callback: func(ctx context.Context, cursor *mongo.Cursor) error {
-				return errors.New("got error from cursor")
-			},
+			pipeline:           aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
+			result:             []string{},
 			want:               []*User{},
 			aggregationOptions: options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
 			ctx:                context.Background(),
@@ -303,16 +298,10 @@ func TestAggregator_e2e_AggregationWithCallback(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			callback := func(ctx context.Context, cursor *mongo.Cursor) error {
-				return cursor.All(ctx, &tc.preUsers)
-			}
-			if tc.callback != nil {
-				callback = tc.callback
-			}
-			err := aggregator.Pipeline(tc.pipeline).AggregateWithCallback(tc.ctx, callback, tc.aggregationOptions)
+			err := aggregator.Pipeline(tc.pipeline).AggregateWithParse(tc.ctx, &tc.result, tc.aggregationOptions)
 			tc.after(tc.ctx, t)
 			if tc.wantErr(t, err) {
-				assert.ElementsMatch(t, tc.want, tc.preUsers)
+				assert.ElementsMatch(t, tc.want, tc.result)
 			}
 		})
 	}

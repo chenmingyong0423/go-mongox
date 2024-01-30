@@ -17,7 +17,6 @@ package aggregator
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -25,7 +24,7 @@ import (
 //go:generate mockgen -source=aggregator.go -destination=../mock/aggregator.mock.go -package=mocks
 type iAggregator[T any] interface {
 	Aggregate(ctx context.Context, opts ...*options.AggregateOptions) ([]*T, error)
-	AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error
+	AggregateWithParse(ctx context.Context, result any, opts ...*options.AggregateOptions) error
 }
 
 type Aggregator[T any] struct {
@@ -59,13 +58,16 @@ func (a *Aggregator[T]) Aggregate(ctx context.Context, opts ...*options.Aggregat
 	return result, nil
 }
 
-func (a *Aggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error {
+// AggregateWithParse is used to parse the result of the aggregation
+// result must be a pointer to a slice
+func (a *Aggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...*options.AggregateOptions) error {
 	cursor, err := a.collection.Aggregate(ctx, a.pipeline, opts...)
 	if err != nil {
 		return err
 	}
 	defer cursor.Close(ctx)
-	if err = handler(ctx, cursor); err != nil {
+	err = cursor.All(ctx, result)
+	if err != nil {
 		return err
 	}
 	return nil

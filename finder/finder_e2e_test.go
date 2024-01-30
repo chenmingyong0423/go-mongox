@@ -876,4 +876,9 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			assert.ElementsMatch(t, tc.want, tc.result)
 		})
 	}
+	t.Run("parse error", func(t *testing.T) {
+		var result []int
+		err := finder.Filter(bson.D{}).DistinctWithParse(context.Background(), "name", result)
+		assert.Error(t, err)
+	})
 }
