@@ -173,9 +173,16 @@ func (tu *TestUser) DefaultUpdatedAt() {
 	tu.UpdatedAt = time.Now().Local()
 }
 
+type TestTempUser struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64
+	UnknownField string `bson:"-"`
+}
+
 type IllegalUser struct {
-	Id   string `bson:"_id"`
-	Name string `bson:"name"`
+	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	Name string             `bson:"name"`
 	Age  string
 }
 

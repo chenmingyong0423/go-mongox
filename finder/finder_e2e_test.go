@@ -18,10 +18,12 @@ package finder
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -56,7 +58,7 @@ func TestFinder_e2e_New(t *testing.T) {
 	assert.Equal(t, collection, result.collection, "Expected finder field to be initialized correctly")
 }
 
-func TestFinder_e2e_One(t *testing.T) {
+func TestFinder_e2e_FindOne(t *testing.T) {
 	collection := getCollection(t)
 	finder := NewFinder[types.TestUser](collection)
 
@@ -76,143 +78,70 @@ func TestFinder_e2e_One(t *testing.T) {
 			name: "no document",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  bsonx.Id("456"),
+			filter:  query.Eq("name", "burt"),
 			wantErr: mongo.ErrNoDocuments,
-		},
-		{
-			name: "match the first one",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
-			},
-			filter: bson.D{},
-			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
-			},
-		},
-		{
-			name: "find by id",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
-				finder.filter = bson.D{}
-			},
-			filter: bsonx.Id("123"),
-			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
-			},
 		},
 		{
 			name: "find by name",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				})
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-				assert.NoError(t, err)
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.M("name", "cmy"),
+			filter: query.Eq("name", "chenmingyong"),
 			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
+				Name: "chenmingyong",
+				Age:  24,
 			},
 		},
 		{
-			name: "find by age",
+			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.M("age", 18),
-			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
-			},
-		},
-		{
-			name: "ignore _id field",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteOneResult.DeletedCount)
-			},
-			filter: bsonx.Id("123"),
+			filter: query.Eq("name", "chenmingyong"),
 			opts: []*options.FindOneOptions{
 				{
-					Projection: bsonx.M("_id", 0),
+					Projection: bsonx.M("age", 0),
 				},
 			},
 			want: &types.TestUser{
-				Name: "cmy",
-				Age:  18,
+				Name: "chenmingyong",
 			},
 		},
 	}
@@ -221,13 +150,16 @@ func TestFinder_e2e_One(t *testing.T) {
 			tc.before(tc.ctx, t)
 			user, err := finder.Filter(tc.filter).FindOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
-			assert.Equal(t, tc.wantErr, err)
-			assert.Equal(t, tc.want, user)
+			require.Equal(t, tc.wantErr, err)
+			if err == nil {
+				tc.want.ID = user.ID
+				require.Equal(t, tc.want, user)
+			}
 		})
 	}
 }
 
-func TestFinder_e2e_All(t *testing.T) {
+func TestFinder_e2e_Find(t *testing.T) {
 	collection := getCollection(t)
 	finder := NewFinder[types.TestUser](collection)
 
@@ -241,271 +173,173 @@ func TestFinder_e2e_All(t *testing.T) {
 
 		ctx     context.Context
 		want    []*types.TestUser
-		wantErr assert.ErrorAssertionFunc
+		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name:   "nil filter error",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-			filter: nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err == nil {
-					t.Errorf("expected error, got nil")
-					return false
-				}
-				return true
-			},
+			name:    "nil filter error",
+			before:  func(_ context.Context, _ *testing.T) {},
+			after:   func(_ context.Context, _ *testing.T) {},
+			filter:  nil,
+			wantErr: require.Error,
 		},
 		{
 			name: "decode error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&types.IllegalUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  "18",
+						Name: "chenmingyong",
+						Age:  "24",
 					},
 					&types.IllegalUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  "18",
+						Name: "burt",
+						Age:  "25",
 					},
 				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.D(),
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err == nil {
-					t.Errorf("expected error, got nil")
-					return false
-				}
-				return true
-			},
+			filter:  bsonx.D(),
+			wantErr: require.Error,
 		},
 		{
 			name: "returns empty documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
+						Name: "chenmingyong",
+						Age:  24,
 					},
 					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
+						Name: "burt",
+						Age:  25,
 					},
 				})
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-				assert.NoError(t, err)
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.Id("789"),
-			want:   []*types.TestUser{},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			filter:  query.Eq("name", "cmy"),
+			want:    []*types.TestUser{},
+			wantErr: require.NoError,
 		},
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
+						Name: "chenmingyong",
+						Age:  24,
 					},
 					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
+						Name: "burt",
+						Age:  25,
 					},
 				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			filter: bsonx.D(),
 			want: []*types.TestUser{
 				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				},
 				{
-					Id:   "456",
-					Name: "cmy",
-					Age:  18,
+					Name: "burt",
+					Age:  25,
 				},
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 		{
-			name: "find by multiple id",
+			name: "find by multiple name",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
+						Name: "chenmingyong",
+						Age:  24,
 					},
 					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
+						Name: "burt",
+						Age:  25,
 					},
 				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: query.BsonBuilder().InString("_id", "123", "456").Build(),
+			filter: query.In("name", "chenmingyong", "burt"),
 			want: []*types.TestUser{
 				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				},
 				{
-					Id:   "456",
-					Name: "cmy",
-					Age:  18,
+					Name: "burt",
+					Age:  25,
 				},
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 		{
-			name: "find by name",
+			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
+						Name: "chenmingyong",
+						Age:  24,
 					},
 					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
+						Name: "burt",
+						Age:  25,
 					},
 				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.M("name", "cmy"),
-			want: []*types.TestUser{
-				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				},
-				{
-					Id:   "456",
-					Name: "cmy",
-					Age:  18,
-				},
-			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
-		},
-		{
-			name: "ignore _id field",
-			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					},
-					&types.TestUser{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
-					},
-				})
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertManyResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteManyResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteManyResult.DeletedCount)
-
-				finder.filter = bson.D{}
-			},
-			filter: bsonx.D(),
+			filter: query.In("name", "chenmingyong", "burt"),
 			opts: []*options.FindOptions{
 				{
-					Projection: bsonx.M("_id", 0),
+					Projection: bsonx.M("age", 0),
 				},
 			},
 			want: []*types.TestUser{
 				{
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
 				},
 				{
-					Name: "cmy",
-					Age:  18,
+					Name: "burt",
 				},
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -513,10 +347,15 @@ func TestFinder_e2e_All(t *testing.T) {
 			tc.before(tc.ctx, t)
 			users, err := finder.Filter(tc.filter).Find(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
+			tc.wantErr(t, err)
+			if err == nil {
+				assert.Equal(t, len(tc.want), len(users))
+				for _, user := range users {
+					var zero primitive.ObjectID
+					user.ID = zero
+				}
+				assert.ElementsMatch(t, tc.want, users)
 			}
-			assert.ElementsMatch(t, tc.want, users)
 		})
 	}
 }
@@ -555,17 +394,16 @@ func TestFinder_e2e_Count(t *testing.T) {
 			name: "returns 1",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
+					Name: "chenmingyong",
 					Age:  24,
 				})
-				assert.NoError(t, err)
-				assert.Equal(t, insertOneResult.InsertedID.(string), "123")
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, bsonx.Id("123"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			opts: []*options.CountOptions{
 				options.Count().SetComment("test"),
@@ -602,23 +440,17 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 
 		ctx     context.Context
 		want    []any
-		wantErr assert.ErrorAssertionFunc
+		wantErr require.ErrorAssertionFunc
 	}{
 		{
 			name:   "nil filter error",
 			before: func(_ context.Context, _ *testing.T) {},
 			after:  func(_ context.Context, _ *testing.T) {},
 
-			filter: "name",
-			ctx:    context.Background(),
-			want:   nil,
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err == nil {
-					t.Errorf("expected error, got nil")
-					return false
-				}
-				return errors.Is(err, mongo.ErrNilDocument)
-			},
+			filter:  "name",
+			ctx:     context.Background(),
+			want:    nil,
+			wantErr: require.Error,
 		},
 		{
 			name:      "returns empty documents",
@@ -628,36 +460,28 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 			fieldName: "name",
 			ctx:       context.Background(),
 			want:      []any{},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr:   require.NoError,
 		},
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
 					{
-						Id:   "1",
 						Name: "chenmingyong",
 						Age:  24,
 					},
 					{
-						Id:   "2",
 						Name: "burt",
 						Age:  45,
 					},
 				}...))
 				require.NoError(t, err)
-				assert.ElementsMatch(t, []string{"1", "2"}, insertManyResult.InsertedIDs)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
@@ -666,41 +490,32 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 				"chenmingyong",
 				"burt",
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 		{
 			name: "name distinct",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
 					{
-						Id:   "1",
 						Name: "chenmingyong",
 						Age:  24,
 					},
 					{
-						Id:   "2",
 						Name: "chenmingyong",
 						Age:  25,
 					},
 					{
-						Id:   "3",
 						Name: "burt",
 						Age:  26,
 					},
 				}...))
 				require.NoError(t, err)
-				assert.ElementsMatch(t, []string{"1", "2", "3"}, insertManyResult.InsertedIDs)
+				require.Len(t, insertManyResult.InsertedIDs, 3)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2", "3"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(3), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(3), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
@@ -709,13 +524,7 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 				"chenmingyong",
 				"burt",
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -723,10 +532,10 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 			tc.before(tc.ctx, t)
 			result, err := finder.Filter(tc.filter).Distinct(tc.ctx, tc.fieldName, tc.opts...)
 			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
+			tc.wantErr(t, err)
+			if err == nil {
+				require.ElementsMatch(t, tc.want, result)
 			}
-			assert.ElementsMatch(t, tc.want, result)
 		})
 	}
 }
@@ -747,22 +556,16 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 
 		ctx     context.Context
 		want    []string
-		wantErr assert.ErrorAssertionFunc
+		wantErr require.ErrorAssertionFunc
 	}{
 		{
 			name:   "nil filter error",
 			before: func(_ context.Context, _ *testing.T) {},
 			after:  func(_ context.Context, _ *testing.T) {},
 
-			filter: "name",
-			ctx:    context.Background(),
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err == nil {
-					t.Errorf("expected error, got nil")
-					return false
-				}
-				return errors.Is(err, mongo.ErrNilDocument)
-			},
+			filter:  "name",
+			ctx:     context.Background(),
+			wantErr: require.Error,
 		},
 		{
 			name:      "returns empty documents",
@@ -773,36 +576,28 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			ctx:       context.Background(),
 			result:    []string{},
 			want:      []string{},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr:   require.NoError,
 		},
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
 					{
-						Id:   "1",
 						Name: "chenmingyong",
 						Age:  24,
 					},
 					{
-						Id:   "2",
 						Name: "burt",
 						Age:  45,
 					},
 				}...))
 				require.NoError(t, err)
-				assert.ElementsMatch(t, []string{"1", "2"}, insertManyResult.InsertedIDs)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
@@ -812,41 +607,32 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 				"chenmingyong",
 				"burt",
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 		{
 			name: "name distinct",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
 					{
-						Id:   "1",
 						Name: "chenmingyong",
 						Age:  24,
 					},
 					{
-						Id:   "2",
 						Name: "chenmingyong",
 						Age:  25,
 					},
 					{
-						Id:   "3",
 						Name: "burt",
 						Age:  26,
 					},
 				}...))
 				require.NoError(t, err)
-				assert.ElementsMatch(t, []string{"1", "2", "3"}, insertManyResult.InsertedIDs)
+				require.Len(t, insertManyResult.InsertedIDs, 3)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2", "3"))
-				assert.NoError(t, err)
-				assert.Equal(t, int64(3), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(3), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
@@ -856,13 +642,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 				"chenmingyong",
 				"burt",
 			},
-			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
-				if err != nil {
-					t.Errorf("expected nil, got error: %v", err)
-					return false
-				}
-				return true
-			},
+			wantErr: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -870,10 +650,10 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			tc.before(tc.ctx, t)
 			err := finder.Filter(tc.filter).DistinctWithParse(tc.ctx, tc.fieldName, &tc.result, tc.opts...)
 			tc.after(tc.ctx, t)
-			if !tc.wantErr(t, err) {
-				return
+			tc.wantErr(t, err)
+			if err == nil {
+				require.ElementsMatch(t, tc.want, tc.result)
 			}
-			assert.ElementsMatch(t, tc.want, tc.result)
 		})
 	}
 	t.Run("parse error", func(t *testing.T) {

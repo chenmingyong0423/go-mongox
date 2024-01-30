@@ -127,7 +127,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  bson.D{},
-			updates: types.TestUser{Id: "123", Name: "cmy", Age: 24},
+			updates: types.TestTempUser{Id: "123", Name: "cmy", Age: 24},
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -148,7 +148,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -168,7 +168,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is bson.D",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -188,7 +188,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is map[string]any",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -212,7 +212,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -295,7 +295,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -319,7 +319,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "update many success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -343,7 +343,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 				}...))
 				assert.NoError(t, err)
@@ -466,7 +466,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -487,7 +487,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "update one success when the updates is bson.D",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -508,7 +508,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "update one success when the updates is map[string]any",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -531,7 +531,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},

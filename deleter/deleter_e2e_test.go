@@ -55,7 +55,7 @@ func TestDeleter_e2e_New(t *testing.T) {
 
 func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[types.TestUser](collection)
+	deleter := NewDeleter[types.TestTempUser](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
@@ -83,7 +83,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy"})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -103,7 +103,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy"})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -134,7 +134,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 
 func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[types.TestUser](collection)
+	deleter := NewDeleter[types.TestTempUser](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
@@ -162,7 +162,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
@@ -185,7 +185,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))

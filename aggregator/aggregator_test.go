@@ -57,15 +57,15 @@ func TestAggregator_Aggregation(t *testing.T) {
 			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
 				aggregator.EXPECT().Aggregate(ctx).Return([]*types.TestUser{
-					{Id: "1", Name: "cmy", Age: 24},
-					{Id: "2", Name: "gopher", Age: 20},
+					{Name: "chenmingyong", Age: 24},
+					{Name: "gopher", Age: 25},
 				}, nil).Times(1)
 				return aggregator
 			},
 			ctx: context.Background(),
 			want: []*types.TestUser{
-				{Id: "2", Name: "gopher", Age: 20},
-				{Id: "1", Name: "cmy", Age: 24},
+				{Name: "chenmingyong", Age: 24},
+				{Name: "gopher", Age: 25},
 			},
 			wantErr: assert.NoError,
 		},
