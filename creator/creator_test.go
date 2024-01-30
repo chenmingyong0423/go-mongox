@@ -19,6 +19,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/chenmingyong0423/go-mongox/types"
 
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
@@ -38,59 +40,47 @@ func TestNewCreator(t *testing.T) {
 func TestCreator_One(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser]
 		ctx  context.Context
 		doc  *types.TestUser
 
-		wantId  string
 		wantErr error
 	}{
 		{
-			name: "duplicate",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
+			name: "nil doc",
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				}).Return(nil, errors.New("duplicate key")).Times(1)
+				mockCollection.EXPECT().InsertOne(ctx, doc).Return(nil, errors.New("nil filter")).Times(1)
 				return mockCollection
 			},
 			ctx:     context.Background(),
-			doc:     &types.TestUser{Id: "123", Name: "cmy", Age: 18},
-			wantId:  "",
-			wantErr: errors.New("duplicate key"),
+			doc:     nil,
+			wantErr: errors.New("nil filter"),
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
-				}).Return(&mongo.InsertOneResult{InsertedID: "123"}, nil).Times(1)
+				mockCollection.EXPECT().InsertOne(ctx, doc).Return(&mongo.InsertOneResult{InsertedID: "?"}, nil).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
 			doc: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
+				Name: "chenmingyong",
+				Age:  24,
 			},
-			wantId: "123",
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			creator := tc.mock(tc.ctx, ctl)
+			creator := tc.mock(tc.ctx, ctl, tc.doc)
 
 			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc)
-			assert.Equal(t, tc.wantErr, err)
+			require.Equal(t, tc.wantErr, err)
 			if err == nil {
-				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
+				assert.NotNil(t, insertOneResult.InsertedID)
 			}
 		})
 	}
@@ -99,73 +89,52 @@ func TestCreator_One(t *testing.T) {
 func TestCreator_Many(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser]
 		ctx  context.Context
-		doc  []*types.TestUser
+		docs []*types.TestUser
 
-		wantIds []string
-		wantErr error
+		wantIdsLength int
+		wantErr       error
 	}{
 		{
-			name: "duplicate",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
+			name: "nil docs",
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertMany(ctx, []*types.TestUser{
-					{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					}, {
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					},
-				}).Return(nil, errors.New("duplicate key")).Times(1)
+				mockCollection.EXPECT().InsertMany(ctx, docs).Return(nil, errors.New("nil docs")).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: []*types.TestUser{
-				{Id: "123", Name: "cmy", Age: 18},
-				{Id: "123", Name: "cmy", Age: 18},
+			docs: []*types.TestUser{
+				{Name: "chenmingyong", Age: 24},
+				{Name: "burt", Age: 25},
 			},
-			wantIds: nil,
-			wantErr: errors.New("duplicate key"),
+			wantErr: errors.New("nil docs"),
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iCreator[types.TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser] {
 				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
-				mockCollection.EXPECT().InsertMany(ctx, []*types.TestUser{
-					{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
-					}, {
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
-					},
-				}).Return(&mongo.InsertManyResult{InsertedIDs: []any{"123", "456"}}, nil).Times(1)
+				mockCollection.EXPECT().InsertMany(ctx, docs).Return(&mongo.InsertManyResult{InsertedIDs: make([]interface{}, 2)}, nil).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: []*types.TestUser{
-				{Id: "123", Name: "cmy", Age: 18},
-				{Id: "456", Name: "cmy", Age: 18},
+			docs: []*types.TestUser{
+				{Name: "chenmingyong", Age: 24},
+				{Name: "burt", Age: 25},
 			},
-			wantIds: []string{"123", "456"},
+			wantIdsLength: 2,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			creator := tc.mock(tc.ctx, ctl)
+			creator := tc.mock(tc.ctx, ctl, tc.docs)
 
-			insertResult, err := creator.InsertMany(tc.ctx, tc.doc)
-			assert.Equal(t, tc.wantErr, err)
+			insertResult, err := creator.InsertMany(tc.ctx, tc.docs)
+			require.Equal(t, tc.wantErr, err)
 			if err == nil {
-				assert.ElementsMatch(t, tc.wantIds, insertResult.InsertedIDs)
+				assert.Equal(t, tc.wantIdsLength, len(insertResult.InsertedIDs))
 			}
 		})
 	}

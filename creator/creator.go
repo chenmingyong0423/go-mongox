@@ -17,6 +17,9 @@ package creator
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/middleware"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -40,9 +43,33 @@ func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
 }
 
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
-	return c.collection.InsertOne(ctx, doc, opts...)
+	err := middleware.Execute(ctx, doc, operation.OpTypeBeforeInsert)
+	if err != nil {
+		return nil, err
+	}
+	result, err := c.collection.InsertOne(ctx, doc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = middleware.Execute(ctx, doc, operation.OpTypeAfterInsert)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
-	return c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), opts...)
+	err := middleware.Execute(ctx, docs, operation.OpTypeBeforeInsert)
+	if err != nil {
+		return nil, err
+	}
+	result, err := c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = middleware.Execute(ctx, docs, operation.OpTypeAfterInsert)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

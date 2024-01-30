@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
 	"github.com/chenmingyong0423/go-mongox/types"
@@ -52,59 +54,38 @@ func TestCreator_e2e_One(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 		opts   []*options.InsertOneOptions
 		ctx    context.Context
-		t      *types.TestUser
+		doc    *types.TestUser
 
 		wantId    string
 		wantError assert.ErrorAssertionFunc
 	}{
 		{
-			name: "duplicate",
-			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", oneResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
-			ctx: context.Background(),
+			name:   "nil doc",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  24,
-			},
-			wantId: "",
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return mongo.IsDuplicateKeyError(err)
-			},
+			doc:       nil,
+			wantError: assert.Error,
 		},
 		{
 			name:   "insert one successfully",
 			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
+			doc: &types.TestUser{
+				Name: "chenmingyong",
 				Age:  24,
 			},
-			wantId: "123",
 			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err != nil {
 					t.Errorf("expected no error, but got: %v", err)
@@ -117,13 +98,14 @@ func TestCreator_e2e_One(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertOneResult, err := creator.InsertOne(tc.ctx, tc.t, tc.opts...)
+			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
 			}
-			if insertOneResult != nil {
-				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
+			if err == nil {
+				require.NotNil(t, insertOneResult.InsertedID)
+				require.NotZero(t, tc.doc.CreatedAt)
 			}
 		})
 	}
@@ -138,49 +120,28 @@ func TestCreator_e2e_Many(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx  context.Context
-		t    []*types.TestUser
+		docs []*types.TestUser
 		opts []*options.InsertManyOptions
 
-		wantIds   []string
-		wantError assert.ErrorAssertionFunc
+		wantIdsLength int
+		wantError     assert.ErrorAssertionFunc
 	}{
 		{
-			name: "duplicate",
-			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", oneResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
+			name:   "nil docs",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
 			opts: []*options.InsertManyOptions{
 				options.InsertMany().SetComment("test"),
 			},
-			ctx: context.Background(),
-			t: []*types.TestUser{
-				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				},
-			},
-			wantIds: nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return mongo.IsDuplicateKeyError(err)
-			},
+			ctx:       context.Background(),
+			docs:      nil,
+			wantError: assert.Error,
 		},
 		{
 			name:   "insert many successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -188,32 +149,34 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
-			t: []*types.TestUser{
+			docs: []*types.TestUser{
 				{
-					Id:   "123",
-					Name: "cmy",
+					Name: "chenmingyong",
 					Age:  24,
 				},
 				{
-					Id:   "456",
-					Name: "cmy",
+					Name: "burt",
 					Age:  24,
 				},
 			},
-			wantIds:   []string{"123", "456"},
-			wantError: assert.NoError,
+			wantIdsLength: 2,
+			wantError:     assert.NoError,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertManyResult, err := creator.InsertMany(tc.ctx, tc.t, tc.opts...)
+			insertManyResult, err := creator.InsertMany(tc.ctx, tc.docs, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
 			}
-			if insertManyResult != nil {
-				assert.ElementsMatch(t, tc.wantIds, insertManyResult.InsertedIDs)
+			if err == nil {
+				require.NotNil(t, insertManyResult)
+				require.Len(t, insertManyResult.InsertedIDs, tc.wantIdsLength)
+				for _, doc := range tc.docs {
+					require.NotZero(t, doc.CreatedAt)
+				}
 			}
 		})
 	}
