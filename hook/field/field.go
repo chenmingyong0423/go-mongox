@@ -22,23 +22,22 @@ import (
 )
 
 func Execute(ctx context.Context, doc any, opType operation.OpType, opts ...any) error {
-	typeOf := reflect.TypeOf(doc)
-	if typeOf == nil {
+	valueOf := reflect.ValueOf(doc)
+	if valueOf.IsZero() {
 		return nil
 	}
-	switch typeOf.Kind() {
+	switch valueOf.Type().Kind() {
 	case reflect.Slice:
-		return executeSlice(ctx, doc, opType, opts...)
+		return executeSlice(ctx, valueOf, opType, opts...)
 	case reflect.Ptr:
 		return execute(ctx, doc, opType, opts...)
 	}
 	return nil
 }
 
-func executeSlice(ctx context.Context, docs any, opType operation.OpType, opts ...any) error {
-	sliceValue := reflect.ValueOf(docs)
-	for i := 0; i < sliceValue.Len(); i++ {
-		doc := sliceValue.Index(i)
+func executeSlice(ctx context.Context, docs reflect.Value, opType operation.OpType, opts ...any) error {
+	for i := 0; i < docs.Len(); i++ {
+		doc := docs.Index(i)
 		if err := execute(ctx, doc.Interface(), opType, opts...); err != nil {
 			return err
 		}
