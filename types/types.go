@@ -14,12 +14,6 @@
 
 package types
 
-import (
-	"context"
-
-	"go.mongodb.org/mongo-driver/mongo"
-)
-
 const (
 	Id                 = "_id"
 	Set                = "$set"
@@ -207,8 +201,6 @@ type TextOptions struct {
 	CaseSensitive      bool
 	DiacriticSensitive bool
 }
-
-type ResultHandler func(ctx context.Context, cursor *mongo.Cursor) error
 
 type Numeric interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |

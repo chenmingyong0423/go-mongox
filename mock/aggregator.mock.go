@@ -12,7 +12,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	types "github.com/chenmingyong0423/go-mongox/types"
 	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -60,21 +59,21 @@ func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any, opts ...any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregate), varargs...)
 }
 
-// AggregateWithCallback mocks base method.
-func (m *MockiAggregator[T]) AggregateWithCallback(ctx context.Context, handler types.ResultHandler, opts ...*options.AggregateOptions) error {
+// AggregateWithParse mocks base method.
+func (m *MockiAggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...*options.AggregateOptions) error {
 	m.ctrl.T.Helper()
-	varargs := []any{ctx, handler}
+	varargs := []any{ctx, result}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "AggregateWithCallback", varargs...)
+	ret := m.ctrl.Call(m, "AggregateWithParse", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AggregateWithCallback indicates an expected call of AggregateWithCallback.
-func (mr *MockiAggregatorMockRecorder[T]) AggregateWithCallback(ctx, handler any, opts ...any) *gomock.Call {
+// AggregateWithParse indicates an expected call of AggregateWithParse.
+func (mr *MockiAggregatorMockRecorder[T]) AggregateWithParse(ctx, result any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, handler}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithCallback", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithCallback), varargs...)
+	varargs := append([]any{ctx, result}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithParse", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithParse), varargs...)
 }

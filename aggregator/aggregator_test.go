@@ -84,7 +84,7 @@ func TestAggregator_Aggregation(t *testing.T) {
 	}
 }
 
-func TestAggregator_AggregationWithCallback(t *testing.T) {
+func TestAggregator_AggregateWithParse(t *testing.T) {
 	type User struct {
 		Id           string `bson:"_id"`
 		Name         string `bson:"name"`
@@ -92,33 +92,33 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 		IsProgrammer bool `bson:"is_programmer"`
 	}
 	testCases := []struct {
-		name          string
-		mock          func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser]
-		ctx           context.Context
-		callbackParam []*User
-		want          []*User
-		wantErr       assert.ErrorAssertionFunc
+		name    string
+		mock    func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser]
+		ctx     context.Context
+		result  []*User
+		want    []*User
+		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "got error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().AggregateWithCallback(ctx, gomock.Any()).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
+				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
-			ctx:           context.Background(),
-			callbackParam: []*User{},
-			wantErr:       assert.Error,
+			ctx:     context.Background(),
+			result:  []*User{},
+			wantErr: assert.Error,
 		},
 		{
 			name: "got result",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser] {
 				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().AggregateWithCallback(ctx, gomock.Any()).Return(nil).Times(1)
+				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(nil).Times(1)
 				return aggregator
 			},
 			ctx: context.Background(),
-			callbackParam: []*User{
+			result: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
 			},
 			want: []*User{
@@ -131,13 +131,11 @@ func TestAggregator_AggregationWithCallback(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			var callback types.ResultHandler = func(ctx context.Context, cursor *mongo.Cursor) error {
-				return cursor.All(ctx, &tc.callbackParam)
-			}
-			aggregator := tc.mock(tc.ctx, ctl)
-			err := aggregator.AggregateWithCallback(tc.ctx, callback)
+
+			aggregator := tc.mock(tc.ctx, ctl, tc.result)
+			err := aggregator.AggregateWithParse(tc.ctx, tc.result)
 			if tc.wantErr(t, err) {
-				assert.ElementsMatch(t, tc.want, tc.callbackParam)
+				assert.ElementsMatch(t, tc.want, tc.result)
 			}
 		})
 	}
