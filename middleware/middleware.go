@@ -17,13 +17,15 @@ package middleware
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/hook/field"
+
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
 type callback func(ctx context.Context, doc any, opType operation.OpType, opts ...any) error
 
 var middlewares = []callback{
-	nil,
+	field.Execute,
 }
 
 func Register(cb callback) {

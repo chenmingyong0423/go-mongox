@@ -20,7 +20,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Model is the base model for all models
+// Model is a base struct which includes the following fields:
+// - ID: the primary key of the document
+// - CreatedAt: the time when the document was created
+// - UpdatedAt: the time when the document was last updated
+// It may be embedded into a struct to provide these fields.
+// Example:
+//
+//	type User struct {
+//		mongox.Model
+//	}
 type Model struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty"`
 	CreatedAt time.Time          `bson:"created_at"`
