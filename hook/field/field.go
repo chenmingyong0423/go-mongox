@@ -21,8 +21,9 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-func Execute(ctx context.Context, doc any, opType operation.OpType, opts ...any) error {
-	valueOf := reflect.ValueOf(doc)
+func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
+	payLoad := opCtx.GetPayload(opType)
+	valueOf := reflect.ValueOf(payLoad)
 	if valueOf.IsZero() {
 		return nil
 	}
@@ -30,7 +31,7 @@ func Execute(ctx context.Context, doc any, opType operation.OpType, opts ...any)
 	case reflect.Slice:
 		return executeSlice(ctx, valueOf, opType, opts...)
 	case reflect.Ptr:
-		return execute(ctx, doc, opType, opts...)
+		return execute(ctx, payLoad, opType, opts...)
 	}
 	return nil
 }

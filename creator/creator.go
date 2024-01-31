@@ -43,15 +43,18 @@ func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
 }
 
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
-	err := middleware.Execute(ctx, doc, operation.OpTypeBeforeInsert)
+	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc))
+	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
+
 	result, err := c.collection.InsertOne(ctx, doc, opts...)
 	if err != nil {
 		return nil, err
 	}
-	err = middleware.Execute(ctx, doc, operation.OpTypeAfterInsert)
+
+	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,9 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.Ins
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
-	err := middleware.Execute(ctx, docs, operation.OpTypeBeforeInsert)
+	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs))
+	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +72,8 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options
 	if err != nil {
 		return nil, err
 	}
-	err = middleware.Execute(ctx, docs, operation.OpTypeAfterInsert)
+
+	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}

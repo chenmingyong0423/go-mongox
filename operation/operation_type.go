@@ -14,6 +14,10 @@
 
 package operation
 
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
 type OpType string
 
 const (
@@ -26,3 +30,26 @@ const (
 	OpTypeBeforeUpsert OpType = "beforeUpsert"
 	OpTypeAfterUpsert  OpType = "afterUpsert"
 )
+
+type OpContext struct {
+	Col *mongo.Collection `opt:"-"`
+	Doc any
+	// filter = query
+	Filter      any
+	Replacement any
+	Update      any
+}
+
+func (opCtx OpContext) GetPayload(opType OpType) any {
+	switch opType {
+	case OpTypeBeforeInsert, OpTypeAfterInsert:
+		return opCtx.Doc
+	case OpTypeBeforeUpdate, OpTypeAfterUpdate:
+		return opCtx.Update
+	case OpTypeBeforeDelete, OpTypeAfterDelete:
+		return opCtx.Filter
+	case OpTypeBeforeUpsert, OpTypeAfterUpsert:
+		return opCtx.Replacement
+	}
+	return nil
+}

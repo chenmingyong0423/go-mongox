@@ -17,25 +17,9 @@ package middleware
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/hook/field"
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-type callback func(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error
-
-var middlewares = []callback{
-	field.Execute,
-}
-
-func Register(cb callback) {
-	middlewares = append(middlewares, cb)
-}
-
-func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
-	for _, cb := range middlewares {
-		if err := cb(ctx, opCtx, opType, opts...); err != nil {
-			return err
-		}
-	}
-	return nil
+type BeforeInsert interface {
+	BeforeInsert(ctx context.Context, opCtx *operation.OpContext)
 }
