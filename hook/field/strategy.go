@@ -41,6 +41,7 @@ func BeforeUpdate(doc any) error {
 
 func BeforeUpsert(doc any) error {
 	if tsh, ok := doc.(hook.TimeStamperHook); ok {
+		tsh.DefaultCreatedAt()
 		tsh.DefaultUpdatedAt()
 	}
 	return nil
