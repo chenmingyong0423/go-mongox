@@ -23,6 +23,9 @@ import (
 
 func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
 	payLoad := opCtx.GetPayload(opType)
+	if payLoad == nil {
+		return nil
+	}
 	valueOf := reflect.ValueOf(payLoad)
 	if valueOf.IsZero() {
 		return nil

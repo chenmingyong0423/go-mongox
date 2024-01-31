@@ -42,6 +42,6 @@ func WithReplacement(replacement any) OpContextOption {
 
 func WithUpdate(update any) OpContextOption {
 	return func(opContext *OpContext) {
-		opContext.Update = update
+		opContext.Updates = update
 	}
 }

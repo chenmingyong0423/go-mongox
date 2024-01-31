@@ -34,10 +34,10 @@ const (
 type OpContext struct {
 	Col *mongo.Collection `opt:"-"`
 	Doc any
-	// filter = query
+	// filter also can be used as query query
 	Filter      any
+	Updates     any
 	Replacement any
-	Update      any
 }
 
 func (opCtx OpContext) GetPayload(opType OpType) any {
@@ -45,7 +45,7 @@ func (opCtx OpContext) GetPayload(opType OpType) any {
 	case OpTypeBeforeInsert, OpTypeAfterInsert:
 		return opCtx.Doc
 	case OpTypeBeforeUpdate, OpTypeAfterUpdate:
-		return opCtx.Update
+		return opCtx.Updates
 	case OpTypeBeforeDelete, OpTypeAfterDelete:
 		return opCtx.Filter
 	case OpTypeBeforeUpsert, OpTypeAfterUpsert:
