@@ -17,7 +17,8 @@ package updater
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/middleware"
+	"github.com/chenmingyong0423/go-mongox/callback"
+
 	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -67,7 +68,7 @@ func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T]
 
 func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 		return nil, err
 	}
 
-	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 
 func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +97,7 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOpti
 		return nil, err
 	}
 
-	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +113,7 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions
 
 	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithReplacement(u.replacement))
 
-	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeUpsert)
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpsert)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +123,7 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions
 		return nil, err
 	}
 
-	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterUpsert)
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpsert)
 	if err != nil {
 		return nil, err
 	}

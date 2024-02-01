@@ -29,6 +29,8 @@ const (
 	OpTypeAfterDelete  OpType = "afterDelete"
 	OpTypeBeforeUpsert OpType = "beforeUpsert"
 	OpTypeAfterUpsert  OpType = "afterUpsert"
+	OpTypeBeforeFind   OpType = "beforeFind"
+	OpTypeAfterFind    OpType = "afterFind"
 )
 
 type OpContext struct {

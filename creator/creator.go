@@ -17,7 +17,7 @@ package creator
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/middleware"
+	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
@@ -44,17 +44,16 @@ func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
 
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc))
-	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
-
 	result, err := c.collection.InsertOne(ctx, doc, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterInsert)
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +62,10 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.Ins
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs))
-	err := middleware.Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+	if err != nil {
+		return nil, err
+	}
 
 	if err != nil {
 		return nil, err
@@ -73,7 +75,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options
 		return nil, err
 	}
 
-	err = middleware.Execute(ctx, opContext, operation.OpTypeAfterInsert)
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
