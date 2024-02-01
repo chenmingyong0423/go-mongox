@@ -19,42 +19,10 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-func RegisterBeforeInsert(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeBeforeInsert, name, cb)
+func Register(name string, cb callback.CbFn, opType operation.OpType) {
+	callback.Callbacks.Register(opType, name, cb)
 }
 
-func RegisterAfterInsert(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeAfterInsert, name, cb)
-}
-
-func RegisterBeforeUpdate(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeBeforeUpdate, name, cb)
-}
-
-func RegisterAfterUpdate(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeAfterUpdate, name, cb)
-}
-
-func RegisterBeforeDelete(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeBeforeDelete, name, cb)
-}
-
-func RegisterAfterDelete(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeAfterDelete, name, cb)
-}
-
-func RegisterBeforeUpsert(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeBeforeUpsert, name, cb)
-}
-
-func RegisterAfterUpsert(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeAfterUpsert, name, cb)
-}
-
-func RegisterBeforeFind(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeBeforeFind, name, cb)
-}
-
-func RegisterAfterFind(name string, cb callback.CbFn) {
-	callback.Callbacks.Register(operation.OpTypeAfterFind, name, cb)
+func Remove(name string, opType operation.OpType) {
+	callback.Callbacks.Remove(opType, name)
 }

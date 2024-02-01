@@ -168,6 +168,41 @@ func (c *Callback) Register(opType operation.OpType, name string, fn CbFn) {
 	}
 }
 
+func (c *Callback) Remove(opType operation.OpType, name string) {
+	switch opType {
+	case operation.OpTypeBeforeInsert:
+		c.beforeInsert = c.remove(c.beforeInsert, name)
+	case operation.OpTypeAfterInsert:
+		c.afterInsert = c.remove(c.afterInsert, name)
+	case operation.OpTypeBeforeUpdate:
+		c.beforeUpdate = c.remove(c.beforeUpdate, name)
+	case operation.OpTypeAfterUpdate:
+		c.afterUpdate = c.remove(c.afterUpdate, name)
+	case operation.OpTypeBeforeDelete:
+		c.beforeDelete = c.remove(c.beforeDelete, name)
+	case operation.OpTypeAfterDelete:
+		c.afterDelete = c.remove(c.afterDelete, name)
+	case operation.OpTypeBeforeUpsert:
+		c.beforeUpsert = c.remove(c.beforeUpsert, name)
+	case operation.OpTypeAfterUpsert:
+		c.afterUpsert = c.remove(c.afterUpsert, name)
+	case operation.OpTypeBeforeFind:
+		c.beforeFind = c.remove(c.beforeFind, name)
+	case operation.OpTypeAfterFind:
+		c.afterFind = c.remove(c.afterFind, name)
+	}
+}
+
+func (c *Callback) remove(callbackHandlers []callbackHandler, name string) []callbackHandler {
+	for i, handler := range callbackHandlers {
+		if handler.name == name {
+			callbackHandlers = append(callbackHandlers[:i], callbackHandlers[i+1:]...)
+			break
+		}
+	}
+	return callbackHandlers
+}
+
 type callbackHandler struct {
 	name string
 	fn   CbFn
