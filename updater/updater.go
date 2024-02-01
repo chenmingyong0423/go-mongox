@@ -17,6 +17,10 @@ package updater
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/callback"
+
+	"github.com/chenmingyong0423/go-mongox/operation"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,6 +30,7 @@ import (
 type iUpdater[T any] interface {
 	UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error)
 }
 
 func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
@@ -33,9 +38,10 @@ func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
 }
 
 type Updater[T any] struct {
-	collection *mongo.Collection
-	filter     any
-	updates    any
+	collection  *mongo.Collection
+	filter      any
+	updates     any
+	replacement any
 }
 
 // Filter is used to set the filter of the query
@@ -50,15 +56,76 @@ func (u *Updater[T]) Updates(updates any) *Updater[T] {
 	return u
 }
 
+func (u *Updater[T]) Replacement(replacement any) *Updater[T] {
+	u.replacement = replacement
+	return u
+}
+
 func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T] {
 	u.updates = bson.D{bson.E{Key: operator, Value: value}}
 	return u
 }
 
 func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	return u.collection.UpdateOne(ctx, u.filter, u.updates, opts...)
+	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := u.collection.UpdateOne(ctx, u.filter, u.updates, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	return u.collection.UpdateMany(ctx, u.filter, u.updates, opts...)
+	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := u.collection.UpdateMany(ctx, u.filter, u.updates, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
+	if len(opts) == 0 {
+		options.Replace().SetUpsert(true)
+	} else {
+		opts[0].SetUpsert(true)
+	}
+
+	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithReplacement(u.replacement))
+
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpsert)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := u.collection.ReplaceOne(ctx, u.filter, u.replacement, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpsert)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

@@ -18,17 +18,43 @@ package creator
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
+
+type User struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (u *User) DefaultCreatedAt() {
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = time.Now().Local()
+	}
+}
+
+func (u *User) DefaultUpdatedAt() {
+	u.UpdatedAt = time.Now().Local()
+}
 
 func newCollection(t *testing.T) *mongo.Collection {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
@@ -45,66 +71,44 @@ func newCollection(t *testing.T) *mongo.Collection {
 
 func TestCreator_e2e_One(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[types.TestUser](collection)
+	creator := NewCreator[User](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 		opts   []*options.InsertOneOptions
 		ctx    context.Context
-		t      *types.TestUser
+		doc    *User
 
-		wantId    string
 		wantError assert.ErrorAssertionFunc
 	}{
 		{
-			name: "duplicate",
-			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", oneResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
-			ctx: context.Background(),
+			name:   "nil doc",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  24,
-			},
-			wantId: "",
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return mongo.IsDuplicateKeyError(err)
-			},
+			doc:       nil,
+			wantError: assert.Error,
 		},
 		{
 			name:   "insert one successfully",
 			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			t: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
+			doc: &User{
+				Name: "chenmingyong",
 				Age:  24,
 			},
-			wantId: "123",
 			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err != nil {
 					t.Errorf("expected no error, but got: %v", err)
@@ -117,70 +121,78 @@ func TestCreator_e2e_One(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertOneResult, err := creator.InsertOne(tc.ctx, tc.t, tc.opts...)
+			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
 			}
-			if insertOneResult != nil {
-				assert.Equal(t, tc.wantId, insertOneResult.InsertedID)
+			if err == nil {
+				require.NotNil(t, insertOneResult.InsertedID)
+				require.NotZero(t, tc.doc.CreatedAt)
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		doc := &User{}
+		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		insertOneResult, err := creator.InsertOne(ctx, doc)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
+	})
+	t.Run("after hook error", func(t *testing.T) {
+		ctx := context.Background()
+		doc := &User{
+			Name: "chenmingyong",
+			Age:  24,
+		}
+		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertOneResult, err := creator.InsertOne(ctx, doc)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+	})
 }
 
 func TestCreator_e2e_Many(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[types.TestUser](collection)
+	creator := NewCreator[User](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx  context.Context
-		t    []*types.TestUser
+		docs []*User
 		opts []*options.InsertManyOptions
 
-		wantIds   []string
-		wantError assert.ErrorAssertionFunc
+		wantIdsLength int
+		wantError     assert.ErrorAssertionFunc
 	}{
 		{
-			name: "duplicate",
-			before: func(ctx context.Context, t *testing.T) {
-				oneResult, err := collection.InsertOne(ctx, &types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", oneResult.InsertedID)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
+			name:   "nil docs",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
 			opts: []*options.InsertManyOptions{
 				options.InsertMany().SetComment("test"),
 			},
-			ctx: context.Background(),
-			t: []*types.TestUser{
-				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  24,
-				},
-			},
-			wantIds: nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return mongo.IsDuplicateKeyError(err)
-			},
+			ctx:       context.Background(),
+			docs:      nil,
+			wantError: assert.Error,
 		},
 		{
 			name:   "insert many successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -188,33 +200,63 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
-			t: []*types.TestUser{
+			docs: []*User{
 				{
-					Id:   "123",
-					Name: "cmy",
+					Name: "chenmingyong",
 					Age:  24,
 				},
 				{
-					Id:   "456",
-					Name: "cmy",
+					Name: "burt",
 					Age:  24,
 				},
 			},
-			wantIds:   []string{"123", "456"},
-			wantError: assert.NoError,
+			wantIdsLength: 2,
+			wantError:     assert.NoError,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertManyResult, err := creator.InsertMany(tc.ctx, tc.t, tc.opts...)
+			insertManyResult, err := creator.InsertMany(tc.ctx, tc.docs, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
 			}
-			if insertManyResult != nil {
-				assert.ElementsMatch(t, tc.wantIds, insertManyResult.InsertedIDs)
+			if err == nil {
+				require.NotNil(t, insertManyResult)
+				require.Len(t, insertManyResult.InsertedIDs, tc.wantIdsLength)
+				for _, doc := range tc.docs {
+					require.NotZero(t, doc.CreatedAt)
+				}
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		docs := []*User{{}}
+		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		insertOneResult, err := creator.InsertMany(ctx, docs)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
+	})
+	t.Run("after hook error", func(t *testing.T) {
+		ctx := context.Background()
+		docs := []*User{{
+			Name: "chenmingyong",
+			Age:  24,
+		}}
+		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertOneResult, err := creator.InsertMany(ctx, docs)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+	})
 }

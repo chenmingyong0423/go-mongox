@@ -58,16 +58,14 @@ func TestFinder_One(t *testing.T) {
 			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[types.TestUser] {
 				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
 				mockCollection.EXPECT().FindOne(gomock.Any()).Return(&types.TestUser{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				}, nil).Times(1)
 				return mockCollection
 			},
 			want: &types.TestUser{
-				Id:   "123",
-				Name: "cmy",
-				Age:  18,
+				Name: "chenmingyong",
+				Age:  24,
 			},
 		},
 	}
@@ -108,28 +106,24 @@ func TestFinder_All(t *testing.T) {
 				mockCollection := mocks.NewMockiFinder[types.TestUser](ctl)
 				mockCollection.EXPECT().Find(ctx).Return([]*types.TestUser{
 					{
-						Id:   "123",
-						Name: "cmy",
-						Age:  18,
+						Name: "chenmingyong",
+						Age:  24,
 					},
 					{
-						Id:   "456",
-						Name: "cmy",
-						Age:  18,
+						Name: "burt",
+						Age:  25,
 					},
 				}, nil).Times(1)
 				return mockCollection
 			},
 			want: []*types.TestUser{
 				{
-					Id:   "123",
-					Name: "cmy",
-					Age:  18,
+					Name: "chenmingyong",
+					Age:  24,
 				},
 				{
-					Id:   "456",
-					Name: "cmy",
-					Age:  18,
+					Name: "burt",
+					Age:  25,
 				},
 			},
 		},

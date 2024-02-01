@@ -17,6 +17,9 @@ package finder
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -50,15 +53,35 @@ func (f *Finder[T]) Filter(filter any) *Finder[T] {
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
 	t := new(T)
-	err := f.collection.FindOne(ctx, f.filter, opts...).Decode(t)
+
+	opContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
+
+	err = f.collection.FindOne(ctx, f.filter, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterFind)
+	if err != nil {
+		return nil, err
+	}
+
 	return t, nil
 }
 
 func (f *Finder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
 	t := make([]*T, 0)
+
+	opContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeFind)
+	if err != nil {
+		return nil, err
+	}
+
 	cursor, err := f.collection.Find(ctx, f.filter, opts...)
 	if err != nil {
 		return nil, err
@@ -68,15 +91,17 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*
 	if err != nil {
 		return nil, err
 	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterFind)
+	if err != nil {
+		return nil, err
+	}
+
 	return t, nil
 }
 
 func (f *Finder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
-	cnt, err := f.collection.CountDocuments(ctx, f.filter, opts...)
-	if err != nil {
-		return 0, err
-	}
-	return cnt, nil
+	return f.collection.CountDocuments(ctx, f.filter, opts...)
 }
 
 func (f *Finder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {

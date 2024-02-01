@@ -18,9 +18,14 @@ package updater
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
 	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/stretchr/testify/require"
 
 	"go.mongodb.org/mongo-driver/bson"
 
@@ -127,7 +132,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  bson.D{},
-			updates: types.TestUser{Id: "123", Name: "cmy", Age: 24},
+			updates: types.TestTempUser{Id: "123", Name: "cmy", Age: 24},
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -148,7 +153,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -168,7 +173,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is bson.D",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -188,7 +193,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is map[string]any",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -212,7 +217,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -244,6 +249,32 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpdate, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.UpdateOne(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpdate, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpdate, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("name", "chenmingyong")).Updates(update.Set("name", "burt")).UpdateOne(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "burt"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpdate, "after hook error")
+	})
 }
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
@@ -295,7 +326,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -319,7 +350,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "update many success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 					{Id: "456", Name: "cmy", Age: 24},
 				}...))
@@ -343,7 +374,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestUser{
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
 					{Id: "123", Name: "cmy", Age: 24},
 				}...))
 				assert.NoError(t, err)
@@ -379,6 +410,33 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpdate, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.UpdateMany(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpdate, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpdate, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("name", "chenmingyong")).Updates(update.Set("name", "burt")).UpdateMany(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "burt"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpdate, "after hook error")
+	})
 }
 
 func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
@@ -466,7 +524,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -487,7 +545,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "update one success when the updates is bson.D",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -508,7 +566,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "update one success when the updates is map[string]any",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -531,7 +589,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestUser{Id: "123", Name: "cmy", Age: 24})
+				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy", Age: 24})
 				assert.NoError(t, err)
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
@@ -564,4 +622,150 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+}
+
+func TestUpdater_e2e_Upsert(t *testing.T) {
+	collection := getCollection(t)
+	updater := NewUpdater[any](collection)
+	assert.NotNil(t, updater)
+
+	testCases := []struct {
+		name string
+
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx         context.Context
+		filter      any
+		replacement any
+		opts        []*options.ReplaceOptions
+
+		want    *mongo.UpdateResult
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name:        "nil filter",
+			before:      func(ctx context.Context, t *testing.T) {},
+			after:       func(ctx context.Context, t *testing.T) {},
+			ctx:         context.Background(),
+			filter:      nil,
+			replacement: bson.D{},
+			want:        nil,
+			wantErr:     require.Error,
+		},
+		{
+			name:        "invalid filter",
+			before:      func(ctx context.Context, t *testing.T) {},
+			after:       func(ctx context.Context, t *testing.T) {},
+			ctx:         context.Background(),
+			filter:      6,
+			replacement: bson.D{},
+			want:        nil,
+			wantErr:     require.Error,
+		},
+		{
+			name:        "nil replacement",
+			before:      func(ctx context.Context, t *testing.T) {},
+			after:       func(ctx context.Context, t *testing.T) {},
+			ctx:         context.Background(),
+			filter:      bson.D{},
+			replacement: nil,
+			want:        nil,
+			wantErr:     require.Error,
+		},
+		{
+			name:        "invalid replacement",
+			before:      func(ctx context.Context, t *testing.T) {},
+			after:       func(ctx context.Context, t *testing.T) {},
+			ctx:         context.Background(),
+			filter:      bson.D{},
+			replacement: 6,
+			want:        nil,
+			wantErr:     require.Error,
+		},
+		{
+			name:   "save successfully",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:    context.Background(),
+			filter: query.BsonBuilder().Id("?").Build(),
+			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
+			replacement: &types.TestUser{
+				Name: "chenmingyong",
+				Age:  24,
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "?"},
+			wantErr: require.NoError,
+		},
+		{
+			name: "replace successfully",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Name: "chenmingyong",
+					Age:  24,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:    context.Background(),
+			filter: query.BsonBuilder().Eq("name", "chenmingyong").Build(),
+			replacement: &types.TestUser{
+				Name: "burt",
+				Age:  24,
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
+			wantErr: require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := updater.Filter(tc.filter).Replacement(tc.replacement).Upsert(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+
+			if err == nil {
+				require.Equal(t, tc.want, got)
+				if tu, ok := tc.replacement.(*types.TestUser); ok {
+					require.NotZero(t, tu.CreatedAt)
+					require.NotZero(t, tu.UpdatedAt)
+				}
+			}
+		})
+	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.Upsert(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpsert, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("_id", "1")).Replacement(&types.TestUser{Name: "chenmingyong"}).Upsert(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpsert, "after hook error")
+	})
 }

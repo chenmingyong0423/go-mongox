@@ -14,6 +14,12 @@
 
 package types
 
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 const (
 	Id                 = "_id"
 	Set                = "$set"
@@ -149,6 +155,25 @@ const (
 )
 
 type TestUser struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (tu *TestUser) DefaultCreatedAt() {
+	if tu.CreatedAt.IsZero() {
+		tu.CreatedAt = time.Now().Local()
+	}
+}
+
+func (tu *TestUser) DefaultUpdatedAt() {
+	tu.UpdatedAt = time.Now().Local()
+}
+
+type TestTempUser struct {
 	Id           string `bson:"_id"`
 	Name         string `bson:"name"`
 	Age          int64
@@ -156,8 +181,8 @@ type TestUser struct {
 }
 
 type IllegalUser struct {
-	Id   string `bson:"_id"`
-	Name string `bson:"name"`
+	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	Name string             `bson:"name"`
 	Age  string
 }
 

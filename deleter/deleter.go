@@ -17,6 +17,9 @@ package deleter
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -43,9 +46,41 @@ func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 }
 
 func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	return d.collection.DeleteOne(ctx, d.filter, opts...)
+	opContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeDelete)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := d.collection.DeleteOne(ctx, d.filter, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterDelete)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	return d.collection.DeleteMany(ctx, d.filter, opts...)
+	opContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
+	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeDelete)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := d.collection.DeleteMany(ctx, d.filter, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterDelete)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
