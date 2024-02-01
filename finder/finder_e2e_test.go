@@ -18,7 +18,11 @@ package finder
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
@@ -32,7 +36,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -54,8 +57,8 @@ func TestFinder_e2e_New(t *testing.T) {
 	collection := getCollection(t)
 
 	result := NewFinder[types.TestUser](collection)
-	assert.NotNil(t, result, "Expected non-nil Finder")
-	assert.Equal(t, collection, result.collection, "Expected finder field to be initialized correctly")
+	require.NotNil(t, result, "Expected non-nil Finder")
+	require.Equal(t, collection, result.collection, "Expected finder field to be initialized correctly")
 }
 
 func TestFinder_e2e_FindOne(t *testing.T) {
@@ -157,6 +160,32 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeFind, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := finder.Filter(query.Eq("name", "chenmingyong")).FindOne(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeFind, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterFind, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := finder.Filter(query.Eq("name", "chenmingyong")).FindOne(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterFind, "after hook error")
+	})
 }
 
 func TestFinder_e2e_Find(t *testing.T) {
@@ -349,15 +378,41 @@ func TestFinder_e2e_Find(t *testing.T) {
 			tc.after(tc.ctx, t)
 			tc.wantErr(t, err)
 			if err == nil {
-				assert.Equal(t, len(tc.want), len(users))
+				require.Equal(t, len(tc.want), len(users))
 				for _, user := range users {
 					var zero primitive.ObjectID
 					user.ID = zero
 				}
-				assert.ElementsMatch(t, tc.want, users)
+				require.ElementsMatch(t, tc.want, users)
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeFind, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := finder.Filter(query.Eq("name", "chenmingyong")).Find(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeFind, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterFind, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := finder.Filter(query.Eq("name", "chenmingyong")).Find(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterFind, "after hook error")
+	})
 }
 
 func TestFinder_e2e_Count(t *testing.T) {
@@ -374,21 +429,21 @@ func TestFinder_e2e_Count(t *testing.T) {
 
 		ctx     context.Context
 		want    int64
-		wantErr assert.ErrorAssertionFunc
+		wantErr require.ErrorAssertionFunc
 	}{
 		{
 			name:    "nil filter error",
 			before:  func(_ context.Context, _ *testing.T) {},
 			after:   func(_ context.Context, _ *testing.T) {},
 			filter:  nil,
-			wantErr: assert.Error,
+			wantErr: require.Error,
 		},
 		{
 			name:    "returns 0",
 			before:  func(_ context.Context, _ *testing.T) {},
 			after:   func(_ context.Context, _ *testing.T) {},
 			filter:  bson.D{},
-			wantErr: assert.NoError,
+			wantErr: require.NoError,
 		},
 		{
 			name: "returns 1",
@@ -410,7 +465,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 			},
 			filter:  bson.D{},
 			want:    1,
-			wantErr: assert.NoError,
+			wantErr: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -418,8 +473,9 @@ func TestFinder_e2e_Count(t *testing.T) {
 			tc.before(tc.ctx, t)
 			count, err := finder.Filter(tc.filter).Count(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
-			if tc.wantErr(t, err) {
-				assert.Equal(t, tc.want, count)
+			tc.wantErr(t, err)
+			if err == nil {
+				require.Equal(t, tc.want, count)
 			}
 		})
 	}
@@ -659,6 +715,6 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 	t.Run("parse error", func(t *testing.T) {
 		var result []int
 		err := finder.Filter(bson.D{}).DistinctWithParse(context.Background(), "name", result)
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

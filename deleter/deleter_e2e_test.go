@@ -18,7 +18,13 @@ package deleter
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
@@ -28,7 +34,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/types"
 
-	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -41,8 +46,8 @@ func newCollection(t *testing.T) *mongo.Collection {
 		Password:   "test",
 		AuthSource: "db-test",
 	}))
-	assert.NoError(t, err)
-	assert.NoError(t, client.Ping(context.Background(), readpref.Primary()))
+	require.NoError(t, err)
+	require.NoError(t, client.Ping(context.Background(), readpref.Primary()))
 
 	collection := client.Database("db-test").Collection("test_user")
 	return collection
@@ -50,7 +55,7 @@ func newCollection(t *testing.T) *mongo.Collection {
 
 func TestDeleter_e2e_New(t *testing.T) {
 	result := NewDeleter[any](newCollection(t))
-	assert.NotNil(t, result, "Expected non-nil Deleter")
+	require.NotNil(t, result, "Expected non-nil Deleter")
 }
 
 func TestDeleter_e2e_DeleteOne(t *testing.T) {
@@ -66,31 +71,29 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
-		wantError assert.ErrorAssertionFunc
+		wantError require.ErrorAssertionFunc
 	}{
 		{
-			name:   "error: nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-			filter: nil,
-			ctx:    context.Background(),
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			want:   nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
-			},
+			name:      "error: nil filter",
+			before:    func(_ context.Context, _ *testing.T) {},
+			after:     func(_ context.Context, _ *testing.T) {},
+			filter:    nil,
+			ctx:       context.Background(),
+			opts:      []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want:      nil,
+			wantError: require.Error,
 		},
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
 				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", insertResult.InsertedID)
+				require.NoError(t, err)
+				require.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			filter: query.BsonBuilder().Id("456").Build(),
 			ctx:    context.Background(),
@@ -98,19 +101,19 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 			},
-			wantError: assert.NoError,
+			wantError: require.NoError,
 		},
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
 				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
-				assert.NoError(t, err)
-				assert.Equal(t, "123", insertResult.InsertedID)
+				require.NoError(t, err)
+				require.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), deleteResult.DeletedCount)
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
 			filter: query.BsonBuilder().Id("123").Build(),
 			ctx:    context.Background(),
@@ -118,7 +121,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			want: &mongo.DeleteResult{
 				DeletedCount: 1,
 			},
-			wantError: assert.NoError,
+			wantError: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -127,9 +130,32 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			result, err := deleter.Filter(tc.filter).DeleteOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
-			assert.Equal(t, tc.want, result)
+			require.Equal(t, tc.want, result)
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeDelete, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		deleteResult, err := deleter.Filter(bsonx.D()).DeleteOne(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, deleteResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeDelete, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterDelete, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		deleteResult, err := deleter.Filter(query.Eq("name", "chenmingyong")).DeleteOne(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, deleteResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterDelete, "after hook error")
+	})
 }
 
 func TestDeleter_e2e_DeleteMany(t *testing.T) {
@@ -145,19 +171,17 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
-		wantError assert.ErrorAssertionFunc
+		wantError require.ErrorAssertionFunc
 	}{
 		{
-			name:   "error: nil filter",
-			before: func(_ context.Context, _ *testing.T) {},
-			after:  func(_ context.Context, _ *testing.T) {},
-			filter: nil,
-			ctx:    context.Background(),
-			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
-			want:   nil,
-			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
-				return assert.Error(t, err)
-			},
+			name:      "error: nil filter",
+			before:    func(_ context.Context, _ *testing.T) {},
+			after:     func(_ context.Context, _ *testing.T) {},
+			filter:    nil,
+			ctx:       context.Background(),
+			opts:      []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want:      nil,
+			wantError: require.Error,
 		},
 		{
 			name: "deleted count: 0",
@@ -166,13 +190,13 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
@@ -180,7 +204,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 			},
-			wantError: assert.NoError,
+			wantError: require.NoError,
 		},
 		{
 			name: "delete success",
@@ -189,13 +213,13 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 					{Id: "123", Name: "cmy"},
 					{Id: "456", Name: "cmy"},
 				}...))
-				assert.NoError(t, err)
-				assert.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), deleteResult.DeletedCount)
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
 			filter: bsonx.M("name", "cmy"),
 			ctx:    context.Background(),
@@ -203,7 +227,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 			},
-			wantError: assert.NoError,
+			wantError: require.NoError,
 		},
 	}
 	for _, tc := range testCases {
@@ -212,7 +236,30 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			result, err := deleter.Filter(tc.filter).DeleteMany(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
-			assert.Equal(t, tc.want, result)
+			require.Equal(t, tc.want, result)
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeDelete, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		deleteResult, err := deleter.Filter(bsonx.D()).DeleteMany(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, deleteResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeDelete, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterDelete, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		deleteResult, err := deleter.Filter(query.Eq("name", "chenmingyong")).DeleteMany(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, deleteResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterDelete, "after hook error")
+	})
 }

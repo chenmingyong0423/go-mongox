@@ -18,7 +18,11 @@ package updater
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/stretchr/testify/require"
@@ -245,6 +249,32 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpdate, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.UpdateOne(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpdate, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpdate, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("name", "chenmingyong")).Updates(update.Set("name", "burt")).UpdateOne(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "burt"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpdate, "after hook error")
+	})
 }
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
@@ -380,6 +410,33 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpdate, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.UpdateMany(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpdate, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpdate, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("name", "chenmingyong")).Updates(update.Set("name", "burt")).UpdateMany(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "burt"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpdate, "after hook error")
+	})
 }
 
 func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
@@ -685,4 +742,30 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeBeforeUpsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		result, err := updater.Upsert(ctx)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, result)
+		callback.GetCallback().Remove(operation.OpTypeBeforeUpsert, "before hook error")
+	})
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		callback.GetCallback().Register(operation.OpTypeAfterUpsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
+		require.NoError(t, err)
+		require.NotNil(t, insertResult.InsertedID)
+		findResult, err := updater.Filter(query.Eq("_id", "1")).Replacement(&types.TestUser{Name: "chenmingyong"}).Upsert(ctx)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, findResult)
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+		callback.GetCallback().Remove(operation.OpTypeAfterUpsert, "after hook error")
+	})
 }

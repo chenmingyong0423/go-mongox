@@ -18,19 +18,43 @@ package creator
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"github.com/chenmingyong0423/go-mongox/types"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
+
+type User struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (u *User) DefaultCreatedAt() {
+	if u.CreatedAt.IsZero() {
+		u.CreatedAt = time.Now().Local()
+	}
+}
+
+func (u *User) DefaultUpdatedAt() {
+	u.UpdatedAt = time.Now().Local()
+}
 
 func newCollection(t *testing.T) *mongo.Collection {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
@@ -47,16 +71,15 @@ func newCollection(t *testing.T) *mongo.Collection {
 
 func TestCreator_e2e_One(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[types.TestUser](collection)
+	creator := NewCreator[User](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 		opts   []*options.InsertOneOptions
 		ctx    context.Context
-		doc    *types.TestUser
+		doc    *User
 
-		wantId    string
 		wantError assert.ErrorAssertionFunc
 	}{
 		{
@@ -82,7 +105,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			opts: []*options.InsertOneOptions{
 				options.InsertOne().SetComment("test"),
 			},
-			doc: &types.TestUser{
+			doc: &User{
 				Name: "chenmingyong",
 				Age:  24,
 			},
@@ -109,18 +132,46 @@ func TestCreator_e2e_One(t *testing.T) {
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		doc := &User{}
+		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		insertOneResult, err := creator.InsertOne(ctx, doc)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
+	})
+	t.Run("after hook error", func(t *testing.T) {
+		ctx := context.Background()
+		doc := &User{
+			Name: "chenmingyong",
+			Age:  24,
+		}
+		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertOneResult, err := creator.InsertOne(ctx, doc)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+	})
 }
 
 func TestCreator_e2e_Many(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[types.TestUser](collection)
+	creator := NewCreator[User](collection)
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
 		ctx  context.Context
-		docs []*types.TestUser
+		docs []*User
 		opts []*options.InsertManyOptions
 
 		wantIdsLength int
@@ -149,7 +200,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
-			docs: []*types.TestUser{
+			docs: []*User{
 				{
 					Name: "chenmingyong",
 					Age:  24,
@@ -180,4 +231,32 @@ func TestCreator_e2e_Many(t *testing.T) {
 			}
 		})
 	}
+	t.Run("before hook error", func(t *testing.T) {
+		ctx := context.Background()
+		docs := []*User{{}}
+		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("before hook error")
+		})
+		insertOneResult, err := creator.InsertMany(ctx, docs)
+		require.Equal(t, err, errors.New("before hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
+	})
+	t.Run("after hook error", func(t *testing.T) {
+		ctx := context.Background()
+		docs := []*User{{
+			Name: "chenmingyong",
+			Age:  24,
+		}}
+		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			return errors.New("after hook error")
+		})
+		insertOneResult, err := creator.InsertMany(ctx, docs)
+		require.Equal(t, err, errors.New("after hook error"))
+		require.Nil(t, insertOneResult)
+		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
+		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+		require.NoError(t, err)
+		require.Equal(t, int64(1), deleteResult.DeletedCount)
+	})
 }

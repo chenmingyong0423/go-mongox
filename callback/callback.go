@@ -17,6 +17,8 @@ package callback
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/hook/model"
+
 	"github.com/chenmingyong0423/go-mongox/hook/field"
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
@@ -32,6 +34,12 @@ func initializeCallbacks() *Callback {
 				name: "mongox:default_field",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 					return field.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
+				},
+			},
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
 				},
 			},
 		},
@@ -54,10 +62,23 @@ func initializeCallbacks() *Callback {
 					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
 				},
 			},
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+				},
+			},
 		},
 		afterUpsert: make([]callbackHandler, 0),
 		beforeFind:  make([]callbackHandler, 0),
-		afterFind:   make([]callbackHandler, 0),
+		afterFind: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterFind, opts...)
+				},
+			},
+		},
 	}
 }
 

@@ -67,9 +67,6 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options
 		return nil, err
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	result, err := c.collection.InsertMany(ctx, utils.ToAnySlice(docs...), opts...)
 	if err != nil {
 		return nil, err
