@@ -21,8 +21,22 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
+func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
+	switch opType {
+	case operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert:
+		return opCtx.Doc
+	case operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate:
+		return opCtx.Updates
+	case operation.OpTypeBeforeDelete, operation.OpTypeAfterDelete:
+		return opCtx.Filter
+	case operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
+		return opCtx.Replacement
+	}
+	return nil
+}
+
 func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
-	payLoad := opCtx.GetPayload(opType)
+	payLoad := getPayload(opCtx, opType)
 	if payLoad == nil {
 		return nil
 	}

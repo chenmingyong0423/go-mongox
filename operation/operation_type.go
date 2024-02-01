@@ -41,17 +41,3 @@ type OpContext struct {
 	Updates     any
 	Replacement any
 }
-
-func (opCtx OpContext) GetPayload(opType OpType) any {
-	switch opType {
-	case OpTypeBeforeInsert, OpTypeAfterInsert:
-		return opCtx.Doc
-	case OpTypeBeforeUpdate, OpTypeAfterUpdate:
-		return opCtx.Updates
-	case OpTypeBeforeDelete, OpTypeAfterDelete:
-		return opCtx.Filter
-	case OpTypeBeforeUpsert, OpTypeAfterUpsert:
-		return opCtx.Replacement
-	}
-	return nil
-}
