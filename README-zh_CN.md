@@ -20,7 +20,7 @@
 - 支持插件化编程
 
 # 快速开始
-- `go-mongox` 指南： [https://go-mongox.dev](https://go-mongox.dev/en/)
+- `go-mongox` 指南： [https://go-mongox.dev](https://go-mongox.dev)
 
 # 贡献
 [如果有您的加入，go-mongox 将会变得更加强大！](https://go-mongox.dev/contribute.html)

@@ -20,7 +20,7 @@ English | [中文简体](./README-zh_CN.md)
 - Plugin programming support
 
 # Getting Started
-- `go-mongox` Guides: [https://go-mongox.dev](https://go-mongox.dev)
+- `go-mongox` Guides: [https://go-mongox.dev](https://go-mongox.dev/en)
 
 # Contributing
 [With your participation, go-mongox will become even more powerful!](https://go-mongox.dev/en/contribute.html)
