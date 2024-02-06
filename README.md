@@ -6,6 +6,8 @@
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/chenmingyong0423/go-mongox)
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 
+English | [中文简体](./README-zh_CN.md)
+
 # go-mongox
 `go-mongox` is a generics-based library that enhances the MongoDB official framework, offering a seamless chainable API for effortless document handling. Additionally, it features an array of `bson` constructors and built-in functions, designed to simplify and expedite the creation of `bson` data.
 
