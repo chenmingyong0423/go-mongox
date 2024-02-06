@@ -20,6 +20,7 @@ url=$2
 echo >&2 "Try pushing $2 to $1"
 
 TEST="go test ./... -race -cover -failfast"
+
 LINTER="golangci-lint run"
 
 # Run test and return if failed

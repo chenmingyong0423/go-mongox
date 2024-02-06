@@ -1,4 +1,4 @@
-// Copyright 2023 chenmingyong0423
+// Copyright 2024 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +15,14 @@
 package mongox
 
 import (
-	"context"
-
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-type Querier[T any] interface {
-	FindOne(ctx context.Context) (*T, error)
-	FindMany(ctx context.Context) ([]*T, error)
+func Register(name string, cb callback.CbFn, opType operation.OpType) {
+	callback.Callbacks.Register(opType, name, cb)
 }
 
-type Updater interface {
-	UpdateOne(ctx context.Context) (*mongo.UpdateResult, error)
-	UpdateMany(ctx context.Context) (*mongo.UpdateResult, error)
+func Remove(name string, opType operation.OpType) {
+	callback.Callbacks.Remove(opType, name)
 }

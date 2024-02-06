@@ -15,36 +15,41 @@
 package mongox
 
 import (
-	"context"
-
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/aggregator"
+	"github.com/chenmingyong0423/go-mongox/creator"
+	"github.com/chenmingyong0423/go-mongox/deleter"
+	"github.com/chenmingyong0423/go-mongox/finder"
+	"github.com/chenmingyong0423/go-mongox/updater"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const (
-	ID = "_id"
-)
-
-type CollectionName interface {
-	CollectionName() string
+func NewCollection[T any](collection *mongo.Collection) *Collection[T] {
+	return &Collection[T]{collection: collection}
 }
 
-type Collection struct {
-	coll *mongo.Collection
-	err  error
+type Collection[T any] struct {
+	collection *mongo.Collection
 }
 
-func newCollection(coll *mongo.Collection, err error) *Collection {
-	return &Collection{
-		coll: coll,
-		err:  err,
-	}
+func (c *Collection[T]) Finder() *finder.Finder[T] {
+	return finder.NewFinder[T](c.collection)
 }
 
-func (c *Collection) FindById(ctx context.Context, id any, expectPtr any, opts ...*options.FindOneOptions) error {
-	if c.err != nil {
-		return c.err
-	}
-	return c.coll.FindOne(ctx, bson.M{ID: id}, opts...).Decode(expectPtr)
+func (c *Collection[T]) Creator() *creator.Creator[T] {
+	return creator.NewCreator[T](c.collection)
+}
+
+func (c *Collection[T]) Updater() *updater.Updater[T] {
+	return updater.NewUpdater[T](c.collection)
+}
+
+func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
+	return deleter.NewDeleter[T](c.collection)
+}
+func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
+	return aggregator.NewAggregator[T](c.collection)
+}
+
+func (c *Collection[T]) Collection() *mongo.Collection {
+	return c.collection
 }

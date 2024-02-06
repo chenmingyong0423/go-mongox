@@ -18,97 +18,59 @@ package mongox
 
 import (
 	"context"
-	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/creator"
+
+	"github.com/chenmingyong0423/go-mongox/finder"
+
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func TestCollection_e2e_FindById(t *testing.T) {
-	clientErr := errors.New("client error")
+func TestCollection_e2e_Deleter(t *testing.T) {
+	collection := getCollection[any](t)
 
-	gotMc, err := Open(context.Background(), "db-test", Config{
-		ClientOpts: []*options.ClientOptions{options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
-			Username:   "test",
-			Password:   "test",
-			AuthSource: "db-test",
-		})},
-		DbOpts: nil,
-	})
+	d := collection.Deleter()
+	assert.NotNil(t, d, "Expected non-nil Deleter")
+}
+
+func TestCollection_e2e_Updater(t *testing.T) {
+	collection := getCollection[any](t)
+
+	u := collection.Updater()
+	assert.NotNil(t, u, "Expected non-nil Updater")
+}
+
+func TestCollection_e2e_Finder(t *testing.T) {
+	collection := getCollection[any](t)
+
+	f := finder.NewFinder[any](collection.collection)
+	assert.NotNil(t, f, "Expected non-nil Finder")
+}
+
+func TestCollection_e2e_Creator(t *testing.T) {
+	collection := getCollection[any](t)
+
+	c := creator.NewCreator[any](collection.collection)
+	assert.NotNil(t, c, "Expected non-nil Creator")
+}
+
+func TestCollection_e2e_New(t *testing.T) {
+	assert.NotNil(t, getCollection[any](t))
+}
+
+func getCollection[T any](t *testing.T) *Collection[T] {
+	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+		Username:   "test",
+		Password:   "test",
+		AuthSource: "db-test",
+	}))
 	assert.NoError(t, err)
+	assert.NoError(t, client.Ping(context.Background(), readpref.Primary()))
 
-	coll := gotMc.Coll("testUser")
-
-	testCases := []struct {
-		name string
-
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-
-		ctx       context.Context
-		id        any
-		expectPtr any
-		opts      []*options.FindOneOptions
-
-		wantExpect any
-		wantErr    error
-	}{
-		{
-			name: "client error",
-			before: func(ctx context.Context, t *testing.T) {
-				coll.err = clientErr
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				coll.err = nil
-			},
-
-			wantErr: clientErr,
-		},
-		{
-			name: "no document",
-			ctx:  context.Background(),
-
-			before: func(ctx context.Context, t *testing.T) {
-			},
-			after: func(ctx context.Context, t *testing.T) {
-			},
-
-			id:        "1",
-			expectPtr: &testUser{},
-
-			wantExpect: &testUser{},
-			wantErr:    mongo.ErrNoDocuments,
-		},
-		{
-			name: "found",
-			ctx:  context.Background(),
-
-			before: func(ctx context.Context, t *testing.T) {
-				_, fErr := coll.coll.InsertOne(ctx, testUser{Id: "1", Name: "cmy"})
-				assert.NoError(t, fErr)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				_, fErr := coll.coll.DeleteOne(ctx, bson.D{bson.E{Key: "_id", Value: 1}})
-				assert.NoError(t, fErr)
-			},
-
-			id:        "1",
-			expectPtr: &testUser{},
-
-			wantExpect: &testUser{Id: "1", Name: "cmy"},
-			wantErr:    nil,
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.before(tc.ctx, t)
-			tErr := coll.FindById(tc.ctx, tc.id, tc.expectPtr, tc.opts...)
-			tc.after(tc.ctx, t)
-			assert.Equal(t, tc.wantErr, tErr)
-			assert.Equal(t, tc.wantExpect, tc.expectPtr)
-		})
-	}
+	collection := NewCollection[T](client.Database("db-test").Collection("test_user"))
+	return collection
 }
