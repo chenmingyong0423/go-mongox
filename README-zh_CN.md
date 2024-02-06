@@ -31,4 +31,4 @@
 # 版权
 © [陈明勇](https://github.com/chenmingyong0423)，2024-至今
 
-这个项目遵循 [Apache License](hhttps://github.com/chenmingyong0423/go-mongox/blob/main/LICENSE) 许可。
+这个项目遵循 [Apache License](https://github.com/chenmingyong0423/go-mongox/blob/main/LICENSE) 许可。

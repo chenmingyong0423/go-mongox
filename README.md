@@ -31,4 +31,4 @@ English | [中文简体](./README-zh_CN.md)
 # License
 © [Mingyong Chen](https://github.com/chenmingyong0423)，2024-now
 
-This project is licensed under the [Apache License](hhttps://github.com/chenmingyong0423/go-mongox/blob/main/LICENSE).
+This project is licensed under the [Apache License](https://github.com/chenmingyong0423/go-mongox/blob/main/LICENSE).
