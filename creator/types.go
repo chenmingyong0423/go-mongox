@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package finder
+package creator
 
 import (
 	"context"
@@ -20,20 +20,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-//go:generate optioner -type OpContext
-type OpContext struct {
-	Col    *mongo.Collection `opt:"-"`
-	Filter any               `opt:"-"`
+//go:generate optioner -type BeforeOpContext
+type BeforeOpContext[T any] struct {
+	Col  *mongo.Collection `opt:"-"`
+	Doc  *T
+	Docs []*T
 }
 
 //go:generate optioner -type AfterOpContext
-type AfterOpContext[T any] struct {
-	*OpContext `opt:"-"`
-	Doc        *T
-	Docs       []*T
+type AfterOpContext struct {
+	Col *mongo.Collection `opt:"-"`
 }
 
 type (
-	beforeHookFn       func(ctx context.Context, opContext *OpContext, opts ...any) error
-	afterHookFn[T any] func(ctx context.Context, opContext *AfterOpContext[T], opts ...any) error
+	beforeHookFn[T any] func(ctx context.Context, opContext *BeforeOpContext[T], opts ...any) error
+	afterHookFn         func(ctx context.Context, opContext *AfterOpContext, opts ...any) error
 )
