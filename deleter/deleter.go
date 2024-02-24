@@ -35,8 +35,48 @@ func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
 }
 
 type Deleter[T any] struct {
-	collection *mongo.Collection
-	filter     any
+	collection  *mongo.Collection
+	filter      any
+	beforeHooks []beforeHookFn
+	afterHooks  []afterHookFn
+}
+
+func (d *Deleter[T]) RegisterBeforeHooks(hooks ...beforeHookFn) *Deleter[T] {
+	d.beforeHooks = append(d.beforeHooks, hooks...)
+	return d
+}
+
+func (d *Deleter[T]) RegisterAfterHooks(hooks ...afterHookFn) *Deleter[T] {
+	d.afterHooks = append(d.afterHooks, hooks...)
+	return d
+}
+
+func (d *Deleter[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *BeforeOpContext, opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, beforeHook := range d.beforeHooks {
+		err = beforeHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (d *Deleter[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext, opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, afterHook := range d.afterHooks {
+		err = afterHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Filter is used to set the filter of the query
@@ -46,8 +86,8 @@ func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 }
 
 func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	opContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeDelete)
+	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
+	err := d.preActionHandler(ctx, globalPoContext, NewBeforeOpContext(d.collection, d.filter), operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +97,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptio
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterDelete)
+	err = d.postActionHandler(ctx, globalPoContext, NewAfterOpContext(d.collection, d.filter), operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +106,8 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptio
 }
 
 func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	opContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeDelete)
+	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter))
+	err := d.preActionHandler(ctx, globalPoContext, NewBeforeOpContext(d.collection, d.filter), operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +117,7 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOpti
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterDelete)
+	err = d.postActionHandler(ctx, globalPoContext, NewAfterOpContext(d.collection, d.filter), operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}

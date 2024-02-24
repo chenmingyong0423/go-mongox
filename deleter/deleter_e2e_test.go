@@ -18,13 +18,13 @@ package deleter
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
@@ -32,13 +32,18 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
+
+type testTempUser struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64
+	UnknownField string `bson:"-"`
+}
 
 func newCollection(t *testing.T) *mongo.Collection {
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
@@ -60,14 +65,24 @@ func TestDeleter_e2e_New(t *testing.T) {
 
 func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[types.TestTempUser](collection)
+	deleter := NewDeleter[testTempUser](collection)
+
+	type globalHook struct {
+		opType operation.OpType
+		name   string
+		fn     callback.CbFn
+	}
+
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter bson.D
-		opts   []*options.DeleteOptions
+		filter     bson.D
+		opts       []*options.DeleteOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn
+		afterHook  []afterHookFn
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
@@ -86,16 +101,16 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
+				insertResult, err := collection.InsertOne(ctx, testTempUser{Id: "1", Name: "Mingyong Chen"})
 				require.NoError(t, err)
-				require.Equal(t, "123", insertResult.InsertedID)
+				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("456").Build(),
+			filter: query.BsonBuilder().Id("2").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
@@ -106,18 +121,172 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, types.TestTempUser{Id: "123", Name: "cmy"})
+				insertResult, err := collection.InsertOne(ctx, testTempUser{Id: "1", Name: "Mingyong Chen"})
 				require.NoError(t, err)
-				require.Equal(t, "123", insertResult.InsertedID)
+				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("123").Build(),
+			filter: query.BsonBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want: &mongo.DeleteResult{
+				DeletedCount: 1,
+			},
+			wantError: require.NoError,
+		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return fmt.Errorf("before hook error")
+					},
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "before hook error", err.Error())
+			},
+		},
+		{
+			name:   "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return fmt.Errorf("after hook error")
+					},
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "after hook error", err.Error())
+			},
+		},
+		{
+			name: "global before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, testTempUser{Id: "1", Name: "Mingyong Chen"})
+				require.NoError(t, err)
+				require.Equal(t, "1", insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
+			},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter == nil {
+							return fmt.Errorf("filter is nil")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter == nil {
+							return fmt.Errorf("filter is nil")
+						}
+						return nil
+					},
+				},
+			},
+			want: &mongo.DeleteResult{
+				DeletedCount: 1,
+			},
+			wantError: require.NoError,
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+					return fmt.Errorf("before hook error")
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "before hook error", err.Error())
+			},
+		},
+		{
+			name:   "after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+					return fmt.Errorf("after hook error")
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "after hook error", err.Error())
+			},
+		},
+		{
+			name: "before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, testTempUser{Id: "1", Name: "Mingyong Chen"})
+				require.NoError(t, err)
+				require.Equal(t, "1", insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
+			},
+			filter: query.BsonBuilder().Id("1").Build(),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+					if opCtx.Filter == nil {
+						return fmt.Errorf("filter is nil")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+					if opCtx.Filter == nil {
+						return fmt.Errorf("filter is nil")
+					}
+					return nil
+				},
+			},
 			want: &mongo.DeleteResult{
 				DeletedCount: 1,
 			},
@@ -127,47 +296,42 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteOne(tc.ctx, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			result, err := deleter.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).DeleteOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			require.Equal(t, tc.want, result)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			deleter.beforeHooks = nil
+			deleter.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeBeforeDelete, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		deleteResult, err := deleter.Filter(bsonx.D()).DeleteOne(ctx)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, deleteResult)
-		callback.GetCallback().Remove(operation.OpTypeBeforeDelete, "before hook error")
-	})
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeAfterDelete, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
-		require.NoError(t, err)
-		require.NotNil(t, insertResult.InsertedID)
-		deleteResult, err := deleter.Filter(query.Eq("name", "chenmingyong")).DeleteOne(ctx)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, deleteResult)
-		callback.GetCallback().Remove(operation.OpTypeAfterDelete, "after hook error")
-	})
 }
 
 func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[types.TestTempUser](collection)
+	deleter := NewDeleter[testTempUser](collection)
+
+	type globalHook struct {
+		opType operation.OpType
+		name   string
+		fn     callback.CbFn
+	}
+
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter any
-		opts   []*options.DeleteOptions
+		filter     any
+		opts       []*options.DeleteOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn
+		afterHook  []afterHookFn
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
@@ -186,15 +350,15 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "deleted count: 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
-					{Id: "123", Name: "cmy"},
-					{Id: "456", Name: "cmy"},
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
 				}...))
 				require.NoError(t, err)
-				require.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -209,19 +373,201 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		{
 			name: "delete success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]types.TestTempUser{
-					{Id: "123", Name: "cmy"},
-					{Id: "456", Name: "cmy"},
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
 				}...))
 				require.NoError(t, err)
-				require.ElementsMatch(t, []string{"123", "456"}, insertResult.InsertedIDs)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "cmy").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: bsonx.M("name", "cmy"),
+			filter: bsonx.M("name", "Mingyong Chen"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want: &mongo.DeleteResult{
+				DeletedCount: 2,
+			},
+			wantError: require.NoError,
+		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: bsonx.Id("789"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return fmt.Errorf("before hook error")
+					},
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "before hook error", err.Error())
+			},
+		},
+		{
+			name: "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
+				}...))
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return fmt.Errorf("after hook error")
+					},
+				},
+			},
+			filter: bsonx.Id("789"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want:   nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "after hook error", err.Error())
+			},
+		},
+		{
+			name: "global before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
+				}...))
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter == nil {
+							return fmt.Errorf("filter is nil")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterDelete,
+					name:   "before delete hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter == nil {
+							return fmt.Errorf("filter is nil")
+						}
+						return nil
+					},
+				},
+			},
+			filter: query.In("_id", "1", "2"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want: &mongo.DeleteResult{
+				DeletedCount: 2,
+			},
+			wantError: require.NoError,
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: bsonx.Id("789"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+					return fmt.Errorf("before hook error")
+				},
+			},
+			want: nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "before hook error", err.Error())
+			},
+		},
+		{
+			name: "after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
+				}...))
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+					return fmt.Errorf("after hook error")
+				},
+			},
+			filter: query.In("_id", "1", "2"),
+			ctx:    context.Background(),
+			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
+			want:   nil,
+			wantError: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, "after hook error", err.Error())
+			},
+		},
+		{
+			name: "before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]testTempUser{
+					{Id: "1", Name: "Mingyong Chen"},
+					{Id: "2", Name: "Mingyong Chen"},
+				}...))
+				require.NoError(t, err)
+				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				require.NoError(t, err)
+				require.Equal(t, int64(0), deleteResult.DeletedCount)
+			},
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+					if opCtx.Filter == nil {
+						return fmt.Errorf("filter is nil")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+					if opCtx.Filter == nil {
+						return fmt.Errorf("filter is nil")
+					}
+					return nil
+				},
+			},
+			filter: query.In("_id", "1", "2"),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
@@ -233,33 +579,18 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := deleter.Filter(tc.filter).DeleteMany(tc.ctx, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			result, err := deleter.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).DeleteMany(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			require.Equal(t, tc.want, result)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			deleter.beforeHooks = nil
+			deleter.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeBeforeDelete, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		deleteResult, err := deleter.Filter(bsonx.D()).DeleteMany(ctx)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, deleteResult)
-		callback.GetCallback().Remove(operation.OpTypeBeforeDelete, "before hook error")
-	})
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeAfterDelete, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
-		require.NoError(t, err)
-		require.NotNil(t, insertResult.InsertedID)
-		deleteResult, err := deleter.Filter(query.Eq("name", "chenmingyong")).DeleteMany(ctx)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, deleteResult)
-		callback.GetCallback().Remove(operation.OpTypeAfterDelete, "after hook error")
-	})
 }
