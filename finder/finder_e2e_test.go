@@ -19,6 +19,7 @@ package finder
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
@@ -65,13 +66,21 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 	collection := getCollection(t)
 	finder := NewFinder[types.TestUser](collection)
 
+	type globalHook struct {
+		opType operation.OpType
+		name   string
+		fn     callback.CbFn
+	}
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter any
-		opts   []*options.FindOneOptions
+		filter     any
+		opts       []*options.FindOneOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn
+		afterHook  []afterHookFn[types.TestUser]
 
 		ctx     context.Context
 		want    *types.TestUser
@@ -147,58 +156,218 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				Name: "chenmingyong",
 			},
 		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.Eq("name", "Mingyong Chen"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeFind,
+					name:   "before hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("global before hook error")
+					},
+				},
+			},
+			wantErr: errors.New("global before hook error"),
+		},
+		{
+			name: "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Name: "Mingyong Chen",
+					Age:  24,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
+				finder.filter = bson.D{}
+			},
+			filter: query.Eq("name", "Mingyong Chen"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterFind,
+					name:   "after hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("global after hook error")
+					},
+				},
+			},
+			wantErr: errors.New("global after hook error"),
+		},
+		{
+			name: "global before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Name: "Mingyong Chen",
+					Age:  18,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
+				finder.filter = bson.D{}
+			},
+			filter: query.Eq("name", "Mingyong Chen"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeFind,
+					name:   "before hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
+							return errors.New("filter error")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterFind,
+					name:   "after hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						user := opCtx.Doc.(*types.TestUser)
+						if user.Name != "Mingyong Chen" || user.Age != 18 {
+							return errors.New("result error")
+						}
+						return nil
+					},
+				},
+			},
+			want: &types.TestUser{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.Eq("name", "Mingyong Chen"),
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+					return errors.New("before hook error")
+				},
+			},
+			wantErr: errors.New("before hook error"),
+		},
+		{
+			name: "after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Name: "Mingyong Chen",
+					Age:  18,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
+				finder.filter = bson.D{}
+			},
+			filter: query.Eq("name", "Mingyong Chen"),
+			afterHook: []afterHookFn[types.TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+					return errors.New("after hook error")
+				},
+			},
+			wantErr: errors.New("after hook error"),
+		},
+		{
+			name: "before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+					Name: "Mingyong Chen",
+					Age:  18,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
+
+				finder.filter = bson.D{}
+			},
+			filter: query.Eq("name", "Mingyong Chen"),
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+					if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
+						return errors.New("filter error")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn[types.TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+					user := opCtx.Doc
+					if user.Name != "Mingyong Chen" || user.Age != 18 {
+						return errors.New("after error")
+					}
+					return nil
+				},
+			},
+			want: &types.TestUser{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			user, err := finder.Filter(tc.filter).FindOne(tc.ctx, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			user, err := finder.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).
+				FindOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
 				tc.want.ID = user.ID
 				require.Equal(t, tc.want, user)
 			}
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			finder.beforeHooks = nil
+			finder.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeBeforeFind, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		result, err := finder.Filter(query.Eq("name", "chenmingyong")).FindOne(ctx)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, result)
-		callback.GetCallback().Remove(operation.OpTypeBeforeFind, "before hook error")
-	})
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeAfterFind, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
-		require.NoError(t, err)
-		require.NotNil(t, insertResult.InsertedID)
-		findResult, err := finder.Filter(query.Eq("name", "chenmingyong")).FindOne(ctx)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, findResult)
-		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
-		require.NoError(t, err)
-		require.Equal(t, int64(1), deleteResult.DeletedCount)
-		callback.GetCallback().Remove(operation.OpTypeAfterFind, "after hook error")
-	})
 }
 
 func TestFinder_e2e_Find(t *testing.T) {
 	collection := getCollection(t)
 	finder := NewFinder[types.TestUser](collection)
 
+	type globalHook struct {
+		opType operation.OpType
+		name   string
+		fn     callback.CbFn
+	}
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		filter any
-		opts   []*options.FindOptions
+		filter     any
+		opts       []*options.FindOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn
+		afterHook  []afterHookFn[types.TestUser]
 
 		ctx     context.Context
 		want    []*types.TestUser
@@ -370,11 +539,226 @@ func TestFinder_e2e_Find(t *testing.T) {
 			},
 			wantErr: require.NoError,
 		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.Eq("name", "Mingyong Chen"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeFind,
+					name:   "before hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("before hook error")
+					},
+				},
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name: "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, []any{
+					&types.TestUser{
+						Name: "Mingyong Chen",
+						Age:  18,
+					},
+					&types.TestUser{
+						Name: "burt",
+						Age:  19,
+					},
+				})
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
+				finder.filter = bson.D{}
+			},
+			filter: query.In("name", "Mingyong Chen", "burt"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterFind,
+					name:   "after hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("after hook error")
+					},
+				},
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name: "global before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, []any{
+					&types.TestUser{
+						Name: "Mingyong Chen",
+						Age:  18,
+					},
+					&types.TestUser{
+						Name: "burt",
+						Age:  19,
+					},
+				})
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
+				finder.filter = bson.D{}
+			},
+			filter: query.In("name", "Mingyong Chen", "burt"),
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeFind,
+					name:   "before hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx.Filter == nil {
+							return errors.New("filter error")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterFind,
+					name:   "after hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						fmt.Println(opCtx.Doc)
+						users := opCtx.Doc.([]*types.TestUser)
+						if len(users) != 2 {
+							return errors.New("result error")
+						}
+						return nil
+					},
+				},
+			},
+			wantErr: require.NoError,
+			want: []*types.TestUser{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			filter: query.Eq("name", "Mingyong Chen"),
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+					return errors.New("before hook error")
+				},
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name: "after hook error",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, []any{
+					&types.TestUser{
+						Name: "Mingyong Chen",
+						Age:  18,
+					},
+					&types.TestUser{
+						Name: "burt",
+						Age:  19,
+					},
+				})
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
+				finder.filter = bson.D{}
+			},
+			filter: query.In("name", "Mingyong Chen", "burt"),
+			afterHook: []afterHookFn[types.TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+					return errors.New("after hook error")
+				},
+			},
+			wantErr: func(t require.TestingT, err error, i ...interface{}) {
+				require.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name: "before and after hook",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, []any{
+					&types.TestUser{
+						Name: "Mingyong Chen",
+						Age:  18,
+					},
+					&types.TestUser{
+						Name: "burt",
+						Age:  19,
+					},
+				})
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 2)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteResult.DeletedCount)
+				finder.filter = bson.D{}
+			},
+			filter: query.In("name", "Mingyong Chen", "burt"),
+			beforeHook: []beforeHookFn{
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+					if opCtx.Filter == nil {
+						return errors.New("filter error")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn[types.TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+					users := opCtx.Docs
+					if len(users) != 2 {
+						return errors.New("result error")
+					}
+					return nil
+				},
+			},
+			wantErr: require.NoError,
+			want: []*types.TestUser{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			users, err := finder.Filter(tc.filter).Find(tc.ctx, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			users, err := finder.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Find(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantErr(t, err)
 			if err == nil {
@@ -385,34 +769,13 @@ func TestFinder_e2e_Find(t *testing.T) {
 				}
 				require.ElementsMatch(t, tc.want, users)
 			}
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			finder.beforeHooks = nil
+			finder.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeBeforeFind, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		result, err := finder.Filter(query.Eq("name", "chenmingyong")).Find(ctx)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, result)
-		callback.GetCallback().Remove(operation.OpTypeBeforeFind, "before hook error")
-	})
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		callback.GetCallback().Register(operation.OpTypeAfterFind, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertResult, err := collection.InsertOne(ctx, types.TestUser{Name: "chenmingyong"})
-		require.NoError(t, err)
-		require.NotNil(t, insertResult.InsertedID)
-		findResult, err := finder.Filter(query.Eq("name", "chenmingyong")).Find(ctx)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, findResult)
-		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
-		require.NoError(t, err)
-		require.Equal(t, int64(1), deleteResult.DeletedCount)
-		callback.GetCallback().Remove(operation.OpTypeAfterFind, "after hook error")
-	})
 }
 
 func TestFinder_e2e_Count(t *testing.T) {

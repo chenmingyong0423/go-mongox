@@ -72,13 +72,23 @@ func newCollection(t *testing.T) *mongo.Collection {
 func TestCreator_e2e_One(t *testing.T) {
 	collection := newCollection(t)
 	creator := NewCreator[User](collection)
-	testCases := []struct {
+
+	type globalHook struct {
+		opType operation.OpType
 		name   string
-		before func(ctx context.Context, t *testing.T)
-		after  func(ctx context.Context, t *testing.T)
-		opts   []*options.InsertOneOptions
-		ctx    context.Context
-		doc    *User
+		fn     callback.CbFn
+	}
+
+	testCases := []struct {
+		name       string
+		before     func(ctx context.Context, t *testing.T)
+		after      func(ctx context.Context, t *testing.T)
+		opts       []*options.InsertOneOptions
+		ctx        context.Context
+		doc        *User
+		globalHook []globalHook
+		beforeHook []beforeHookFn[User]
+		afterHook  []afterHookFn
 
 		wantError assert.ErrorAssertionFunc
 	}{
@@ -97,7 +107,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			name:   "insert one successfully",
 			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -106,8 +116,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
-				Name: "chenmingyong",
-				Age:  24,
+				Name: "Mingyong Chen",
+				Age:  18,
 			},
 			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
 				if err != nil {
@@ -117,11 +127,183 @@ func TestCreator_e2e_One(t *testing.T) {
 				return true
 			},
 		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: nil,
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeInsert,
+					name:   "before hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("before hook error")
+					},
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name:   "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: &User{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterInsert,
+					name:   "after hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("after hook error")
+					},
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name:   "global before and after hook ",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: &User{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeInsert,
+					name:   "before hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if user, ok := opCtx.Doc.(*User); !ok || user == nil {
+							return errors.New("before hook error")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterInsert,
+					name:   "after hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx == nil {
+							return errors.New("after hook error")
+						}
+						return nil
+					},
+				},
+			},
+			wantError: assert.NoError,
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: nil,
+			beforeHook: []beforeHookFn[User]{
+				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+					return errors.New("before hook error")
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name:   "after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: &User{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+					return errors.New("after hook error")
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name:   "before and after hook ",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertOneOptions{
+				options.InsertOne().SetComment("test"),
+			},
+			doc: &User{
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+			beforeHook: []beforeHookFn[User]{
+				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+					if opContext.Doc == nil {
+						return errors.New("before hook error")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+					if opContext == nil {
+						return errors.New("after hook error")
+					}
+					return nil
+				},
+			},
+			wantError: assert.NoError,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			insertOneResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).InsertOne(tc.ctx, tc.doc, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
@@ -130,49 +312,36 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.NotNil(t, insertOneResult.InsertedID)
 				require.NotZero(t, tc.doc.CreatedAt)
 			}
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			creator.beforeHooks = nil
+			creator.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		doc := &User{}
-		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		insertOneResult, err := creator.InsertOne(ctx, doc)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, insertOneResult)
-		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
-	})
-	t.Run("after hook error", func(t *testing.T) {
-		ctx := context.Background()
-		doc := &User{
-			Name: "chenmingyong",
-			Age:  24,
-		}
-		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertOneResult, err := creator.InsertOne(ctx, doc)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, insertOneResult)
-		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
-		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
-		require.NoError(t, err)
-		require.Equal(t, int64(1), deleteResult.DeletedCount)
-	})
 }
 
 func TestCreator_e2e_Many(t *testing.T) {
 	collection := newCollection(t)
 	creator := NewCreator[User](collection)
+
+	type globalHook struct {
+		opType operation.OpType
+		name   string
+		fn     callback.CbFn
+	}
+
 	testCases := []struct {
 		name   string
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		ctx  context.Context
-		docs []*User
-		opts []*options.InsertManyOptions
+		ctx        context.Context
+		docs       []*User
+		opts       []*options.InsertManyOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn[User]
+		afterHook  []afterHookFn
 
 		wantIdsLength int
 		wantError     assert.ErrorAssertionFunc
@@ -192,7 +361,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 			name:   "insert many successfully",
 			before: func(_ context.Context, _ *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -202,22 +371,220 @@ func TestCreator_e2e_Many(t *testing.T) {
 			ctx: context.Background(),
 			docs: []*User{
 				{
-					Name: "chenmingyong",
-					Age:  24,
+					Name: "Mingyong Chen",
+					Age:  18,
 				},
 				{
 					Name: "burt",
-					Age:  24,
+					Age:  19,
 				},
 			},
 			wantIdsLength: 2,
 			wantError:     assert.NoError,
 		},
+		{
+			name:   "global before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: nil,
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeInsert,
+					name:   "before hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("before hook error")
+					},
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name:   "global after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: []*User{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeAfterInsert,
+					name:   "after hook error",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						return errors.New("after hook error")
+					},
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name:   "global before and after hook ",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: []*User{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+			globalHook: []globalHook{
+				{
+					opType: operation.OpTypeBeforeInsert,
+					name:   "before hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if users, ok := opCtx.Doc.([]*User); !ok || len(users) != 2 {
+							return errors.New("before hook error")
+						}
+						return nil
+					},
+				},
+				{
+					opType: operation.OpTypeAfterInsert,
+					name:   "after hook",
+					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+						if opCtx == nil {
+							return errors.New("after hook error")
+						}
+						return nil
+					},
+				},
+			},
+			wantIdsLength: 2,
+			wantError:     assert.NoError,
+		},
+		{
+			name:   "before hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: nil,
+			beforeHook: []beforeHookFn[User]{
+				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+					return errors.New("before hook error")
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("before hook error"), err)
+			},
+		},
+		{
+			name:   "after hook error",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: []*User{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+					return errors.New("after hook error")
+				},
+			},
+			wantError: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.Equal(t, errors.New("after hook error"), err)
+			},
+		},
+		{
+			name:   "before and after hook ",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+			},
+			ctx: context.Background(),
+			opts: []*options.InsertManyOptions{
+				options.InsertMany().SetComment("test"),
+			},
+			docs: []*User{
+				{
+					Name: "Mingyong Chen",
+					Age:  18,
+				},
+				{
+					Name: "burt",
+					Age:  19,
+				},
+			},
+			beforeHook: []beforeHookFn[User]{
+				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+					if len(opContext.Docs) != 2 {
+						return errors.New("before hook error")
+					}
+					return nil
+				},
+			},
+			afterHook: []afterHookFn{
+				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+					if opContext == nil {
+						return errors.New("after hook error")
+					}
+					return nil
+				},
+			},
+			wantError:     assert.NoError,
+			wantIdsLength: 2,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			insertManyResult, err := creator.InsertMany(tc.ctx, tc.docs, tc.opts...)
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+			}
+			insertManyResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).InsertMany(tc.ctx, tc.docs, tc.opts...)
 			tc.after(tc.ctx, t)
 			if !tc.wantError(t, err) {
 				return
@@ -229,34 +596,11 @@ func TestCreator_e2e_Many(t *testing.T) {
 					require.NotZero(t, doc.CreatedAt)
 				}
 			}
+			for _, hook := range tc.globalHook {
+				callback.GetCallback().Remove(hook.opType, hook.name)
+			}
+			creator.beforeHooks = nil
+			creator.afterHooks = nil
 		})
 	}
-	t.Run("before hook error", func(t *testing.T) {
-		ctx := context.Background()
-		docs := []*User{{}}
-		callback.GetCallback().Register(operation.OpTypeBeforeInsert, "before hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("before hook error")
-		})
-		insertOneResult, err := creator.InsertMany(ctx, docs)
-		require.Equal(t, err, errors.New("before hook error"))
-		require.Nil(t, insertOneResult)
-		callback.GetCallback().Remove(operation.OpTypeBeforeInsert, "before hook error")
-	})
-	t.Run("after hook error", func(t *testing.T) {
-		ctx := context.Background()
-		docs := []*User{{
-			Name: "chenmingyong",
-			Age:  24,
-		}}
-		callback.GetCallback().Register(operation.OpTypeAfterInsert, "after hook error", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-			return errors.New("after hook error")
-		})
-		insertOneResult, err := creator.InsertMany(ctx, docs)
-		require.Equal(t, err, errors.New("after hook error"))
-		require.Nil(t, insertOneResult)
-		callback.GetCallback().Remove(operation.OpTypeAfterInsert, "after hook error")
-		deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
-		require.NoError(t, err)
-		require.Equal(t, int64(1), deleteResult.DeletedCount)
-	})
 }

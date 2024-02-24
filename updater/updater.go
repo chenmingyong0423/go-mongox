@@ -42,6 +42,8 @@ type Updater[T any] struct {
 	filter      any
 	updates     any
 	replacement any
+	beforeHooks []beforeHookFn
+	afterHooks  []afterHookFn
 }
 
 // Filter is used to set the filter of the query
@@ -66,9 +68,47 @@ func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T]
 	return u
 }
 
+func (u *Updater[T]) RegisterBeforeHooks(hooks ...beforeHookFn) *Updater[T] {
+	u.beforeHooks = append(u.beforeHooks, hooks...)
+	return u
+}
+
+func (u *Updater[T]) RegisterAfterHooks(hooks ...afterHookFn) *Updater[T] {
+	u.afterHooks = append(u.afterHooks, hooks...)
+	return u
+}
+
+func (u *Updater[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *BeforeOpContext, opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, beforeHook := range u.beforeHooks {
+		err = beforeHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext, opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, afterHook := range u.afterHooks {
+		err = afterHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +118,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -86,8 +126,8 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 }
 
 func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpdate)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +137,7 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOpti
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpdate)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -111,9 +151,9 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions
 		opts[0].SetUpsert(true)
 	}
 
-	opContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithReplacement(u.replacement))
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithReplacement(u.replacement))
 
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeUpsert)
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithReplacement(u.replacement))), operation.OpTypeBeforeUpsert)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +163,7 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterUpsert)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithReplacement(u.replacement))), operation.OpTypeAfterUpsert)
 	if err != nil {
 		return nil, err
 	}

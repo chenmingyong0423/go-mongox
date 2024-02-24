@@ -33,7 +33,9 @@ type iCreator[T any] interface {
 }
 
 type Creator[T any] struct {
-	collection *mongo.Collection
+	collection  *mongo.Collection
+	beforeHooks []beforeHookFn[T]
+	afterHooks  []afterHookFn
 }
 
 func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
@@ -42,27 +44,70 @@ func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
 	}
 }
 
+// RegisterBeforeHooks is used to set the after hooks of the insert operation
+// If you register the hook for InsertOne, the opContext.Docs will be nil
+// If you register the hook for InsertMany, the opContext.Doc will be nil
+func (c *Creator[T]) RegisterBeforeHooks(hooks ...beforeHookFn[T]) *Creator[T] {
+	c.beforeHooks = append(c.beforeHooks, hooks...)
+	return c
+}
+
+func (c *Creator[T]) RegisterAfterHooks(hooks ...afterHookFn) *Creator[T] {
+	c.afterHooks = append(c.afterHooks, hooks...)
+	return c
+}
+
+func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *BeforeOpContext[T], opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, beforeHook := range c.beforeHooks {
+		err = beforeHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext, opType operation.OpType) error {
+	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	if err != nil {
+		return err
+	}
+	for _, afterHook := range c.afterHooks {
+		err = afterHook(ctx, opContext)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+	err := c.preActionHandler(ctx, opContext, NewBeforeOpContext(c.collection, WithDoc(doc)), operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
+
 	result, err := c.collection.InsertOne(ctx, doc, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterInsert)
+	err = c.postActionHandler(ctx, opContext, NewAfterOpContext(c.collection), operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs))
-	err := callback.GetCallback().Execute(ctx, opContext, operation.OpTypeBeforeInsert)
+	err := c.preActionHandler(ctx, opContext, NewBeforeOpContext(c.collection, WithDocs(docs)), operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +117,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options
 		return nil, err
 	}
 
-	err = callback.GetCallback().Execute(ctx, opContext, operation.OpTypeAfterInsert)
+	err = c.postActionHandler(ctx, opContext, NewAfterOpContext(c.collection), operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
