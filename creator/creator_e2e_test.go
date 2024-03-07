@@ -46,6 +46,12 @@ type User struct {
 	UpdatedAt    time.Time `bson:"updated_at"`
 }
 
+func (u *User) DefaultId() {
+	if u.ID.IsZero() {
+		u.ID = primitive.NewObjectID()
+	}
+}
+
 func (u *User) DefaultCreatedAt() {
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now().Local()

@@ -14,7 +14,8 @@
 
 package hook
 
-type TimeStamperHook interface {
+type DefaultModelHook interface {
+	DefaultId()
 	DefaultCreatedAt()
 	DefaultUpdatedAt()
 }

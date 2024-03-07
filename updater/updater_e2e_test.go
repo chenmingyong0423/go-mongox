@@ -61,6 +61,12 @@ type TestUser struct {
 	UpdatedAt    time.Time `bson:"updated_at"`
 }
 
+func (tu *TestUser) DefaultId() {
+	if tu.ID.IsZero() {
+		tu.ID = primitive.NewObjectID()
+	}
+}
+
 func (tu *TestUser) DefaultCreatedAt() {
 	if tu.CreatedAt.IsZero() {
 		tu.CreatedAt = time.Now().Local()
@@ -1059,6 +1065,21 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			wantErr:     require.Error,
 		},
 		{
+			name:   "error: filter with id different from id in replacement",
+			before: func(ctx context.Context, t *testing.T) {},
+			after:  func(ctx context.Context, t *testing.T) {},
+			ctx:    context.Background(),
+			filter: query.BsonBuilder().Id(primitive.NewObjectID()).Build(),
+			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
+			replacement: &TestUser{
+				ID:   primitive.NewObjectID(),
+				Name: "Mingyong Chen",
+				Age:  18,
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0},
+			wantErr: require.Error,
+		},
+		{
 			name:   "save successfully",
 			before: func(ctx context.Context, t *testing.T) {},
 			after: func(ctx context.Context, t *testing.T) {
@@ -1067,13 +1088,13 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Id("?").Build(),
+			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
 			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
 			replacement: &TestUser{
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "?"},
+			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1},
 			wantErr: require.NoError,
 		},
 		{
@@ -1092,10 +1113,10 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: &TestUser{
-				Name: "chenmingyong",
-				Age:  18,
+			filter: query.Eq("name", "Mingyong Chen"),
+			replacement: bson.M{
+				"name": "chenmingyong",
+				"age":  18,
 			},
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: require.NoError,
@@ -1137,9 +1158,9 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: &TestUser{
-				Name: "chenmingyong",
-				Age:  18,
+			replacement: bson.M{
+				"name": "chenmingyong",
+				"age":  18,
 			},
 			want: nil,
 			globalHook: []globalHook{
@@ -1172,9 +1193,9 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: &TestUser{
-				Name: "chenmingyong",
-				Age:  18,
+			replacement: bson.M{
+				"name": "chenmingyong",
+				"age":  18,
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			globalHook: []globalHook{
@@ -1237,9 +1258,9 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: &TestUser{
-				Name: "chenmingyong",
-				Age:  18,
+			replacement: bson.M{
+				"name": "chenmingyong",
+				"age":  18,
 			},
 			want: nil,
 			afterHook: []afterHookFn{
@@ -1268,9 +1289,9 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: &TestUser{
-				Name: "chenmingyong",
-				Age:  18,
+			replacement: bson.M{
+				"name": "chenmingyong",
+				"age":  18,
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			beforeHook: []beforeHookFn{
@@ -1299,11 +1320,13 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
 			}
 			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Replacement(tc.replacement).Upsert(tc.ctx, tc.opts...)
-			tc.after(tc.ctx, t)
 			tc.wantErr(t, err)
+			tc.after(tc.ctx, t)
 
 			if err == nil {
-				require.Equal(t, tc.want, got)
+				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
+				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
+				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
 				if tu, ok := tc.replacement.(*TestUser); ok {
 					require.NotZero(t, tu.CreatedAt)
 					require.NotZero(t, tu.UpdatedAt)

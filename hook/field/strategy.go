@@ -26,21 +26,23 @@ var strategies = map[operation.OpType]func(doc any) error{
 }
 
 func BeforeInsert(doc any) error {
-	if tsh, ok := doc.(hook.TimeStamperHook); ok {
+	if tsh, ok := doc.(hook.DefaultModelHook); ok {
+		tsh.DefaultId()
 		tsh.DefaultCreatedAt()
 	}
 	return nil
 }
 
 func BeforeUpdate(doc any) error {
-	if tsh, ok := doc.(hook.TimeStamperHook); ok {
+	if tsh, ok := doc.(hook.DefaultModelHook); ok {
 		tsh.DefaultUpdatedAt()
 	}
 	return nil
 }
 
 func BeforeUpsert(doc any) error {
-	if tsh, ok := doc.(hook.TimeStamperHook); ok {
+	if tsh, ok := doc.(hook.DefaultModelHook); ok {
+		tsh.DefaultId()
 		tsh.DefaultCreatedAt()
 		tsh.DefaultUpdatedAt()
 	}
