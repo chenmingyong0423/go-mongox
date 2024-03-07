@@ -43,15 +43,15 @@ func initializeCallbacks() *Callback {
 				},
 			},
 		},
-		afterInsert: make([]callbackHandler, 0),
-		beforeUpdate: []callbackHandler{
+		afterInsert: []callbackHandler{
 			{
-				name: "mongox:default_field",
+				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpdate, opts...)
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterInsert, opts...)
 				},
 			},
 		},
+		beforeUpdate: make([]callbackHandler, 0),
 		afterUpdate:  make([]callbackHandler, 0),
 		beforeDelete: make([]callbackHandler, 0),
 		afterDelete:  make([]callbackHandler, 0),
@@ -69,8 +69,15 @@ func initializeCallbacks() *Callback {
 				},
 			},
 		},
-		afterUpsert: make([]callbackHandler, 0),
-		beforeFind:  make([]callbackHandler, 0),
+		afterUpsert: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+				},
+			},
+		},
+		beforeFind: make([]callbackHandler, 0),
 		afterFind: []callbackHandler{
 			{
 				name: "mongox:model",

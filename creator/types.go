@@ -20,19 +20,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-//go:generate optioner -type BeforeOpContext
-type BeforeOpContext[T any] struct {
+//go:generate optioner -type OpContext
+type OpContext[T any] struct {
 	Col  *mongo.Collection `opt:"-"`
 	Doc  *T
 	Docs []*T
 }
 
-//go:generate optioner -type AfterOpContext
-type AfterOpContext struct {
-	Col *mongo.Collection `opt:"-"`
-}
-
 type (
-	beforeHookFn[T any] func(ctx context.Context, opContext *BeforeOpContext[T], opts ...any) error
-	afterHookFn         func(ctx context.Context, opContext *AfterOpContext, opts ...any) error
+	hookFn[T any] func(ctx context.Context, opContext *OpContext[T], opts ...any) error
 )

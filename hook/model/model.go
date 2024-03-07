@@ -25,7 +25,9 @@ func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
 	switch opType {
 	case operation.OpTypeBeforeInsert, operation.OpTypeAfterFind:
 		return opCtx.Doc
-	case operation.OpTypeBeforeUpsert:
+	case operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate:
+		return opCtx.Updates
+	case operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
 		return opCtx.Replacement
 	default:
 		return nil
@@ -70,6 +72,10 @@ func execute(ctx context.Context, doc any, opType operation.OpType, _ ...any) er
 	case operation.OpTypeBeforeUpsert:
 		if m, ok := doc.(BeforeUpsert); ok {
 			return m.BeforeUpsert(ctx)
+		}
+	case operation.OpTypeAfterUpsert:
+		if m, ok := doc.(AfterUpsert); ok {
+			return m.AfterUpsert(ctx)
 		}
 	case operation.OpTypeAfterFind:
 		if m, ok := doc.(AfterFind); ok {

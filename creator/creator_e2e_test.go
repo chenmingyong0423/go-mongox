@@ -46,6 +46,12 @@ type User struct {
 	UpdatedAt    time.Time `bson:"updated_at"`
 }
 
+func (u *User) DefaultId() {
+	if u.ID.IsZero() {
+		u.ID = primitive.NewObjectID()
+	}
+}
+
 func (u *User) DefaultCreatedAt() {
 	if u.CreatedAt.IsZero() {
 		u.CreatedAt = time.Now().Local()
@@ -87,8 +93,8 @@ func TestCreator_e2e_One(t *testing.T) {
 		ctx        context.Context
 		doc        *User
 		globalHook []globalHook
-		beforeHook []beforeHookFn[User]
-		afterHook  []afterHookFn
+		beforeHook []hookFn[User]
+		afterHook  []hookFn[User]
 
 		wantError assert.ErrorAssertionFunc
 	}{
@@ -227,8 +233,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				options.InsertOne().SetComment("test"),
 			},
 			doc: nil,
-			beforeHook: []beforeHookFn[User]{
-				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+			beforeHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -252,8 +258,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+			afterHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -277,16 +283,16 @@ func TestCreator_e2e_One(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			beforeHook: []beforeHookFn[User]{
-				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+			beforeHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					if opContext.Doc == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+			afterHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					if opContext == nil {
 						return errors.New("after hook error")
 					}
@@ -340,8 +346,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 		docs       []*User
 		opts       []*options.InsertManyOptions
 		globalHook []globalHook
-		beforeHook []beforeHookFn[User]
-		afterHook  []afterHookFn
+		beforeHook []hookFn[User]
+		afterHook  []hookFn[User]
 
 		wantIdsLength int
 		wantError     assert.ErrorAssertionFunc
@@ -495,8 +501,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			docs: nil,
-			beforeHook: []beforeHookFn[User]{
-				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+			beforeHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -526,8 +532,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Age:  19,
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+			afterHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -557,16 +563,16 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Age:  19,
 				},
 			},
-			beforeHook: []beforeHookFn[User]{
-				func(ctx context.Context, opContext *BeforeOpContext[User], opts ...any) error {
+			beforeHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					if len(opContext.Docs) != 2 {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *AfterOpContext, opts ...any) error {
+			afterHook: []hookFn[User]{
+				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
 					if opContext == nil {
 						return errors.New("after hook error")
 					}

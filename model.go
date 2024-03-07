@@ -31,9 +31,15 @@ import (
 //		mongox.Model
 //	}
 type Model struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	ID        primitive.ObjectID `bson:"_id"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
+}
+
+func (m *Model) DefaultId() {
+	if m.ID.IsZero() {
+		m.ID = primitive.NewObjectID()
+	}
 }
 
 func (m *Model) DefaultCreatedAt() {
