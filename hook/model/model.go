@@ -23,7 +23,7 @@ import (
 
 func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
 	switch opType {
-	case operation.OpTypeBeforeInsert, operation.OpTypeAfterFind:
+	case operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert, operation.OpTypeAfterFind:
 		return opCtx.Doc
 	case operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate:
 		return opCtx.Updates
