@@ -69,6 +69,10 @@ func execute(ctx context.Context, doc any, opType operation.OpType, _ ...any) er
 		if m, ok := doc.(BeforeInsert); ok {
 			return m.BeforeInsert(ctx)
 		}
+	case operation.OpTypeAfterInsert:
+		if m, ok := doc.(AfterInsert); ok {
+			return m.AfterInsert(ctx)
+		}
 	case operation.OpTypeBeforeUpsert:
 		if m, ok := doc.(BeforeUpsert); ok {
 			return m.BeforeUpsert(ctx)
