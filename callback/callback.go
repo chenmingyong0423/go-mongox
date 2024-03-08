@@ -73,7 +73,7 @@ func initializeCallbacks() *Callback {
 			{
 				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterUpsert, opts...)
 				},
 			},
 		},
