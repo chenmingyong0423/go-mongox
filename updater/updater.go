@@ -146,7 +146,7 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOpti
 
 func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
 	if len(opts) == 0 {
-		options.Replace().SetUpsert(true)
+		opts = append(opts, options.Replace().SetUpsert(true))
 	} else {
 		opts[0].SetUpsert(true)
 	}
