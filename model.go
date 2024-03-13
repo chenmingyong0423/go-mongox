@@ -43,7 +43,7 @@ func (m *Model) DefaultId() {
 }
 
 func (m *Model) DefaultCreatedAt() {
-	if !m.CreatedAt.IsZero() {
+	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now().Local()
 	}
 }
