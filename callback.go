@@ -19,10 +19,10 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-func Register(name string, cb callback.CbFn, opType operation.OpType) {
+func RegisterPlugin(name string, cb callback.CbFn, opType operation.OpType) {
 	callback.Callbacks.Register(opType, name, cb)
 }
 
-func Remove(name string, opType operation.OpType) {
+func RemovePlugin(name string, opType operation.OpType) {
 	callback.Callbacks.Remove(opType, name)
 }
