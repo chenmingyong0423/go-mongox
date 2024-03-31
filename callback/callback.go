@@ -17,6 +17,8 @@ package callback
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/hook/validator"
+
 	"github.com/chenmingyong0423/go-mongox/hook/model"
 
 	"github.com/chenmingyong0423/go-mongox/hook/field"
@@ -40,6 +42,12 @@ func initializeCallbacks() *Callback {
 				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 					return model.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
+				},
+			},
+			{
+				name: "mongox:validation",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return validator.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
 				},
 			},
 		},
@@ -66,6 +74,12 @@ func initializeCallbacks() *Callback {
 				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+				},
+			},
+			{
+				name: "mongox:validation",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return validator.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
 				},
 			},
 		},
