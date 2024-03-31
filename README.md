@@ -20,6 +20,8 @@ English | [中文简体](./README-zh_CN.md)
 - Aggregation operations
 - Built-in basic `Model` structure for automated updates of default `field` fields
 - Support for constructing `bson` data
+- Automatically default fields
+- Struct tags validation
 - Hooks
 - Plugin programming support
 
