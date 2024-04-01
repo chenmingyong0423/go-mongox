@@ -17,10 +17,10 @@ English | [中文简体](./README-zh_CN.md)
 
 # Feature Highlights
 - Generic MongoDB Collection
+- Support for constructing `bson` data
 - `CRUD` operations on documents
 - Aggregation operations
 - Built-in basic `Model` structure for automated updates of default `field` fields
-- Support for constructing `bson` data
 - Automatically default fields
 - Struct tag validation
 - Hooks
