@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/chenmingyong0423/go-mongox-doc/main/docs/public/mongox-logo.jpg" width="200" height="200" akt="go-mongox"></img>
+  <img src="https://raw.githubusercontent.com/chenmingyong0423/go-mongox-doc/main/docs/public/go-mongox-logo.png" width="200" height="200" akt="go-mongox"></img>
 </p>
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/chenmingyong0423/go-mongox)](https://github.com/chenmingyong0423/go-mongox/stargazers)
