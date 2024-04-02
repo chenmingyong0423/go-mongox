@@ -21,7 +21,6 @@ English | [中文简体](./README-zh_CN.md)
 - `CRUD` operations on documents
 - Aggregation operations
 - Built-in basic `Model` structure for automated updates of default `field` fields
-- Automatically default fields
 - Struct tag validation
 - Hooks
 - Plugin programming support
