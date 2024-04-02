@@ -26,6 +26,11 @@
 - `Hooks`
 - 支持插件化编程
 
+# 安装
+```go
+go get github.com/chenmingyong0423/go-mongox
+```
+
 # 快速开始
 - `go-mongox` 指南： [https://go-mongox.dev](https://go-mongox.dev)
 
