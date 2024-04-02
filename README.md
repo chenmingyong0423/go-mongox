@@ -26,6 +26,11 @@ English | [中文简体](./README-zh_CN.md)
 - Hooks
 - Plugin programming support
 
+# Install
+```go
+go get github.com/chenmingyong0423/go-mongox
+```
+
 # Getting Started
 - `go-mongox` Guides: [https://go-mongox.dev](https://go-mongox.dev/en)
 
