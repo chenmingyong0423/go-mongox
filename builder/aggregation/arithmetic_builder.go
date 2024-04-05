@@ -49,16 +49,16 @@ func (b *arithmeticBuilder) MultiplyWithoutKey(expressions ...any) *Builder {
 	return b.parent
 }
 
-func (b *arithmeticBuilder) Subtract(key string, s string, start, length int64) *Builder {
-	e := bson.E{Key: types.AggregationSubtract, Value: []any{s, start, length}}
+func (b *arithmeticBuilder) Subtract(key string, expressions ...any) *Builder {
+	e := bson.E{Key: types.AggregationSubtract, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
-func (b *arithmeticBuilder) SubtractWithoutKey(s string, start, length int64) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSubtract, Value: []any{s, start, length}})
+func (b *arithmeticBuilder) SubtractWithoutKey(expressions ...any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSubtract, Value: expressions})
 	return b.parent
 }
 
