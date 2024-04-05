@@ -57,8 +57,8 @@ func MultiplyWithoutKey(expressions ...any) bson.D {
 	return bson.D{{Key: types.AggregationMultiply, Value: expressions}}
 }
 
-func SubtractWithoutKey(s string, start, length int64) bson.D {
-	return bson.D{{Key: types.AggregationSubtract, Value: []any{s, start, length}}}
+func SubtractWithoutKey(expressions ...any) bson.D {
+	return bson.D{{Key: types.AggregationSubtract, Value: expressions}}
 }
 
 func DivideWithoutKey(expressions ...any) bson.D {
