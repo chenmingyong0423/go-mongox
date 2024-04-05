@@ -402,7 +402,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter:  bsonx.D(),
+			filter:  bson.D{},
 			wantErr: require.Error,
 		},
 		{
@@ -453,7 +453,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
-			filter: bsonx.D(),
+			filter: bson.D{},
 			want: []*types.TestUser{
 				{
 					Name: "chenmingyong",

@@ -333,7 +333,7 @@ func TestStageBuilder_Group(t *testing.T) {
 			name: "id is nil",
 			id:   nil,
 			accumulators: BsonBuilder().
-				Sum("totalSaleAmount", bsonx.D(bsonx.E("$multiply", []any{"$price", "$quantity"}))).
+				Sum("totalSaleAmount", bsonx.D("$multiply", []any{"$price", "$quantity"})).
 				Avg("averageQuantity", "$quantity").
 				Sum("count", 1).Build(),
 			want: mongo.Pipeline{
@@ -347,7 +347,7 @@ func TestStageBuilder_Group(t *testing.T) {
 		},
 		{
 			name:         "accumulators is nil",
-			id:           bsonx.D(bsonx.E("x", "$x")),
+			id:           bsonx.D("x", "$x"),
 			accumulators: nil,
 			want: mongo.Pipeline{
 				bson.D{bson.E{Key: "$group", Value: bson.D{
@@ -356,9 +356,9 @@ func TestStageBuilder_Group(t *testing.T) {
 		},
 		{
 			name: "id and accumulators are not nil",
-			id:   bsonx.D(bsonx.E("x", "$x")),
+			id:   bsonx.D("x", "$x"),
 			accumulators: BsonBuilder().
-				Sum("totalSaleAmount", bsonx.D(bsonx.E("$multiply", []any{"$price", "$quantity"}))).
+				Sum("totalSaleAmount", bsonx.D("$multiply", []any{"$price", "$quantity"})).
 				Avg("averageQuantity", "$quantity").
 				Sum("count", 1).Build(),
 			want: mongo.Pipeline{

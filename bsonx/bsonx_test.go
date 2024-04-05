@@ -22,47 +22,7 @@ import (
 )
 
 func TestD(t *testing.T) {
-	testCases := []struct {
-		name     string
-		input    []bson.E
-		expected bson.D
-	}{
-		{
-			name:     "nil input",
-			input:    nil,
-			expected: bson.D{},
-		},
-		{
-			name:     "empty input",
-			input:    []bson.E{},
-			expected: bson.D{},
-		},
-		{
-			name: "one element",
-			input: []bson.E{
-				E("name", "chenmingyong"),
-			},
-			expected: bson.D{
-				{Key: "name", Value: "chenmingyong"},
-			},
-		},
-		{
-			name: "many elements",
-			input: []bson.E{
-				E("name", "chenmingyong"),
-				E("age", 24),
-			},
-			expected: bson.D{
-				{Key: "name", Value: "chenmingyong"},
-				{Key: "age", Value: 24},
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, D(tc.input...))
-		})
-	}
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "Mingyong Chen"}}, D("name", "Mingyong Chen"))
 }
 
 func TestId(t *testing.T) {
@@ -76,7 +36,7 @@ func TestE(t *testing.T) {
 func TestA(t *testing.T) {
 	testCases := []struct {
 		name   string
-		values []string
+		values []any
 		want   bson.A
 	}{
 		{
@@ -86,12 +46,12 @@ func TestA(t *testing.T) {
 		},
 		{
 			name:   "empty values",
-			values: []string{},
+			values: []any{},
 			want:   bson.A{},
 		},
 		{
 			name:   "multiple values",
-			values: []string{"1", "2"},
+			values: []any{"1", "2"},
 			want:   bson.A{"1", "2"},
 		},
 	}

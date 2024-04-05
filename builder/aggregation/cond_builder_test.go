@@ -105,10 +105,10 @@ func Test_condBuilder_Switch(t *testing.T) {
 	}}},
 		BsonBuilder().Switch("summary", []types.CaseThen{
 			{
-				Case: bsonx.D(bsonx.E("$eq", []any{0, 5})), Then: "equals",
+				Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 			},
 			{
-				Case: bsonx.D(bsonx.E("$gt", []any{0, 5})), Then: "greater than",
+				Case: bsonx.D("$gt", []any{0, 5}), Then: "greater than",
 			},
 		}, "Did not match").Build(),
 	)
@@ -147,10 +147,10 @@ func Test_condBuilder_SwitchWithoutKey(t *testing.T) {
 			name: "normal",
 			cases: []types.CaseThen{
 				{
-					Case: bsonx.D(bsonx.E("$eq", []any{0, 5})), Then: "equals",
+					Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 				},
 				{
-					Case: bsonx.D(bsonx.E("$gt", []any{0, 5})), Then: "greater than",
+					Case: bsonx.D("$gt", []any{0, 5}), Then: "greater than",
 				},
 			},
 			defaultCase: "Did not match",

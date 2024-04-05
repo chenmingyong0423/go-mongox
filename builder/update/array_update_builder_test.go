@@ -59,7 +59,7 @@ func Test_arrayUpdateBuilder_Pull(t *testing.T) {
 		assert.Equal(
 			t,
 			bson.D{bson.E{Key: "$pull", Value: bson.D{bson.E{Key: "fruits", Value: bson.D{bson.E{Key: "$in", Value: []string{"apples", "oranges"}}}}}}},
-			BsonBuilder().Pull("fruits", bsonx.D(bsonx.E("$in", []string{"apples", "oranges"}))).Build(),
+			BsonBuilder().Pull("fruits", bsonx.D("$in", []string{"apples", "oranges"})).Build(),
 		)
 	})
 
