@@ -26,7 +26,7 @@ func E(key string, value any) bson.E {
 	return bson.E{Key: key, Value: value}
 }
 
-func A[T any](values ...T) bson.A {
+func A(values ...any) bson.A {
 	value := make(bson.A, 0, len(values))
 	for _, v := range values {
 		value = append(value, v)
@@ -34,12 +34,8 @@ func A[T any](values ...T) bson.A {
 	return value
 }
 
-func D(bsonElements ...bson.E) bson.D {
-	value := make(bson.D, 0, len(bsonElements))
-	for _, element := range bsonElements {
-		value = append(value, element)
-	}
-	return value
+func D(key string, value any) bson.D {
+	return bson.D{bson.E{Key: key, Value: value}}
 }
 
 func Id(value any) bson.M {

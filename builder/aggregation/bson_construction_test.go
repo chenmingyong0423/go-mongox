@@ -280,7 +280,7 @@ func Test_Lte(t *testing.T) {
 }
 
 func Test_Cond(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}}}}, Cond("discount", bsonx.D(bsonx.E("$gte", []any{"$qty", 250})), 30, 20))
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}}}}, Cond("discount", bsonx.D("$gte", []any{"$qty", 250}), 30, 20))
 }
 
 func Test_IfNull(t *testing.T) {
@@ -300,10 +300,10 @@ func Test_Switch(t *testing.T) {
 	}}},
 		Switch("summary", []types.CaseThen{
 			{
-				Case: bsonx.D(bsonx.E("$eq", []any{0, 5})), Then: "equals",
+				Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 			},
 			{
-				Case: bsonx.D(bsonx.E("$gt", []any{0, 5})), Then: "greater than",
+				Case: bsonx.D("$gt", []any{0, 5}), Then: "greater than",
 			},
 		}, "Did not match"),
 	)
@@ -427,15 +427,15 @@ func Test_DateToString(t *testing.T) {
 }
 
 func Test_And(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}}}}, And("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 100})), bsonx.D(bsonx.E("$lt", []any{"$qty", 250}))))
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}}}}, And("item", bsonx.D("$gt", []any{"$qty", 100}), bsonx.D("$lt", []any{"$qty", 250})))
 }
 
 func Test_Not(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, Not("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250}))))
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, Not("item", bsonx.D("$gt", []any{"$qty", 250})))
 }
 
 func Test_Or(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 50}}}}}}}}, Or("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250})), bsonx.D(bsonx.E("$lt", []any{"$qty", 50}))))
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 50}}}}}}}}, Or("item", bsonx.D("$gt", []any{"$qty", 250}), bsonx.D("$lt", []any{"$qty", 50})))
 }
 
 func Test_Concat(t *testing.T) {

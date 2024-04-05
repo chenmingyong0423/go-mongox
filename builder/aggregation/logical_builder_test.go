@@ -27,7 +27,7 @@ import (
 
 func Test_logicalBuilder_And(t *testing.T) {
 	t.Run("test And", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}}}}, BsonBuilder().And("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 100})), bsonx.D(bsonx.E("$lt", []any{"$qty", 250}))).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$and", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 100}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}}}}}, BsonBuilder().And("item", bsonx.D("$gt", []any{"$qty", 100}), bsonx.D("$lt", []any{"$qty", 250})).Build())
 	})
 }
 
@@ -61,7 +61,7 @@ func Test_logicalBuilder_AndWithoutKey(t *testing.T) {
 }
 
 func Test_logicalBuilder_Not(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, BsonBuilder().Not("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250}))).Build())
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$not", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}}}}}, BsonBuilder().Not("item", bsonx.D("$gt", []any{"$qty", 250})).Build())
 }
 
 func Test_logicalBuilder_NotWithoutKey(t *testing.T) {
@@ -94,7 +94,7 @@ func Test_logicalBuilder_NotWithoutKey(t *testing.T) {
 }
 
 func Test_logicalBuilder_Or(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 50}}}}}}}}, BsonBuilder().Or("item", bsonx.D(bsonx.E("$gt", []any{"$qty", 250})), bsonx.D(bsonx.E("$lt", []any{"$qty", 50}))).Build())
+	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}, bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 50}}}}}}}}, BsonBuilder().Or("item", bsonx.D("$gt", []any{"$qty", 250}), bsonx.D("$lt", []any{"$qty", 50})).Build())
 }
 
 func Test_logicalBuilder_OrWithoutKey(t *testing.T) {

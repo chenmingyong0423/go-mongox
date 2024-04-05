@@ -101,6 +101,6 @@ func Test_fieldUpdateBuilder_CurrentDate(t *testing.T) {
 	})
 
 	t.Run("multiple operation", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.D{bson.E{Key: "$type", Value: "timestamp"}}}}}}, BsonBuilder().CurrentDate("lastModified", true).CurrentDate("cancellation.date", bsonx.D(bsonx.E("$type", "timestamp"))).Build())
+		assert.Equal(t, bson.D{{Key: "$currentDate", Value: bson.D{bson.E{Key: "lastModified", Value: true}, bson.E{Key: "cancellation.date", Value: bson.D{bson.E{Key: "$type", Value: "timestamp"}}}}}}, BsonBuilder().CurrentDate("lastModified", true).CurrentDate("cancellation.date", bsonx.D("$type", "timestamp")).Build())
 	})
 }
