@@ -654,3 +654,77 @@ func TestStageBuilder_SortByCount(t *testing.T) {
 func TestStageBuilder_Count(t *testing.T) {
 	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$count", Value: "passing_scores"}}}, StageBsonBuilder().Count("passing_scores").Build())
 }
+
+func TestStageBuilder_Lookup(t *testing.T) {
+	testCases := []struct {
+		name string
+		from string
+		as   string
+		opt  *LookUpOptions
+
+		want mongo.Pipeline
+	}{
+		{
+			name: "basic",
+			from: "orders",
+			opt: &LookUpOptions{
+				LocalField:   "_id",
+				ForeignField: "userId",
+				Let:          nil,
+				Pipeline:     nil,
+			},
+			as: "userOrders",
+			want: mongo.Pipeline{
+				{
+					bson.E{Key: "$lookup", Value: bson.D{
+						bson.E{Key: "from", Value: "orders"},
+						bson.E{Key: "localField", Value: "_id"},
+						bson.E{Key: "foreignField", Value: "userId"},
+						bson.E{Key: "as", Value: "userOrders"},
+					}},
+				},
+			},
+		},
+		{
+			name: "advanced case",
+			from: "orders",
+			opt: &LookUpOptions{
+				LocalField:   "",
+				ForeignField: "",
+				Let:          bson.D{bson.E{Key: "userId", Value: "$_id"}},
+				Pipeline: mongo.Pipeline{
+					{
+						bson.E{Key: "$match", Value: bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$and", Value: []any{
+							bson.D{bson.E{Key: "$eq", Value: []any{"$userId", "$$userId"}}},
+							bson.D{bson.E{Key: "$gt", Value: []any{"$totalAmount", 100}}},
+						}}}}}},
+					},
+				},
+			},
+			as: "largeOrders",
+			want: mongo.Pipeline{
+				{
+					bson.E{Key: "$lookup", Value: bson.D{
+						bson.E{Key: "from", Value: "orders"},
+						bson.E{Key: "let", Value: bson.D{bson.E{Key: "userId", Value: "$_id"}}},
+						bson.E{Key: "pipeline", Value: mongo.Pipeline{
+							{
+								bson.E{Key: "$match", Value: bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$and", Value: []any{
+									bson.D{bson.E{Key: "$eq", Value: []any{"$userId", "$$userId"}}},
+									bson.D{bson.E{Key: "$gt", Value: []any{"$totalAmount", 100}}},
+								}}}}}},
+							},
+						}},
+						bson.E{Key: "as", Value: "largeOrders"},
+					},
+					},
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, StageBsonBuilder().Lookup(tc.from, tc.as, tc.opt).Build())
+		})
+	}
+}

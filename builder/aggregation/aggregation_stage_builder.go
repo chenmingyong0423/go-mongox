@@ -140,6 +140,23 @@ func (b *StageBuilder) Count(countName string) *StageBuilder {
 	return b
 }
 
+func (b *StageBuilder) Lookup(from, as string, opt *LookUpOptions) *StageBuilder {
+	d := bson.D{bson.E{Key: "from", Value: from}}
+	if opt.LocalField != "" && opt.ForeignField != "" {
+		d = append(d, bson.E{Key: "localField", Value: opt.LocalField})
+		d = append(d, bson.E{Key: "foreignField", Value: opt.ForeignField})
+	}
+	if len(opt.Let) > 0 {
+		d = append(d, bson.E{Key: "let", Value: opt.Let})
+	}
+	if len(opt.Pipeline) > 0 {
+		d = append(d, bson.E{Key: "pipeline", Value: opt.Pipeline})
+	}
+	d = append(d, bson.E{Key: "as", Value: as})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageLookUp, Value: d}})
+	return b
+}
+
 func (b *StageBuilder) Build() mongo.Pipeline {
 	return b.pipeline
 }
