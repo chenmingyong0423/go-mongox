@@ -49,7 +49,7 @@ func MaxWithoutKey(expression any) bson.D {
 	return bson.D{{Key: types.AggregationMax, Value: expression}}
 }
 
-func AddWithoutKey(expression any) bson.D {
+func AddWithoutKey(expression ...any) bson.D {
 	return bson.D{{Key: types.AggregationAdd, Value: expression}}
 }
 

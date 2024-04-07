@@ -202,7 +202,7 @@ func TestAddWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := AddWithoutKey(tc.expressions)
+			got := AddWithoutKey(tc.expressions...)
 			assert.Equal(t, tc.want, got)
 		})
 	}
