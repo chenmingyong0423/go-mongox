@@ -38,3 +38,6 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 echo "install goimports..."
 go install golang.org/x/tools/cmd/goimports@latest
+
+echo "go mod tidy"
+go mod tidy
