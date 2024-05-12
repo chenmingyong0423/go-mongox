@@ -17,7 +17,6 @@ package aggregation
 import (
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -25,17 +24,17 @@ type dateBuilder struct {
 	parent *Builder
 }
 
-func (b *dateBuilder) DateToString(key string, date any, opt *types.DateToStringOptions) *Builder {
-	d := bson.D{bson.E{Key: types.Date, Value: date}}
+func (b *dateBuilder) DateToString(key string, date any, opt *DateToStringOptions) *Builder {
+	d := bson.D{bson.E{Key: DateOp, Value: date}}
 	if opt != nil {
 		if opt.Format != "" {
-			d = append(d, bson.E{Key: types.Format, Value: opt.Format})
+			d = append(d, bson.E{Key: FormatOp, Value: opt.Format})
 		}
 		if opt.Timezone != "" {
-			d = append(d, bson.E{Key: types.Timezone, Value: opt.Timezone})
+			d = append(d, bson.E{Key: TimezoneOp, Value: opt.Timezone})
 		}
 		if opt.OnNull != nil {
-			d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
+			d = append(d, bson.E{Key: OnNullOp, Value: opt.OnNull})
 		}
 	}
 	e := bson.E{Key: DateToStringOp, Value: d}
@@ -45,17 +44,17 @@ func (b *dateBuilder) DateToString(key string, date any, opt *types.DateToString
 	return b.parent
 }
 
-func (b *dateBuilder) DateToStringWithoutKey(date any, opt *types.DateToStringOptions) *Builder {
-	d := bson.D{bson.E{Key: types.Date, Value: date}}
+func (b *dateBuilder) DateToStringWithoutKey(date any, opt *DateToStringOptions) *Builder {
+	d := bson.D{bson.E{Key: DateOp, Value: date}}
 	if opt != nil {
 		if opt.Format != "" {
-			d = append(d, bson.E{Key: types.Format, Value: opt.Format})
+			d = append(d, bson.E{Key: FormatOp, Value: opt.Format})
 		}
 		if opt.Timezone != "" {
-			d = append(d, bson.E{Key: types.Timezone, Value: opt.Timezone})
+			d = append(d, bson.E{Key: TimezoneOp, Value: opt.Timezone})
 		}
 		if opt.OnNull != nil {
-			d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
+			d = append(d, bson.E{Key: OnNullOp, Value: opt.OnNull})
 		}
 	}
 	b.parent.d = append(b.parent.d, bson.E{Key: DateToStringOp, Value: d})
@@ -76,7 +75,7 @@ func (b *dateBuilder) DayOfMonthWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) DayOfMonthWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -84,7 +83,7 @@ func (b *dateBuilder) DayOfMonthWithTimezone(key string, date time.Time, timezon
 }
 
 func (b *dateBuilder) DayOfMonthWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }
 
@@ -102,7 +101,7 @@ func (b *dateBuilder) DayOfWeekWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) DayOfWeekWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -110,7 +109,7 @@ func (b *dateBuilder) DayOfWeekWithTimezone(key string, date time.Time, timezone
 }
 
 func (b *dateBuilder) DayOfWeekWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }
 
@@ -128,7 +127,7 @@ func (b *dateBuilder) DayOfYearWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) DayOfYearWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: DayOfYearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: DayOfYearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -136,7 +135,7 @@ func (b *dateBuilder) DayOfYearWithTimezone(key string, date time.Time, timezone
 }
 
 func (b *dateBuilder) DayOfYearWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: DayOfYearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: DayOfYearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }
 
@@ -154,7 +153,7 @@ func (b *dateBuilder) YearWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) YearWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: YearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: YearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -162,7 +161,7 @@ func (b *dateBuilder) YearWithTimezone(key string, date time.Time, timezone stri
 }
 
 func (b *dateBuilder) YearWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: YearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: YearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }
 
@@ -180,7 +179,7 @@ func (b *dateBuilder) MonthWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) MonthWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: MonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: MonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -188,7 +187,7 @@ func (b *dateBuilder) MonthWithTimezone(key string, date time.Time, timezone str
 }
 
 func (b *dateBuilder) MonthWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: MonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: MonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }
 
@@ -206,7 +205,7 @@ func (b *dateBuilder) WeekWithoutKey(date time.Time) *Builder {
 }
 
 func (b *dateBuilder) WeekWithTimezone(key string, date time.Time, timezone string) *Builder {
-	e := bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}
+	e := bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -214,6 +213,6 @@ func (b *dateBuilder) WeekWithTimezone(key string, date time.Time, timezone stri
 }
 
 func (b *dateBuilder) WeekWithTimezoneWithoutKey(date time.Time, timezone string) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}})
+	b.parent.d = append(b.parent.d, bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}})
 	return b.parent
 }

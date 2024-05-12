@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -122,7 +121,7 @@ func (b *arrayBuilder) MapWithoutKey(inputArray any, as string, in any) *Builder
 	return b.parent
 }
 
-func (b *arrayBuilder) Filter(key string, inputArray any, cond any, opt *types.FilterOptions) *Builder {
+func (b *arrayBuilder) Filter(key string, inputArray any, cond any, opt *FilterOptions) *Builder {
 	d := bson.D{{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
 	if opt != nil {
 		if opt.As != "" {
@@ -139,7 +138,7 @@ func (b *arrayBuilder) Filter(key string, inputArray any, cond any, opt *types.F
 	return b.parent
 }
 
-func (b *arrayBuilder) FilterWithoutKey(inputArray any, cond any, opt *types.FilterOptions) *Builder {
+func (b *arrayBuilder) FilterWithoutKey(inputArray any, cond any, opt *FilterOptions) *Builder {
 	d := bson.D{{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
 	if opt != nil {
 		if opt.As != "" {

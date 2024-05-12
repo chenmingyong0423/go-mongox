@@ -84,8 +84,59 @@ const (
 	LimitOp               = "$limit"
 	LIMIT                 = "limit"
 	CondWithoutOperatorOp = "cond"
+
+	GroupByOp     = "groupBy"
+	BoundariesOp  = "boundaries"
+	DefaultOp     = "default"
+	OutputOp      = "output"
+	BucketsOp     = "buckets"
+	GranularityOp = "granularity"
+	DateOp        = "date"
+	FormatOp      = "format"
+	TimezoneOp    = "timezone"
+	OnNullOp      = "onNull"
+	BranchesOp    = "branches"
+	CaseOp        = "case"
+	ThenOp        = "then"
+	DefaultCaseOp = "default"
 )
 
+type UnWindOptions struct {
+	IncludeArrayIndex          string
+	PreserveNullAndEmptyArrays bool
+}
+
+type BucketOptions struct {
+	DefaultKey any
+	Output     any
+}
+
+type BucketAutoOptions struct {
+	Output      any
+	Granularity string
+}
+
+type DateToStringOptions struct {
+	Format   string
+	Timezone string
+	OnNull   any
+}
+
+type FilterOptions struct {
+	As    string
+	Limit int64
+}
+
+type Numeric interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64
+}
+
+type CaseThen struct {
+	Case any
+	Then any
+}
 type LookUpOptions struct {
 	LocalField   string
 	ForeignField string

@@ -18,8 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -353,7 +351,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 		name     string
 		key      string
 		date     time.Time
-		opt      *types.DateToStringOptions
+		opt      *DateToStringOptions
 		expected bson.D
 	}{
 		{
@@ -367,7 +365,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 			name: "empty format",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -379,7 +377,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 			name: "empty timezone",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
@@ -391,7 +389,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 			name: "nil onNull",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -402,7 +400,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 			name: "normal",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   "null",
@@ -421,7 +419,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 	testCases := []struct {
 		name     string
 		date     time.Time
-		opt      *types.DateToStringOptions
+		opt      *DateToStringOptions
 		expected bson.D
 	}{
 		{
@@ -433,7 +431,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "empty format",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -444,7 +442,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "empty timezone",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
@@ -455,7 +453,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "nil onNull",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -465,7 +463,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "normal",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   "null",

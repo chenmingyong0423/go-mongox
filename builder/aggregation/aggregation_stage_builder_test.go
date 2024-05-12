@@ -19,7 +19,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -119,7 +118,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 	testCases := []struct {
 		name       string
 		groupBy    any
-		opt        *types.BucketOptions
+		opt        *BucketOptions
 		boundaries []any
 		want       mongo.Pipeline
 	}{
@@ -138,7 +137,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 		{
 			name:    "output is nil",
 			groupBy: "$year_born",
-			opt: &types.BucketOptions{
+			opt: &BucketOptions{
 				DefaultKey: "Other",
 				Output:     nil,
 			},
@@ -154,7 +153,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 		{
 			name:    "defaultKey is empty",
 			groupBy: "$year_born",
-			opt: &types.BucketOptions{
+			opt: &BucketOptions{
 				DefaultKey: nil,
 				Output:     BsonBuilder().Sum("count", 1).Build(),
 			},
@@ -170,7 +169,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 		{
 			name:    "boundaries is nil",
 			groupBy: "$year_born",
-			opt: &types.BucketOptions{
+			opt: &BucketOptions{
 				DefaultKey: "Other",
 				Output:     BsonBuilder().Sum("count", 1).Build(),
 			},
@@ -187,7 +186,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 		{
 			name:    "all not nil",
 			groupBy: "$year_born",
-			opt: &types.BucketOptions{
+			opt: &BucketOptions{
 				DefaultKey: "Other",
 				Output:     BsonBuilder().Sum("count", 1).Push("artists", BsonBuilder().Concat("name", "$first_name", " ", "$last_name").AddKeyValues("year_born", "$year_born").Build()).Build(),
 			},
@@ -221,7 +220,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 	testCases := []struct {
 		name    string
 		groupBy any
-		opt     *types.BucketAutoOptions
+		opt     *BucketAutoOptions
 		buckets int
 		want    mongo.Pipeline
 	}{
@@ -240,7 +239,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 		{
 			name:    "output is nil",
 			groupBy: "$price",
-			opt: &types.BucketAutoOptions{
+			opt: &BucketAutoOptions{
 				Granularity: "R5",
 			},
 			buckets: 4,
@@ -255,7 +254,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 		{
 			name:    "granularity is empty",
 			groupBy: "$price",
-			opt: &types.BucketAutoOptions{
+			opt: &BucketAutoOptions{
 				Output: BsonBuilder().Sum("count", 1).Build(),
 			},
 			buckets: 4,
@@ -270,7 +269,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 		{
 			name:    "normal",
 			groupBy: "$price",
-			opt: &types.BucketAutoOptions{
+			opt: &BucketAutoOptions{
 				Output:      BsonBuilder().Sum("count", 1).Build(),
 				Granularity: "R5",
 			},
@@ -448,7 +447,7 @@ func TestStageBuilder_Unwind(t *testing.T) {
 	testCases := []struct {
 		name string
 		path string
-		opt  *types.UnWindOptions
+		opt  *UnWindOptions
 		want mongo.Pipeline
 	}{
 		{
@@ -460,7 +459,7 @@ func TestStageBuilder_Unwind(t *testing.T) {
 		{
 			name: "opt is not nil and includeArrayIndex is not empty",
 			path: "$sizes",
-			opt: &types.UnWindOptions{
+			opt: &UnWindOptions{
 				IncludeArrayIndex: "arrayIndex",
 			},
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$unwind", Value: bson.D{
@@ -472,7 +471,7 @@ func TestStageBuilder_Unwind(t *testing.T) {
 		{
 			name: "opt is not nil and preserveNullAndEmptyArrays is true",
 			path: "$sizes",
-			opt: &types.UnWindOptions{
+			opt: &UnWindOptions{
 				PreserveNullAndEmptyArrays: true,
 			},
 			want: mongo.Pipeline{bson.D{bson.E{Key: "$unwind", Value: bson.D{
@@ -483,7 +482,7 @@ func TestStageBuilder_Unwind(t *testing.T) {
 		{
 			name: "opt is not nil and includeArrayIndex is not empty and preserveNullAndEmptyArrays is true",
 			path: "$sizes",
-			opt: &types.UnWindOptions{
+			opt: &UnWindOptions{
 				IncludeArrayIndex:          "arrayIndex",
 				PreserveNullAndEmptyArrays: true,
 			},
@@ -579,7 +578,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 		//	value: bsonx.NewD().
 		//		Add("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()).
 		//		Add("categorizedByPrice", StageBsonBuilder().Match(
-		//			BsonBuilder().AddKeyValues("price", BsonBuilder().AddKeyValues("$exists", 1).Build()).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &types.BucketOptions{
+		//			BsonBuilder().AddKeyValues("price", BsonBuilder().AddKeyValues("$exists", 1).Build()).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &BucketOptions{
 		//			DefaultKey: "Other",
 		//			Output:     BsonBuilder().AddKeyValues("count", BsonBuilder().Sum(1).Build()).AddKeyValues("titles", BsonBuilder().Push("$title").Build()).Build(),
 		//		}).Build()).

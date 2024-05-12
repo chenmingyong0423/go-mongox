@@ -17,7 +17,6 @@ package aggregation
 import (
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -101,7 +100,7 @@ func MapWithoutKey(inputArray any, as string, in any) bson.D {
 	}}}
 }
 
-func FilterWithoutKey(inputArray any, cond any, opt *types.FilterOptions) bson.D {
+func FilterWithoutKey(inputArray any, cond any, opt *FilterOptions) bson.D {
 	d := bson.D{{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
 	if opt != nil {
 		if opt.As != "" {
@@ -145,25 +144,25 @@ func CondWithoutKey(boolExpr, tureExpr, falseExpr any) bson.D {
 func IfNullWithoutKey(expr, replacement any) bson.D {
 	return bson.D{{Key: IfNullOp, Value: []any{expr, replacement}}}
 }
-func SwitchWithoutKey(cases []types.CaseThen, defaultCase any) bson.D {
+func SwitchWithoutKey(cases []CaseThen, defaultCase any) bson.D {
 	branches := bson.A{}
 	for _, caseThen := range cases {
-		branches = append(branches, bson.D{bson.E{Key: types.Case, Value: caseThen.Case}, {Key: types.Then, Value: caseThen.Then}})
+		branches = append(branches, bson.D{bson.E{Key: CaseOp, Value: caseThen.Case}, {Key: ThenOp, Value: caseThen.Then}})
 	}
-	return bson.D{bson.E{Key: SwitchOp, Value: bson.D{bson.E{Key: types.Branches, Value: branches}, bson.E{Key: types.DefaultCase, Value: defaultCase}}}}
+	return bson.D{bson.E{Key: SwitchOp, Value: bson.D{bson.E{Key: BranchesOp, Value: branches}, bson.E{Key: DefaultCaseOp, Value: defaultCase}}}}
 }
 
-func DateToStringWithoutKey(date any, opt *types.DateToStringOptions) bson.D {
-	d := bson.D{bson.E{Key: types.Date, Value: date}}
+func DateToStringWithoutKey(date any, opt *DateToStringOptions) bson.D {
+	d := bson.D{bson.E{Key: DateOp, Value: date}}
 	if opt != nil {
 		if opt.Format != "" {
-			d = append(d, bson.E{Key: types.Format, Value: opt.Format})
+			d = append(d, bson.E{Key: FormatOp, Value: opt.Format})
 		}
 		if opt.Timezone != "" {
-			d = append(d, bson.E{Key: types.Timezone, Value: opt.Timezone})
+			d = append(d, bson.E{Key: TimezoneOp, Value: opt.Timezone})
 		}
 		if opt.OnNull != nil {
-			d = append(d, bson.E{Key: types.OnNull, Value: opt.OnNull})
+			d = append(d, bson.E{Key: OnNullOp, Value: opt.OnNull})
 		}
 	}
 	return bson.D{{Key: DateToStringOp, Value: d}}
@@ -174,7 +173,7 @@ func DayOfMonthWithoutKey(date time.Time) bson.D {
 }
 
 func DayOfMonthWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: DayOfMonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func DayOfWeekWithoutKey(date time.Time) bson.D {
@@ -182,7 +181,7 @@ func DayOfWeekWithoutKey(date time.Time) bson.D {
 }
 
 func DayOfWeekWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: DayOfWeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func DayOfYearWithoutKey(date time.Time) bson.D {
@@ -190,7 +189,7 @@ func DayOfYearWithoutKey(date time.Time) bson.D {
 }
 
 func DayOfYearWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: DayOfYearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: DayOfYearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func YearWithoutKey(date time.Time) bson.D {
@@ -198,7 +197,7 @@ func YearWithoutKey(date time.Time) bson.D {
 }
 
 func YearWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: YearOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: YearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func MonthWithoutKey(date time.Time) bson.D {
@@ -206,7 +205,7 @@ func MonthWithoutKey(date time.Time) bson.D {
 }
 
 func MonthWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: MonthOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: MonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func WeekWithoutKey(date time.Time) bson.D {
@@ -214,7 +213,7 @@ func WeekWithoutKey(date time.Time) bson.D {
 }
 
 func WeekWithTimezoneWithoutKey(date time.Time, timezone string) bson.D {
-	return bson.D{{Key: WeekOp, Value: bson.D{bson.E{Key: types.Date, Value: date}, bson.E{Key: types.Timezone, Value: timezone}}}}
+	return bson.D{{Key: WeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}
 }
 
 func AndWithoutKey(expressions ...any) bson.D {
