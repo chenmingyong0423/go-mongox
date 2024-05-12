@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -24,7 +23,7 @@ type comparisonBuilder struct {
 }
 
 func (b *comparisonBuilder) Eq(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationEq, Value: expressions}
+	e := bson.E{Key: EqOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -32,12 +31,12 @@ func (b *comparisonBuilder) Eq(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) EqWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationEq, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: EqOp, Value: expressions})
 	return b.parent
 }
 
 func (b *comparisonBuilder) Ne(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationNe, Value: expressions}
+	e := bson.E{Key: NeOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -45,12 +44,12 @@ func (b *comparisonBuilder) Ne(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) NeWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationNe, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: NeOp, Value: expressions})
 	return b.parent
 }
 
 func (b *comparisonBuilder) Gt(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationGt, Value: expressions}
+	e := bson.E{Key: GtOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -58,12 +57,12 @@ func (b *comparisonBuilder) Gt(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) GtWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationGt, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: GtOp, Value: expressions})
 	return b.parent
 }
 
 func (b *comparisonBuilder) Gte(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationGte, Value: expressions}
+	e := bson.E{Key: GteOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -71,12 +70,12 @@ func (b *comparisonBuilder) Gte(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) GteWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationGte, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: GteOp, Value: expressions})
 	return b.parent
 }
 
 func (b *comparisonBuilder) Lt(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationLt, Value: expressions}
+	e := bson.E{Key: LtOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -84,12 +83,12 @@ func (b *comparisonBuilder) Lt(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) LtWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationLt, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: LtOp, Value: expressions})
 	return b.parent
 }
 
 func (b *comparisonBuilder) Lte(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationLte, Value: expressions}
+	e := bson.E{Key: LteOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -97,6 +96,6 @@ func (b *comparisonBuilder) Lte(key string, expressions ...any) *Builder {
 }
 
 func (b *comparisonBuilder) LteWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationLte, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: LteOp, Value: expressions})
 	return b.parent
 }
