@@ -15,7 +15,6 @@
 package update
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -25,8 +24,8 @@ type fieldUpdateBuilder struct {
 
 func (b *fieldUpdateBuilder) Set(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Set, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Set, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(SetOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: SetOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
@@ -36,62 +35,62 @@ func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	for i := range keys {
 		value = append(value, bson.E{Key: keys[i], Value: ""})
 	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Unset, Value: value})
+	b.parent.data = append(b.parent.data, bson.E{Key: UnsetOp, Value: value})
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) SetOnInsert(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.SetOnInsert, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.SetOnInsert, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(SetOnInsertOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: SetOnInsertOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) CurrentDate(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.CurrentDate, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.CurrentDate, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(CurrentDateOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: CurrentDateOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) Inc(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Inc, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Inc, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(IncOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: IncOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) Min(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Min, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Min, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(MinOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: MinOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) Max(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Max, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Max, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(MaxOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: MaxOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) Mul(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Mul, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Mul, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(MulOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: MulOp, Value: bson.D{e}})
 	}
 	return b.parent
 }
 
 func (b *fieldUpdateBuilder) Rename(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
-	if !b.parent.tryMergeValue(types.Rename, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: types.Rename, Value: bson.D{e}})
+	if !b.parent.tryMergeValue(RenameOp, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: RenameOp, Value: bson.D{e}})
 	}
 	return b.parent
 }

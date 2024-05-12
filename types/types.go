@@ -21,57 +21,6 @@ import (
 )
 
 const (
-	Id                 = "_id"
-	Set                = "$set"
-	In                 = "$in"
-	Eq                 = "$eq"
-	Gt                 = "$gt"
-	Gte                = "$gte"
-	Lt                 = "$lt"
-	Lte                = "$lte"
-	Ne                 = "$ne"
-	Nin                = "$nin"
-	And                = "$and"
-	Not                = "$not"
-	Nor                = "$nor"
-	Or                 = "$or"
-	Exists             = "$exists"
-	Type               = "$type"
-	All                = "$all"
-	ElemMatch          = "$elemMatch"
-	Size               = "$size"
-	Unset              = "$unset"
-	SetOnInsert        = "$setOnInsert"
-	CurrentDate        = "$currentDate"
-	Inc                = "$inc"
-	Min                = "$min"
-	Max                = "$max"
-	Mul                = "$mul"
-	Rename             = "$rename"
-	Expr               = "$expr"
-	JsonSchema         = "$jsonSchema"
-	Mod                = "$mod"
-	Regex              = "$regex"
-	Options            = "$options"
-	Text               = "$text"
-	Search             = "$search"
-	Language           = "$language"
-	CaseSensitive      = "$caseSensitive"
-	DiacriticSensitive = "$diacriticSensitive"
-	Where              = "$where"
-	Slice              = "$slice"
-	AddToSet           = "$addToSet"
-	Pop                = "$pop"
-	Pull               = "$pull"
-	Push               = "$push"
-	PullAll            = "$pullAll"
-	Each               = "$each"
-	Position           = "$position"
-	SliceForUpdate     = "$slice"
-	Sort               = "$sort"
-)
-
-const (
 	GroupBy     = "groupBy"
 	Boundaries  = "boundaries"
 	Default     = "default"
@@ -153,12 +102,6 @@ type DateToStringOptions struct {
 type FilterOptions struct {
 	As    string
 	Limit int64
-}
-
-type TextOptions struct {
-	Language           string
-	CaseSensitive      bool
-	DiacriticSensitive bool
 }
 
 type Numeric interface {
