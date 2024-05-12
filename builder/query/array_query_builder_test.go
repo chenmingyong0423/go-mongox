@@ -17,7 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -42,7 +41,7 @@ func TestBsonBuilder_All(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]any)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]any)(nil)}}},
 			},
 		},
 		{
@@ -50,28 +49,28 @@ func TestBsonBuilder_All(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []any{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []any{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []any{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []any{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []any{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []any{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []any{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []any{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []any{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -97,7 +96,7 @@ func TestBsonBuilder_AllUint(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]uint)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint)(nil)}}},
 			},
 		},
 		{
@@ -105,28 +104,28 @@ func TestBsonBuilder_AllUint(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []uint{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []uint{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -152,7 +151,7 @@ func TestBsonBuilder_AllUint8(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]uint8)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint8)(nil)}}},
 			},
 		},
 		{
@@ -160,28 +159,28 @@ func TestBsonBuilder_AllUint8(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint8{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint8{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint8{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint8{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint8{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint8{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []uint8{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []uint8{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint8{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -207,7 +206,7 @@ func TestBsonBuilder_AllUint16(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]uint16)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint16)(nil)}}},
 			},
 		},
 		{
@@ -215,28 +214,28 @@ func TestBsonBuilder_AllUint16(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint16{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint16{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint16{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint16{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint16{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint16{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []uint16{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []uint16{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint16{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -262,7 +261,7 @@ func TestBsonBuilder_AllUint32(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]uint32)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint32)(nil)}}},
 			},
 		},
 		{
@@ -270,28 +269,28 @@ func TestBsonBuilder_AllUint32(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint32{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint32{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint32{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint32{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint32{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint32{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []uint32{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []uint32{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint32{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -317,7 +316,7 @@ func TestBsonBuilder_AllUint64(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]uint64)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint64)(nil)}}},
 			},
 		},
 		{
@@ -325,28 +324,28 @@ func TestBsonBuilder_AllUint64(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint64{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint64{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint64{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint64{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []uint64{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []uint64{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []uint64{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []uint64{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint64{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -372,7 +371,7 @@ func TestBsonBuilder_AllInt(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]int)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int)(nil)}}},
 			},
 		},
 		{
@@ -380,28 +379,28 @@ func TestBsonBuilder_AllInt(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []int{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []int{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -427,7 +426,7 @@ func TestBsonBuilder_AllInt8(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]int8)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int8)(nil)}}},
 			},
 		},
 		{
@@ -435,28 +434,28 @@ func TestBsonBuilder_AllInt8(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int8{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int8{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int8{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int8{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int8{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int8{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []int8{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []int8{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int8{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -482,7 +481,7 @@ func TestBsonBuilder_AllInt16(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]int16)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int16)(nil)}}},
 			},
 		},
 		{
@@ -490,28 +489,28 @@ func TestBsonBuilder_AllInt16(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int16{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int16{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int16{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int16{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []int16{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int16{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []int16{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []int16{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int16{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -536,7 +535,7 @@ func TestBsonBuilder_AllInt32(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]int32)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int32)(nil)}}},
 			},
 		},
 		{
@@ -544,28 +543,28 @@ func TestBsonBuilder_AllInt32(t *testing.T) {
 			key:     "age",
 			values:  []int32{},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int32{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			values:  []int32{1},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int32{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			values:  []int32{1, 2, 3},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int32{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			values:  []int32{18, 19, 20},
 			builder: BsonBuilder().Gt("age", 18),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []int32{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int32{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -592,7 +591,7 @@ func TestBsonBuilder_AllInt64(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]int64)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int64)(nil)}}},
 			},
 		},
 		{
@@ -600,28 +599,28 @@ func TestBsonBuilder_AllInt64(t *testing.T) {
 			key:     "age",
 			values:  []int64{},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int64{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			values:  []int64{1},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int64{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			values:  []int64{1, 2, 3},
 			builder: BsonBuilder(),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []int64{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			values:  []int64{18, 19, 20},
 			builder: BsonBuilder().Gt("age", 18),
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []int64{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int64{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -647,7 +646,7 @@ func TestBsonBuilder_AllFloat32(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]float32)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]float32)(nil)}}},
 			},
 		},
 		{
@@ -655,28 +654,28 @@ func TestBsonBuilder_AllFloat32(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float32{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float32{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float32{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float32{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float32{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float32{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []float32{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []float32{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []float32{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -702,7 +701,7 @@ func TestBsonBuilder_AllFloat64(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]float64)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]float64)(nil)}}},
 			},
 		},
 		{
@@ -710,28 +709,28 @@ func TestBsonBuilder_AllFloat64(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float64{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float64{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float64{1},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float64{1}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []float64{1, 2, 3},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []float64{1, 2, 3}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []float64{18, 19, 20},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []float64{18, 19, 20}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []float64{18, 19, 20}}}}},
 		},
 	}
 	for _, tc := range testCases {
@@ -756,7 +755,7 @@ func TestBsonBuilder_AllString(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			want: bson.D{
-				bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: ([]string)(nil)}}},
+				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]string)(nil)}}},
 			},
 		},
 		{
@@ -764,28 +763,28 @@ func TestBsonBuilder_AllString(t *testing.T) {
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []string{},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []string{}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []string{"1"},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []string{"1"}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{"1"}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			builder: BsonBuilder(),
 			values:  []string{"1", "2", "3"},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.All, Value: []string{"1", "2", "3"}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{"1", "2", "3"}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			builder: BsonBuilder().Gt("age", 18),
 			values:  []string{"18", "19", "20"},
-			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.All, Value: []string{"18", "19", "20"}}}}},
+			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []string{"18", "19", "20"}}}}},
 		},
 	}
 	for _, tc := range testCases {
