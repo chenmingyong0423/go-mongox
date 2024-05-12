@@ -17,8 +17,6 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -234,7 +232,7 @@ func Test_arrayBuilder_Filter(t *testing.T) {
 		key        string
 		inputArray any
 		cond       any
-		opt        *types.FilterOptions
+		opt        *FilterOptions
 		expected   bson.D
 	}{
 		{
@@ -250,7 +248,7 @@ func Test_arrayBuilder_Filter(t *testing.T) {
 			key:        "items",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
-			opt:        &types.FilterOptions{As: "item", Limit: 5},
+			opt:        &FilterOptions{As: "item", Limit: 5},
 			expected:   bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}}}},
 		},
 	}
@@ -266,7 +264,7 @@ func Test_arrayBuilder_FilterWithoutKey(t *testing.T) {
 		name       string
 		inputArray any
 		cond       any
-		opt        *types.FilterOptions
+		opt        *FilterOptions
 		expected   bson.D
 	}{
 		{
@@ -280,7 +278,7 @@ func Test_arrayBuilder_FilterWithoutKey(t *testing.T) {
 			name:       "valid expression with options",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
-			opt:        &types.FilterOptions{As: "item", Limit: 5},
+			opt:        &FilterOptions{As: "item", Limit: 5},
 			expected:   bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}},
 		},
 	}

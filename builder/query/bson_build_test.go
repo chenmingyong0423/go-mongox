@@ -17,7 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -485,7 +484,7 @@ func TestText(t *testing.T) {
 	testCases := []struct {
 		name   string
 		search string
-		opt    *types.TextOptions
+		opt    *TextOptions
 		want   bson.D
 	}{
 		{
@@ -497,31 +496,31 @@ func TestText(t *testing.T) {
 		{
 			name:   "empty opt",
 			search: "cmy",
-			opt:    &types.TextOptions{},
+			opt:    &TextOptions{},
 			want:   bson.D{bson.E{Key: "$text", Value: bson.D{bson.E{Key: "$search", Value: "cmy"}}}},
 		},
 		{
 			name:   "nil language",
 			search: "cmy",
-			opt:    &types.TextOptions{CaseSensitive: true, DiacriticSensitive: true},
+			opt:    &TextOptions{CaseSensitive: true, DiacriticSensitive: true},
 			want:   bson.D{bson.E{Key: "$text", Value: bson.D{bson.E{Key: "$search", Value: "cmy"}, {Key: "$caseSensitive", Value: true}, {Key: "$diacriticSensitive", Value: true}}}},
 		},
 		{
 			name:   "nil caseSensitive",
 			search: "cmy",
-			opt:    &types.TextOptions{Language: "en", DiacriticSensitive: true},
+			opt:    &TextOptions{Language: "en", DiacriticSensitive: true},
 			want:   bson.D{bson.E{Key: "$text", Value: bson.D{bson.E{Key: "$search", Value: "cmy"}, {Key: "$language", Value: "en"}, {Key: "$diacriticSensitive", Value: true}}}},
 		},
 		{
 			name:   "nil diacriticSensitive",
 			search: "cmy",
-			opt:    &types.TextOptions{Language: "en", CaseSensitive: true},
+			opt:    &TextOptions{Language: "en", CaseSensitive: true},
 			want:   bson.D{bson.E{Key: "$text", Value: bson.D{bson.E{Key: "$search", Value: "cmy"}, {Key: "$language", Value: "en"}, {Key: "$caseSensitive", Value: true}}}},
 		},
 		{
 			name:   "all not nil",
 			search: "cmy",
-			opt:    &types.TextOptions{Language: "en", CaseSensitive: true, DiacriticSensitive: true},
+			opt:    &TextOptions{Language: "en", CaseSensitive: true, DiacriticSensitive: true},
 			want:   bson.D{bson.E{Key: "$text", Value: bson.D{bson.E{Key: "$search", Value: "cmy"}, {Key: "$language", Value: "en"}, {Key: "$caseSensitive", Value: true}, {Key: "$diacriticSensitive", Value: true}}}},
 		},
 	}

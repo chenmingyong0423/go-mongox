@@ -15,7 +15,6 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -51,11 +50,11 @@ func (b *Builder) Build() bson.D {
 
 // Id appends an element with '_id' key and given value to the builder's data slice.
 func (b *Builder) Id(v any) *Builder {
-	b.data = append(b.data, bson.E{Key: types.Id, Value: v})
+	b.data = append(b.data, bson.E{Key: IdOp, Value: v})
 	return b
 }
 
-// Add appends given types.KeyValue elements to the builder's data slice. Each types.KeyValue
+// Add appends given KeyValue elements to the builder's data slice. Each KeyValue
 // is converted into a bson.E before appending.
 func (b *Builder) Add(key string, value any) *Builder {
 	b.data = append(b.data, bson.E{Key: key, Value: value})

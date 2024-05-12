@@ -20,7 +20,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -454,7 +453,7 @@ func Test_FilterWithoutKey(t *testing.T) {
 		name       string
 		inputArray any
 		cond       any
-		opt        *types.FilterOptions
+		opt        *FilterOptions
 		want       bson.D
 	}{
 		{
@@ -468,7 +467,7 @@ func Test_FilterWithoutKey(t *testing.T) {
 			name:       "valid expression with options",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
-			opt:        &types.FilterOptions{As: "item", Limit: 5},
+			opt:        &FilterOptions{As: "item", Limit: 5},
 			want:       bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}},
 		},
 	}
@@ -718,7 +717,7 @@ func Test_IfNullWithoutKey(t *testing.T) {
 func Test_SwitchWithoutKey(t *testing.T) {
 	testCases := []struct {
 		name        string
-		cases       []types.CaseThen
+		cases       []CaseThen
 		defaultCase any
 		want        bson.D
 	}{
@@ -735,7 +734,7 @@ func Test_SwitchWithoutKey(t *testing.T) {
 		},
 		{
 			name:        "empty cases",
-			cases:       []types.CaseThen{},
+			cases:       []CaseThen{},
 			defaultCase: "Did not match",
 			want: bson.D{
 				{Key: "$switch", Value: bson.D{
@@ -746,7 +745,7 @@ func Test_SwitchWithoutKey(t *testing.T) {
 		},
 		{
 			name: "normal",
-			cases: []types.CaseThen{
+			cases: []CaseThen{
 				{
 					Case: EqWithoutKey(0, 5),
 					Then: "equals",
@@ -1019,7 +1018,7 @@ func Test_DateToStringWithoutKey(t *testing.T) {
 	testCases := []struct {
 		name string
 		date time.Time
-		opt  *types.DateToStringOptions
+		opt  *DateToStringOptions
 		want bson.D
 	}{
 		{
@@ -1031,7 +1030,7 @@ func Test_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "empty format",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -1042,7 +1041,7 @@ func Test_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "empty timezone",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
@@ -1053,7 +1052,7 @@ func Test_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "nil onNull",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -1063,7 +1062,7 @@ func Test_DateToStringWithoutKey(t *testing.T) {
 		{
 			name: "normal",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   "null",

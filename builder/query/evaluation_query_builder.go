@@ -16,7 +16,6 @@ package query
 
 import (
 	"github.com/chenmingyong0423/go-mongox/pkg/utils"
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -25,18 +24,18 @@ type evaluationQueryBuilder struct {
 }
 
 func (b *evaluationQueryBuilder) Expr(d bson.D) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Expr, Value: d})
+	b.parent.data = append(b.parent.data, bson.E{Key: ExprOp, Value: d})
 	return b.parent
 }
 
 func (b *evaluationQueryBuilder) JsonSchema(value any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.JsonSchema, Value: value})
+	b.parent.data = append(b.parent.data, bson.E{Key: JsonSchemaOp, Value: value})
 	return b.parent
 }
 
 func (b *evaluationQueryBuilder) Mod(key string, divisor any, remainder int) *Builder {
 	if utils.IsNumeric(divisor) {
-		e := bson.E{Key: types.Mod, Value: bson.A{divisor, remainder}}
+		e := bson.E{Key: ModOp, Value: bson.A{divisor, remainder}}
 		if !b.parent.tryMergeValue(key, e) {
 			b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 		}
@@ -45,7 +44,7 @@ func (b *evaluationQueryBuilder) Mod(key string, divisor any, remainder int) *Bu
 }
 
 func (b *evaluationQueryBuilder) Regex(key, value string) *Builder {
-	e := bson.E{Key: types.Regex, Value: value}
+	e := bson.E{Key: RegexOp, Value: value}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -53,8 +52,8 @@ func (b *evaluationQueryBuilder) Regex(key, value string) *Builder {
 }
 
 func (b *evaluationQueryBuilder) RegexOptions(key, value, options string) *Builder {
-	if !b.parent.tryMergeValue(key, bson.E{Key: types.Regex, Value: value}, bson.E{Key: types.Options, Value: options}) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: types.Regex, Value: value}, bson.E{Key: types.Options, Value: options}}})
+	if !b.parent.tryMergeValue(key, bson.E{Key: RegexOp, Value: value}, bson.E{Key: OptionsOp, Value: options}) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{bson.E{Key: RegexOp, Value: value}, bson.E{Key: OptionsOp, Value: options}}})
 	}
 	return b.parent
 }
@@ -64,21 +63,21 @@ func (b *evaluationQueryBuilder) RegexOptions(key, value, options string) *Build
 // 如果 caseSensitive 的值为零值，则不作为查询条件 If the value of caseSensitive is zero, it is not used as a query condition
 // 如果 diacriticSensitive 的值为零值，则不作为查询条件 If the value of diacriticSensitive is zero, it is not used as a query condition
 func (b *evaluationQueryBuilder) Text(value, language string, caseSensitive, diacriticSensitive bool) *Builder {
-	d := bson.D{bson.E{Key: types.Search, Value: value}}
+	d := bson.D{bson.E{Key: SearchOp, Value: value}}
 	if language != "" {
-		d = append(d, bson.E{Key: types.Language, Value: language})
+		d = append(d, bson.E{Key: LanguageOp, Value: language})
 	}
 	if caseSensitive {
-		d = append(d, bson.E{Key: types.CaseSensitive, Value: caseSensitive})
+		d = append(d, bson.E{Key: CaseSensitiveOp, Value: caseSensitive})
 	}
 	if diacriticSensitive {
-		d = append(d, bson.E{Key: types.DiacriticSensitive, Value: diacriticSensitive})
+		d = append(d, bson.E{Key: DiacriticSensitiveOp, Value: diacriticSensitive})
 	}
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Text, Value: d})
+	b.parent.data = append(b.parent.data, bson.E{Key: TextOp, Value: d})
 	return b.parent
 }
 
 func (b *evaluationQueryBuilder) Where(value string) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Where, Value: value})
+	b.parent.data = append(b.parent.data, bson.E{Key: WhereOp, Value: value})
 	return b.parent
 }

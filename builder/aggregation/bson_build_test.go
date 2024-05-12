@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -228,7 +227,7 @@ func Test_Filter(t *testing.T) {
 		key        string
 		inputArray any
 		cond       any
-		opt        *types.FilterOptions
+		opt        *FilterOptions
 		want       bson.D
 	}{
 		{
@@ -244,7 +243,7 @@ func Test_Filter(t *testing.T) {
 			key:        "items",
 			inputArray: "$items",
 			cond:       "$$item.price > 100",
-			opt:        &types.FilterOptions{As: "item", Limit: int64(5)},
+			opt:        &FilterOptions{As: "item", Limit: int64(5)},
 			want:       bson.D{bson.E{Key: "items", Value: bson.D{{Key: "$filter", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "cond", Value: "$$item.price > 100"}, {Key: "as", Value: "item"}, {Key: "limit", Value: int64(5)}}}}}},
 		},
 	}
@@ -298,7 +297,7 @@ func Test_Switch(t *testing.T) {
 			{Key: "default", Value: "Did not match"},
 		}},
 	}}},
-		Switch("summary", []types.CaseThen{
+		Switch("summary", []CaseThen{
 			{
 				Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 			},
@@ -362,7 +361,7 @@ func Test_DateToString(t *testing.T) {
 		name string
 		key  string
 		date time.Time
-		opt  *types.DateToStringOptions
+		opt  *DateToStringOptions
 		want bson.D
 	}{
 		{
@@ -376,7 +375,7 @@ func Test_DateToString(t *testing.T) {
 			name: "empty format",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -388,7 +387,7 @@ func Test_DateToString(t *testing.T) {
 			name: "empty timezone",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "",
 				OnNull:   nil,
@@ -400,7 +399,7 @@ func Test_DateToString(t *testing.T) {
 			name: "nil onNull",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   nil,
@@ -411,7 +410,7 @@ func Test_DateToString(t *testing.T) {
 			name: "normal",
 			key:  "date",
 			date: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC),
-			opt: &types.DateToStringOptions{
+			opt: &DateToStringOptions{
 				Format:   "%Y-%m-%d",
 				Timezone: "Asia/Shanghai",
 				OnNull:   "null",
