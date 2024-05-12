@@ -28,7 +28,7 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
 	"github.com/chenmingyong0423/go-mongox/builder/query"
-	"github.com/chenmingyong0423/go-mongox/types"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -49,14 +49,14 @@ func getCollection(t *testing.T) *mongo.Collection {
 func TestAggregator_e2e_New(t *testing.T) {
 	collection := getCollection(t)
 
-	result := NewAggregator[types.TestUser](collection)
+	result := NewAggregator[TestUser](collection)
 	require.NotNil(t, result, "Expected non-nil Aggregator")
 	require.Equal(t, collection, result.collection, "Expected collection field to be initialized correctly")
 }
 
 func TestAggregator_e2e_Aggregation(t *testing.T) {
 	collection := getCollection(t)
-	aggregator := NewAggregator[types.TestUser](collection)
+	aggregator := NewAggregator[TestUser](collection)
 
 	testCases := []struct {
 		name   string
@@ -67,7 +67,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 		aggregationOptions []*options.AggregateOptions
 
 		ctx     context.Context
-		want    []*types.TestUser
+		want    []*TestUser
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
@@ -86,10 +86,10 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			name: "decode error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.IllegalUser{
+					&IllegalUser{
 						Name: "chenmingyong", Age: "24",
 					},
-					&types.IllegalUser{
+					&IllegalUser{
 						Name: "gopher", Age: "20",
 					},
 				})
@@ -103,7 +103,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			},
 			pipeline:           mongo.Pipeline{},
 			aggregationOptions: nil,
-			want:               []*types.TestUser{},
+			want:               []*TestUser{},
 			ctx:                context.Background(),
 			wantErr:            require.Error,
 		},
@@ -111,10 +111,10 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			name: "got result when pipeline is empty",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong", Age: 24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "gopher", Age: 20,
 					},
 				})
@@ -128,7 +128,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			},
 			pipeline:           mongo.Pipeline{},
 			aggregationOptions: nil,
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong", Age: 24,
 				},
@@ -143,10 +143,10 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			name: "got result by pipeline with match stage",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong", Age: 24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "gopher", Age: 20,
 					},
 				})
@@ -159,7 +159,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			pipeline: aggregation.StageBsonBuilder().Sort(bsonx.M("age", -1)).Build(),
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong", Age: 24,
 				},
@@ -174,10 +174,10 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			name: "got result with aggregation options",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong", Age: 24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "gopher", Age: 20,
 					},
 				})
@@ -193,7 +193,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			aggregationOptions: []*options.AggregateOptions{
 				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
 			},
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong", Age: 24,
 				},
@@ -225,7 +225,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 
 func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 	collection := getCollection(t)
-	aggregator := NewAggregator[types.TestUser](collection)
+	aggregator := NewAggregator[TestUser](collection)
 
 	type User struct {
 		Id           string `bson:"_id"`
@@ -260,8 +260,8 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 			name: "got result by pipeline with match stage",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					types.TestTempUser{Id: "2", Name: "gopher", Age: 20},
-					types.TestTempUser{Id: "1", Name: "cmy", Age: 24},
+					TestTempUser{Id: "2", Name: "gopher", Age: 20},
+					TestTempUser{Id: "1", Name: "cmy", Age: 24},
 				})
 				require.NoError(t, err)
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)
@@ -284,8 +284,8 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 			name: "got result with aggregation options",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					types.TestTempUser{Id: "2", Name: "gopher", Age: 20},
-					types.TestTempUser{Id: "1", Name: "cmy", Age: 24},
+					TestTempUser{Id: "2", Name: "gopher", Age: 20},
+					TestTempUser{Id: "1", Name: "cmy", Age: 24},
 				})
 				require.NoError(t, err)
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)
@@ -309,8 +309,8 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 			name: "got error from cursor",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					types.TestTempUser{Id: "2", Name: "gopher", Age: 20},
-					types.TestTempUser{Id: "1", Name: "cmy", Age: 24},
+					TestTempUser{Id: "2", Name: "gopher", Age: 20},
+					TestTempUser{Id: "1", Name: "cmy", Age: 24},
 				})
 				require.NoError(t, err)
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)

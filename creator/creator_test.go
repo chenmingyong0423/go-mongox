@@ -18,16 +18,36 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/chenmingyong0423/go-mongox/types"
 
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/mock/gomock"
 )
+
+type TestUser struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (tu *TestUser) DefaultCreatedAt() {
+	if tu.CreatedAt.IsZero() {
+		tu.CreatedAt = time.Now().Local()
+	}
+}
+
+func (tu *TestUser) DefaultUpdatedAt() {
+	tu.UpdatedAt = time.Now().Local()
+}
 
 func TestNewCreator(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
@@ -40,16 +60,16 @@ func TestNewCreator(t *testing.T) {
 func TestCreator_One(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser]
 		ctx  context.Context
-		doc  *types.TestUser
+		doc  *TestUser
 
 		wantErr error
 	}{
 		{
 			name: "nil doc",
-			mock: func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser] {
-				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser] {
+				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertOne(ctx, doc).Return(nil, errors.New("nil filter")).Times(1)
 				return mockCollection
 			},
@@ -59,13 +79,13 @@ func TestCreator_One(t *testing.T) {
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, doc *types.TestUser) iCreator[types.TestUser] {
-				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser] {
+				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertOne(ctx, doc).Return(&mongo.InsertOneResult{InsertedID: "?"}, nil).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
-			doc: &types.TestUser{
+			doc: &TestUser{
 				Name: "chenmingyong",
 				Age:  24,
 			},
@@ -89,22 +109,22 @@ func TestCreator_One(t *testing.T) {
 func TestCreator_Many(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser]
 		ctx  context.Context
-		docs []*types.TestUser
+		docs []*TestUser
 
 		wantIdsLength int
 		wantErr       error
 	}{
 		{
 			name: "nil docs",
-			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser] {
-				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser] {
+				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertMany(ctx, docs).Return(nil, errors.New("nil docs")).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
-			docs: []*types.TestUser{
+			docs: []*TestUser{
 				{Name: "chenmingyong", Age: 24},
 				{Name: "burt", Age: 25},
 			},
@@ -112,13 +132,13 @@ func TestCreator_Many(t *testing.T) {
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*types.TestUser) iCreator[types.TestUser] {
-				mockCollection := mocks.NewMockiCreator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser] {
+				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertMany(ctx, docs).Return(&mongo.InsertManyResult{InsertedIDs: make([]interface{}, 2)}, nil).Times(1)
 				return mockCollection
 			},
 			ctx: context.Background(),
-			docs: []*types.TestUser{
+			docs: []*TestUser{
 				{Name: "chenmingyong", Age: 24},
 				{Name: "burt", Age: 25},
 			},

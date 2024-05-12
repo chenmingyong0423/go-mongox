@@ -18,14 +18,35 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
-	"github.com/chenmingyong0423/go-mongox/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/mock/gomock"
 )
+
+type TestUser struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (tu *TestUser) DefaultCreatedAt() {
+	if tu.CreatedAt.IsZero() {
+		tu.CreatedAt = time.Now().Local()
+	}
+}
+
+func (tu *TestUser) DefaultUpdatedAt() {
+	tu.UpdatedAt = time.Now().Local()
+}
 
 func TestDeleter_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
@@ -39,7 +60,7 @@ func TestDeleter_DeleteOne(t *testing.T) {
 	testCases := []struct {
 		name string
 
-		mock func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser]
 		ctx  context.Context
 
 		want    *mongo.DeleteResult
@@ -47,8 +68,8 @@ func TestDeleter_DeleteOne(t *testing.T) {
 	}{
 		{
 			name: "error: nil filter",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteOne(ctx).Return(nil, errors.New("nil filter")).Times(1)
 				return mockCollection
 			},
@@ -59,8 +80,8 @@ func TestDeleter_DeleteOne(t *testing.T) {
 		},
 		{
 			name: "deleted count: 0",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteOne(ctx).Return(&mongo.DeleteResult{DeletedCount: 0}, nil).Times(1)
 				return mockCollection
 			},
@@ -72,8 +93,8 @@ func TestDeleter_DeleteOne(t *testing.T) {
 		},
 		{
 			name: "delete success",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteOne(ctx).Return(&mongo.DeleteResult{DeletedCount: 1}, nil).Times(1)
 				return mockCollection
 			},
@@ -104,7 +125,7 @@ func TestDeleter_DeleteMany(t *testing.T) {
 	testCases := []struct {
 		name string
 
-		mock func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser]
 		ctx  context.Context
 
 		want    *mongo.DeleteResult
@@ -112,8 +133,8 @@ func TestDeleter_DeleteMany(t *testing.T) {
 	}{
 		{
 			name: "error: nil filter",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteMany(ctx).Return(nil, errors.New("nil filter")).Times(1)
 				return mockCollection
 			},
@@ -124,8 +145,8 @@ func TestDeleter_DeleteMany(t *testing.T) {
 		},
 		{
 			name: "deleted count: 0",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteMany(ctx).Return(&mongo.DeleteResult{DeletedCount: 0}, nil).Times(1)
 				return mockCollection
 			},
@@ -137,8 +158,8 @@ func TestDeleter_DeleteMany(t *testing.T) {
 		},
 		{
 			name: "delete success",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[types.TestUser] {
-				mockCollection := mocks.NewMockiDeleter[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iDeleter[TestUser] {
+				mockCollection := mocks.NewMockiDeleter[TestUser](ctl)
 				mockCollection.EXPECT().DeleteMany(ctx).Return(&mongo.DeleteResult{DeletedCount: 2}, nil).Times(1)
 				return mockCollection
 			},

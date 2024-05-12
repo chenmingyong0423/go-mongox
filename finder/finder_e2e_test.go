@@ -35,8 +35,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -57,14 +55,14 @@ func getCollection(t *testing.T) *mongo.Collection {
 func TestFinder_e2e_New(t *testing.T) {
 	collection := getCollection(t)
 
-	result := NewFinder[types.TestUser](collection)
+	result := NewFinder[TestUser](collection)
 	require.NotNil(t, result, "Expected non-nil Finder")
 	require.Equal(t, collection, result.collection, "Expected finder field to be initialized correctly")
 }
 
 func TestFinder_e2e_FindOne(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
+	finder := NewFinder[TestUser](collection)
 
 	type globalHook struct {
 		opType operation.OpType
@@ -80,16 +78,16 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		opts       []*options.FindOneOptions
 		globalHook []globalHook
 		beforeHook []beforeHookFn
-		afterHook  []afterHookFn[types.TestUser]
+		afterHook  []afterHookFn[TestUser]
 
 		ctx     context.Context
-		want    *types.TestUser
+		want    *TestUser
 		wantErr error
 	}{
 		{
 			name: "no document",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "chenmingyong",
 					Age:  24,
 				})
@@ -109,7 +107,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "find by name",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "chenmingyong",
 					Age:  24,
 				})
@@ -124,7 +122,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "chenmingyong"),
-			want: &types.TestUser{
+			want: &TestUser{
 				Name: "chenmingyong",
 				Age:  24,
 			},
@@ -132,7 +130,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "chenmingyong",
 					Age:  24,
 				})
@@ -152,7 +150,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 					Projection: bsonx.M("age", 0),
 				},
 			},
-			want: &types.TestUser{
+			want: &TestUser{
 				Name: "chenmingyong",
 			},
 		},
@@ -175,7 +173,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "global after hook error",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "Mingyong Chen",
 					Age:  24,
 				})
@@ -204,7 +202,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "global before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "Mingyong Chen",
 					Age:  18,
 				})
@@ -234,7 +232,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 					opType: operation.OpTypeAfterFind,
 					name:   "after hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-						user := opCtx.Doc.(*types.TestUser)
+						user := opCtx.Doc.(*TestUser)
 						if user.Name != "Mingyong Chen" || user.Age != 18 {
 							return errors.New("result error")
 						}
@@ -242,7 +240,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 					},
 				},
 			},
-			want: &types.TestUser{
+			want: &TestUser{
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
@@ -262,7 +260,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "after hook error",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "Mingyong Chen",
 					Age:  18,
 				})
@@ -277,8 +275,8 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
-			afterHook: []afterHookFn[types.TestUser]{
-				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+			afterHook: []afterHookFn[TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -287,7 +285,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		{
 			name: "before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "Mingyong Chen",
 					Age:  18,
 				})
@@ -310,8 +308,8 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 					return nil
 				},
 			},
-			afterHook: []afterHookFn[types.TestUser]{
-				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+			afterHook: []afterHookFn[TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					user := opCtx.Doc
 					if user.Name != "Mingyong Chen" || user.Age != 18 {
 						return errors.New("after error")
@@ -319,7 +317,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 					return nil
 				},
 			},
-			want: &types.TestUser{
+			want: &TestUser{
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
@@ -351,7 +349,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 
 func TestFinder_e2e_Find(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
+	finder := NewFinder[TestUser](collection)
 
 	type globalHook struct {
 		opType operation.OpType
@@ -367,10 +365,10 @@ func TestFinder_e2e_Find(t *testing.T) {
 		opts       []*options.FindOptions
 		globalHook []globalHook
 		beforeHook []beforeHookFn
-		afterHook  []afterHookFn[types.TestUser]
+		afterHook  []afterHookFn[TestUser]
 
 		ctx     context.Context
-		want    []*types.TestUser
+		want    []*TestUser
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
@@ -384,11 +382,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "decode error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.IllegalUser{
+					&IllegalUser{
 						Name: "chenmingyong",
 						Age:  "24",
 					},
-					&types.IllegalUser{
+					&IllegalUser{
 						Name: "burt",
 						Age:  "25",
 					},
@@ -409,11 +407,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "returns empty documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong",
 						Age:  24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  25,
 					},
@@ -428,18 +426,18 @@ func TestFinder_e2e_Find(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter:  query.Eq("name", "cmy"),
-			want:    []*types.TestUser{},
+			want:    []*TestUser{},
 			wantErr: require.NoError,
 		},
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong",
 						Age:  24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  25,
 					},
@@ -454,7 +452,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: bson.D{},
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong",
 					Age:  24,
@@ -470,11 +468,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "find by multiple name",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong",
 						Age:  24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  25,
 					},
@@ -489,7 +487,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: query.In("name", "chenmingyong", "burt"),
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong",
 					Age:  24,
@@ -505,11 +503,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "chenmingyong",
 						Age:  24,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  25,
 					},
@@ -529,7 +527,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 					Projection: bsonx.M("age", 0),
 				},
 			},
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "chenmingyong",
 				},
@@ -561,11 +559,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "global after hook error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "Mingyong Chen",
 						Age:  18,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  19,
 					},
@@ -597,11 +595,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "global before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "Mingyong Chen",
 						Age:  18,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  19,
 					},
@@ -632,7 +630,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 					name:   "after hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 						fmt.Println(opCtx.Doc)
-						users := opCtx.Doc.([]*types.TestUser)
+						users := opCtx.Doc.([]*TestUser)
 						if len(users) != 2 {
 							return errors.New("result error")
 						}
@@ -641,7 +639,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				},
 			},
 			wantErr: require.NoError,
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "Mingyong Chen",
 					Age:  18,
@@ -670,11 +668,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "after hook error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "Mingyong Chen",
 						Age:  18,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  19,
 					},
@@ -689,8 +687,8 @@ func TestFinder_e2e_Find(t *testing.T) {
 				finder.filter = bson.D{}
 			},
 			filter: query.In("name", "Mingyong Chen", "burt"),
-			afterHook: []afterHookFn[types.TestUser]{
-				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+			afterHook: []afterHookFn[TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -702,11 +700,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name: "before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
-					&types.TestUser{
+					&TestUser{
 						Name: "Mingyong Chen",
 						Age:  18,
 					},
-					&types.TestUser{
+					&TestUser{
 						Name: "burt",
 						Age:  19,
 					},
@@ -729,8 +727,8 @@ func TestFinder_e2e_Find(t *testing.T) {
 					return nil
 				},
 			},
-			afterHook: []afterHookFn[types.TestUser]{
-				func(ctx context.Context, opCtx *AfterOpContext[types.TestUser], opts ...any) error {
+			afterHook: []afterHookFn[TestUser]{
+				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					users := opCtx.Docs
 					if len(users) != 2 {
 						return errors.New("result error")
@@ -739,7 +737,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				},
 			},
 			wantErr: require.NoError,
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{
 					Name: "Mingyong Chen",
 					Age:  18,
@@ -780,7 +778,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 
 func TestFinder_e2e_Count(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
+	finder := NewFinder[TestUser](collection)
 
 	testCases := []struct {
 		name   string
@@ -811,7 +809,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 		{
 			name: "returns 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertOne(ctx, &types.TestUser{
+				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "chenmingyong",
 					Age:  24,
 				})
@@ -846,7 +844,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 
 func TestFinder_e2e_Distinct(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
+	finder := NewFinder[TestUser](collection)
 
 	testCases := []struct {
 		name   string
@@ -884,7 +882,7 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
 						Name: "chenmingyong",
 						Age:  24,
@@ -914,7 +912,7 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 		{
 			name: "name distinct",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
 						Name: "chenmingyong",
 						Age:  24,
@@ -961,7 +959,7 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 
 func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[types.TestUser](collection)
+	finder := NewFinder[TestUser](collection)
 
 	testCases := []struct {
 		name   string
@@ -1000,7 +998,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
 						Name: "chenmingyong",
 						Age:  24,
@@ -1031,7 +1029,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 		{
 			name: "name distinct",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*types.TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
 						Name: "chenmingyong",
 						Age:  24,
