@@ -115,7 +115,7 @@ func Test_logicalBuilder_OrWithoutKey(t *testing.T) {
 		},
 		{
 			name:        "normal expressions",
-			expressions: []any{query.BsonBuilder().Eq("x", 0).Build(), query.BsonBuilder().Expr(NewBuilder().EqWithoutKey(NewBuilder().DivideWithoutKey(1, "$x").Build(), 3).Build()).Build()},
+			expressions: []any{query.NewBuilder().Eq("x", 0).Build(), query.NewBuilder().Expr(NewBuilder().EqWithoutKey(NewBuilder().DivideWithoutKey(1, "$x").Build(), 3).Build()).Build()},
 			expected:    bson.D{bson.E{Key: "$or", Value: []any{bson.D{bson.E{Key: "x", Value: bson.D{bson.E{Key: "$eq", Value: 0}}}}, bson.D{bson.E{Key: "$expr", Value: bson.D{bson.E{Key: "$eq", Value: []any{bson.D{bson.E{Key: "$divide", Value: []any{1, "$x"}}}, 3}}}}}}}},
 		},
 	}

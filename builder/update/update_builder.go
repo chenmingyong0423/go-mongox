@@ -31,7 +31,8 @@ type Builder struct {
 	arrayUpdateBuilder
 }
 
-func (b *Builder) Add(key string, value any) *Builder {
+// KeyValue appends given key-value pair to the builder's data slice.
+func (b *Builder) KeyValue(key string, value any) *Builder {
 	b.data = append(b.data, bson.E{Key: key, Value: value})
 	return b
 }

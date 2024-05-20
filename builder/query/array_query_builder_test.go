@@ -22,7 +22,7 @@ import (
 )
 
 func Test_arrayQueryBuilder_ElemMatch(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gt", Value: 1}}}}}}, BsonBuilder().ElemMatch("age", BsonBuilder().Add("$gt", 1).Build()).Build())
+	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gt", Value: 1}}}}}}, NewBuilder().ElemMatch("age", NewBuilder().KeyValue("$gt", 1).Build()).Build())
 }
 
 func TestBsonBuilder_All(t *testing.T) {
@@ -39,7 +39,7 @@ func TestBsonBuilder_All(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]any)(nil)}}},
 			},
@@ -47,28 +47,28 @@ func TestBsonBuilder_All(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []any{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []any{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []any{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []any{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []any{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []any{18, 19, 20}}}}},
 		},
@@ -94,7 +94,7 @@ func TestBsonBuilder_AllUint(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint)(nil)}}},
 			},
@@ -102,28 +102,28 @@ func TestBsonBuilder_AllUint(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []uint{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint{18, 19, 20}}}}},
 		},
@@ -149,7 +149,7 @@ func TestBsonBuilder_AllUint8(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint8)(nil)}}},
 			},
@@ -157,28 +157,28 @@ func TestBsonBuilder_AllUint8(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint8{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint8{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint8{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint8{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []uint8{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint8{18, 19, 20}}}}},
 		},
@@ -204,7 +204,7 @@ func TestBsonBuilder_AllUint16(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint16)(nil)}}},
 			},
@@ -212,28 +212,28 @@ func TestBsonBuilder_AllUint16(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint16{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint16{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint16{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint16{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []uint16{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint16{18, 19, 20}}}}},
 		},
@@ -259,7 +259,7 @@ func TestBsonBuilder_AllUint32(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint32)(nil)}}},
 			},
@@ -267,28 +267,28 @@ func TestBsonBuilder_AllUint32(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint32{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint32{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint32{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []uint32{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint32{18, 19, 20}}}}},
 		},
@@ -314,7 +314,7 @@ func TestBsonBuilder_AllUint64(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]uint64)(nil)}}},
 			},
@@ -322,28 +322,28 @@ func TestBsonBuilder_AllUint64(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint64{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint64{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []uint64{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []uint64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []uint64{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []uint64{18, 19, 20}}}}},
 		},
@@ -369,7 +369,7 @@ func TestBsonBuilder_AllInt(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int)(nil)}}},
 			},
@@ -377,28 +377,28 @@ func TestBsonBuilder_AllInt(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []int{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int{18, 19, 20}}}}},
 		},
@@ -424,7 +424,7 @@ func TestBsonBuilder_AllInt8(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int8)(nil)}}},
 			},
@@ -432,28 +432,28 @@ func TestBsonBuilder_AllInt8(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int8{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int8{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int8{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int8{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []int8{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int8{18, 19, 20}}}}},
 		},
@@ -479,7 +479,7 @@ func TestBsonBuilder_AllInt16(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int16)(nil)}}},
 			},
@@ -487,28 +487,28 @@ func TestBsonBuilder_AllInt16(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int16{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int16{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []int16{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int16{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []int16{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int16{18, 19, 20}}}}},
 		},
@@ -533,7 +533,7 @@ func TestBsonBuilder_AllInt32(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int32)(nil)}}},
 			},
@@ -542,28 +542,28 @@ func TestBsonBuilder_AllInt32(t *testing.T) {
 			name:    "empty values",
 			key:     "age",
 			values:  []int32{},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			values:  []int32{1},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			values:  []int32{1, 2, 3},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			values:  []int32{18, 19, 20},
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int32{18, 19, 20}}}}},
 		},
 	}
@@ -589,7 +589,7 @@ func TestBsonBuilder_AllInt64(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]int64)(nil)}}},
 			},
@@ -598,28 +598,28 @@ func TestBsonBuilder_AllInt64(t *testing.T) {
 			name:    "empty values",
 			key:     "age",
 			values:  []int64{},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
 			values:  []int64{1},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
 			values:  []int64{1, 2, 3},
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []int64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
 			values:  []int64{18, 19, 20},
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []int64{18, 19, 20}}}}},
 		},
 	}
@@ -644,7 +644,7 @@ func TestBsonBuilder_AllFloat32(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]float32)(nil)}}},
 			},
@@ -652,28 +652,28 @@ func TestBsonBuilder_AllFloat32(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float32{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float32{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float32{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float32{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []float32{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []float32{18, 19, 20}}}}},
 		},
@@ -699,7 +699,7 @@ func TestBsonBuilder_AllFloat64(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]float64)(nil)}}},
 			},
@@ -707,28 +707,28 @@ func TestBsonBuilder_AllFloat64(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float64{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float64{1},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{1}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []float64{1, 2, 3},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []float64{1, 2, 3}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []float64{18, 19, 20},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []float64{18, 19, 20}}}}},
 		},
@@ -753,7 +753,7 @@ func TestBsonBuilder_AllString(t *testing.T) {
 		{
 			name:    "nil values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			want: bson.D{
 				bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: ([]string)(nil)}}},
 			},
@@ -761,28 +761,28 @@ func TestBsonBuilder_AllString(t *testing.T) {
 		{
 			name:    "empty values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []string{},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{}}}}},
 		},
 		{
 			name:    "one value",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []string{"1"},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{"1"}}}}},
 		},
 		{
 			name:    "multiple values",
 			key:     "age",
-			builder: BsonBuilder(),
+			builder: NewBuilder(),
 			values:  []string{"1", "2", "3"},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: AllOp, Value: []string{"1", "2", "3"}}}}},
 		},
 		{
 			name:    "merge value",
 			key:     "age",
-			builder: BsonBuilder().Gt("age", 18),
+			builder: NewBuilder().Gt("age", 18),
 			values:  []string{"18", "19", "20"},
 			want:    bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: AllOp, Value: []string{"18", "19", "20"}}}}},
 		},
@@ -796,7 +796,7 @@ func TestBsonBuilder_AllString(t *testing.T) {
 }
 
 func Test_arrayQueryBuilder_Size(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$size", Value: 1}}}}, BsonBuilder().Size("age", 1).Build())
+	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$size", Value: 1}}}}, NewBuilder().Size("age", 1).Build())
 
-	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$gt", Value: 18}, bson.E{Key: "$size", Value: 1}}}}, BsonBuilder().Gt("age", 18).Size("age", 1).Build())
+	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$gt", Value: 18}, bson.E{Key: "$size", Value: 1}}}}, NewBuilder().Gt("age", 18).Size("age", 1).Build())
 }

@@ -24,7 +24,7 @@ import (
 func Test_evaluationQueryBuilder_Expr(t *testing.T) {
 	assert.Equal(t,
 		bson.D{{Key: "$expr", Value: bson.D{{Key: "$gt", Value: []any{"$spent", "$budget"}}}}},
-		BsonBuilder().Expr(BsonBuilder().Add("$gt", []any{
+		NewBuilder().Expr(NewBuilder().KeyValue("$gt", []any{
 			"$spent",
 			"$budget",
 		}).Build()).Build())
@@ -68,28 +68,28 @@ func Test_evaluationQueryBuilder_JsonSchema(t *testing.T) {
 			},
 			},
 		}}},
-		BsonBuilder().JsonSchema(
-			BsonBuilder().
-				Add("required", []string{"name", "major", "gpa", "address"}).
-				Add("properties",
-					BsonBuilder().
-						Add("name",
-							BsonBuilder().
-								Add("bsonType", "string").
-								Add("description", "must be a string and is required").
+		NewBuilder().JsonSchema(
+			NewBuilder().
+				KeyValue("required", []string{"name", "major", "gpa", "address"}).
+				KeyValue("properties",
+					NewBuilder().
+						KeyValue("name",
+							NewBuilder().
+								KeyValue("bsonType", "string").
+								KeyValue("description", "must be a string and is required").
 								Build()).
-						Add("address",
-							BsonBuilder().Add("bsonType", "object").
-								Add("required", []string{"zipcode"}).
-								Add("properties",
-									BsonBuilder().
-										Add("street",
-											BsonBuilder().
-												Add("bsonType", "string").
+						KeyValue("address",
+							NewBuilder().KeyValue("bsonType", "object").
+								KeyValue("required", []string{"zipcode"}).
+								KeyValue("properties",
+									NewBuilder().
+										KeyValue("street",
+											NewBuilder().
+												KeyValue("bsonType", "string").
 												Build()).
-										Add("zipcode",
-											BsonBuilder().
-												Add("bsonType", "string").
+										KeyValue("zipcode",
+											NewBuilder().
+												KeyValue("bsonType", "string").
 												Build()).
 										Build()).
 								Build()).
@@ -132,19 +132,19 @@ func Test_evaluationQueryBuilder_Mod(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, BsonBuilder().Mod(tt.key, tt.divisor, tt.remainder).Build())
+			assert.Equal(t, tt.want, NewBuilder().Mod(tt.key, tt.divisor, tt.remainder).Build())
 		})
 	}
 }
 
 func Test_evaluationQueryBuilder_Regex(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{{Key: "$regex", Value: "acme.*corp"}}}},
-		BsonBuilder().Regex("name", "acme.*corp").Build())
+		NewBuilder().Regex("name", "acme.*corp").Build())
 }
 
 func Test_evaluationQueryBuilder_RegexOptions(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{{Key: "$regex", Value: "acme.*corp"}, {Key: "$options", Value: "i"}}}},
-		BsonBuilder().RegexOptions("name", "acme.*corp", "i").Build())
+		NewBuilder().RegexOptions("name", "acme.*corp", "i").Build())
 }
 
 func Test_evaluationQueryBuilder_Text(t *testing.T) {
@@ -192,11 +192,11 @@ func Test_evaluationQueryBuilder_Text(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, BsonBuilder().Text(tt.value, tt.language, tt.caseSensitive, tt.diacriticSensitive).Build())
+			assert.Equal(t, tt.want, NewBuilder().Text(tt.value, tt.language, tt.caseSensitive, tt.diacriticSensitive).Build())
 		})
 	}
 }
 
 func Test_evaluationQueryBuilder_Where(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$where", Value: "this.credits == this.debits"}}, BsonBuilder().Where("this.credits == this.debits").Build())
+	assert.Equal(t, bson.D{{Key: "$where", Value: "this.credits == this.debits"}}, NewBuilder().Where("this.credits == this.debits").Build())
 }

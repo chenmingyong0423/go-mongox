@@ -267,7 +267,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", []string{"1", "2"}...).Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", []string{"1", "2"}...).Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -291,7 +291,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", []string{"1", "2"}...).Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", []string{"1", "2"}...).Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -316,7 +316,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.ElementsMatch(t, []any{"1", "2"}, insertManyResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", []string{"1", "2"}...).Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", []string{"1", "2"}...).Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},

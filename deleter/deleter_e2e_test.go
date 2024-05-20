@@ -106,11 +106,11 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("2").Build(),
+			filter: query.NewBuilder().Id("2").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
@@ -126,11 +126,11 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			want: &mongo.DeleteResult{
@@ -142,7 +142,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			name:   "global before hook error",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			globalHook: []globalHook{
@@ -163,7 +163,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			name:   "global after hook error",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			globalHook: []globalHook{
@@ -188,11 +188,11 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			globalHook: []globalHook{
@@ -226,7 +226,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			name:   "before hook error",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			beforeHook: []beforeHookFn{
@@ -243,7 +243,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			name:   "after hook error",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			afterHook: []afterHookFn{
@@ -264,11 +264,11 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 				require.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			beforeHook: []beforeHookFn{
@@ -358,7 +358,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -381,7 +381,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
@@ -425,7 +425,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -457,7 +457,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
@@ -519,7 +519,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
@@ -547,7 +547,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().Eq("name", "Mingyong Chen").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().Eq("name", "Mingyong Chen").Build())
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
