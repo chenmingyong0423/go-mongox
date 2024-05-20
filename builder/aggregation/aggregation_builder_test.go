@@ -22,7 +22,7 @@ import (
 )
 
 func TestBuilder_AddKeyValues(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "chenmingyong"}}, BsonBuilder().AddKeyValues("name", "chenmingyong").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "chenmingyong"}}, BsonBuilder().KeyValue("name", "chenmingyong").Build())
 }
 
 func TestBuilder_tryMergeValue(t *testing.T) {

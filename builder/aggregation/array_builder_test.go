@@ -99,7 +99,7 @@ func Test_arrayBuilder_ArrayToObjectWithoutKey(t *testing.T) {
 		},
 		{
 			name:       "array expression",
-			expression: []any{BsonBuilder().AddKeyValues("k", "item").AddKeyValues("v", "abc123").Build()},
+			expression: []any{BsonBuilder().KeyValue("k", "item").KeyValue("v", "abc123").Build()},
 			expected:   bson.D{{Key: "$arrayToObject", Value: []any{bson.D{{Key: "k", Value: "item"}, {Key: "v", Value: "abc123"}}}}},
 		},
 	}

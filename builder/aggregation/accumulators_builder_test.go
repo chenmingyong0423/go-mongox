@@ -67,7 +67,7 @@ func Test_accumulatorsBuilder_PushWithoutKey(t *testing.T) {
 		{
 			name: "normal",
 			// { item: "$item", quantity: "$quantity" }
-			expression: BsonBuilder().AddKeyValues("item", "$item").AddKeyValues("quantity", "$quantity").Build(),
+			expression: BsonBuilder().KeyValue("item", "$item").KeyValue("quantity", "$quantity").Build(),
 			expected:   bson.D{{Key: "$push", Value: bson.D{{Key: "item", Value: "$item"}, {Key: "quantity", Value: "$quantity"}}}},
 		},
 	}
