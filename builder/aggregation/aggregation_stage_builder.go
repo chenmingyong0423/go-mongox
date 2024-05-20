@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -29,84 +28,84 @@ func StageBsonBuilder() *StageBuilder {
 }
 
 func (b *StageBuilder) AddFields(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageAddFields, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: AddFieldsOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Set(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSet, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SetOp, Value: value}})
 	return b
 }
 
-func (b *StageBuilder) Bucket(groupBy any, boundaries []any, opt *types.BucketOptions) *StageBuilder {
+func (b *StageBuilder) Bucket(groupBy any, boundaries []any, opt *BucketOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: types.GroupBy, Value: groupBy},
-		bson.E{Key: types.Boundaries, Value: boundaries},
+		bson.E{Key: GroupByOp, Value: groupBy},
+		bson.E{Key: BoundariesOp, Value: boundaries},
 	}
 	if opt != nil {
 		if opt.DefaultKey != nil {
-			d = append(d, bson.E{Key: types.Default, Value: opt.DefaultKey})
+			d = append(d, bson.E{Key: DefaultOp, Value: opt.DefaultKey})
 		}
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: types.Output, Value: opt.Output})
+			d = append(d, bson.E{Key: OutputOp, Value: opt.Output})
 		}
 	}
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageBucket, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: BucketOp, Value: d}})
 	return b
 }
 
-func (b *StageBuilder) BucketAuto(groupBy any, buckets int, opt *types.BucketAutoOptions) *StageBuilder {
+func (b *StageBuilder) BucketAuto(groupBy any, buckets int, opt *BucketAutoOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: types.GroupBy, Value: groupBy},
-		bson.E{Key: types.Buckets, Value: buckets},
+		bson.E{Key: GroupByOp, Value: groupBy},
+		bson.E{Key: BucketsOp, Value: buckets},
 	}
 	if opt != nil {
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: types.Output, Value: opt.Output})
+			d = append(d, bson.E{Key: OutputOp, Value: opt.Output})
 		}
 		if opt.Granularity != "" {
-			d = append(d, bson.E{Key: types.Granularity, Value: opt.Granularity})
+			d = append(d, bson.E{Key: GranularityOp, Value: opt.Granularity})
 		}
 	}
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageBucketAuto, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: BucketAutoOp, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) Match(expression any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageMatch, Value: expression}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: MatchOp, Value: expression}})
 	return b
 }
 
 func (b *StageBuilder) Group(id any, accumulators ...bson.E) *StageBuilder {
 	d := bson.D{{Key: "_id", Value: id}}
 	d = append(d, accumulators...)
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageGroup, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: GroupOp, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) Sort(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSort, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SortOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Project(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageProject, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: ProjectOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Limit(limit int64) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageLimit, Value: limit}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: LimitOp, Value: limit}})
 	return b
 }
 
 func (b *StageBuilder) Skip(skip int64) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSkip, Value: skip}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SkipOp, Value: skip}})
 	return b
 }
 
-func (b *StageBuilder) Unwind(path string, opt *types.UnWindOptions) *StageBuilder {
+func (b *StageBuilder) Unwind(path string, opt *UnWindOptions) *StageBuilder {
 	if opt == nil {
-		b.pipeline = append(b.pipeline, bson.D{{Key: types.AggregationStageUnwind, Value: path}})
+		b.pipeline = append(b.pipeline, bson.D{{Key: UnwindOp, Value: path}})
 	} else {
 		d := bson.D{{Key: "path", Value: path}}
 		if opt.IncludeArrayIndex != "" {
@@ -115,28 +114,28 @@ func (b *StageBuilder) Unwind(path string, opt *types.UnWindOptions) *StageBuild
 		if opt.PreserveNullAndEmptyArrays {
 			d = append(d, bson.E{Key: "preserveNullAndEmptyArrays", Value: opt.PreserveNullAndEmptyArrays})
 		}
-		b.pipeline = append(b.pipeline, bson.D{{Key: types.AggregationStageUnwind, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{{Key: UnwindOp, Value: d}})
 	}
 	return b
 }
 
 func (b *StageBuilder) ReplaceWith(replacementDocument any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{{Key: types.AggregationStageReplaceWith, Value: replacementDocument}})
+	b.pipeline = append(b.pipeline, bson.D{{Key: ReplaceWithOp, Value: replacementDocument}})
 	return b
 }
 
 func (b *StageBuilder) Facet(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageFacet, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: FacetOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) SortByCount(expression any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageSortByCount, Value: expression}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SortByCountOp, Value: expression}})
 	return b
 }
 
 func (b *StageBuilder) Count(countName string) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: types.AggregationStageCount, Value: countName}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: CountOp, Value: countName}})
 	return b
 }
 
@@ -153,7 +152,7 @@ func (b *StageBuilder) Lookup(from, as string, opt *LookUpOptions) *StageBuilder
 		d = append(d, bson.E{Key: "pipeline", Value: opt.Pipeline})
 	}
 	d = append(d, bson.E{Key: "as", Value: as})
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageLookUp, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageLookUpOp, Value: d}})
 	return b
 }
 

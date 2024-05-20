@@ -15,7 +15,6 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
@@ -25,7 +24,7 @@ type elementQueryBuilder struct {
 }
 
 func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
-	e := bson.E{Key: types.Exists, Value: exists}
+	e := bson.E{Key: ExistsOp, Value: exists}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -33,7 +32,7 @@ func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
 }
 
 func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
-	e := bson.E{Key: types.Type, Value: t}
+	e := bson.E{Key: TypeOp, Value: t}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -41,7 +40,7 @@ func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
 }
 
 func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
-	e := bson.E{Key: types.Type, Value: alias}
+	e := bson.E{Key: TypeOp, Value: alias}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -49,7 +48,7 @@ func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
 }
 
 func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builder {
-	e := bson.E{Key: types.Type, Value: ts}
+	e := bson.E{Key: TypeOp, Value: ts}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -57,7 +56,7 @@ func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builde
 }
 
 func (b *elementQueryBuilder) TypeArrayAlias(key string, aliases ...string) *Builder {
-	e := bson.E{Key: types.Type, Value: aliases}
+	e := bson.E{Key: TypeOp, Value: aliases}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
 	}

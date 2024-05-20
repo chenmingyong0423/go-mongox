@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -24,7 +23,7 @@ type logicalBuilder struct {
 }
 
 func (b *logicalBuilder) And(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationAnd, Value: expressions}
+	e := bson.E{Key: AndOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -32,12 +31,12 @@ func (b *logicalBuilder) And(key string, expressions ...any) *Builder {
 }
 
 func (b *logicalBuilder) AndWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAnd, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: AndOp, Value: expressions})
 	return b.parent
 }
 
 func (b *logicalBuilder) Not(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationNot, Value: expressions}
+	e := bson.E{Key: NotOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -45,12 +44,12 @@ func (b *logicalBuilder) Not(key string, expressions ...any) *Builder {
 }
 
 func (b *logicalBuilder) NotWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationNot, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: NotOp, Value: expressions})
 	return b.parent
 }
 
 func (b *logicalBuilder) Or(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationOr, Value: expressions}
+	e := bson.E{Key: OrOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -58,6 +57,6 @@ func (b *logicalBuilder) Or(key string, expressions ...any) *Builder {
 }
 
 func (b *logicalBuilder) OrWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationOr, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: OrOp, Value: expressions})
 	return b.parent
 }

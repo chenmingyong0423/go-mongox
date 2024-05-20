@@ -16,6 +16,9 @@ package updater
 
 import (
 	"context"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -43,3 +46,61 @@ type (
 	beforeHookFn func(ctx context.Context, opContext *BeforeOpContext, opts ...any) error
 	afterHookFn  func(ctx context.Context, opContext *AfterOpContext, opts ...any) error
 )
+
+const (
+	SetOp = "$set"
+)
+
+type User struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64
+	UnknownField string `bson:"-"`
+}
+
+type TestUser struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (m *TestUser) DefaultId() {
+	if m.ID.IsZero() {
+		m.ID = primitive.NewObjectID()
+	}
+}
+
+func (tu *TestUser) DefaultCreatedAt() {
+	if tu.CreatedAt.IsZero() {
+		tu.CreatedAt = time.Now().Local()
+	}
+}
+
+func (tu *TestUser) DefaultUpdatedAt() {
+	tu.UpdatedAt = time.Now().Local()
+}
+
+type TestTempUser struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64
+	UnknownField string `bson:"-"`
+}
+
+type IllegalUser struct {
+	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	Name string             `bson:"name"`
+	Age  string
+}
+
+type UpdatedUser struct {
+	Name string `bson:"name"`
+	Age  int64
+}
+
+type UserName struct {
+	Name string `bson:"name"`
+}

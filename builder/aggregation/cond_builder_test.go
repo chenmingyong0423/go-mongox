@@ -18,8 +18,6 @@ import (
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -103,7 +101,7 @@ func Test_condBuilder_Switch(t *testing.T) {
 			{Key: "default", Value: "Did not match"},
 		}},
 	}}},
-		NewBuilder().Switch("summary", []types.CaseThen{
+		NewBuilder().Switch("summary", []CaseThen{
 			{
 				Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 			},
@@ -117,7 +115,7 @@ func Test_condBuilder_Switch(t *testing.T) {
 func Test_condBuilder_SwitchWithoutKey(t *testing.T) {
 	testCases := []struct {
 		name        string
-		cases       []types.CaseThen
+		cases       []CaseThen
 		defaultCase any
 		expected    bson.D
 	}{
@@ -134,7 +132,7 @@ func Test_condBuilder_SwitchWithoutKey(t *testing.T) {
 		},
 		{
 			name:        "empty cases",
-			cases:       []types.CaseThen{},
+			cases:       []CaseThen{},
 			defaultCase: "Did not match",
 			expected: bson.D{
 				{Key: "$switch", Value: bson.D{
@@ -145,7 +143,7 @@ func Test_condBuilder_SwitchWithoutKey(t *testing.T) {
 		},
 		{
 			name: "normal",
-			cases: []types.CaseThen{
+			cases: []CaseThen{
 				{
 					Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 				},

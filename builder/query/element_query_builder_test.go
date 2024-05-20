@@ -17,7 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -48,7 +47,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 			name: "nil values",
 			key:  "name",
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: ([]bsontype.Type)(nil)}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: ([]bsontype.Type)(nil)}}},
 			},
 		},
 		{
@@ -56,7 +55,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 			key:  "name",
 			ts:   []bsontype.Type{},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []bsontype.Type{}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{}}}},
 			},
 		},
 		{
@@ -64,7 +63,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 			key:  "name",
 			ts:   []bsontype.Type{bson.TypeString},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []bsontype.Type{bson.TypeString}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{bson.TypeString}}}},
 			},
 		},
 		{
@@ -72,7 +71,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 			key:  "name",
 			ts:   []bsontype.Type{bson.TypeString, bson.TypeInt32},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []bsontype.Type{bson.TypeString, bson.TypeInt32}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{bson.TypeString, bson.TypeInt32}}}},
 			},
 		},
 	}
@@ -96,7 +95,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 			name: "nil values",
 			key:  "name",
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: ([]string)(nil)}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: ([]string)(nil)}}},
 			},
 		},
 		{
@@ -104,7 +103,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 			key:  "name",
 			ts:   []string{},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []string{}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []string{}}}},
 			},
 		},
 		{
@@ -112,7 +111,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 			key:  "name",
 			ts:   []string{"string"},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []string{"string"}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []string{"string"}}}},
 			},
 		},
 		{
@@ -120,7 +119,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 			key:  "name",
 			ts:   []string{"string", "int32"},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: types.Type, Value: []string{"string", "int32"}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []string{"string", "int32"}}}},
 			},
 		},
 	}

@@ -15,7 +15,6 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -26,25 +25,25 @@ type logicalQueryBuilder struct {
 // And
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
 func (b *logicalQueryBuilder) And(conditions ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.And, Value: conditions})
+	b.parent.data = append(b.parent.data, bson.E{Key: AndOp, Value: conditions})
 	return b.parent
 }
 
 func (b *logicalQueryBuilder) Not(condition any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Not, Value: condition})
+	b.parent.data = append(b.parent.data, bson.E{Key: NotOp, Value: condition})
 	return b.parent
 }
 
 // Nor
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
 func (b *logicalQueryBuilder) Nor(conditions ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Nor, Value: conditions})
+	b.parent.data = append(b.parent.data, bson.E{Key: NorOp, Value: conditions})
 	return b.parent
 }
 
 // Or
 // 对于 conditions 参数，你同样可以使用 QueryBuilder 去生成
 func (b *logicalQueryBuilder) Or(conditions ...any) *Builder {
-	b.parent.data = append(b.parent.data, bson.E{Key: types.Or, Value: conditions})
+	b.parent.data = append(b.parent.data, bson.E{Key: OrOp, Value: conditions})
 	return b.parent
 }

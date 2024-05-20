@@ -15,140 +15,139 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 func Id(value any) bson.D {
-	return bson.D{bson.E{Key: types.Id, Value: value}}
+	return bson.D{bson.E{Key: IdOp, Value: value}}
 }
 
 func All[T any](values ...T) bson.D {
-	return bson.D{bson.E{Key: types.All, Value: values}}
+	return bson.D{bson.E{Key: AllOp, Value: values}}
 }
 
 func ElemMatch(key string, cond any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.ElemMatch, Value: cond}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: ElemMatchOp, Value: cond}}}}
 }
 
 func Size(key string, value int) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Size, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: SizeOp, Value: value}}}}
 }
 
 func Eq(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Eq, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: EqOp, Value: value}}}}
 }
 
 func Gt(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Gt, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: GtOp, Value: value}}}}
 }
 
 func Gte(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Gte, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: GteOp, Value: value}}}}
 }
 
 func In[T any](key string, values ...T) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.In, Value: values}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: InOp, Value: values}}}}
 }
 
 func NIn[T any](key string, values ...T) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Nin, Value: values}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: NinOp, Value: values}}}}
 }
 
 func Lt(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Lt, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: LtOp, Value: value}}}}
 }
 
 func Lte(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Lte, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: LteOp, Value: value}}}}
 }
 
 func Ne(key string, value any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Ne, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: NeOp, Value: value}}}}
 }
 
 func Exists(key string, value bool) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Exists, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: ExistsOp, Value: value}}}}
 }
 
 func Type(key string, value bsontype.Type) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Type, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: value}}}}
 }
 
 func TypeAlias(key string, value string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Type, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: value}}}}
 }
 
 func TypeArray(key string, values ...bsontype.Type) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Type, Value: values}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: values}}}}
 }
 
 func TypeArrayAlias(key string, values ...string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Type, Value: values}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: values}}}}
 }
 
 func Expr(value any) bson.D {
-	return bson.D{bson.E{Key: types.Expr, Value: value}}
+	return bson.D{bson.E{Key: ExprOp, Value: value}}
 }
 
 func JsonSchema(value any) bson.D {
-	return bson.D{bson.E{Key: types.JsonSchema, Value: value}}
+	return bson.D{bson.E{Key: JsonSchemaOp, Value: value}}
 }
 
 func Mod(key string, divisor any, remainder int) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Mod, Value: bson.A{divisor, remainder}}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: ModOp, Value: bson.A{divisor, remainder}}}}}
 }
 
 func Regex(key, value string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Regex, Value: value}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: RegexOp, Value: value}}}}
 }
 
 func RegexOptions(key, value, options string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Regex, Value: value}, {Key: types.Options, Value: options}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: RegexOp, Value: value}, {Key: OptionsOp, Value: options}}}}
 }
 
-func Text(search string, opt *types.TextOptions) bson.D {
-	d := bson.D{bson.E{Key: types.Search, Value: search}}
+func Text(search string, opt *TextOptions) bson.D {
+	d := bson.D{bson.E{Key: SearchOp, Value: search}}
 	if opt != nil {
 		if opt.Language != "" {
-			d = append(d, bson.E{Key: types.Language, Value: opt.Language})
+			d = append(d, bson.E{Key: LanguageOp, Value: opt.Language})
 		}
 		if opt.CaseSensitive {
-			d = append(d, bson.E{Key: types.CaseSensitive, Value: opt.CaseSensitive})
+			d = append(d, bson.E{Key: CaseSensitiveOp, Value: opt.CaseSensitive})
 		}
 		if opt.DiacriticSensitive {
-			d = append(d, bson.E{Key: types.DiacriticSensitive, Value: opt.DiacriticSensitive})
+			d = append(d, bson.E{Key: DiacriticSensitiveOp, Value: opt.DiacriticSensitive})
 		}
 	}
 
-	return bson.D{bson.E{Key: types.Text, Value: d}}
+	return bson.D{bson.E{Key: TextOp, Value: d}}
 }
 
 func Where(value string) bson.D {
-	return bson.D{bson.E{Key: types.Where, Value: value}}
+	return bson.D{bson.E{Key: WhereOp, Value: value}}
 }
 
 func And(conditions ...any) bson.D {
-	return bson.D{bson.E{Key: types.And, Value: conditions}}
+	return bson.D{bson.E{Key: AndOp, Value: conditions}}
 }
 
 func Not(cond any) bson.D {
-	return bson.D{bson.E{Key: types.Not, Value: cond}}
+	return bson.D{bson.E{Key: NotOp, Value: cond}}
 }
 
 func Nor(conditions ...any) bson.D {
-	return bson.D{bson.E{Key: types.Nor, Value: conditions}}
+	return bson.D{bson.E{Key: NorOp, Value: conditions}}
 }
 
 func Or(conditions ...any) bson.D {
-	return bson.D{bson.E{Key: types.Or, Value: conditions}}
+	return bson.D{bson.E{Key: OrOp, Value: conditions}}
 }
 
 func Slice(key string, number int) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Slice, Value: number}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: SliceOp, Value: number}}}}
 }
 
 func SliceRanger(key string, start, end int) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{{Key: types.Slice, Value: []int{start, end}}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{{Key: SliceOp, Value: []int{start, end}}}}}
 }

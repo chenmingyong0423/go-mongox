@@ -17,8 +17,6 @@ package query
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/types"
-
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -50,7 +48,7 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 			name:     "not merge when key is not exist",
 			builder:  BsonBuilder(),
 			key:      "age",
-			value:    bson.E{Key: types.Lt, Value: 25},
+			value:    bson.E{Key: LtOp, Value: 25},
 			wantBool: false,
 			wantBson: bson.D{},
 		},
@@ -58,17 +56,17 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 			name:     "not merge when key is different",
 			builder:  BsonBuilder().Gt("age", 18),
 			key:      "name",
-			value:    bson.E{Key: types.Eq, Value: "cmy"},
+			value:    bson.E{Key: EqOp, Value: "cmy"},
 			wantBool: false,
-			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}}}},
+			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}}}},
 		},
 		{
 			name:     "merge when key is same",
 			builder:  BsonBuilder().Gt("age", 18),
 			key:      "age",
-			value:    bson.E{Key: types.Lt, Value: 25},
+			value:    bson.E{Key: LtOp, Value: 25},
 			wantBool: true,
-			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: types.Gt, Value: 18}, bson.E{Key: types.Lt, Value: 25}}}},
+			wantBson: bson.D{bson.E{Key: "age", Value: bson.D{bson.E{Key: GtOp, Value: 18}, bson.E{Key: LtOp, Value: 25}}}},
 		},
 	}
 	for _, tc := range testCases {

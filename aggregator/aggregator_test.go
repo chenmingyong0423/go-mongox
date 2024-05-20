@@ -18,13 +18,57 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	mocks "github.com/chenmingyong0423/go-mongox/mock"
-	"github.com/chenmingyong0423/go-mongox/types"
+
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/mock/gomock"
 )
+
+type TestUser struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Name         string             `bson:"name"`
+	Age          int64
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"created_at"`
+	UpdatedAt    time.Time `bson:"updated_at"`
+}
+
+func (tu *TestUser) DefaultCreatedAt() {
+	if tu.CreatedAt.IsZero() {
+		tu.CreatedAt = time.Now().Local()
+	}
+}
+
+func (tu *TestUser) DefaultUpdatedAt() {
+	tu.UpdatedAt = time.Now().Local()
+}
+
+type TestTempUser struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64
+	UnknownField string `bson:"-"`
+}
+
+type IllegalUser struct {
+	ID   primitive.ObjectID `bson:"_id,omitempty"`
+	Name string             `bson:"name"`
+	Age  string
+}
+
+type UpdatedUser struct {
+	Name string `bson:"name"`
+	Age  int64
+}
+
+type UserName struct {
+	Name string `bson:"name"`
+}
 
 func TestAggregator_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
@@ -37,15 +81,15 @@ func TestAggregator_New(t *testing.T) {
 func TestAggregator_Aggregation(t *testing.T) {
 	testCases := []struct {
 		name    string
-		mock    func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser]
+		mock    func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser]
 		ctx     context.Context
-		want    []*types.TestUser
+		want    []*TestUser
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "got error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
-				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser] {
+				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
 				aggregator.EXPECT().Aggregate(ctx).Return(nil, errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
@@ -54,16 +98,16 @@ func TestAggregator_Aggregation(t *testing.T) {
 		},
 		{
 			name: "got result",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[types.TestUser] {
-				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
-				aggregator.EXPECT().Aggregate(ctx).Return([]*types.TestUser{
+			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser] {
+				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
+				aggregator.EXPECT().Aggregate(ctx).Return([]*TestUser{
 					{Name: "chenmingyong", Age: 24},
 					{Name: "gopher", Age: 25},
 				}, nil).Times(1)
 				return aggregator
 			},
 			ctx: context.Background(),
-			want: []*types.TestUser{
+			want: []*TestUser{
 				{Name: "chenmingyong", Age: 24},
 				{Name: "gopher", Age: 25},
 			},
@@ -93,7 +137,7 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 	}
 	testCases := []struct {
 		name    string
-		mock    func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser]
+		mock    func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser]
 		ctx     context.Context
 		result  []*User
 		want    []*User
@@ -101,8 +145,8 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 	}{
 		{
 			name: "got error",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser] {
-				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser] {
+				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
 				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
@@ -112,8 +156,8 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 		},
 		{
 			name: "got result",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[types.TestUser] {
-				aggregator := mocks.NewMockiAggregator[types.TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser] {
+				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
 				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(nil).Times(1)
 				return aggregator
 			},

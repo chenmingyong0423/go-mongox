@@ -15,7 +15,6 @@
 package aggregation
 
 import (
-	"github.com/chenmingyong0423/go-mongox/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -24,7 +23,7 @@ type arithmeticBuilder struct {
 }
 
 func (b *arithmeticBuilder) Add(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationAdd, Value: expressions}
+	e := bson.E{Key: AddOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -32,12 +31,12 @@ func (b *arithmeticBuilder) Add(key string, expressions ...any) *Builder {
 }
 
 func (b *arithmeticBuilder) AddWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationAdd, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: AddOp, Value: expressions})
 	return b.parent
 }
 
 func (b *arithmeticBuilder) Multiply(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationMultiply, Value: expressions}
+	e := bson.E{Key: MultiplyOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -45,12 +44,12 @@ func (b *arithmeticBuilder) Multiply(key string, expressions ...any) *Builder {
 }
 
 func (b *arithmeticBuilder) MultiplyWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMultiply, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: MultiplyOp, Value: expressions})
 	return b.parent
 }
 
 func (b *arithmeticBuilder) Subtract(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationSubtract, Value: expressions}
+	e := bson.E{Key: SubtractOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -58,12 +57,12 @@ func (b *arithmeticBuilder) Subtract(key string, expressions ...any) *Builder {
 }
 
 func (b *arithmeticBuilder) SubtractWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationSubtract, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: SubtractOp, Value: expressions})
 	return b.parent
 }
 
 func (b *arithmeticBuilder) Divide(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationDivide, Value: expressions}
+	e := bson.E{Key: DivideOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -71,12 +70,12 @@ func (b *arithmeticBuilder) Divide(key string, expressions ...any) *Builder {
 }
 
 func (b *arithmeticBuilder) DivideWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationDivide, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: DivideOp, Value: expressions})
 	return b.parent
 }
 
 func (b *arithmeticBuilder) Mod(key string, expressions ...any) *Builder {
-	e := bson.E{Key: types.AggregationMod, Value: expressions}
+	e := bson.E{Key: ModOp, Value: expressions}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
 	}
@@ -84,6 +83,6 @@ func (b *arithmeticBuilder) Mod(key string, expressions ...any) *Builder {
 }
 
 func (b *arithmeticBuilder) ModWithoutKey(expressions ...any) *Builder {
-	b.parent.d = append(b.parent.d, bson.E{Key: types.AggregationMod, Value: expressions})
+	b.parent.d = append(b.parent.d, bson.E{Key: ModOp, Value: expressions})
 	return b.parent
 }
