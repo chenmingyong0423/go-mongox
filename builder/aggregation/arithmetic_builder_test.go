@@ -24,7 +24,7 @@ import (
 func Test_arithmeticBuilder_Add(t *testing.T) {
 	t.Run("test add", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$add", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
-			BsonBuilder().Add("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+			NewBuilder().Add("total", 1, 2, 3, "$a", "$b", "$c").Build(),
 		)
 	})
 }
@@ -58,7 +58,7 @@ func Test_arithmeticBuilder_AddWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().AddWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().AddWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -66,7 +66,7 @@ func Test_arithmeticBuilder_AddWithoutKey(t *testing.T) {
 func Test_arithmeticBuilder_Multiply(t *testing.T) {
 	t.Run("test multiply", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$multiply", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
-			BsonBuilder().Multiply("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+			NewBuilder().Multiply("total", 1, 2, 3, "$a", "$b", "$c").Build(),
 		)
 	})
 }
@@ -100,7 +100,7 @@ func Test_arithmeticBuilder_MultiplyWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MultiplyWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().MultiplyWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -108,7 +108,7 @@ func Test_arithmeticBuilder_MultiplyWithoutKey(t *testing.T) {
 func Test_arithmeticBuilder_Subtract(t *testing.T) {
 	t.Run("test subtract", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "dateDifference", Value: bson.D{bson.E{Key: "$subtract", Value: []any{"$date", 5 * 60 * 1000}}}}},
-			BsonBuilder().Subtract("dateDifference", []any{"$date", 5 * 60 * 1000}...).Build(),
+			NewBuilder().Subtract("dateDifference", []any{"$date", 5 * 60 * 1000}...).Build(),
 		)
 	})
 
@@ -128,7 +128,7 @@ func Test_arithmeticBuilder_SubtractWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SubtractWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SubtractWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -136,7 +136,7 @@ func Test_arithmeticBuilder_SubtractWithoutKey(t *testing.T) {
 func Test_arithmeticBuilder_Divide(t *testing.T) {
 	t.Run("test divide", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$divide", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
-			BsonBuilder().Divide("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+			NewBuilder().Divide("total", 1, 2, 3, "$a", "$b", "$c").Build(),
 		)
 	})
 }
@@ -154,7 +154,7 @@ func Test_arithmeticBuilder_DivideWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DivideWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DivideWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -162,7 +162,7 @@ func Test_arithmeticBuilder_DivideWithoutKey(t *testing.T) {
 func Test_arithmeticBuilder_Mod(t *testing.T) {
 	t.Run("test mod", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "total", Value: bson.D{bson.E{Key: "$mod", Value: []any{1, 2, 3, "$a", "$b", "$c"}}}}},
-			BsonBuilder().Mod("total", 1, 2, 3, "$a", "$b", "$c").Build(),
+			NewBuilder().Mod("total", 1, 2, 3, "$a", "$b", "$c").Build(),
 		)
 	})
 }
@@ -180,7 +180,7 @@ func Test_arithmeticBuilder_ModWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ModWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ModWithoutKey(tc.expressions...).Build())
 		})
 	}
 }

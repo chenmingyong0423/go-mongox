@@ -26,7 +26,7 @@ func Test_condBuilder_Cond(t *testing.T) {
 	t.Run("test Cond", func(t *testing.T) {
 		assert.Equal(t,
 			bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}}}},
-			BsonBuilder().Cond("discount", bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20).Build(),
+			NewBuilder().Cond("discount", bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20).Build(),
 		)
 	})
 }
@@ -41,7 +41,7 @@ func Test_condBuilder_CondWithoutKey(t *testing.T) {
 	}{
 		{
 			name:      "normal",
-			boolExpr:  BsonBuilder().GteWithoutKey("$qty", 250).Build(),
+			boolExpr:  NewBuilder().GteWithoutKey("$qty", 250).Build(),
 			trueExpr:  30,
 			falseExpr: 20,
 			expected:  bson.D{{Key: "$cond", Value: []any{bson.D{{Key: "$gte", Value: []any{"$qty", 250}}}, 30, 20}}},
@@ -49,13 +49,13 @@ func Test_condBuilder_CondWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().CondWithoutKey(tc.boolExpr, tc.trueExpr, tc.falseExpr).Build())
+			assert.Equal(t, tc.expected, NewBuilder().CondWithoutKey(tc.boolExpr, tc.trueExpr, tc.falseExpr).Build())
 		})
 	}
 }
 
 func Test_condBuilder_IfNull(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: []any{"$coupon", int64(0)}}}}}, BsonBuilder().IfNull("discount", "$coupon", int64(0)).Build())
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: []any{"$coupon", int64(0)}}}}}, NewBuilder().IfNull("discount", "$coupon", int64(0)).Build())
 }
 
 func Test_condBuilder_IfNullWithoutKey(t *testing.T) {
@@ -86,7 +86,7 @@ func Test_condBuilder_IfNullWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().IfNullWithoutKey(tc.expr, tc.replacement).Build())
+			assert.Equal(t, tc.expected, NewBuilder().IfNullWithoutKey(tc.expr, tc.replacement).Build())
 		})
 	}
 }
@@ -101,7 +101,7 @@ func Test_condBuilder_Switch(t *testing.T) {
 			{Key: "default", Value: "Did not match"},
 		}},
 	}}},
-		BsonBuilder().Switch("summary", []CaseThen{
+		NewBuilder().Switch("summary", []CaseThen{
 			{
 				Case: bsonx.D("$eq", []any{0, 5}), Then: "equals",
 			},
@@ -165,7 +165,7 @@ func Test_condBuilder_SwitchWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SwitchWithoutKey(tc.cases, tc.defaultCase).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SwitchWithoutKey(tc.cases, tc.defaultCase).Build())
 		})
 	}
 }

@@ -25,7 +25,7 @@ import (
 func Test_dateBuilder_DateOfMonth(t *testing.T) {
 	t.Run("test DayOfMonth", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfMonth", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().DayOfMonth("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().DayOfMonth("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -43,7 +43,7 @@ func Test_dateBuilder_DateOfMonthWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfMonthWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfMonthWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -51,7 +51,7 @@ func Test_dateBuilder_DateOfMonthWithoutKey(t *testing.T) {
 func Test_dateBuilder_DayOfMonthWithTimezone(t *testing.T) {
 	t.Run("test DayOfMonthWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfMonth", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
-			BsonBuilder().DayOfMonthWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			NewBuilder().DayOfMonthWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -71,7 +71,7 @@ func Test_dateBuilder_DayOfMonthWithTimezoneWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfMonthWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfMonthWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -79,7 +79,7 @@ func Test_dateBuilder_DayOfMonthWithTimezoneWithoutKey(t *testing.T) {
 func Test_dateBuilder_DayOfWeek(t *testing.T) {
 	t.Run("test DayOfWeek", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfWeek", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().DayOfWeek("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().DayOfWeek("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -97,7 +97,7 @@ func Test_dateBuilder_DayOfWeekWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfWeekWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfWeekWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -105,7 +105,7 @@ func Test_dateBuilder_DayOfWeekWithoutKey(t *testing.T) {
 func Test_dateBuilder_DayOfWeekWithTimezone(t *testing.T) {
 	t.Run("test DayOfWeekWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfWeek", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
-			BsonBuilder().DayOfWeekWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			NewBuilder().DayOfWeekWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -125,7 +125,7 @@ func Test_dateBuilder_DayOfWeekWithTimezoneWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfWeekWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfWeekWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -133,7 +133,7 @@ func Test_dateBuilder_DayOfWeekWithTimezoneWithoutKey(t *testing.T) {
 func Test_dateBuilder_DayOfYear(t *testing.T) {
 	t.Run("test DayOfYear", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfYear", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().DayOfYear("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().DayOfYear("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -151,7 +151,7 @@ func Test_dateBuilder_DayOfYearWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfYearWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfYearWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -159,7 +159,7 @@ func Test_dateBuilder_DayOfYearWithoutKey(t *testing.T) {
 func Test_dateBuilder_DayOfYearWithTimezone(t *testing.T) {
 	t.Run("test DayOfYearWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$dayOfYear", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
-			BsonBuilder().DayOfYearWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			NewBuilder().DayOfYearWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -179,7 +179,7 @@ func Test_dateBuilder_DayOfYearWithTimezoneWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DayOfYearWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DayOfYearWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -187,7 +187,7 @@ func Test_dateBuilder_DayOfYearWithTimezoneWithoutKey(t *testing.T) {
 func Test_dateBuilder_Year(t *testing.T) {
 	t.Run("test Year", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$year", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().Year("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().Year("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -205,7 +205,7 @@ func Test_dateBuilder_YearWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().YearWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().YearWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -213,7 +213,7 @@ func Test_dateBuilder_YearWithoutKey(t *testing.T) {
 func Test_dateBuilder_YearWithTimezone(t *testing.T) {
 	t.Run("test YearWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$year", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
-			BsonBuilder().YearWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			NewBuilder().YearWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -233,7 +233,7 @@ func Test_dateBuilder_YearWithTimezoneWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().YearWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().YearWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -241,7 +241,7 @@ func Test_dateBuilder_YearWithTimezoneWithoutKey(t *testing.T) {
 func Test_dateBuilder_Month(t *testing.T) {
 	t.Run("test Month", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$month", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().Month("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().Month("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -259,7 +259,7 @@ func Test_dateBuilder_MonthWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MonthWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().MonthWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -267,7 +267,7 @@ func Test_dateBuilder_MonthWithoutKey(t *testing.T) {
 func Test_dateBuilder_MonthWithTimezone(t *testing.T) {
 	t.Run("test MonthWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$month", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}},
-			BsonBuilder().MonthWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			NewBuilder().MonthWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -287,7 +287,7 @@ func Test_dateBuilder_MonthWithTimezoneWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MonthWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().MonthWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -295,7 +295,7 @@ func Test_dateBuilder_MonthWithTimezoneWithoutKey(t *testing.T) {
 func Test_dateBuilder_Week(t *testing.T) {
 	t.Run("test Week", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{bson.E{Key: "$week", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}}}},
-			BsonBuilder().Week("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
+			NewBuilder().Week("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)).Build())
 	})
 }
 
@@ -313,7 +313,7 @@ func Test_dateBuilder_WeekWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().WeekWithoutKey(tc.date).Build())
+			assert.Equal(t, tc.expected, NewBuilder().WeekWithoutKey(tc.date).Build())
 		})
 	}
 }
@@ -321,7 +321,7 @@ func Test_dateBuilder_WeekWithoutKey(t *testing.T) {
 func Test_dateBuilder_WeekWithTimezoneWithoutKey(t *testing.T) {
 	t.Run("test WeekWithTimezone", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "date", Value: bson.D{
-			bson.E{Key: "$week", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, BsonBuilder().WeekWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
+			bson.E{Key: "$week", Value: bson.D{bson.E{Key: "date", Value: time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC)}, bson.E{Key: "timezone", Value: "Asia/Shanghai"}}}}}}, NewBuilder().WeekWithTimezone("date", time.Date(2023, 10, 24, 0, 0, 0, 0, time.UTC), "Asia/Shanghai").Build())
 	})
 }
 
@@ -341,7 +341,7 @@ func Test_dateBuilder_WeekWithTimezone(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().WeekWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
+			assert.Equal(t, tc.expected, NewBuilder().WeekWithTimezoneWithoutKey(tc.date, tc.timezone).Build())
 		})
 	}
 }
@@ -410,7 +410,7 @@ func Test_dateBuilder_DateToString(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DateToString(tc.key, tc.date, tc.opt).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DateToString(tc.key, tc.date, tc.opt).Build())
 		})
 	}
 }
@@ -473,7 +473,7 @@ func Test_dateBuilder_DateToStringWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().DateToStringWithoutKey(tc.date, tc.opt).Build())
+			assert.Equal(t, tc.expected, NewBuilder().DateToStringWithoutKey(tc.date, tc.opt).Build())
 		})
 	}
 }

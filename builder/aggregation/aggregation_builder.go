@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func BsonBuilder() *Builder {
+func NewBuilder() *Builder {
 	b := &Builder{d: bson.D{}}
 
 	b.arithmeticBuilder = arithmeticBuilder{parent: b}
@@ -50,7 +50,7 @@ func (b *Builder) Build() bson.D {
 	return b.d
 }
 
-func (b *Builder) AddKeyValues(key string, value any) *Builder {
+func (b *Builder) KeyValue(key string, value any) *Builder {
 	b.d = append(b.d, bson.E{Key: key, Value: value})
 	return b
 }
