@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func BsonBuilder() *Builder {
+func NewBuilder() *Builder {
 	query := &Builder{
 		data: bson.D{},
 		err:  make([]error, 0),
@@ -54,9 +54,8 @@ func (b *Builder) Id(v any) *Builder {
 	return b
 }
 
-// Add appends given KeyValue elements to the builder's data slice. Each KeyValue
-// is converted into a bson.E before appending.
-func (b *Builder) Add(key string, value any) *Builder {
+// KeyValue appends given key-value pair to the builder's data slice.
+func (b *Builder) KeyValue(key string, value any) *Builder {
 	b.data = append(b.data, bson.E{Key: key, Value: value})
 	return b
 }

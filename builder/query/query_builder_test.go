@@ -22,17 +22,17 @@ import (
 )
 
 func TestQuery(t *testing.T) {
-	query := BsonBuilder()
+	query := NewBuilder()
 	assert.NotNil(t, query)
 	assert.Equal(t, bson.D{}, query.Build())
 }
 
 func TestQueryBuilder_Id(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "_id", Value: "123"}}, BsonBuilder().Id("123").Build())
+	assert.Equal(t, bson.D{{Key: "_id", Value: "123"}}, NewBuilder().Id("123").Build())
 }
 
-func TestQueryBuilder_Add(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}}, BsonBuilder().Add("name", "cmy").Add("age", 18).Add("scores", []int{100, 99, 98}).Build())
+func TestQueryBuilder_KeyValue(t *testing.T) {
+	assert.Equal(t, bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 18}, bson.E{Key: "scores", Value: []int{100, 99, 98}}}, NewBuilder().KeyValue("name", "cmy").KeyValue("age", 18).KeyValue("scores", []int{100, 99, 98}).Build())
 }
 
 func TestBuilder_TryMergeValue(t *testing.T) {
@@ -46,7 +46,7 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 	}{
 		{
 			name:     "not merge when key is not exist",
-			builder:  BsonBuilder(),
+			builder:  NewBuilder(),
 			key:      "age",
 			value:    bson.E{Key: LtOp, Value: 25},
 			wantBool: false,
@@ -54,7 +54,7 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 		},
 		{
 			name:     "not merge when key is different",
-			builder:  BsonBuilder().Gt("age", 18),
+			builder:  NewBuilder().Gt("age", 18),
 			key:      "name",
 			value:    bson.E{Key: EqOp, Value: "cmy"},
 			wantBool: false,
@@ -62,7 +62,7 @@ func TestBuilder_TryMergeValue(t *testing.T) {
 		},
 		{
 			name:     "merge when key is same",
-			builder:  BsonBuilder().Gt("age", 18),
+			builder:  NewBuilder().Gt("age", 18),
 			key:      "age",
 			value:    bson.E{Key: LtOp, Value: 25},
 			wantBool: true,

@@ -23,22 +23,22 @@ import (
 
 func Test_comparisonQueryBuilder(t *testing.T) {
 	// eq
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: EqOp, Value: "v1"}}}}, BsonBuilder().Eq("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: EqOp, Value: "v1"}}}}, NewBuilder().Eq("k1", "v1").Build())
 
 	// gt
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: GtOp, Value: "v1"}}}}, BsonBuilder().Gt("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: GtOp, Value: "v1"}}}}, NewBuilder().Gt("k1", "v1").Build())
 
 	// gte
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: GteOp, Value: "v1"}}}}, BsonBuilder().Gte("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: GteOp, Value: "v1"}}}}, NewBuilder().Gte("k1", "v1").Build())
 
 	// lt
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: LtOp, Value: "v1"}}}}, BsonBuilder().Lt("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: LtOp, Value: "v1"}}}}, NewBuilder().Lt("k1", "v1").Build())
 
 	// lte
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: LteOp, Value: "v1"}}}}, BsonBuilder().Lte("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: LteOp, Value: "v1"}}}}, NewBuilder().Lte("k1", "v1").Build())
 
 	// ne
-	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: NeOp, Value: "v1"}}}}, BsonBuilder().Ne("k1", "v1").Build())
+	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: NeOp, Value: "v1"}}}}, NewBuilder().Ne("k1", "v1").Build())
 }
 
 func TestBsonBuilder_In(t *testing.T) {
@@ -75,7 +75,7 @@ func TestBsonBuilder_In(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().In(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().In(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -114,7 +114,7 @@ func TestBsonBuilder_InUint(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InUint(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InUint(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -153,7 +153,7 @@ func TestBsonBuilder_InUint8(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InUint8(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InUint8(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -192,7 +192,7 @@ func TestBsonBuilder_InUint16(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InUint16(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InUint16(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -231,7 +231,7 @@ func TestBsonBuilder_InUint32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InUint32(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InUint32(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -270,7 +270,7 @@ func TestBsonBuilder_InUint64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InUint64(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InUint64(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -309,7 +309,7 @@ func TestBsonBuilder_InInt(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InInt(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InInt(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -348,7 +348,7 @@ func TestBsonBuilder_InInt8(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InInt8(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InInt8(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -387,7 +387,7 @@ func TestBsonBuilder_InInt16(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InInt16(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InInt16(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -426,7 +426,7 @@ func TestBsonBuilder_InInt32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InInt32(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InInt32(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -465,7 +465,7 @@ func TestBsonBuilder_InInt64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().InInt64(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().InInt64(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -504,7 +504,7 @@ func TestBsonBuilder_InFloat32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().InFloat32(tc.key, tc.values...).Build()
+			got := NewBuilder().InFloat32(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -544,7 +544,7 @@ func TestBsonBuilder_InFloat64(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().InFloat64(tc.key, tc.values...).Build()
+			got := NewBuilder().InFloat64(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -584,7 +584,7 @@ func TestBsonBuilder_InString(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().InString(tc.key, tc.values...).Build()
+			got := NewBuilder().InString(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -624,7 +624,7 @@ func TestBsonBuilder_Nin(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().Nin(tc.key, tc.values...).Build())
+			assert.Equal(t, tc.want, NewBuilder().Nin(tc.key, tc.values...).Build())
 		})
 	}
 }
@@ -663,7 +663,7 @@ func TestBsonBuilder_NinUint(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().NinUint(tc.key, tc.values...).Build()
+			got := NewBuilder().NinUint(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -703,7 +703,7 @@ func TestBsonBuilder_NinUint8(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().NinUint8(tc.key, tc.values...).Build()
+			got := NewBuilder().NinUint8(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -743,7 +743,7 @@ func TestBsonBuilder_NinUint16(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().NinUint16(tc.key, tc.values...).Build()
+			got := NewBuilder().NinUint16(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -785,7 +785,7 @@ func TestBsonBuilder_NinUint32(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := BsonBuilder().NinUint32(tc.key, tc.values...).Build()
+			got := NewBuilder().NinUint32(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -828,7 +828,7 @@ func TestBsonBuilder_NinUint64(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinUint64(tc.key, tc.values...).Build()
+			got := NewBuilder().NinUint64(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -871,7 +871,7 @@ func TestBsonBuilder_NinInt(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinInt(tc.key, tc.values...).Build()
+			got := NewBuilder().NinInt(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -914,7 +914,7 @@ func TestBsonBuilder_NinInt8(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinInt8(tc.key, tc.values...).Build()
+			got := NewBuilder().NinInt8(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -957,7 +957,7 @@ func TestBsonBuilder_NinInt16(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinInt16(tc.key, tc.values...).Build()
+			got := NewBuilder().NinInt16(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -1000,7 +1000,7 @@ func TestBsonBuilder_NinInt32(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinInt32(tc.key, tc.values...).Build()
+			got := NewBuilder().NinInt32(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -1043,7 +1043,7 @@ func TestBsonBuilder_NinInt64(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinInt64(tc.key, tc.values...).Build()
+			got := NewBuilder().NinInt64(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -1086,7 +1086,7 @@ func TestBsonBuilder_NinFloat32(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinFloat32(tc.key, tc.values...).Build()
+			got := NewBuilder().NinFloat32(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -1129,7 +1129,7 @@ func TestBsonBuilder_NinFloat64(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinFloat64(tc.key, tc.values...).Build()
+			got := NewBuilder().NinFloat64(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}
@@ -1172,7 +1172,7 @@ func TestBsonBuilder_NinString(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
-			got := BsonBuilder().NinString(tc.key, tc.values...).Build()
+			got := NewBuilder().NinString(tc.key, tc.values...).Build()
 			assert.Equal(t, tc.want, got)
 		})
 	}

@@ -23,15 +23,15 @@ import (
 )
 
 func Test_elementQueryBuilder_Exists(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$exists", Value: true}}}}, BsonBuilder().Exists("name", true).Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$exists", Value: true}}}}, NewBuilder().Exists("name", true).Build())
 }
 
 func Test_elementQueryBuilder_Type(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$type", Value: bson.TypeString}}}}, BsonBuilder().Type("name", bson.TypeString).Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$type", Value: bson.TypeString}}}}, NewBuilder().Type("name", bson.TypeString).Build())
 }
 
 func Test_elementQueryBuilder_TypeAlias(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$type", Value: "string"}}}}, BsonBuilder().TypeAlias("name", "string").Build())
+	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$type", Value: "string"}}}}, NewBuilder().TypeAlias("name", "string").Build())
 }
 
 func TestBsonBuilder_TypeArray(t *testing.T) {
@@ -77,7 +77,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().TypeArray(tc.key, tc.ts...).Build())
+			assert.Equal(t, tc.want, NewBuilder().TypeArray(tc.key, tc.ts...).Build())
 		})
 	}
 }
@@ -125,7 +125,7 @@ func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, BsonBuilder().TypeArrayAlias(tc.key, tc.ts...).Build())
+			assert.Equal(t, tc.want, NewBuilder().TypeArrayAlias(tc.key, tc.ts...).Build())
 		})
 	}
 }

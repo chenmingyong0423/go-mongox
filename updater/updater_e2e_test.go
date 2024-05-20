@@ -166,12 +166,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("2").Build(),
+			filter:  query.NewBuilder().Id("2").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -186,12 +186,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -206,12 +206,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			updates: map[string]any{
 				"$set": map[string]any{
 					"name": "chenmingyong",
@@ -230,12 +230,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("2").Build(),
+			filter:  query.NewBuilder().Id("2").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
@@ -250,7 +250,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			globalHook: []globalHook{
@@ -274,7 +274,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -288,7 +288,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				},
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -303,7 +303,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -330,7 +330,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				},
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: assert.NoError,
@@ -340,7 +340,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			beforeHook: []beforeHookFn{
@@ -360,7 +360,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -370,7 +370,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				},
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -385,7 +385,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
@@ -406,7 +406,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				},
 			},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: assert.NoError,
@@ -499,13 +499,13 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
 			},
 			ctx:      context.Background(),
 			operator: SetOp,
-			filter:   query.BsonBuilder().InString("_id", "3", "4").Build(),
+			filter:   query.NewBuilder().InString("_id", "3", "4").Build(),
 			updates:  bsonx.M("name", "Mingyong Chen"),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -523,13 +523,13 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			operator: SetOp,
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().InString("_id", "1", "2").Build(),
+			filter:   query.NewBuilder().InString("_id", "1", "2").Build(),
 			updates:  bsonx.M("name", "hhh"),
 			want:     &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -546,7 +546,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -567,7 +567,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			globalHook: []globalHook{
@@ -594,7 +594,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -608,7 +608,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				},
 			},
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().Id("1").Build(),
+			filter:   query.NewBuilder().Id("1").Build(),
 			updates:  bsonx.M("name", "chenmingyong"),
 			operator: SetOp,
 			want:     nil,
@@ -627,7 +627,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -665,7 +665,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
-			filter:  query.BsonBuilder().Id("1").Build(),
+			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			beforeHook: []beforeHookFn{
@@ -688,7 +688,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -706,7 +706,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				},
 			},
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().Id("1").Build(),
+			filter:   query.NewBuilder().Id("1").Build(),
 			updates:  bsonx.M("name", "chenmingyong"),
 			operator: SetOp,
 			want:     nil,
@@ -725,7 +725,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -865,13 +865,13 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			operator: SetOp,
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().Id("456").Build(),
+			filter:   query.NewBuilder().Id("456").Build(),
 			updates:  update.BsonBuilder().AddToSet("name", "cmy").Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -886,13 +886,13 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			operator: SetOp,
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().Id("123").Build(),
+			filter:   query.NewBuilder().Id("123").Build(),
 			updates:  update.BsonBuilder().Add("name", "hhh").Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -907,12 +907,12 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.BsonBuilder().Id("123").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("123").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:      context.Background(),
-			filter:   query.BsonBuilder().Id("123").Build(),
+			filter:   query.NewBuilder().Id("123").Build(),
 			operator: SetOp,
 			updates: map[string]any{
 				"name": "hhh",
@@ -930,13 +930,13 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 				assert.Equal(t, "123", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.BsonBuilder().InString("_id", "123", "456").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "123", "456").Build())
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:      context.Background(),
 			operator: SetOp,
-			filter:   query.BsonBuilder().Id("456").Build(),
+			filter:   query.NewBuilder().Id("456").Build(),
 			updates:  update.BsonBuilder().AddToSet("name", "cmy").Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
@@ -1033,7 +1033,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Id(primitive.NewObjectID()).Build(),
+			filter: query.NewBuilder().Id(primitive.NewObjectID()).Build(),
 			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
 			replacement: &TestUser{
 				ID:   primitive.NewObjectID(),
@@ -1052,7 +1052,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
 			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
 			replacement: &TestUser{
 				Name: "Mingyong Chen",
@@ -1090,7 +1090,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			want:   nil,
 			globalHook: []globalHook{
 				{
@@ -1121,7 +1121,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
 			replacement: bson.M{
 				"name": "chenmingyong",
 				"age":  18,
@@ -1156,7 +1156,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
 			replacement: bson.M{
 				"name": "chenmingyong",
 				"age":  18,
@@ -1191,7 +1191,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Id("1").Build(),
+			filter: query.NewBuilder().Id("1").Build(),
 			want:   nil,
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
@@ -1221,7 +1221,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
 			replacement: bson.M{
 				"name": "chenmingyong",
 				"age":  18,
@@ -1252,7 +1252,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.BsonBuilder().Eq("name", "Mingyong Chen").Build(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
 			replacement: bson.M{
 				"name": "chenmingyong",
 				"age":  18,
