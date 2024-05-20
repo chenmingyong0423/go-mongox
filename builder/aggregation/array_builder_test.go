@@ -26,7 +26,7 @@ import (
 func Test_arrayBuilder_ArrayElemAt(t *testing.T) {
 	t.Run("test arrayElemAt", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "first", Value: bson.D{{Key: "$arrayElemAt", Value: []any{"$favorites", int64(0)}}}}},
-			BsonBuilder().ArrayElemAt("first", "$favorites", 0).Build())
+			NewBuilder().ArrayElemAt("first", "$favorites", 0).Build())
 	})
 }
 
@@ -46,7 +46,7 @@ func Test_arrayBuilder_ArrayElemAtWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ArrayElemAtWithoutKey(tc.expression, tc.index).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ArrayElemAtWithoutKey(tc.expression, tc.index).Build())
 		})
 	}
 }
@@ -54,7 +54,7 @@ func Test_arrayBuilder_ArrayElemAtWithoutKey(t *testing.T) {
 func Test_arrayBuilder_ConcatArrays(t *testing.T) {
 	t.Run("test concatArrays", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$concatArrays", Value: []any{"$favorites", "$hobbies"}}}}},
-			BsonBuilder().ConcatArrays("favorites", "$favorites", "$hobbies").Build(),
+			NewBuilder().ConcatArrays("favorites", "$favorites", "$hobbies").Build(),
 		)
 	})
 }
@@ -73,7 +73,7 @@ func Test_arrayBuilder_ConcatArraysWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ConcatArraysWithoutKey(tc.arrays...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ConcatArraysWithoutKey(tc.arrays...).Build())
 		})
 	}
 }
@@ -81,7 +81,7 @@ func Test_arrayBuilder_ConcatArraysWithoutKey(t *testing.T) {
 func Test_arrayBuilder_ArrayToObject(t *testing.T) {
 	t.Run("test arrayToObject", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$arrayToObject", Value: "$favorites"}}}},
-			BsonBuilder().ArrayToObject("favorites", "$favorites").Build(),
+			NewBuilder().ArrayToObject("favorites", "$favorites").Build(),
 		)
 	})
 }
@@ -99,13 +99,13 @@ func Test_arrayBuilder_ArrayToObjectWithoutKey(t *testing.T) {
 		},
 		{
 			name:       "array expression",
-			expression: []any{BsonBuilder().KeyValue("k", "item").KeyValue("v", "abc123").Build()},
+			expression: []any{NewBuilder().KeyValue("k", "item").KeyValue("v", "abc123").Build()},
 			expected:   bson.D{{Key: "$arrayToObject", Value: []any{bson.D{{Key: "k", Value: "item"}, {Key: "v", Value: "abc123"}}}}},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ArrayToObjectWithoutKey(tc.expression).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ArrayToObjectWithoutKey(tc.expression).Build())
 		})
 	}
 }
@@ -113,7 +113,7 @@ func Test_arrayBuilder_ArrayToObjectWithoutKey(t *testing.T) {
 func Test_arrayBuilder_Size(t *testing.T) {
 	t.Run("test size", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$size", Value: "$favorites"}}}},
-			BsonBuilder().Size("favorites", "$favorites").Build(),
+			NewBuilder().Size("favorites", "$favorites").Build(),
 		)
 	})
 }
@@ -132,7 +132,7 @@ func Test_arrayBuilder_SizeWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SizeWithoutKey(tc.expression).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SizeWithoutKey(tc.expression).Build())
 		})
 	}
 }
@@ -140,7 +140,7 @@ func Test_arrayBuilder_SizeWithoutKey(t *testing.T) {
 func Test_arrayBuilder_Slice(t *testing.T) {
 	t.Run("test slice", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$slice", Value: []any{"$favorites", int64(5)}}}}},
-			BsonBuilder().Slice("favorites", "$favorites", 5).Build(),
+			NewBuilder().Slice("favorites", "$favorites", 5).Build(),
 		)
 	})
 }
@@ -161,7 +161,7 @@ func Test_arrayBuilder_SliceWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SliceWithoutKey(tc.array, tc.nElements).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SliceWithoutKey(tc.array, tc.nElements).Build())
 		})
 	}
 }
@@ -169,7 +169,7 @@ func Test_arrayBuilder_SliceWithoutKey(t *testing.T) {
 func Test_arrayBuilder_SliceWithPosition(t *testing.T) {
 	t.Run("test slice with position", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$slice", Value: []any{"$favorites", int64(2), int64(5)}}}}},
-			BsonBuilder().SliceWithPosition("favorites", "$favorites", 2, 5).Build(),
+			NewBuilder().SliceWithPosition("favorites", "$favorites", 2, 5).Build(),
 		)
 	})
 }
@@ -192,7 +192,7 @@ func Test_arrayBuilder_SliceWithPositionWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SliceWithPositionWithoutKey(tc.array, tc.position, tc.nElements).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SliceWithPositionWithoutKey(tc.array, tc.position, tc.nElements).Build())
 		})
 	}
 }
@@ -200,7 +200,7 @@ func Test_arrayBuilder_SliceWithPositionWithoutKey(t *testing.T) {
 func Test_arrayBuilder_Map(t *testing.T) {
 	t.Run("test map", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "favorites", Value: bson.D{{Key: "$map", Value: bson.D{{Key: "input", Value: "$items"}, {Key: "as", Value: "item"}, {Key: "in", Value: "$$item.price * 1.25"}}}}}},
-			BsonBuilder().Map("favorites", "$items", "item", "$$item.price * 1.25").Build(),
+			NewBuilder().Map("favorites", "$items", "item", "$$item.price * 1.25").Build(),
 		)
 	})
 }
@@ -223,7 +223,7 @@ func Test_arrayBuilder_MapWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().MapWithoutKey(tc.inputArray, tc.as, tc.in).Build())
+			assert.Equal(t, tc.expected, NewBuilder().MapWithoutKey(tc.inputArray, tc.as, tc.in).Build())
 		})
 	}
 }
@@ -256,7 +256,7 @@ func Test_arrayBuilder_Filter(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().Filter(tc.key, tc.inputArray, tc.cond, tc.opt).Build())
+			assert.Equal(t, tc.expected, NewBuilder().Filter(tc.key, tc.inputArray, tc.cond, tc.opt).Build())
 		})
 	}
 }
@@ -286,7 +286,7 @@ func Test_arrayBuilder_FilterWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().FilterWithoutKey(tc.inputArray, tc.cond, tc.opt).Build())
+			assert.Equal(t, tc.expected, NewBuilder().FilterWithoutKey(tc.inputArray, tc.cond, tc.opt).Build())
 		})
 	}
 }

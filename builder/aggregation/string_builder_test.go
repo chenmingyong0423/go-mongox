@@ -23,7 +23,7 @@ import (
 
 func Test_stringBuilder_Concat(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, BsonBuilder().Concat("item", "$item", " - ", "$description").Build())
+		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, NewBuilder().Concat("item", "$item", " - ", "$description").Build())
 	})
 }
 
@@ -51,14 +51,14 @@ func Test_stringBuilder_ConcatWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ConcatWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ConcatWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
 
 func Test_stringBuilder_SubstrBytes(t *testing.T) {
 	t.Run("normal", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "quarterSubtring", Value: bson.D{{Key: "$substrBytes", Value: []any{"$quarter", int64(0), int64(2)}}}}}, BsonBuilder().SubstrBytes("quarterSubtring", "$quarter", int64(0), int64(2)).Build())
+		assert.Equal(t, bson.D{bson.E{Key: "quarterSubtring", Value: bson.D{{Key: "$substrBytes", Value: []any{"$quarter", int64(0), int64(2)}}}}}, NewBuilder().SubstrBytes("quarterSubtring", "$quarter", int64(0), int64(2)).Build())
 	})
 }
 
@@ -80,14 +80,14 @@ func Test_stringBuilder_SubstrBytesWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().SubstrBytesWithoutKey(tc.stringExpression, tc.byteIndex, tc.byteCount).Build())
+			assert.Equal(t, tc.expected, NewBuilder().SubstrBytesWithoutKey(tc.stringExpression, tc.byteIndex, tc.byteCount).Build())
 		})
 	}
 }
 
 func Test_stringBuilder_ToLower(t *testing.T) {
 	t.Run("test ToLower", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toLower", Value: "$item"}}}}, BsonBuilder().ToLower("item", "$item").Build())
+		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toLower", Value: "$item"}}}}, NewBuilder().ToLower("item", "$item").Build())
 	})
 }
 
@@ -105,14 +105,14 @@ func Test_stringBuilder_ToLowerWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ToLowerWithoutKey(tc.expression).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ToLowerWithoutKey(tc.expression).Build())
 		})
 	}
 }
 
 func Test_stringBuilder_ToUpper(t *testing.T) {
 	t.Run("test ToUpper", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toUpper", Value: "$item"}}}}, BsonBuilder().ToUpper("item", "$item").Build())
+		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{{Key: "$toUpper", Value: "$item"}}}}, NewBuilder().ToUpper("item", "$item").Build())
 	})
 }
 
@@ -130,14 +130,14 @@ func Test_stringBuilder_ToUpperWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ToUpperWithoutKey(tc.expression).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ToUpperWithoutKey(tc.expression).Build())
 		})
 	}
 }
 
 func Test_stringBuilder_Contact(t *testing.T) {
 	t.Run("test Contact", func(t *testing.T) {
-		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, BsonBuilder().Contact("item", "$item", " - ", "$description").Build())
+		assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, NewBuilder().Contact("item", "$item", " - ", "$description").Build())
 	})
 }
 
@@ -155,7 +155,7 @@ func Test_stringBuilder_ContactWithoutKey(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().ContactWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().ContactWithoutKey(tc.expressions...).Build())
 		})
 	}
 }

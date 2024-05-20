@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func BsonBuilder() *Builder {
+func NewBuilder() *Builder {
 	b := &Builder{d: bson.D{}}
 
 	b.arithmeticBuilder = arithmeticBuilder{parent: b}

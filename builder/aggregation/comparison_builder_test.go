@@ -24,7 +24,7 @@ import (
 func Test_comparisonBuilder_Eq(t *testing.T) {
 	t.Run("test Eq", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$eq", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Eq("items", "$qty", 250).Build())
+			NewBuilder().Eq("items", "$qty", 250).Build())
 	})
 }
 
@@ -53,7 +53,7 @@ func Test_comparisonBuilder_EqWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().EqWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().EqWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -61,7 +61,7 @@ func Test_comparisonBuilder_EqWithoutKey(t *testing.T) {
 func Test_comparisonBuilder_Ne(t *testing.T) {
 	t.Run("test Ne", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$ne", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Ne("items", "$qty", 250).Build())
+			NewBuilder().Ne("items", "$qty", 250).Build())
 	})
 }
 
@@ -90,7 +90,7 @@ func Test_comparisonBuilder_NeWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().NeWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().NeWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -98,7 +98,7 @@ func Test_comparisonBuilder_NeWithoutKey(t *testing.T) {
 func Test_comparisonBuilder_Gt(t *testing.T) {
 	t.Run("test Gt", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$gt", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Gt("items", "$qty", 250).Build())
+			NewBuilder().Gt("items", "$qty", 250).Build())
 	})
 }
 
@@ -127,7 +127,7 @@ func Test_comparisonBuilder_GtWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().GtWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().GtWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -135,7 +135,7 @@ func Test_comparisonBuilder_GtWithoutKey(t *testing.T) {
 func Test_comparisonBuilder_Gte(t *testing.T) {
 	t.Run("test Gte", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$gte", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Gte("items", "$qty", 250).Build())
+			NewBuilder().Gte("items", "$qty", 250).Build())
 	})
 }
 
@@ -164,7 +164,7 @@ func Test_comparisonBuilder_GteWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().GteWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().GteWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -172,7 +172,7 @@ func Test_comparisonBuilder_GteWithoutKey(t *testing.T) {
 func Test_comparisonBuilder_Lt(t *testing.T) {
 	t.Run("test Lt", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$lt", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Lt("items", "$qty", 250).Build())
+			NewBuilder().Lt("items", "$qty", 250).Build())
 	})
 }
 
@@ -201,7 +201,7 @@ func Test_comparisonBuilder_LtWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().LtWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().LtWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
@@ -209,7 +209,7 @@ func Test_comparisonBuilder_LtWithoutKey(t *testing.T) {
 func Test_comparisonBuilder_Lte(t *testing.T) {
 	t.Run("test Lte", func(t *testing.T) {
 		assert.Equal(t, bson.D{bson.E{Key: "items", Value: bson.D{bson.E{Key: "$lte", Value: []any{"$qty", 250}}}}},
-			BsonBuilder().Lte("items", "$qty", 250).Build())
+			NewBuilder().Lte("items", "$qty", 250).Build())
 	})
 }
 
@@ -238,7 +238,7 @@ func Test_comparisonBuilder_LteWithoutKey(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, BsonBuilder().LteWithoutKey(tc.expressions...).Build())
+			assert.Equal(t, tc.expected, NewBuilder().LteWithoutKey(tc.expressions...).Build())
 		})
 	}
 }
