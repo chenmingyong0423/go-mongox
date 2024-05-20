@@ -15,7 +15,12 @@
 package mongox
 
 import (
+	"context"
+
+	"github.com/chenmingyong0423/go-mongox/hook/model"
+
 	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/hook/field"
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
@@ -25,4 +30,41 @@ func RegisterPlugin(name string, cb callback.CbFn, opType operation.OpType) {
 
 func RemovePlugin(name string, opType operation.OpType) {
 	callback.Callbacks.Remove(opType, name)
+}
+
+type PluginConfig struct {
+	EnableDefaultFieldHook bool
+	EnableModelHook        bool
+	EnableValidationHook   bool
+}
+
+func PluginInit(config PluginConfig) {
+	if config.EnableDefaultFieldHook {
+		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
+		for _, opType := range opTypes {
+			RegisterPlugin("mongox:default_field", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+				return field.Execute(ctx, opCtx, opType, opts...)
+			}, opType)
+		}
+	}
+	if config.EnableModelHook {
+		opTypes := []operation.OpType{
+			operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert,
+			operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert,
+			operation.OpTypeAfterFind,
+		}
+		for _, opType := range opTypes {
+			RegisterPlugin("mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+				return model.Execute(ctx, opCtx, opType, opts...)
+			}, opType)
+		}
+	}
+	if config.EnableValidationHook {
+		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
+		for _, opType := range opTypes {
+			RegisterPlugin("mongox:validation", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+				return field.Execute(ctx, opCtx, opType, opts...)
+			}, opType)
+		}
+	}
 }

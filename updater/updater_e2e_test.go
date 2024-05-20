@@ -1291,10 +1291,6 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
 				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
 				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
-				if tu, ok := tc.replacement.(*TestUser); ok {
-					require.NotZero(t, tu.CreatedAt)
-					require.NotZero(t, tu.UpdatedAt)
-				}
 			}
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)
