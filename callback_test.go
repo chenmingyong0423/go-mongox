@@ -18,6 +18,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
 	"github.com/stretchr/testify/assert"
@@ -226,5 +228,236 @@ func TestRegisterPlugin_Upsert(t *testing.T) {
 		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithReplacement(bson.M{"name": "Burt"})), operation.OpTypeAfterUpsert)
 		require.Nil(t, err)
 		assert.False(t, isCalled)
+	})
+}
+
+func TestPluginInit_EnableEnableDefaultFieldHook(t *testing.T) {
+	t.Run("beforeInsert", func(t *testing.T) {
+		model := &Model{}
+		err := callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(model)),
+			operation.OpTypeBeforeInsert,
+		)
+		require.Nil(t, err)
+		require.Zero(t, model.ID)
+		require.Zero(t, model.CreatedAt)
+
+		cfg := &PluginConfig{
+			EnableDefaultFieldHook: true,
+		}
+		InitPlugin(cfg)
+
+		err = callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(model)),
+			operation.OpTypeBeforeInsert,
+		)
+		require.Nil(t, err)
+		require.NotZero(t, model.ID)
+		require.NotZero(t, model.CreatedAt)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
+	})
+	t.Run("beforeUpsert", func(t *testing.T) {
+		model := &Model{}
+		err := callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(model)),
+			operation.OpTypeBeforeUpsert,
+		)
+		require.Nil(t, err)
+		require.Zero(t, model.ID)
+		require.Zero(t, model.CreatedAt)
+		require.Zero(t, model.UpdatedAt)
+
+		cfg := &PluginConfig{
+			EnableDefaultFieldHook: true,
+		}
+		InitPlugin(cfg)
+
+		err = callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithReplacement(model)),
+			operation.OpTypeBeforeUpsert,
+		)
+		require.Nil(t, err)
+		require.NotZero(t, model.ID)
+		require.NotZero(t, model.CreatedAt)
+		require.NotZero(t, model.UpdatedAt)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
+	})
+}
+
+type testModelHookStruct int
+
+func (t *testModelHookStruct) BeforeInsert(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) AfterInsert(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) BeforeUpsert(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) AfterUpsert(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) AfterFind(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func TestPluginInit_EnableModelHook(t *testing.T) {
+	testCases := []struct {
+		name     string
+		ctx      context.Context
+		ocOption func(tm *testModelHookStruct) operation.OpContextOption
+		opType   operation.OpType
+
+		wantErr error
+		want    testModelHookStruct
+	}{
+		{
+			name: "beforeInsert",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
+				return operation.WithDoc(tm)
+			},
+			opType:  operation.OpTypeBeforeInsert,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "afterInsert",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
+				return operation.WithDoc(tm)
+			},
+			opType:  operation.OpTypeAfterInsert,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "beforeUpsert",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
+				return operation.WithReplacement(tm)
+			},
+			opType:  operation.OpTypeBeforeUpsert,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "afterUpsert",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
+				return operation.WithReplacement(tm)
+			},
+			opType:  operation.OpTypeAfterUpsert,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "afterFind",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
+				return operation.WithDoc(tm)
+			},
+			opType:  operation.OpTypeAfterFind,
+			wantErr: nil,
+			want:    1,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tm := new(testModelHookStruct)
+			err := callback.GetCallback().Execute(
+				tc.ctx,
+				operation.NewOpContext(nil, tc.ocOption(tm)),
+				tc.opType,
+			)
+			require.Nil(t, err)
+			cfg := &PluginConfig{
+				EnableModelHook: true,
+			}
+			InitPlugin(cfg)
+			err = callback.GetCallback().Execute(
+				tc.ctx,
+				operation.NewOpContext(nil, tc.ocOption(tm)),
+				tc.opType,
+			)
+			require.Equal(t, tc.wantErr, err)
+			require.Equal(t, tc.want, *tm)
+			remoteModelPlugin()
+		})
+	}
+}
+
+func remoteModelPlugin() {
+	RemovePlugin("mongox:model", operation.OpTypeBeforeInsert)
+	RemovePlugin("mongox:model", operation.OpTypeAfterInsert)
+	RemovePlugin("mongox:model", operation.OpTypeBeforeUpsert)
+	RemovePlugin("mongox:model", operation.OpTypeAfterUpsert)
+	RemovePlugin("mongox:model", operation.OpTypeAfterFind)
+}
+
+func TestPluginInit_EnableValidationHook(t *testing.T) {
+	type TestModel struct {
+		Name string `validate:"required"`
+	}
+	t.Run("beforeInsert", func(t *testing.T) {
+		err := callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(&TestModel{})),
+			operation.OpTypeBeforeInsert,
+		)
+		require.Nil(t, err)
+
+		cfg := &PluginConfig{
+			EnableValidationHook: true,
+		}
+		InitPlugin(cfg)
+
+		err = callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(&TestModel{})),
+			operation.OpTypeBeforeInsert,
+		)
+		require.NotNil(t, err.(validator.ValidationErrors))
+		RemovePlugin("mongox:validation", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:validation", operation.OpTypeBeforeUpsert)
+	})
+	t.Run("beforeUpsert", func(t *testing.T) {
+		err := callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(&TestModel{})),
+			operation.OpTypeBeforeUpsert,
+		)
+		require.Nil(t, err)
+
+		cfg := &PluginConfig{
+			EnableValidationHook: true,
+		}
+		InitPlugin(cfg)
+
+		err = callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithReplacement(&TestModel{})),
+			operation.OpTypeBeforeUpsert,
+		)
+		require.NotNil(t, err.(validator.ValidationErrors))
+		RemovePlugin("mongox:validation", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:validation", operation.OpTypeBeforeUpsert)
 	})
 }

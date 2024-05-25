@@ -17,6 +17,8 @@ package mongox
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/hook/validator"
+
 	"github.com/chenmingyong0423/go-mongox/hook/model"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
@@ -38,7 +40,7 @@ type PluginConfig struct {
 	EnableValidationHook   bool
 }
 
-func PluginInit(config PluginConfig) {
+func InitPlugin(config *PluginConfig) {
 	if config.EnableDefaultFieldHook {
 		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
@@ -63,7 +65,7 @@ func PluginInit(config PluginConfig) {
 		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
 			RegisterPlugin("mongox:validation", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-				return field.Execute(ctx, opCtx, opType, opts...)
+				return validator.Execute(ctx, opCtx, opType, opts...)
 			}, opType)
 		}
 	}
