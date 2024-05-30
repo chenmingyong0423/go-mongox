@@ -16,6 +16,7 @@ package mongox
 
 import (
 	"context"
+	validator2 "github.com/go-playground/validator/v10"
 
 	"github.com/chenmingyong0423/go-mongox/hook/validator"
 
@@ -38,6 +39,8 @@ type PluginConfig struct {
 	EnableDefaultFieldHook bool
 	EnableModelHook        bool
 	EnableValidationHook   bool
+	// use to replace to the default validate instance
+	Validate *validator2.Validate
 }
 
 func InitPlugin(config *PluginConfig) {
@@ -62,6 +65,7 @@ func InitPlugin(config *PluginConfig) {
 		}
 	}
 	if config.EnableValidationHook {
+		validator.SetValidate(config.Validate)
 		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
 			RegisterPlugin("mongox:validation", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
