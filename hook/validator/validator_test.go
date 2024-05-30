@@ -17,6 +17,7 @@ package validator
 import (
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"time"
@@ -28,11 +29,12 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
+type User struct {
+	Name string `bson:"name"`
+	Age  int    `bson:"age" validate:"gte=0,lte=150"`
+}
+
 func TestExecute(t *testing.T) {
-	type User struct {
-		Name string `bson:"name"`
-		Age  int    `bson:"age" validate:"gte=0,lte=150"`
-	}
 
 	testCases := []struct {
 		name string
@@ -159,4 +161,67 @@ func TestExecute(t *testing.T) {
 			tc.errFunc(t, err)
 		})
 	}
+}
+
+func Test_getPayload(t *testing.T) {
+	testCases := []struct {
+		name   string
+		opCtx  *operation.OpContext
+		opType operation.OpType
+
+		want any
+	}{
+		{
+			name:   "nil opCtx",
+			opCtx:  nil,
+			opType: operation.OpTypeBeforeInsert,
+
+			want: nil,
+		},
+		{
+			name:   "empty opCtx",
+			opCtx:  &operation.OpContext{},
+			opType: operation.OpTypeBeforeInsert,
+
+			want: nil,
+		},
+		{
+			name:   "unexpected opType",
+			opCtx:  &operation.OpContext{Doc: &User{}},
+			opType: "unexpected",
+
+			want: nil,
+		},
+		{
+			name:   "BeforeInsert",
+			opCtx:  &operation.OpContext{Doc: &User{}},
+			opType: operation.OpTypeBeforeInsert,
+
+			want: &User{},
+		},
+		{
+			name:   "BeforeUpsert",
+			opCtx:  &operation.OpContext{Replacement: &User{}},
+			opType: operation.OpTypeBeforeUpsert,
+
+			want: &User{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := getPayload(tc.opCtx, tc.opType)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestSetValidate(t *testing.T) {
+	v := validate
+	SetValidate(nil)
+	assert.Equal(t, v, validate)
+
+	v = validator.New()
+	SetValidate(v)
+	assert.Equal(t, v, validate)
 }

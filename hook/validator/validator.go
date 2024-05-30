@@ -26,7 +26,16 @@ import (
 
 var validate = validator.New()
 
+func SetValidate(v *validator.Validate) {
+	if v != nil {
+		validate = v
+	}
+}
+
 func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
+	if opCtx == nil {
+		return nil
+	}
 	switch opType {
 	case operation.OpTypeBeforeInsert:
 		return opCtx.Doc
@@ -43,13 +52,14 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 		return nil
 	}
 	value := reflect.ValueOf(payLoad)
-	if value.IsZero() {
-		return nil
-	}
+
 	switch value.Type().Kind() {
 	case reflect.Slice:
 		return executeSlice(ctx, value, opts...)
 	case reflect.Ptr:
+		if value.IsZero() {
+			return nil
+		}
 		return execute(ctx, value, opts...)
 	default:
 		return nil
