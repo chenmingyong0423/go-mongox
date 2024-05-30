@@ -22,11 +22,12 @@ import (
 )
 
 func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
+	if opCtx == nil {
+		return nil
+	}
 	switch opType {
 	case operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert, operation.OpTypeAfterFind:
 		return opCtx.Doc
-	case operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate:
-		return opCtx.Updates
 	case operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
 		return opCtx.Replacement
 	default:
@@ -40,13 +41,14 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 		return nil
 	}
 	valueOf := reflect.ValueOf(payLoad)
-	if valueOf.IsZero() {
-		return nil
-	}
+
 	switch valueOf.Type().Kind() {
 	case reflect.Slice:
 		return executeSlice(ctx, valueOf, opType, opts...)
 	case reflect.Ptr:
+		if valueOf.IsZero() {
+			return nil
+		}
 		return execute(ctx, payLoad, opType, opts...)
 	default:
 		return nil
@@ -64,6 +66,9 @@ func executeSlice(ctx context.Context, docs reflect.Value, opType operation.OpTy
 }
 
 func execute(ctx context.Context, doc any, opType operation.OpType, _ ...any) error {
+	if doc == nil {
+		return nil
+	}
 	switch opType {
 	case operation.OpTypeBeforeInsert:
 		if m, ok := doc.(BeforeInsert); ok {
