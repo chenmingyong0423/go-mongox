@@ -48,9 +48,10 @@ func InitPlugin(config *PluginConfig) {
 	if config.EnableDefaultFieldHook {
 		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
+			typ := opType
 			RegisterPlugin("mongox:default_field", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-				return field.Execute(ctx, opCtx, opType, opts...)
-			}, opType)
+				return field.Execute(ctx, opCtx, typ, opts...)
+			}, typ)
 		}
 	}
 	if config.EnableModelHook {
@@ -60,18 +61,20 @@ func InitPlugin(config *PluginConfig) {
 			operation.OpTypeAfterFind,
 		}
 		for _, opType := range opTypes {
+			typ := opType
 			RegisterPlugin("mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-				return model.Execute(ctx, opCtx, opType, opts...)
-			}, opType)
+				return model.Execute(ctx, opCtx, typ, opts...)
+			}, typ)
 		}
 	}
 	if config.EnableValidationHook {
 		validator.SetValidate(config.Validate)
 		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
+			typ := opType
 			RegisterPlugin("mongox:validation", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-				return validator.Execute(ctx, opCtx, opType, opts...)
-			}, opType)
+				return validator.Execute(ctx, opCtx, typ, opts...)
+			}, typ)
 		}
 	}
 }
