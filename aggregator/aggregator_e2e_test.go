@@ -158,7 +158,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Sort(bsonx.M("age", -1)).Build(),
+			pipeline: aggregation.NewStageBuilder().Sort(bsonx.M("age", -1)).Build(),
 			want: []*TestUser{
 				{
 					Name: "chenmingyong", Age: 24,
@@ -189,7 +189,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Sort(bsonx.M("age", 1)).Build(),
+			pipeline: aggregation.NewStageBuilder().Sort(bsonx.M("age", 1)).Build(),
 			aggregationOptions: []*options.AggregateOptions{
 				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
 			},
@@ -271,7 +271,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Build(),
+			pipeline: aggregation.NewStageBuilder().Set(bsonx.M("is_programmer", true)).Build(),
 			result:   make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
@@ -295,7 +295,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline: aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
+			pipeline: aggregation.NewStageBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
 			result:   make([]*User, 0, 4),
 			want: []*User{
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
@@ -320,7 +320,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline:           aggregation.StageBsonBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
+			pipeline:           aggregation.NewStageBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
 			result:             []string{},
 			want:               []*User{},
 			aggregationOptions: options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
