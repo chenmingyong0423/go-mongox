@@ -23,7 +23,7 @@ type StageBuilder struct {
 	pipeline mongo.Pipeline
 }
 
-func StageBsonBuilder() *StageBuilder {
+func NewStageBuilder() *StageBuilder {
 	return &StageBuilder{pipeline: make([]bson.D, 0, 4)}
 }
 

@@ -64,7 +64,7 @@ func TestStageBuilder_AddFields(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().AddFields(tc.value).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().AddFields(tc.value).Build())
 		})
 	}
 }
@@ -109,7 +109,7 @@ func TestStageBuilder_Set(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Set(tc.value).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Set(tc.value).Build())
 		})
 	}
 }
@@ -211,7 +211,7 @@ func TestStageBuilder_Bucket(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Bucket(tc.groupBy, tc.boundaries, tc.opt).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Bucket(tc.groupBy, tc.boundaries, tc.opt).Build())
 		})
 	}
 }
@@ -286,7 +286,7 @@ func TestStageBuilder_BucketAuto(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().BucketAuto(tc.groupBy, tc.buckets, tc.opt).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().BucketAuto(tc.groupBy, tc.buckets, tc.opt).Build())
 		})
 	}
 }
@@ -310,7 +310,7 @@ func TestStageBuilder_Match(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Match(tc.expression).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Match(tc.expression).Build())
 		})
 	}
 }
@@ -372,7 +372,7 @@ func TestStageBuilder_Group(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Group(tc.id, tc.accumulators...).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Group(tc.id, tc.accumulators...).Build())
 		})
 	}
 }
@@ -401,7 +401,7 @@ func TestStageBuilder_Sort(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Sort(tc.value).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Sort(tc.value).Build())
 		})
 	}
 }
@@ -430,17 +430,17 @@ func TestStageBuilder_Project(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Project(tc.value).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Project(tc.value).Build())
 		})
 	}
 }
 
 func TestStageBuilder_Limit(t *testing.T) {
-	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$limit", Value: int64(10)}}}, StageBsonBuilder().Limit(10).Build())
+	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$limit", Value: int64(10)}}}, NewStageBuilder().Limit(10).Build())
 }
 
 func TestStageBuilder_Skip(t *testing.T) {
-	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$skip", Value: int64(10)}}}, StageBsonBuilder().Skip(10).Build())
+	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$skip", Value: int64(10)}}}, NewStageBuilder().Skip(10).Build())
 }
 
 func TestStageBuilder_Unwind(t *testing.T) {
@@ -495,7 +495,7 @@ func TestStageBuilder_Unwind(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Unwind(tc.path, tc.opt).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Unwind(tc.path, tc.opt).Build())
 		})
 	}
 }
@@ -524,7 +524,7 @@ func TestStageBuilder_ReplaceWith(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().ReplaceWith(tc.replacementDocument).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().ReplaceWith(tc.replacementDocument).Build())
 		})
 	}
 }
@@ -612,7 +612,7 @@ func TestStageBuilder_Facet(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Facet(tc.value).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Facet(tc.value).Build())
 		})
 	}
 }
@@ -645,13 +645,13 @@ func TestStageBuilder_SortByCount(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().SortByCount(tc.expression).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().SortByCount(tc.expression).Build())
 		})
 	}
 }
 
 func TestStageBuilder_Count(t *testing.T) {
-	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$count", Value: "passing_scores"}}}, StageBsonBuilder().Count("passing_scores").Build())
+	assert.Equal(t, mongo.Pipeline{bson.D{bson.E{Key: "$count", Value: "passing_scores"}}}, NewStageBuilder().Count("passing_scores").Build())
 }
 
 func TestStageBuilder_Lookup(t *testing.T) {
@@ -723,7 +723,7 @@ func TestStageBuilder_Lookup(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, StageBsonBuilder().Lookup(tc.from, tc.as, tc.opt).Build())
+			assert.Equal(t, tc.want, NewStageBuilder().Lookup(tc.from, tc.as, tc.opt).Build())
 		})
 	}
 }
