@@ -21,14 +21,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 

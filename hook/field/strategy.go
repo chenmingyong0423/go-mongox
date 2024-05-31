@@ -26,6 +26,9 @@ var strategies = map[operation.OpType]func(doc any) error{
 }
 
 func BeforeInsert(doc any) error {
+	if doc == nil {
+		return nil
+	}
 	if tsh, ok := doc.(hook.DefaultModelHook); ok {
 		tsh.DefaultId()
 		tsh.DefaultCreatedAt()
@@ -34,6 +37,9 @@ func BeforeInsert(doc any) error {
 }
 
 func BeforeUpdate(doc any) error {
+	if doc == nil {
+		return nil
+	}
 	if tsh, ok := doc.(hook.DefaultModelHook); ok {
 		tsh.DefaultUpdatedAt()
 	}
@@ -41,6 +47,9 @@ func BeforeUpdate(doc any) error {
 }
 
 func BeforeUpsert(doc any) error {
+	if doc == nil {
+		return nil
+	}
 	if tsh, ok := doc.(hook.DefaultModelHook); ok {
 		tsh.DefaultId()
 		tsh.DefaultCreatedAt()

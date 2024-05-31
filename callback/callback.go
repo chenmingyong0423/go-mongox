@@ -17,11 +17,6 @@ package callback
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/hook/validator"
-
-	"github.com/chenmingyong0423/go-mongox/hook/model"
-
-	"github.com/chenmingyong0423/go-mongox/hook/field"
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
@@ -31,75 +26,16 @@ var Callbacks = initializeCallbacks()
 
 func initializeCallbacks() *Callback {
 	return &Callback{
-		beforeInsert: []callbackHandler{
-			{
-				name: "mongox:default_field",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return field.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
-				},
-			},
-			{
-				name: "mongox:model",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
-				},
-			},
-			{
-				name: "mongox:validation",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return validator.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
-				},
-			},
-		},
-		afterInsert: []callbackHandler{
-			{
-				name: "mongox:model",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeAfterInsert, opts...)
-				},
-			},
-		},
+		beforeInsert: make([]callbackHandler, 0),
+		afterInsert:  make([]callbackHandler, 0),
 		beforeUpdate: make([]callbackHandler, 0),
 		afterUpdate:  make([]callbackHandler, 0),
 		beforeDelete: make([]callbackHandler, 0),
 		afterDelete:  make([]callbackHandler, 0),
-		beforeUpsert: []callbackHandler{
-			{
-				name: "mongox:default_field",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
-				},
-			},
-			{
-				name: "mongox:model",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
-				},
-			},
-			{
-				name: "mongox:validation",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return validator.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
-				},
-			},
-		},
-		afterUpsert: []callbackHandler{
-			{
-				name: "mongox:model",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeAfterUpsert, opts...)
-				},
-			},
-		},
-		beforeFind: make([]callbackHandler, 0),
-		afterFind: []callbackHandler{
-			{
-				name: "mongox:model",
-				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-					return model.Execute(ctx, opCtx, operation.OpTypeAfterFind, opts...)
-				},
-			},
-		},
+		beforeUpsert: make([]callbackHandler, 0),
+		afterUpsert:  make([]callbackHandler, 0),
+		beforeFind:   make([]callbackHandler, 0),
+		afterFind:    make([]callbackHandler, 0),
 	}
 }
 

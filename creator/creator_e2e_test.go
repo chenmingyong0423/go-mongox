@@ -316,7 +316,6 @@ func TestCreator_e2e_One(t *testing.T) {
 			}
 			if err == nil {
 				require.NotNil(t, insertOneResult.InsertedID)
-				require.NotZero(t, tc.doc.CreatedAt)
 			}
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)
@@ -598,9 +597,6 @@ func TestCreator_e2e_Many(t *testing.T) {
 			if err == nil {
 				require.NotNil(t, insertManyResult)
 				require.Len(t, insertManyResult.InsertedIDs, tc.wantIdsLength)
-				for _, doc := range tc.docs {
-					require.NotZero(t, doc.CreatedAt)
-				}
 			}
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)

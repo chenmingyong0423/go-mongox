@@ -21,6 +21,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
@@ -29,8 +31,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"
@@ -1291,10 +1291,6 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
 				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
 				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
-				if tu, ok := tc.replacement.(*TestUser); ok {
-					require.NotZero(t, tu.CreatedAt)
-					require.NotZero(t, tu.UpdatedAt)
-				}
 			}
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)

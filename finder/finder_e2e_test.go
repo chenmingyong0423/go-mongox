@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -375,11 +375,13 @@ func TestFinder_e2e_Find(t *testing.T) {
 			name:    "nil filter error",
 			before:  func(_ context.Context, _ *testing.T) {},
 			after:   func(_ context.Context, _ *testing.T) {},
+			ctx:     context.Background(),
 			filter:  nil,
 			wantErr: require.Error,
 		},
 		{
 			name: "decode error",
+			ctx:  context.Background(),
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&IllegalUser{
@@ -425,6 +427,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:     context.Background(),
 			filter:  query.Eq("name", "cmy"),
 			want:    []*TestUser{},
 			wantErr: require.NoError,
@@ -451,6 +454,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: bson.D{},
 			want: []*TestUser{
 				{
@@ -486,6 +490,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: query.In("name", "chenmingyong", "burt"),
 			want: []*TestUser{
 				{
@@ -521,6 +526,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: query.In("name", "chenmingyong", "burt"),
 			opts: []*options.FindOptions{
 				{
@@ -551,6 +557,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 					},
 				},
 			},
+			ctx: context.Background(),
 			wantErr: func(t require.TestingT, err error, i ...interface{}) {
 				require.Equal(t, errors.New("before hook error"), err)
 			},
@@ -577,6 +584,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
 			globalHook: []globalHook{
 				{
@@ -613,6 +621,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
 			globalHook: []globalHook{
 				{
@@ -660,6 +669,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 					return errors.New("before hook error")
 				},
 			},
+			ctx: context.Background(),
 			wantErr: func(t require.TestingT, err error, i ...interface{}) {
 				require.Equal(t, errors.New("before hook error"), err)
 			},
@@ -686,6 +696,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
+			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
 			afterHook: []afterHookFn[TestUser]{
 				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
@@ -712,6 +723,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.NoError(t, err)
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
+			ctx: context.Background(),
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
