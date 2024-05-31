@@ -18,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func BsonBuilder() *Builder {
+func NewBuilder() *Builder {
 	b := &Builder{data: bson.D{}}
 	b.fieldUpdateBuilder = fieldUpdateBuilder{parent: b}
 	b.arrayUpdateBuilder = arrayUpdateBuilder{parent: b}

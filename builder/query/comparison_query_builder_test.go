@@ -41,7 +41,7 @@ func Test_comparisonQueryBuilder(t *testing.T) {
 	assert.Equal(t, bson.D{bson.E{Key: "k1", Value: bson.D{bson.E{Key: NeOp, Value: "v1"}}}}, NewBuilder().Ne("k1", "v1").Build())
 }
 
-func TestBsonBuilder_In(t *testing.T) {
+func TestNewBuilder_In(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -80,7 +80,7 @@ func TestBsonBuilder_In(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InUint(t *testing.T) {
+func TestNewBuilder_InUint(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -119,7 +119,7 @@ func TestBsonBuilder_InUint(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InUint8(t *testing.T) {
+func TestNewBuilder_InUint8(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -158,7 +158,7 @@ func TestBsonBuilder_InUint8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InUint16(t *testing.T) {
+func TestNewBuilder_InUint16(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -197,7 +197,7 @@ func TestBsonBuilder_InUint16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InUint32(t *testing.T) {
+func TestNewBuilder_InUint32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -236,7 +236,7 @@ func TestBsonBuilder_InUint32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InUint64(t *testing.T) {
+func TestNewBuilder_InUint64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -275,7 +275,7 @@ func TestBsonBuilder_InUint64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InInt(t *testing.T) {
+func TestNewBuilder_InInt(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -314,7 +314,7 @@ func TestBsonBuilder_InInt(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InInt8(t *testing.T) {
+func TestNewBuilder_InInt8(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -353,7 +353,7 @@ func TestBsonBuilder_InInt8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InInt16(t *testing.T) {
+func TestNewBuilder_InInt16(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -392,7 +392,7 @@ func TestBsonBuilder_InInt16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InInt32(t *testing.T) {
+func TestNewBuilder_InInt32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -431,7 +431,7 @@ func TestBsonBuilder_InInt32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InInt64(t *testing.T) {
+func TestNewBuilder_InInt64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -470,7 +470,7 @@ func TestBsonBuilder_InInt64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InFloat32(t *testing.T) {
+func TestNewBuilder_InFloat32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -510,7 +510,7 @@ func TestBsonBuilder_InFloat32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InFloat64(t *testing.T) {
+func TestNewBuilder_InFloat64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -550,7 +550,7 @@ func TestBsonBuilder_InFloat64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_InString(t *testing.T) {
+func TestNewBuilder_InString(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -590,7 +590,7 @@ func TestBsonBuilder_InString(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_Nin(t *testing.T) {
+func TestNewBuilder_Nin(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -629,7 +629,7 @@ func TestBsonBuilder_Nin(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinUint(t *testing.T) {
+func TestNewBuilder_NinUint(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -669,7 +669,7 @@ func TestBsonBuilder_NinUint(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinUint8(t *testing.T) {
+func TestNewBuilder_NinUint8(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -709,7 +709,7 @@ func TestBsonBuilder_NinUint8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinUint16(t *testing.T) {
+func TestNewBuilder_NinUint16(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -749,7 +749,7 @@ func TestBsonBuilder_NinUint16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinUint32(t *testing.T) {
+func TestNewBuilder_NinUint32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -791,7 +791,7 @@ func TestBsonBuilder_NinUint32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinUint64(t *testing.T) {
+func TestNewBuilder_NinUint64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -834,7 +834,7 @@ func TestBsonBuilder_NinUint64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinInt(t *testing.T) {
+func TestNewBuilder_NinInt(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -877,7 +877,7 @@ func TestBsonBuilder_NinInt(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinInt8(t *testing.T) {
+func TestNewBuilder_NinInt8(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -920,7 +920,7 @@ func TestBsonBuilder_NinInt8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinInt16(t *testing.T) {
+func TestNewBuilder_NinInt16(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -963,7 +963,7 @@ func TestBsonBuilder_NinInt16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinInt32(t *testing.T) {
+func TestNewBuilder_NinInt32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -1006,7 +1006,7 @@ func TestBsonBuilder_NinInt32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinInt64(t *testing.T) {
+func TestNewBuilder_NinInt64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -1049,7 +1049,7 @@ func TestBsonBuilder_NinInt64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinFloat32(t *testing.T) {
+func TestNewBuilder_NinFloat32(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -1092,7 +1092,7 @@ func TestBsonBuilder_NinFloat32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinFloat64(t *testing.T) {
+func TestNewBuilder_NinFloat64(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
@@ -1135,7 +1135,7 @@ func TestBsonBuilder_NinFloat64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_NinString(t *testing.T) {
+func TestNewBuilder_NinString(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string

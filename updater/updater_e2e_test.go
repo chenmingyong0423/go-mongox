@@ -172,7 +172,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("2").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -192,7 +192,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -236,7 +236,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("2").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
@@ -251,7 +251,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			globalHook: []globalHook{
 				{
@@ -289,7 +289,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Equal(t, errors.New("after hook error"), err)
@@ -331,7 +331,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: assert.NoError,
 		},
@@ -341,7 +341,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opContext *BeforeOpContext, opts ...any) error {
@@ -371,7 +371,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Equal(t, errors.New("after hook error"), err)
@@ -407,7 +407,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "chenmingyong").Build(),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: assert.NoError,
 		},
@@ -568,7 +568,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			globalHook: []globalHook{
 				{
@@ -666,7 +666,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  query.NewBuilder().Id("1").Build(),
-			updates: update.BsonBuilder().Set("name", "Mingyong Chen").Build(),
+			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
@@ -872,7 +872,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: SetOp,
 			ctx:      context.Background(),
 			filter:   query.NewBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSet("name", "cmy").Build(),
+			updates:  update.NewBuilder().AddToSet("name", "cmy").Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -893,7 +893,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			operator: SetOp,
 			ctx:      context.Background(),
 			filter:   query.NewBuilder().Id("123").Build(),
-			updates:  update.BsonBuilder().KeyValue("name", "hhh").Build(),
+			updates:  update.NewBuilder().KeyValue("name", "hhh").Build(),
 			want:     &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
@@ -937,7 +937,7 @@ func TestUpdater_e2e_UpdatesWithOperator(t *testing.T) {
 			ctx:      context.Background(),
 			operator: SetOp,
 			filter:   query.NewBuilder().Id("456").Build(),
-			updates:  update.BsonBuilder().AddToSet("name", "cmy").Build(),
+			updates:  update.NewBuilder().AddToSet("name", "cmy").Build(),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},

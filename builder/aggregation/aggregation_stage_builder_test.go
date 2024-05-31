@@ -576,13 +576,13 @@ func TestStageBuilder_Facet(t *testing.T) {
 		//	//]
 		//	name: "replacementDocument of bson.D",
 		//	value: bsonx.NewD().
-		//		Add("categorizedByTags", StageBsonBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()).
-		//		Add("categorizedByPrice", StageBsonBuilder().Match(
+		//		Add("categorizedByTags", StageNewBuilder().Unwind("$tags", nil).SortByCount("$tags").Build()).
+		//		Add("categorizedByPrice", StageNewBuilder().Match(
 		//			NewBuilder().KeyValue("price", NewBuilder().KeyValue("$exists", 1).Build()).Build()).Bucket("$price", []any{0, 150, 200, 300, 400}, &BucketOptions{
 		//			DefaultKey: "Other",
 		//			Output:     NewBuilder().KeyValue("count", NewBuilder().Sum(1).Build()).KeyValue("titles", NewBuilder().Push("$title").Build()).Build(),
 		//		}).Build()).
-		//		Add("categorizedByYears(Auto)", StageBsonBuilder().BucketAuto("$year", 4, nil).Build()).Build(),
+		//		Add("categorizedByYears(Auto)", StageNewBuilder().BucketAuto("$year", 4, nil).Build()).Build(),
 		//	want: mongo.Pipeline{bson.D{bson.E{Key: "$facet", Value: bson.D{
 		//		bson.E{Key: "categorizedByTags", Value: mongo.Pipeline{
 		//			bson.D{bson.E{Key: "$unwind", Value: "$tags"}},
