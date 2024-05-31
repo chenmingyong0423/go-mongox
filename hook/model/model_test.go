@@ -16,10 +16,11 @@ package model
 
 import (
 	"context"
-	"github.com/chenmingyong0423/go-mongox/operation"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/stretchr/testify/assert"
 )
 
 type entity struct {

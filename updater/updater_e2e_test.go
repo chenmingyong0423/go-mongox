@@ -19,8 +19,9 @@ package updater
 import (
 	"context"
 	"errors"
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"testing"
+
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 

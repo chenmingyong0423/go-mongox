@@ -17,10 +17,11 @@ package validator
 import (
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/go-playground/validator/v10"
 
