@@ -15,7 +15,7 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

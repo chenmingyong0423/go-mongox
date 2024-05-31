@@ -16,11 +16,10 @@ package creator
 
 import (
 	"context"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

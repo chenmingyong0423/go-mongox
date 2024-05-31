@@ -20,12 +20,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
 	"github.com/chenmingyong0423/go-mongox/operation"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 

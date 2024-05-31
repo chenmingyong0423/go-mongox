@@ -19,6 +19,7 @@ package deleter
 import (
 	"context"
 	"fmt"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/callback"
@@ -27,8 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 

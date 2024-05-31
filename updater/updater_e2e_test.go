@@ -19,6 +19,7 @@ package updater
 import (
 	"context"
 	"errors"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -29,8 +30,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.mongodb.org/mongo-driver/bson"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/builder/query"
 	"github.com/chenmingyong0423/go-mongox/builder/update"

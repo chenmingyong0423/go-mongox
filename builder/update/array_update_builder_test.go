@@ -15,11 +15,10 @@
 package update
 
 import (
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
-
-	"github.com/chenmingyong0423/go-mongox/pkg/utils"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
