@@ -34,7 +34,7 @@ func Test_elementQueryBuilder_TypeAlias(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "name", Value: bson.D{bson.E{Key: "$type", Value: "string"}}}}, NewBuilder().TypeAlias("name", "string").Build())
 }
 
-func TestBsonBuilder_TypeArray(t *testing.T) {
+func TestNewBuilder_TypeArray(t *testing.T) {
 
 	testCases := []struct {
 		name string
@@ -82,7 +82,7 @@ func TestBsonBuilder_TypeArray(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_TypeArrayAlias(t *testing.T) {
+func TestNewBuilder_TypeArrayAlias(t *testing.T) {
 
 	testCases := []struct {
 		name string

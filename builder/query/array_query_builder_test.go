@@ -25,7 +25,7 @@ func Test_arrayQueryBuilder_ElemMatch(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "age", Value: bson.D{bson.E{Key: "$elemMatch", Value: bson.D{bson.E{Key: "$gt", Value: 1}}}}}}, NewBuilder().ElemMatch("age", NewBuilder().KeyValue("$gt", 1).Build()).Build())
 }
 
-func TestBsonBuilder_All(t *testing.T) {
+func TestNewBuilder_All(t *testing.T) {
 
 	testCases := []struct {
 		name   string
@@ -80,7 +80,7 @@ func TestBsonBuilder_All(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllUint(t *testing.T) {
+func TestNewBuilder_AllUint(t *testing.T) {
 
 	testCases := []struct {
 		name   string
@@ -136,7 +136,7 @@ func TestBsonBuilder_AllUint(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllUint8(t *testing.T) {
+func TestNewBuilder_AllUint8(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -191,7 +191,7 @@ func TestBsonBuilder_AllUint8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllUint16(t *testing.T) {
+func TestNewBuilder_AllUint16(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -246,7 +246,7 @@ func TestBsonBuilder_AllUint16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllUint32(t *testing.T) {
+func TestNewBuilder_AllUint32(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -301,7 +301,7 @@ func TestBsonBuilder_AllUint32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllUint64(t *testing.T) {
+func TestNewBuilder_AllUint64(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -356,7 +356,7 @@ func TestBsonBuilder_AllUint64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllInt(t *testing.T) {
+func TestNewBuilder_AllInt(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -411,7 +411,7 @@ func TestBsonBuilder_AllInt(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllInt8(t *testing.T) {
+func TestNewBuilder_AllInt8(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -467,7 +467,7 @@ func TestBsonBuilder_AllInt8(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllInt16(t *testing.T) {
+func TestNewBuilder_AllInt16(t *testing.T) {
 	testCases := []struct {
 		name    string
 		key     string
@@ -521,7 +521,7 @@ func TestBsonBuilder_AllInt16(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllInt32(t *testing.T) {
+func TestNewBuilder_AllInt32(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -576,7 +576,7 @@ func TestBsonBuilder_AllInt32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllInt64(t *testing.T) {
+func TestNewBuilder_AllInt64(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -631,7 +631,7 @@ func TestBsonBuilder_AllInt64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllFloat32(t *testing.T) {
+func TestNewBuilder_AllFloat32(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -686,7 +686,7 @@ func TestBsonBuilder_AllFloat32(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllFloat64(t *testing.T) {
+func TestNewBuilder_AllFloat64(t *testing.T) {
 
 	testCases := []struct {
 		name    string
@@ -741,7 +741,7 @@ func TestBsonBuilder_AllFloat64(t *testing.T) {
 	}
 }
 
-func TestBsonBuilder_AllString(t *testing.T) {
+func TestNewBuilder_AllString(t *testing.T) {
 
 	testCases := []struct {
 		name    string
