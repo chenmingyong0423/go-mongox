@@ -21,7 +21,6 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/operation"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -60,11 +59,6 @@ func (u *Updater[T]) Updates(updates any) *Updater[T] {
 
 func (u *Updater[T]) Replacement(replacement any) *Updater[T] {
 	u.replacement = replacement
-	return u
-}
-
-func (u *Updater[T]) UpdatesWithOperator(operator string, value any) *Updater[T] {
-	u.updates = bson.D{bson.E{Key: operator, Value: value}}
 	return u
 }
 
