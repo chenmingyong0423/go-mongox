@@ -47,10 +47,6 @@ type (
 	afterHookFn  func(ctx context.Context, opContext *AfterOpContext, opts ...any) error
 )
 
-const (
-	SetOp = "$set"
-)
-
 type User struct {
 	Id           string `bson:"_id"`
 	Name         string `bson:"name"`
