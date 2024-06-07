@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/chenmingyong0423/go-mongox-doc/main/docs/public/go-mongox-logo.png" width="200" height="200" akt="go-mongox"></img>
+  <img src="https://raw.githubusercontent.com/chenmingyong0423/go-mongox-doc/main/docs/public/go-mongox-logo.png" width="200" height="200" akt="go mongox"></img>
 </p>
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/chenmingyong0423/go-mongox)](https://github.com/chenmingyong0423/go-mongox/stargazers)
@@ -13,7 +13,7 @@
 
 English | [中文简体](./README-zh_CN.md)
 
-# go-mongox
+# go mongox
 `go mongox` is a generic library for Go Mongo based on the official driver, extending the official framework of MongoDB. Utilizing generic programming, it facilitates the binding of structs to `MongoDB` collections, aiming to provide type safety and streamlined data operations. `go mongox` introduces chainable calls for smoother document handling and offers a rich set of `BSON` builders and built-in functions to simplify the construction of `BSON` data. Moreover, it supports plugin-based programming and incorporates various hooks, offering flexibility for custom logic before and after database operations, thus enhancing the application's extensibility and maintainability.
 
 # Feature Highlights
