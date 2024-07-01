@@ -20,6 +20,7 @@ import (
 )
 
 const (
+	Abs                   = "$abs"
 	StageLookUpOp         = "$lookup"
 	AddFieldsOp           = "$addFields"
 	SetOp                 = "$set"
