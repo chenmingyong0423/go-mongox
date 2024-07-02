@@ -86,3 +86,16 @@ func (b *arithmeticBuilder) ModWithoutKey(expressions ...any) *Builder {
 	b.parent.d = append(b.parent.d, bson.E{Key: ModOp, Value: expressions})
 	return b.parent
 }
+
+func (b *arithmeticBuilder) Abs(key string, expression any) *Builder {
+	e := bson.E{Key: Abs, Value: expression}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.d = append(b.parent.d, bson.E{Key: key, Value: bson.D{e}})
+	}
+	return b.parent
+}
+
+func (b *arithmeticBuilder) AbsWithoutKey(expression any) *Builder {
+	b.parent.d = append(b.parent.d, bson.E{Key: Abs, Value: expression})
+	return b.parent
+}

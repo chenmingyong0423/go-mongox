@@ -184,3 +184,54 @@ func Test_arithmeticBuilder_ModWithoutKey(t *testing.T) {
 		})
 	}
 }
+
+func Test_arithmeticBuilder_Abs(t *testing.T) {
+	testCases := []struct {
+		name       string
+		key        string
+		expression any
+		expected   bson.D
+	}{
+		{
+			name:       "normal",
+			key:        "hours",
+			expression: "$hours",
+			expected:   bson.D{bson.E{Key: "hours", Value: bson.D{bson.E{Key: "$abs", Value: "$hours"}}}},
+		},
+		{
+			name:       "nested expression",
+			key:        "tempDiff",
+			expression: bson.M{"$subtract": []any{"$startTemp", "$endTemp"}},
+			expected:   bson.D{bson.E{Key: "tempDiff", Value: bson.D{bson.E{Key: "$abs", Value: bson.M{"$subtract": []any{"$startTemp", "$endTemp"}}}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, NewBuilder().Abs(tc.key, tc.expression).Build())
+		})
+	}
+}
+
+func Test_arithmeticBuilder_AbsWithoutKey(t *testing.T) {
+	testCases := []struct {
+		name       string
+		expression any
+		expected   bson.D
+	}{
+		{
+			name:       "normal",
+			expression: "$hours",
+			expected:   bson.D{bson.E{Key: "$abs", Value: "$hours"}},
+		},
+		{
+			name:       "nested expression",
+			expression: bson.M{"$subtract": []any{"$startTemp", "$endTemp"}},
+			expected:   bson.D{bson.E{Key: "$abs", Value: bson.M{"$subtract": []any{"$startTemp", "$endTemp"}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, NewBuilder().AbsWithoutKey(tc.expression).Build())
+		})
+	}
+}
