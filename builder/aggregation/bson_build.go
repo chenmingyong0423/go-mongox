@@ -20,133 +20,40 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func Sum(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SumOp, Value: expression}}}}
-}
-
-func Push(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: PushOp, Value: expression}}}}
-}
-
-func Avg(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AvgOp, Value: expression}}}}
-}
-
-func First(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FirstOp, Value: expression}}}}
-}
-
-func Last(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LastOp, Value: expression}}}}
-}
-
-func Min(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MinOp, Value: expression}}}}
-}
-
-func Max(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MaxOp, Value: expression}}}}
-}
-
 func Add(key string, expression ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AddOp, Value: expression}}}}
 }
 
-func Multiply(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MultiplyOp, Value: expressions}}}}
-}
-
-func Subtract(key string, expression ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SubtractOp, Value: expression}}}}
-}
-
-func Divide(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: DivideOp, Value: expressions}}}}
-}
-
-func Mod(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ModOp, Value: expressions}}}}
+func And(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AndOp, Value: expressions}}}}
 }
 
 func ArrayElemAt(key string, expression any, index int64) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ArrayElemAtOp, Value: []any{expression, index}}}}}
 }
 
-func ConcatArrays(key string, arrays ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ConcatArraysOp, Value: arrays}}}}
-}
-
 func ArrayToObject(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ArrayToObjectOp, Value: expression}}}}
 }
 
-func Size(key string, expression any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SizeOp, Value: expression}}}}
+func Avg(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AvgOp, Value: expression}}}}
 }
 
-func Slice(key string, array any, nElements int64) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SliceOp, Value: []any{array, nElements}}}}}
+func Concat(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ConcatOp, Value: expressions}}}}
 }
 
-func SliceWithPosition(key string, array any, position, nElements int64) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SliceOp, Value: []any{array, position, nElements}}}}}
-}
-
-func Map(key string, inputArray any, as string, in any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MapOp, Value: bson.D{bson.E{Key: InputOp, Value: inputArray}, {Key: AsOp, Value: as}, {Key: InOp, Value: in}}}}}}
-}
-
-func Filter(key string, inputArray any, cond any, opt *FilterOptions) bson.D {
-	d := bson.D{bson.E{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
-	if opt != nil {
-		if opt.As != "" {
-			d = append(d, bson.E{Key: AsOp, Value: opt.As})
-		}
-		if opt.Limit != 0 {
-			d = append(d, bson.E{Key: LIMIT, Value: opt.Limit})
-		}
-	}
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FilterOp, Value: d}}}}
-}
-
-func Eq(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: EqOp, Value: expressions}}}}
-}
-
-func Ne(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: NeOp, Value: expressions}}}}
-}
-
-func Gt(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: GtOp, Value: expressions}}}}
-}
-
-func Gte(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: GteOp, Value: expressions}}}}
-}
-
-func Lt(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LtOp, Value: expressions}}}}
-}
-
-func Lte(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LteOp, Value: expressions}}}}
+func ConcatArrays(key string, arrays ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ConcatArraysOp, Value: arrays}}}}
 }
 
 func Cond(key string, boolExpr, tureExpr, falseExpr any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: CondOp, Value: []any{boolExpr, tureExpr, falseExpr}}}}}
 }
 
-func IfNull(key string, expr, replacement any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: IfNullOp, Value: []any{expr, replacement}}}}}
-}
-
-func Switch(key string, cases []CaseThen, defaultCase any) bson.D {
-	branches := bson.A{}
-	for _, caseThen := range cases {
-		branches = append(branches, bson.D{bson.E{Key: CaseOp, Value: caseThen.Case}, {Key: ThenOp, Value: caseThen.Then}})
-	}
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SwitchOp, Value: bson.D{bson.E{Key: BranchesOp, Value: branches}, bson.E{Key: DefaultCaseOp, Value: defaultCase}}}}}}
+func Contact(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ContactOp, Value: expressions}}}}
 }
 
 func DateToString(key string, date any, opt *DateToStringOptions) bson.D {
@@ -189,12 +96,69 @@ func DayOfYearWithTimezone(key string, date time.Time, timezone string) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: DayOfYearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
 }
 
-func Year(key string, date time.Time) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: YearOp, Value: date}}}}
+func Divide(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: DivideOp, Value: expressions}}}}
 }
 
-func YearWithTimezone(key string, date time.Time, timezone string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: YearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
+func Eq(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: EqOp, Value: expressions}}}}
+}
+
+func Filter(key string, inputArray any, cond any, opt *FilterOptions) bson.D {
+	d := bson.D{bson.E{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
+	if opt != nil {
+		if opt.As != "" {
+			d = append(d, bson.E{Key: AsOp, Value: opt.As})
+		}
+		if opt.Limit != 0 {
+			d = append(d, bson.E{Key: LIMIT, Value: opt.Limit})
+		}
+	}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FilterOp, Value: d}}}}
+}
+
+func First(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FirstOp, Value: expression}}}}
+}
+
+func Gt(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: GtOp, Value: expressions}}}}
+}
+
+func Gte(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: GteOp, Value: expressions}}}}
+}
+
+func IfNull(key string, expr, replacement any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: IfNullOp, Value: []any{expr, replacement}}}}}
+}
+
+func Last(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LastOp, Value: expression}}}}
+}
+
+func Lt(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LtOp, Value: expressions}}}}
+}
+
+func Lte(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LteOp, Value: expressions}}}}
+}
+
+func Map(key string, inputArray any, as string, in any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MapOp, Value: bson.D{bson.E{Key: InputOp, Value: inputArray}, {Key: AsOp, Value: as}, {Key: InOp, Value: in}}}}}}
+}
+
+func Max(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MaxOp, Value: expression}}}}
+}
+
+func Min(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MinOp, Value: expression}}}}
+}
+
+func Mod(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ModOp, Value: expressions}}}}
 }
 
 func Month(key string, date time.Time) bson.D {
@@ -205,32 +169,56 @@ func MonthWithTimezone(key string, date time.Time, timezone string) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MonthOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
 }
 
-func Week(key string, date time.Time) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: WeekOp, Value: date}}}}
+func Multiply(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: MultiplyOp, Value: expressions}}}}
 }
 
-func WeekWithTimezone(key string, date time.Time, timezone string) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
-}
-
-func And(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AndOp, Value: expressions}}}}
-}
-
-func Or(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: OrOp, Value: expressions}}}}
+func Ne(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: NeOp, Value: expressions}}}}
 }
 
 func Not(key string, expressions ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: NotOp, Value: expressions}}}}
 }
 
-func Concat(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ConcatOp, Value: expressions}}}}
+func Or(key string, expressions ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: OrOp, Value: expressions}}}}
+}
+
+func Push(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: PushOp, Value: expression}}}}
+}
+
+func Size(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SizeOp, Value: expression}}}}
+}
+
+func Slice(key string, array any, nElements int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SliceOp, Value: []any{array, nElements}}}}}
+}
+
+func SliceWithPosition(key string, array any, position, nElements int64) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SliceOp, Value: []any{array, position, nElements}}}}}
 }
 
 func SubstrBytes(key string, stringExpression string, byteIndex int64, byteCount int64) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SubstrBytesOp, Value: []any{stringExpression, byteIndex, byteCount}}}}}
+}
+
+func Subtract(key string, expression ...any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SubtractOp, Value: expression}}}}
+}
+
+func Sum(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SumOp, Value: expression}}}}
+}
+
+func Switch(key string, cases []CaseThen, defaultCase any) bson.D {
+	branches := bson.A{}
+	for _, caseThen := range cases {
+		branches = append(branches, bson.D{bson.E{Key: CaseOp, Value: caseThen.Case}, {Key: ThenOp, Value: caseThen.Then}})
+	}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SwitchOp, Value: bson.D{bson.E{Key: BranchesOp, Value: branches}, bson.E{Key: DefaultCaseOp, Value: defaultCase}}}}}}
 }
 
 func ToLower(key string, expression any) bson.D {
@@ -241,6 +229,18 @@ func ToUpper(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ToUpperOp, Value: expression}}}}
 }
 
-func Contact(key string, expressions ...any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ContactOp, Value: expressions}}}}
+func Week(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: WeekOp, Value: date}}}}
+}
+
+func WeekWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: WeekOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
+}
+
+func Year(key string, date time.Time) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: YearOp, Value: date}}}}
+}
+
+func YearWithTimezone(key string, date time.Time, timezone string) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: YearOp, Value: bson.D{bson.E{Key: DateOp, Value: date}, bson.E{Key: TimezoneOp, Value: timezone}}}}}}
 }
