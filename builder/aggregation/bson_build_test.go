@@ -283,7 +283,7 @@ func Test_Cond(t *testing.T) {
 }
 
 func Test_IfNull(t *testing.T) {
-	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: []any{"$coupon", int64(0)}}}}}, IfNull("discount", "$coupon", int64(0)))
+	assert.Equal(t, bson.D{bson.E{Key: "discount", Value: bson.D{{Key: "$ifNull", Value: bson.A{"$coupon", int64(0)}}}}}, IfNull("discount", "$coupon", int64(0)))
 
 }
 
@@ -455,4 +455,90 @@ func Test_ToUpper(t *testing.T) {
 
 func Test_Contact(t *testing.T) {
 	assert.Equal(t, bson.D{bson.E{Key: "item", Value: bson.D{bson.E{Key: "$concat", Value: []any{"$item", " - ", "$description"}}}}}, Contact("item", "$item", " - ", "$description"))
+}
+
+func TestAbs(t *testing.T) {
+	t.Run("test abs", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "hours", Value: bson.D{bson.E{Key: "$abs", Value: "$hours"}}}}, Abs("hours", "$hours"))
+	})
+}
+
+func TestCeil(t *testing.T) {
+	t.Run("test ceil", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "ceilingValue", Value: bson.D{bson.E{Key: "$ceil", Value: "$value"}}}},
+			Ceil("ceilingValue", "$value"),
+		)
+	})
+}
+
+func TestExp(t *testing.T) {
+	t.Run("test exp", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "expValue", Value: bson.D{bson.E{Key: "$exp", Value: "$value"}}}},
+			Exp("expValue", "$value"),
+		)
+	})
+}
+
+func TestFloor(t *testing.T) {
+	t.Run("test floor", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "floorValue", Value: bson.D{bson.E{Key: "$floor", Value: "$value"}}}},
+			Floor("floorValue", "$value"),
+		)
+	})
+}
+
+func TestLn(t *testing.T) {
+	t.Run("test ln", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "lnValue", Value: bson.D{bson.E{Key: "$ln", Value: "$value"}}}},
+			Ln("lnValue", "$value"),
+		)
+	})
+}
+
+func TestLog(t *testing.T) {
+	t.Run("test log", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "logValue", Value: bson.D{bson.E{Key: "$log", Value: bson.A{"$value", 2}}}}},
+			Log("logValue", "$value", 2),
+		)
+	})
+}
+
+func TestLog10(t *testing.T) {
+	t.Run("test log10", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "log10Value", Value: bson.D{bson.E{Key: "$log10", Value: bson.A{"$value", 10}}}}},
+			Log10("log10Value", "$value"),
+		)
+	})
+}
+
+func TestPow(t *testing.T) {
+	t.Run("test pow", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "powValue", Value: bson.D{bson.E{Key: "$pow", Value: bson.A{"$value", 2}}}}},
+			Pow("powValue", "$value", 2),
+		)
+	})
+}
+
+func TestRound(t *testing.T) {
+	t.Run("test round", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "roundValue", Value: bson.D{bson.E{Key: "$round", Value: bson.A{"$value", 2}}}}},
+			Round("roundValue", "$value", 2),
+		)
+	})
+}
+
+func TestSqrt(t *testing.T) {
+	t.Run("test sqrt", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "sqrtValue", Value: bson.D{bson.E{Key: "$sqrt", Value: "$value"}}}},
+			Sqrt("sqrtValue", "$value"),
+		)
+	})
+}
+
+func TestTrunc(t *testing.T) {
+	t.Run("test trunc", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "truncValue", Value: bson.D{bson.E{Key: "$trunc", Value: bson.A{"$value", 0}}}}},
+			Trunc("truncValue", "$value", 0),
+		)
+	})
 }

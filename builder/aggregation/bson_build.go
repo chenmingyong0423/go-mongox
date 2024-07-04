@@ -20,6 +20,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func Abs(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AbsOp, Value: expression}}}}
+}
+
 func Add(key string, expression ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AddOp, Value: expression}}}}
 }
@@ -38,6 +42,10 @@ func ArrayToObject(key string, expression any) bson.D {
 
 func Avg(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: AvgOp, Value: expression}}}}
+}
+
+func Ceil(key string, expression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: CeilOp, Value: expression}}}}
 }
 
 func Concat(key string, expressions ...any) bson.D {
@@ -104,6 +112,10 @@ func Eq(key string, expressions ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: EqOp, Value: expressions}}}}
 }
 
+func Exp(key string, exponent any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ExpOp, Value: exponent}}}}
+}
+
 func Filter(key string, inputArray any, cond any, opt *FilterOptions) bson.D {
 	d := bson.D{bson.E{Key: InputOp, Value: inputArray}, {Key: CondWithoutOperatorOp, Value: cond}}
 	if opt != nil {
@@ -121,6 +133,10 @@ func First(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FirstOp, Value: expression}}}}
 }
 
+func Floor(key string, numberExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: FloorOp, Value: numberExpression}}}}
+}
+
 func Gt(key string, expressions ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: GtOp, Value: expressions}}}}
 }
@@ -130,11 +146,23 @@ func Gte(key string, expressions ...any) bson.D {
 }
 
 func IfNull(key string, expr, replacement any) bson.D {
-	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: IfNullOp, Value: []any{expr, replacement}}}}}
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: IfNullOp, Value: bson.A{expr, replacement}}}}}
 }
 
 func Last(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LastOp, Value: expression}}}}
+}
+
+func Ln(key string, numberExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LnOp, Value: numberExpression}}}}
+}
+
+func Log(key string, numberExpression, baseNumberExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: LogOp, Value: bson.A{numberExpression, baseNumberExpression}}}}}
+}
+
+func Log10(key string, numberExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: Log10Op, Value: bson.A{numberExpression, 10}}}}}
 }
 
 func Lt(key string, expressions ...any) bson.D {
@@ -185,8 +213,16 @@ func Or(key string, expressions ...any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: OrOp, Value: expressions}}}}
 }
 
+func Pow(key string, numberExpression, exponentExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: PowOp, Value: bson.A{numberExpression, exponentExpression}}}}}
+}
+
 func Push(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: PushOp, Value: expression}}}}
+}
+
+func Round(key string, numberExpression, placeExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: RoundOp, Value: bson.A{numberExpression, placeExpression}}}}}
 }
 
 func Size(key string, expression any) bson.D {
@@ -199,6 +235,10 @@ func Slice(key string, array any, nElements int64) bson.D {
 
 func SliceWithPosition(key string, array any, position, nElements int64) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SliceOp, Value: []any{array, position, nElements}}}}}
+}
+
+func Sqrt(key string, numberExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: SqrtOp, Value: numberExpression}}}}
 }
 
 func SubstrBytes(key string, stringExpression string, byteIndex int64, byteCount int64) bson.D {
@@ -227,6 +267,10 @@ func ToLower(key string, expression any) bson.D {
 
 func ToUpper(key string, expression any) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: ToUpperOp, Value: expression}}}}
+}
+
+func Trunc(key string, numberExpression, placeExpression any) bson.D {
+	return bson.D{bson.E{Key: key, Value: bson.D{bson.E{Key: TruncOp, Value: bson.A{numberExpression, placeExpression}}}}}
 }
 
 func Week(key string, date time.Time) bson.D {
