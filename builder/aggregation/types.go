@@ -20,102 +20,104 @@ import (
 )
 
 const (
-	AbsOp      = "$abs"
-	AddOp      = "$add"
-	CeilOp     = "$ceil"
-	DivideOp   = "$divide"
-	ExpOp      = "$exp"
-	FloorOp    = "$floor"
-	LnOp       = "$ln"
-	LogOp      = "$log"
-	Log10Op    = "$log10"
-	ModOp      = "$mod"
-	MultiplyOp = "$multiply"
-	PowOp      = "$pow"
-	RoundOp    = "$round"
-	SqrtOp     = "$sqrt"
-	SubtractOp = "$subtract"
-	TruncOp    = "$trunc"
-
-	StageLookUpOp         = "$lookup"
-	AddFieldsOp           = "$addFields"
-	SetOp                 = "$set"
-	SumOp                 = "$sum"
-	BucketOp              = "$bucket"
-	BucketAutoOp          = "$bucketAuto"
-	ContactOp             = "$concat"
-	PushOp                = "$push"
-	MatchOp               = "$match"
-	GroupOp               = "$group"
-	DateToStringOp        = "$dateToString"
-	AvgOp                 = "$avg"
-	SortOp                = "$sort"
-	ProjectOp             = "$project"
-	SkipOp                = "$skip"
-	UnwindOp              = "$unwind"
-	ReplaceWithOp         = "$replaceWith"
-	ArrayToObjectOp       = "$arrayToObject"
-	FacetOp               = "$facet"
-	SortByCountOp         = "$sortByCount"
-	CountOp               = "$count"
-	EqOp                  = "$eq"
-	NeOp                  = "$ne"
-	GtOp                  = "$gt"
-	GteOp                 = "$gte"
-	LtOp                  = "$lt"
-	LteOp                 = "$lte"
+	AbsOp                 = "$abs"
+	AddOp                 = "$add"
 	AndOp                 = "$and"
-	NotOp                 = "$not"
-	OrOp                  = "$or"
-	ConcatOp              = "$concat"
-	SubstrBytesOp         = "$substrBytes"
-	ToLowerOp             = "$toLower"
-	ToUpperOp             = "$toUpper"
 	ArrayElemAtOp         = "$arrayElemAt"
+	ArrayToObjectOp       = "$arrayToObject"
+	AsOp                  = "as"
+	AvgOp                 = "$avg"
+	BranchesOp            = "branches"
+	CaseOp                = "case"
+	CeilOp                = "$ceil"
 	ConcatArraysOp        = "$concatArrays"
-	SizeOp                = "$size"
-	SliceOp               = "$slice"
+	ConcatOp              = "$concat"
+	CondOp                = "$cond"
+	CondWithoutOperatorOp = "cond"
+	ContactOp             = "$concat"
+	DateOp                = "date"
+	DateToStringOp        = "$dateToString"
 	DayOfMonthOp          = "$dayOfMonth"
 	DayOfWeekOp           = "$dayOfWeek"
 	DayOfYearOp           = "$dayOfYear"
-	YearOp                = "$year"
-	MonthOp               = "$month"
-	WeekOp                = "$week"
-	CondOp                = "$cond"
-	IfNullOp              = "$ifNull"
-	SwitchOp              = "$switch"
-	FirstOp               = "$first"
-	LastOp                = "$last"
-	MinOp                 = "$min"
-	MaxOp                 = "$max"
-	MapOp                 = "$map"
+	DefaultCaseOp         = "default"
+	DivideOp              = "$divide"
+	EqOp                  = "$eq"
+	ExpOp                 = "$exp"
 	FilterOp              = "$filter"
-	InputOp               = "input"
-	AsOp                  = "as"
+	FirstOp               = "$first"
+	FloorOp               = "$floor"
+	FormatOp              = "format"
+	GtOp                  = "$gt"
+	GteOp                 = "$gte"
+	IfNullOp              = "$ifNull"
 	InOp                  = "in"
-	LimitOp               = "$limit"
+	InputOp               = "input"
+	LastOp                = "$last"
 	LIMIT                 = "limit"
-	CondWithoutOperatorOp = "cond"
-
-	GroupByOp     = "groupBy"
-	BoundariesOp  = "boundaries"
-	DefaultOp     = "default"
-	OutputOp      = "output"
-	BucketsOp     = "buckets"
-	GranularityOp = "granularity"
-	DateOp        = "date"
-	FormatOp      = "format"
-	TimezoneOp    = "timezone"
-	OnNullOp      = "onNull"
-	BranchesOp    = "branches"
-	CaseOp        = "case"
-	ThenOp        = "then"
-	DefaultCaseOp = "default"
+	LnOp                  = "$ln"
+	Log10Op               = "$log10"
+	LogOp                 = "$log"
+	LtOp                  = "$lt"
+	LteOp                 = "$lte"
+	MapOp                 = "$map"
+	MaxOp                 = "$max"
+	MinOp                 = "$min"
+	ModOp                 = "$mod"
+	MonthOp               = "$month"
+	MultiplyOp            = "$multiply"
+	NeOp                  = "$ne"
+	NotOp                 = "$not"
+	OnNullOp              = "onNull"
+	OrOp                  = "$or"
+	PowOp                 = "$pow"
+	PushOp                = "$push"
+	RoundOp               = "$round"
+	SizeOp                = "$size"
+	SliceOp               = "$slice"
+	SqrtOp                = "$sqrt"
+	SubstrBytesOp         = "$substrBytes"
+	SubtractOp            = "$subtract"
+	SumOp                 = "$sum"
+	SwitchOp              = "$switch"
+	ThenOp                = "then"
+	TimezoneOp            = "timezone"
+	ToLowerOp             = "$toLower"
+	ToUpperOp             = "$toUpper"
+	TruncOp               = "$trunc"
+	WeekOp                = "$week"
+	YearOp                = "$year"
 )
 
-type UnWindOptions struct {
-	IncludeArrayIndex          string
-	PreserveNullAndEmptyArrays bool
+// Stages
+const (
+	StageAddFieldsOp   = "$addFields"
+	StageBoundariesOp  = "boundaries"
+	StageBucketAutoOp  = "$bucketAuto"
+	StageBucketOp      = "$bucket"
+	StageBucketsOp     = "buckets"
+	StageCountOp       = "$count"
+	StageDefaultOp     = "default"
+	StageFacetOp       = "$facet"
+	StageGranularityOp = "granularity"
+	StageGroupByOp     = "groupBy"
+	StageGroupOp       = "$group"
+	StageLimitOp       = "$limit"
+	StageLookUpOp      = "$lookup"
+	StageMatchOp       = "$match"
+	StageOutputOp      = "output"
+	StageProjectOp     = "$project"
+	StageReplaceWithOp = "$replaceWith"
+	StageSetOp         = "$set"
+	StageSkipOp        = "$skip"
+	StageSortByCountOp = "$sortByCount"
+	StageSortOp        = "$sort"
+	StageUnwindOp      = "$unwind"
+)
+
+type BucketAutoOptions struct {
+	Output      any
+	Granularity string
 }
 
 type BucketOptions struct {
@@ -123,9 +125,9 @@ type BucketOptions struct {
 	Output     any
 }
 
-type BucketAutoOptions struct {
-	Output      any
-	Granularity string
+type CaseThen struct {
+	Case any
+	Then any
 }
 
 type DateToStringOptions struct {
@@ -139,19 +141,14 @@ type FilterOptions struct {
 	Limit int64
 }
 
-type Numeric interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
-		~float32 | ~float64
-}
-
-type CaseThen struct {
-	Case any
-	Then any
-}
 type LookUpOptions struct {
 	LocalField   string
 	ForeignField string
 	Let          bson.D
 	Pipeline     mongo.Pipeline
+}
+
+type UnWindOptions struct {
+	IncludeArrayIndex          string
+	PreserveNullAndEmptyArrays bool
 }
