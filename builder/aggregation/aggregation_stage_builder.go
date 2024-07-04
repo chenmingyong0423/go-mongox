@@ -28,84 +28,84 @@ func NewStageBuilder() *StageBuilder {
 }
 
 func (b *StageBuilder) AddFields(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: AddFieldsOp, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageAddFieldsOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Set(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SetOp, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageSetOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Bucket(groupBy any, boundaries []any, opt *BucketOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: GroupByOp, Value: groupBy},
-		bson.E{Key: BoundariesOp, Value: boundaries},
+		bson.E{Key: StageGroupByOp, Value: groupBy},
+		bson.E{Key: StageBoundariesOp, Value: boundaries},
 	}
 	if opt != nil {
 		if opt.DefaultKey != nil {
-			d = append(d, bson.E{Key: DefaultOp, Value: opt.DefaultKey})
+			d = append(d, bson.E{Key: StageDefaultOp, Value: opt.DefaultKey})
 		}
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: OutputOp, Value: opt.Output})
+			d = append(d, bson.E{Key: StageOutputOp, Value: opt.Output})
 		}
 	}
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: BucketOp, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageBucketOp, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) BucketAuto(groupBy any, buckets int, opt *BucketAutoOptions) *StageBuilder {
 	d := bson.D{
-		bson.E{Key: GroupByOp, Value: groupBy},
-		bson.E{Key: BucketsOp, Value: buckets},
+		bson.E{Key: StageGroupByOp, Value: groupBy},
+		bson.E{Key: StageBucketsOp, Value: buckets},
 	}
 	if opt != nil {
 		if opt.Output != nil {
-			d = append(d, bson.E{Key: OutputOp, Value: opt.Output})
+			d = append(d, bson.E{Key: StageOutputOp, Value: opt.Output})
 		}
 		if opt.Granularity != "" {
-			d = append(d, bson.E{Key: GranularityOp, Value: opt.Granularity})
+			d = append(d, bson.E{Key: StageGranularityOp, Value: opt.Granularity})
 		}
 	}
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: BucketAutoOp, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageBucketAutoOp, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) Match(expression any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: MatchOp, Value: expression}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageMatchOp, Value: expression}})
 	return b
 }
 
 func (b *StageBuilder) Group(id any, accumulators ...bson.E) *StageBuilder {
 	d := bson.D{{Key: "_id", Value: id}}
 	d = append(d, accumulators...)
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: GroupOp, Value: d}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageGroupOp, Value: d}})
 	return b
 }
 
 func (b *StageBuilder) Sort(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SortOp, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageSortOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Project(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: ProjectOp, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageProjectOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) Limit(limit int64) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: LimitOp, Value: limit}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageLimitOp, Value: limit}})
 	return b
 }
 
 func (b *StageBuilder) Skip(skip int64) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SkipOp, Value: skip}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageSkipOp, Value: skip}})
 	return b
 }
 
 func (b *StageBuilder) Unwind(path string, opt *UnWindOptions) *StageBuilder {
 	if opt == nil {
-		b.pipeline = append(b.pipeline, bson.D{{Key: UnwindOp, Value: path}})
+		b.pipeline = append(b.pipeline, bson.D{{Key: StageUnwindOp, Value: path}})
 	} else {
 		d := bson.D{{Key: "path", Value: path}}
 		if opt.IncludeArrayIndex != "" {
@@ -114,28 +114,28 @@ func (b *StageBuilder) Unwind(path string, opt *UnWindOptions) *StageBuilder {
 		if opt.PreserveNullAndEmptyArrays {
 			d = append(d, bson.E{Key: "preserveNullAndEmptyArrays", Value: opt.PreserveNullAndEmptyArrays})
 		}
-		b.pipeline = append(b.pipeline, bson.D{{Key: UnwindOp, Value: d}})
+		b.pipeline = append(b.pipeline, bson.D{{Key: StageUnwindOp, Value: d}})
 	}
 	return b
 }
 
 func (b *StageBuilder) ReplaceWith(replacementDocument any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{{Key: ReplaceWithOp, Value: replacementDocument}})
+	b.pipeline = append(b.pipeline, bson.D{{Key: StageReplaceWithOp, Value: replacementDocument}})
 	return b
 }
 
 func (b *StageBuilder) Facet(value any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: FacetOp, Value: value}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageFacetOp, Value: value}})
 	return b
 }
 
 func (b *StageBuilder) SortByCount(expression any) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: SortByCountOp, Value: expression}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageSortByCountOp, Value: expression}})
 	return b
 }
 
 func (b *StageBuilder) Count(countName string) *StageBuilder {
-	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: CountOp, Value: countName}})
+	b.pipeline = append(b.pipeline, bson.D{bson.E{Key: StageCountOp, Value: countName}})
 	return b
 }
 
