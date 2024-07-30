@@ -31,8 +31,8 @@ func (b *arrayQueryBuilder) All(key string, values ...any) *Builder {
 	return b.parent
 }
 
-// AllUint appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllUint(key string, values ...uint) *Builder {
+// AllFloat32 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllFloat32(key string, values ...float32) *Builder {
 	e := bson.E{Key: AllOp, Value: values}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
@@ -40,35 +40,8 @@ func (b *arrayQueryBuilder) AllUint(key string, values ...uint) *Builder {
 	return b.parent
 }
 
-// AllUint8 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllUint8(key string, values ...uint8) *Builder {
-	e := bson.E{Key: AllOp, Value: values}
-	if !b.parent.tryMergeValue(key, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
-	}
-	return b.parent
-}
-
-// AllUint16 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllUint16(key string, values ...uint16) *Builder {
-	e := bson.E{Key: AllOp, Value: values}
-	if !b.parent.tryMergeValue(key, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
-	}
-	return b.parent
-}
-
-// AllUint32 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllUint32(key string, values ...uint32) *Builder {
-	e := bson.E{Key: AllOp, Value: values}
-	if !b.parent.tryMergeValue(key, e) {
-		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
-	}
-	return b.parent
-}
-
-// AllUint64 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllUint64(key string, values ...uint64) *Builder {
+// AllFloat64 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllFloat64(key string, values ...float64) *Builder {
 	e := bson.E{Key: AllOp, Value: values}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
@@ -130,8 +103,8 @@ func (b *arrayQueryBuilder) AllString(key string, values ...string) *Builder {
 	return b.parent
 }
 
-// AllFloat32 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllFloat32(key string, values ...float32) *Builder {
+// AllUint appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllUint(key string, values ...uint) *Builder {
 	e := bson.E{Key: AllOp, Value: values}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
@@ -139,8 +112,35 @@ func (b *arrayQueryBuilder) AllFloat32(key string, values ...float32) *Builder {
 	return b.parent
 }
 
-// AllFloat64 appends an element with '$all' key and given value to the builder's data slice.
-func (b *arrayQueryBuilder) AllFloat64(key string, values ...float64) *Builder {
+// AllUint8 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllUint8(key string, values ...uint8) *Builder {
+	e := bson.E{Key: AllOp, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
+	return b.parent
+}
+
+// AllUint16 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllUint16(key string, values ...uint16) *Builder {
+	e := bson.E{Key: AllOp, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
+	return b.parent
+}
+
+// AllUint32 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllUint32(key string, values ...uint32) *Builder {
+	e := bson.E{Key: AllOp, Value: values}
+	if !b.parent.tryMergeValue(key, e) {
+		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
+	}
+	return b.parent
+}
+
+// AllUint64 appends an element with '$all' key and given value to the builder's data slice.
+func (b *arrayQueryBuilder) AllUint64(key string, values ...uint64) *Builder {
 	e := bson.E{Key: AllOp, Value: values}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
