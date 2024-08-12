@@ -43,6 +43,7 @@ var _ iFinder[any] = (*Finder[any])(nil)
 type Finder[T any] struct {
 	collection  *mongo.Collection
 	filter      any
+	updates     any
 	beforeHooks []beforeHookFn
 	afterHooks  []afterHookFn[T]
 }
@@ -66,10 +67,17 @@ func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	return f
 }
 
-func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
-	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
-	if err != nil {
-		return err
+func (f *Finder[T]) Updates(update any) *Finder[T] {
+	f.updates = update
+	return f
+}
+
+func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opTypes ...operation.OpType) (err error) {
+	for _, opType := range opTypes {
+		err = callback.GetCallback().Execute(ctx, globalOpContext, opType)
+		if err != nil {
+			return
+		}
 	}
 	for _, beforeHook := range f.beforeHooks {
 		err = beforeHook(ctx, opContext)
@@ -77,21 +85,23 @@ func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *opera
 			return err
 		}
 	}
-	return nil
+	return
 }
 
-func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext[T], opType operation.OpType) error {
-	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
-	if err != nil {
-		return err
+func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext[T], opTypes ...operation.OpType) (err error) {
+	for _, opType := range opTypes {
+		err = callback.GetCallback().Execute(ctx, globalOpContext, opType)
+		if err != nil {
+			return
+		}
 	}
 	for _, afterHook := range f.afterHooks {
 		err = afterHook(ctx, opContext)
 		if err != nil {
-			return err
+			return
 		}
 	}
-	return nil
+	return
 }
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
@@ -170,4 +180,26 @@ func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, res
 		return err
 	}
 	return nil
+}
+
+func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...*options.FindOneAndUpdateOptions) (*T, error) {
+	t := new(T)
+
+	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithUpdate(f.updates))
+	err := f.preActionHandler(ctx, globalOpContext, NewOpContext(f.collection, f.filter, WithUpdates(f.updates)), operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.collection.FindOneAndUpdate(ctx, f.filter, f.updates, opts...).Decode(t)
+	if err != nil {
+		return nil, err
+	}
+
+	err = f.postActionHandler(ctx, globalOpContext, NewAfterOpContext[T](NewOpContext(f.collection, f.filter, WithUpdates(f.updates)), WithDoc(t)), operation.OpTypeAfterFind, operation.OpTypeAfterUpdate)
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
 }
