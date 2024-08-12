@@ -13,9 +13,9 @@
 # limitations under the License.
 
 set -e
-docker-compose -f script/integration_test_compose.yml down -v
-docker-compose -f script/integration_test_compose.yml up -d
+docker compose -f script/integration_test_compose.yml down -v
+docker compose -f script/integration_test_compose.yml up -d
 
 #go test ./... -race -cover -failfast -count=1 -parallel=1 -tags=e2e
 go list ./... | xargs -I {} sh -c 'go test -race -cover -failfast -count=1 -parallel=1 -tags=e2e {} || exit 255'
-docker-compose -f script/integration_test_compose.yml down -v
+docker compose -f script/integration_test_compose.yml down -v
