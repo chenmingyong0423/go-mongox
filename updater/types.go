@@ -25,9 +25,10 @@ import (
 
 //go:generate optioner -type CondContext
 type CondContext struct {
-	Filter      any `opt:"-"`
-	Updates     any
-	Replacement any
+	Filter       any `opt:"-"`
+	Updates      any
+	Replacement  any
+	MongoOptions any
 }
 
 //go:generate optioner -type BeforeOpContext
@@ -63,40 +64,49 @@ type TestUser struct {
 	UpdatedAt    time.Time `bson:"updated_at"`
 }
 
-func (m *TestUser) DefaultId() {
+func (m *TestUser) DefaultId() primitive.ObjectID {
 	if m.ID.IsZero() {
 		m.ID = primitive.NewObjectID()
 	}
+	return m.ID
 }
 
-func (tu *TestUser) DefaultCreatedAt() {
-	if tu.CreatedAt.IsZero() {
-		tu.CreatedAt = time.Now().Local()
+func (m *TestUser) DefaultCreatedAt() time.Time {
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = time.Now().Local()
 	}
+	return m.CreatedAt
 }
 
-func (tu *TestUser) DefaultUpdatedAt() {
-	tu.UpdatedAt = time.Now().Local()
+func (m *TestUser) DefaultUpdatedAt() time.Time {
+	m.UpdatedAt = time.Now().Local()
+	return m.UpdatedAt
 }
 
-type TestTempUser struct {
-	Id           string `bson:"_id"`
+type TestUser2 struct {
+	ID           string `bson:"_id,omitempty"`
 	Name         string `bson:"name"`
 	Age          int64
-	UnknownField string `bson:"-"`
+	UnknownField string    `bson:"-"`
+	CreatedAt    time.Time `bson:"createdAt"`
+	UpdatedAt    time.Time `bson:"updatedAt"`
 }
 
-type IllegalUser struct {
-	ID   primitive.ObjectID `bson:"_id,omitempty"`
-	Name string             `bson:"name"`
-	Age  string
+func (m *TestUser2) CustomID() (string, any) {
+	if m.ID == "" {
+		m.ID = primitive.NewObjectID().Hex()
+	}
+	return "_id", m.ID
 }
 
-type UpdatedUser struct {
-	Name string `bson:"name"`
-	Age  int64
+func (m *TestUser2) CustomCreatedAt() (string, any) {
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = time.Now().Local()
+	}
+	return "createdAt", m.CreatedAt
 }
 
-type UserName struct {
-	Name string `bson:"name"`
+func (m *TestUser2) CustomUpdatedAt() (string, any) {
+	m.UpdatedAt = time.Now().Local()
+	return "updatedAt", m.UpdatedAt
 }

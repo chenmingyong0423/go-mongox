@@ -40,8 +40,14 @@ func WithReplacement(replacement any) OpContextOption {
 	}
 }
 
-func WithUpdate(update any) OpContextOption {
+func WithUpdates(updates any) OpContextOption {
 	return func(opContext *OpContext) {
-		opContext.Updates = update
+		opContext.Updates = updates
+	}
+}
+
+func WithMongoOptions(mongoOptions any) OpContextOption {
+	return func(opContext *OpContext) {
+		opContext.MongoOptions = mongoOptions
 	}
 }

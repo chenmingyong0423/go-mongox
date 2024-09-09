@@ -32,20 +32,48 @@ type model struct {
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
-func (m *model) DefaultId() {
+func (m *model) DefaultId() primitive.ObjectID {
 	if m.ID.IsZero() {
 		m.ID = primitive.NewObjectID()
 	}
+	return m.ID
 }
 
-func (m *model) DefaultCreatedAt() {
+func (m *model) DefaultCreatedAt() time.Time {
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now().Local()
 	}
+	return m.CreatedAt
 }
 
-func (m *model) DefaultUpdatedAt() {
+func (m *model) DefaultUpdatedAt() time.Time {
 	m.UpdatedAt = time.Now().Local()
+	return m.UpdatedAt
+}
+
+type customModel struct {
+	ID        string `bson:"_id"`
+	CreatedAt int64  `bson:"createdAt"`
+	UpdatedAt int64  `bson:"updatedAt"`
+}
+
+func (c *customModel) CustomID() (string, any) {
+	if c.ID == "" {
+		c.ID = primitive.NewObjectID().Hex()
+	}
+	return "_id", c.ID
+}
+
+func (c *customModel) CustomCreatedAt() (string, any) {
+	if c.CreatedAt == 0 {
+		c.CreatedAt = time.Now().Unix()
+	}
+	return "createdAt", c.CreatedAt
+}
+
+func (c *customModel) CustomUpdatedAt() (string, any) {
+	c.UpdatedAt = time.Now().Unix()
+	return "updatedAt", c.UpdatedAt
 }
 
 func TestExecute(t *testing.T) {
@@ -128,60 +156,6 @@ func TestExecute(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			err := Execute(tc.ctx, tc.opCtx, tc.opType, tc.opts...)
 			assert.Equal(t, tc.wantErr, err)
-		})
-	}
-}
-
-func Test_getPayload(t *testing.T) {
-
-	testCases := []struct {
-		name   string
-		opCtx  *operation.OpContext
-		opType operation.OpType
-
-		want any
-	}{
-		{
-			name:   "nil opCtx",
-			opCtx:  nil,
-			opType: operation.OpTypeBeforeInsert,
-			want:   nil,
-		},
-		{
-			name:   "empty opCtx",
-			opCtx:  operation.NewOpContext(nil),
-			opType: operation.OpTypeBeforeInsert,
-			want:   nil,
-		},
-		{
-			name:   "unexpect op type",
-			opCtx:  operation.NewOpContext(nil),
-			opType: operation.OpTypeAfterInsert,
-			want:   nil,
-		},
-		{
-			name:   "before insert",
-			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&model{})),
-			opType: operation.OpTypeBeforeInsert,
-			want:   &model{},
-		},
-		{
-			name:   "before update",
-			opCtx:  operation.NewOpContext(nil, operation.WithUpdate(&model{})),
-			opType: operation.OpTypeBeforeUpdate,
-			want:   &model{},
-		},
-		{
-			name:   "before upsert",
-			opCtx:  operation.NewOpContext(nil, operation.WithReplacement(&model{})),
-			opType: operation.OpTypeBeforeUpsert,
-			want:   &model{},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			got := getPayload(tc.opCtx, tc.opType)
-			assert.Equal(t, tc.want, got)
 		})
 	}
 }

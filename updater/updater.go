@@ -17,6 +17,8 @@ package updater
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/bsonx"
+
 	"github.com/chenmingyong0423/go-mongox/callback"
 
 	"github.com/chenmingyong0423/go-mongox/operation"
@@ -101,8 +103,13 @@ func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 }
 
 func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeBeforeUpdate)
+	updates := bsonx.ToBsonM(u.updates)
+	if len(updates) != 0 {
+		u.updates = updates
+	}
+
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts))
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +119,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 		return nil, err
 	}
 
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeAfterUpdate)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -120,8 +127,13 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 }
 
 func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithUpdate(u.updates))
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeBeforeUpdate)
+	updates := bsonx.ToBsonM(u.updates)
+	if len(updates) != 0 {
+		u.updates = updates
+	}
+
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts))
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -131,33 +143,38 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOpti
 		return nil, err
 	}
 
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates))), operation.OpTypeAfterUpdate)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	if len(opts) == 0 {
-		opts = append(opts, options.Replace().SetUpsert(true))
+		opts = append(opts, options.Update().SetUpsert(true))
 	} else {
 		opts[0].SetUpsert(true)
 	}
 
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithFilter(u.filter), operation.WithReplacement(u.replacement))
+	updates := bsonx.ToBsonM(u.updates)
+	if len(updates) != 0 {
+		u.updates = updates
+	}
 
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithReplacement(u.replacement))), operation.OpTypeBeforeUpsert)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts))
+
+	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeBeforeUpsert)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := u.collection.ReplaceOne(ctx, u.filter, u.replacement, opts...)
+	result, err := u.collection.UpdateOne(ctx, u.filter, u.updates, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithReplacement(u.replacement))), operation.OpTypeAfterUpsert)
+	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts))), operation.OpTypeAfterUpsert)
 	if err != nil {
 		return nil, err
 	}

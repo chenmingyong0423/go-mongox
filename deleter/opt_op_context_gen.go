@@ -2,7 +2,7 @@
 // If you have any questions, please create issues and submit contributions at:
 // https://github.com/chenmingyong0423/go-optioner
 
-package finder
+package deleter
 
 import "go.mongodb.org/mongo-driver/mongo"
 
@@ -19,12 +19,6 @@ func NewOpContext(col *mongo.Collection, filter any, opts ...OpContextOption) *O
 	}
 
 	return opContext
-}
-
-func WithUpdates(updates any) OpContextOption {
-	return func(opContext *OpContext) {
-		opContext.Updates = updates
-	}
 }
 
 func WithMongoOptions(mongoOptions any) OpContextOption {

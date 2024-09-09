@@ -230,7 +230,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
 				},
 			},
@@ -247,7 +247,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("after hook error")
 				},
 			},
@@ -272,7 +272,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
@@ -280,7 +280,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 				},
 			},
 			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
@@ -499,7 +499,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			ctx:    context.Background(),
 			opts:   []*options.DeleteOptions{options.Delete().SetComment("test")},
 			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
 				},
 			},
@@ -524,7 +524,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
 			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("after hook error")
 				},
 			},
@@ -552,7 +552,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
 			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
@@ -560,7 +560,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				},
 			},
 			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
+				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
