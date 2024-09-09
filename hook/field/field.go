@@ -21,27 +21,13 @@ import (
 	"github.com/chenmingyong0423/go-mongox/operation"
 )
 
-func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
-	if opCtx == nil {
-		return nil
-	}
-	switch opType {
-	case operation.OpTypeBeforeInsert:
-		return opCtx.Doc
-	case operation.OpTypeBeforeUpdate:
-		return opCtx.Updates
-	case operation.OpTypeBeforeUpsert:
-		return opCtx.Replacement
-	}
-	return nil
-}
-
 func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
-	payLoad := getPayload(opCtx, opType)
-	if payLoad == nil {
+	doc := opCtx.Doc
+	if doc == nil {
 		return nil
 	}
-	valueOf := reflect.ValueOf(payLoad)
+	valueOf := reflect.ValueOf(doc)
+	opts = append([]any{opCtx.Updates, opCtx.Replacement, opCtx.MongoOptions}, opts...)
 	switch valueOf.Type().Kind() {
 	case reflect.Slice:
 		return executeSlice(ctx, valueOf, opType, opts...)
@@ -49,9 +35,10 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 		if valueOf.IsZero() {
 			return nil
 		}
-		return execute(ctx, payLoad, opType, opts...)
+		return execute(ctx, doc, opType, opts...)
+	default:
+		return nil
 	}
-	return nil
 }
 
 func executeSlice(ctx context.Context, docs reflect.Value, opType operation.OpType, opts ...any) error {
@@ -64,9 +51,9 @@ func executeSlice(ctx context.Context, docs reflect.Value, opType operation.OpTy
 	return nil
 }
 
-func execute(_ context.Context, doc any, opType operation.OpType, _ ...any) error {
+func execute(_ context.Context, doc any, opType operation.OpType, opts ...any) error {
 	if strategy, ok := strategies[opType]; ok {
-		return strategy(doc)
+		return strategy(doc, opts...)
 	}
 	return nil
 }

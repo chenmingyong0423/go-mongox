@@ -86,8 +86,8 @@ func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 }
 
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
-	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc))
-	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc)), operation.OpTypeBeforeInsert)
+	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc), operation.WithMongoOptions(opts))
+	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc), WithMongoOptions[T](opts)), operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.Ins
 		return nil, err
 	}
 
-	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc)), operation.OpTypeAfterInsert)
+	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc), WithMongoOptions[T](opts)), operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -106,8 +106,8 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.Ins
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
-	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs))
-	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs)), operation.OpTypeBeforeInsert)
+	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs), operation.WithMongoOptions(opts))
+	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs), WithMongoOptions[T](opts)), operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options
 		return nil, err
 	}
 
-	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs)), operation.OpTypeAfterInsert)
+	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs), WithMongoOptions[T](opts)), operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}

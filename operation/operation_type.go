@@ -37,7 +37,8 @@ type OpContext struct {
 	Col *mongo.Collection `opt:"-"`
 	Doc any
 	// filter also can be used as query
-	Filter      any
-	Updates     any
-	Replacement any
+	Filter       any
+	Updates      any
+	Replacement  any
+	MongoOptions any
 }

@@ -21,9 +21,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/hook/field"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/bsonx"
 	"github.com/chenmingyong0423/go-mongox/callback"
@@ -60,7 +60,7 @@ func TestUpdater_e2e_New(t *testing.T) {
 
 func TestUpdater_e2e_UpdateOne(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[any](collection)
+	updater := NewUpdater[TestUser2](collection)
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -161,17 +161,17 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				insertResult, err := collection.InsertOne(ctx, TestUser2{ID: "1", Name: "Mingyong Chen", Age: 18})
 				assert.NoError(t, err)
 				assert.Equal(t, "1", insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.Id("1"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.NewBuilder().Id("2").Build(),
+			filter:  query.Id("2"),
 			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -181,17 +181,17 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is bson.D",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				insertResult, err := collection.InsertOne(ctx, TestUser2{Name: "Mingyong Chen", Age: 18})
 				assert.NoError(t, err)
-				assert.Equal(t, "1", insertResult.InsertedID)
+				assert.NotNil(t, insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.NewBuilder().Id("1").Build(),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -201,17 +201,17 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "update one success when the updates is map[string]any",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				insertResult, err := collection.InsertOne(ctx, TestUser2{Name: "Mingyong Chen", Age: 18})
 				assert.NoError(t, err)
-				assert.Equal(t, "1", insertResult.InsertedID)
+				assert.NotNil(t, insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Id("1").Build())
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
-			filter: query.NewBuilder().Id("1").Build(),
+			filter: query.Eq("name", "Mingyong Chen"),
 			updates: map[string]any{
 				"$set": map[string]any{
 					"name": "chenmingyong",
@@ -225,9 +225,9 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				insertResult, err := collection.InsertOne(ctx, TestUser2{ID: "1", Name: "Mingyong Chen", Age: 18})
 				assert.NoError(t, err)
-				assert.Equal(t, "1", insertResult.InsertedID)
+				assert.NotNil(t, insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
@@ -235,12 +235,44 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.NewBuilder().Id("2").Build(),
-			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
+			filter:  query.Eq("_id", "2"),
+			updates: update.Set("name", "chenmingyong"),
 			opts: []*options.UpdateOptions{
 				options.Update().SetUpsert(true),
 			},
 			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "2"},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success in field hook enabled",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, TestUser2{Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+				callbacks := callback.GetCallback()
+				callbacks.Register("beforeUpdate", "mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, "beforeUpdate", opts...)
+				})
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var user TestUser2
+				err := collection.FindOne(ctx, query.Eq("name", "chenmingyong")).Decode(&user)
+				require.NoError(t, err)
+				require.Zero(t, user.CreatedAt)
+				require.NotZero(t, user.UpdatedAt)
+
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+				callbacks := callback.GetCallback()
+				callbacks.Remove("beforeUpdate", "mongox:model")
+			},
+			ctx:     context.Background(),
+			filter:  query.Eq("name", "Mingyong Chen"),
+			updates: update.NewBuilder().Set("name", "chenmingyong").Build(),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
 			},
@@ -435,7 +467,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[any](collection)
+	updater := NewUpdater[TestUser2](collection)
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -488,20 +520,20 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "modified count is 0",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]User{
-					{Id: "1", Name: "Mingyong Chen", Age: 18},
-					{Id: "2", Name: "Mingyong Chen", Age: 18},
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]TestUser2{
+					{ID: "1", Name: "Mingyong Chen", Age: 18},
+					{ID: "2", Name: "Mingyong Chen", Age: 18},
 				}...))
 				assert.NoError(t, err)
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 				assert.NoError(t, err)
 			},
 			ctx:     context.Background(),
-			filter:  query.NewBuilder().InString("_id", "3", "4").Build(),
+			filter:  query.In("_id", "3", "4"),
 			updates: update.Set("name", "Mingyong Chen"),
 			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -511,20 +543,20 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "update many success",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]User{
-					{Id: "1", Name: "Mingyong Chen", Age: 18},
-					{Id: "2", Name: "Mingyong Chen", Age: 18},
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]TestUser2{
+					{ID: "1", Name: "Mingyong Chen", Age: 18},
+					{ID: "2", Name: "Mingyong Chen", Age: 18},
 				}...))
 				assert.NoError(t, err)
 				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx:     context.Background(),
-			filter:  query.NewBuilder().InString("_id", "1", "2").Build(),
+			filter:  query.In("_id", "1", "2"),
 			updates: update.Set("name", "hhh"),
 			want:    &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -534,14 +566,14 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {
-				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]User{
-					{Id: "1", Name: "Mingyong Chen", Age: 18},
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]TestUser2{
+					{ID: "1", Name: "Mingyong Chen", Age: 18},
 				}...))
 				assert.NoError(t, err)
 				assert.ElementsMatch(t, []string{"1"}, insertResult.InsertedIDs)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.NewBuilder().InString("_id", "1", "2").Build())
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -552,6 +584,44 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				options.Update().SetUpsert(true),
 			},
 			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "2"},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update many success",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]TestUser2{
+					{ID: "1", Name: "Mingyong Chen", Age: 18},
+					{ID: "2", Name: "Mingyong Chen", Age: 18},
+				}...))
+				assert.NoError(t, err)
+				assert.ElementsMatch(t, []string{"1", "2"}, insertResult.InsertedIDs)
+				callbacks := callback.GetCallback()
+				callbacks.Register("beforeUpdate", "mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, "beforeUpdate", opts...)
+				})
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				users := make([]TestUser2, 2)
+				cur, err := collection.Find(ctx, query.In("_id", "1", "2"))
+				require.NoError(t, err)
+				require.NoError(t, cur.All(ctx, &users))
+				for _, user := range users {
+					require.Zero(t, user.CreatedAt)
+					require.NotZero(t, user.UpdatedAt)
+				}
+
+				deleteResult, err := collection.DeleteMany(ctx, query.In("_id", "1", "2"))
+				assert.NoError(t, err)
+				assert.Equal(t, int64(2), deleteResult.DeletedCount)
+				callbacks := callback.GetCallback()
+				callbacks.Remove("beforeUpdate", "mongox:model")
+			},
+			ctx:     context.Background(),
+			filter:  query.In("_id", "1", "2"),
+			updates: update.Set("name", "hhh"),
+			want:    &mongo.UpdateResult{MatchedCount: 2, ModifiedCount: 2, UpsertedCount: 0, UpsertedID: nil},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
 			},
@@ -767,7 +837,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 
 func TestUpdater_e2e_Upsert(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[any](collection)
+	updater := NewUpdater[TestUser](collection)
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -782,92 +852,59 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 		before func(ctx context.Context, t *testing.T)
 		after  func(ctx context.Context, t *testing.T)
 
-		ctx         context.Context
-		filter      any
-		replacement any
-		opts        []*options.ReplaceOptions
-		globalHook  []globalHook
-		beforeHook  []beforeHookFn
-		afterHook   []afterHookFn
+		ctx        context.Context
+		filter     any
+		updates    any
+		opts       []*options.UpdateOptions
+		globalHook []globalHook
+		beforeHook []beforeHookFn
+		afterHook  []afterHookFn
 
 		want    *mongo.UpdateResult
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
-			name:        "nil filter",
-			before:      func(ctx context.Context, t *testing.T) {},
-			after:       func(ctx context.Context, t *testing.T) {},
-			ctx:         context.Background(),
-			filter:      nil,
-			replacement: bson.D{},
-			want:        nil,
-			wantErr:     require.Error,
-		},
-		{
-			name:        "invalid filter",
-			before:      func(ctx context.Context, t *testing.T) {},
-			after:       func(ctx context.Context, t *testing.T) {},
-			ctx:         context.Background(),
-			filter:      6,
-			replacement: bson.D{},
-			want:        nil,
-			wantErr:     require.Error,
-		},
-		{
-			name:        "nil Replacement",
-			before:      func(ctx context.Context, t *testing.T) {},
-			after:       func(ctx context.Context, t *testing.T) {},
-			ctx:         context.Background(),
-			filter:      bson.D{},
-			replacement: nil,
-			want:        nil,
-			wantErr:     require.Error,
-		},
-		{
-			name:        "invalid Replacement",
-			before:      func(ctx context.Context, t *testing.T) {},
-			after:       func(ctx context.Context, t *testing.T) {},
-			ctx:         context.Background(),
-			filter:      bson.D{},
-			replacement: 6,
-			want:        nil,
-			wantErr:     require.Error,
-		},
-		{
-			name:   "error: filter with id different from id in replacement",
-			before: func(ctx context.Context, t *testing.T) {},
-			after:  func(ctx context.Context, t *testing.T) {},
-			ctx:    context.Background(),
-			filter: query.NewBuilder().Id(primitive.NewObjectID()).Build(),
-			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
-			replacement: &TestUser{
-				ID:   primitive.NewObjectID(),
-				Name: "Mingyong Chen",
-				Age:  18,
-			},
-			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 0},
+			name:    "nil filter",
+			before:  func(ctx context.Context, t *testing.T) {},
+			after:   func(ctx context.Context, t *testing.T) {},
+			ctx:     context.Background(),
+			filter:  nil,
+			updates: bson.D{},
+			want:    nil,
 			wantErr: require.Error,
 		},
 		{
-			name:   "save successfully",
-			before: func(ctx context.Context, t *testing.T) {},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
-				require.NoError(t, err)
-				require.Equal(t, int64(1), deleteResult.DeletedCount)
-			},
-			ctx:    context.Background(),
-			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			opts:   []*options.ReplaceOptions{options.Replace().SetUpsert(true)},
-			replacement: &TestUser{
-				Name: "Mingyong Chen",
-				Age:  18,
-			},
-			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1},
-			wantErr: require.NoError,
+			name:    "invalid filter",
+			before:  func(ctx context.Context, t *testing.T) {},
+			after:   func(ctx context.Context, t *testing.T) {},
+			ctx:     context.Background(),
+			filter:  6,
+			updates: bson.D{},
+			want:    nil,
+			wantErr: require.Error,
 		},
 		{
-			name: "replace successfully",
+			name:    "nil updates",
+			before:  func(ctx context.Context, t *testing.T) {},
+			after:   func(ctx context.Context, t *testing.T) {},
+			ctx:     context.Background(),
+			filter:  bson.D{},
+			updates: nil,
+			want:    nil,
+			wantErr: require.Error,
+		},
+		{
+			name:    "invalid updates",
+			before:  func(ctx context.Context, t *testing.T) {},
+			after:   func(ctx context.Context, t *testing.T) {},
+			ctx:     context.Background(),
+			filter:  bson.D{},
+			updates: 6,
+			want:    nil,
+			wantErr: require.Error,
+		},
+		{
+			name: "update successfully",
 			before: func(ctx context.Context, t *testing.T) {
 				insertResult, err := collection.InsertOne(ctx, &TestUser{
 					Name: "Mingyong Chen",
@@ -877,17 +914,117 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.NotNil(t, insertResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
+				var user TestUser
+				err := collection.FindOne(ctx, query.Eq("name", "chenmingyong")).Decode(&user)
+				require.NoError(t, err)
+				require.Zero(t, user.CreatedAt)
+				require.Zero(t, user.UpdatedAt)
+
 				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx:    context.Background(),
 			filter: query.Eq("name", "Mingyong Chen"),
-			replacement: bson.M{
-				"name": "chenmingyong",
-				"age":  18,
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+				},
 			},
 			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
+			wantErr: require.NoError,
+		},
+		{
+			name: "update successfully in field hook enabled",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, &TestUser{
+					Name: "Mingyong Chen",
+					Age:  18,
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertResult.InsertedID)
+				callbacks := callback.GetCallback()
+				callbacks.Register("beforeUpsert", "mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, "beforeUpsert", opts...)
+				})
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var user TestUser
+				err := collection.FindOne(ctx, query.Eq("name", "chenmingyong")).Decode(&user)
+				require.NoError(t, err)
+				require.Zero(t, user.CreatedAt)
+				require.NotZero(t, user.UpdatedAt)
+
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+
+				callbacks := callback.GetCallback()
+				callbacks.Remove("beforeUpsert", "mongox:model")
+			},
+			ctx:    context.Background(),
+			filter: query.Eq("name", "Mingyong Chen"),
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+				},
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
+			wantErr: require.NoError,
+		},
+		{
+			name:   "save successfully",
+			before: func(ctx context.Context, t *testing.T) {},
+			after: func(ctx context.Context, t *testing.T) {
+				var user TestUser
+				err := collection.FindOne(ctx, query.Eq("name", "Mingyong Chen")).Decode(&user)
+				require.NoError(t, err)
+				require.Zero(t, user.CreatedAt)
+				require.Zero(t, user.UpdatedAt)
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:    context.Background(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
+			opts:   nil,
+			updates: bson.D{
+				{Key: "$set", Value: bson.D{
+					{Key: "name", Value: "Mingyong Chen"},
+				}},
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1},
+			wantErr: require.NoError,
+		},
+		{
+			name: "save successfully in field hook enabled",
+			before: func(ctx context.Context, t *testing.T) {
+				callbacks := callback.GetCallback()
+				callbacks.Register("beforeUpsert", "mongox:model", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, "beforeUpsert", opts...)
+				})
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var user TestUser
+				err := collection.FindOne(ctx, query.Eq("name", "Mingyong Chen")).Decode(&user)
+				require.NoError(t, err)
+				require.NotZero(t, user.CreatedAt)
+				require.NotZero(t, user.UpdatedAt)
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), deleteResult.DeletedCount)
+				callbacks := callback.GetCallback()
+				callbacks.Remove("beforeUpsert", "mongox:model")
+			},
+			ctx:    context.Background(),
+			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
+			opts:   nil,
+			updates: bson.D{
+				{Key: "$set", Value: bson.D{
+					{Key: "name", Value: "Mingyong Chen"},
+				}},
+			},
+			want:    &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1},
 			wantErr: require.NoError,
 		},
 		{
@@ -927,9 +1064,11 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: bson.M{
-				"name": "chenmingyong",
-				"age":  18,
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+					"age":  18,
+				},
 			},
 			want: nil,
 			globalHook: []globalHook{
@@ -962,9 +1101,11 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: bson.M{
-				"name": "chenmingyong",
-				"age":  18,
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+					"age":  18,
+				},
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			globalHook: []globalHook{
@@ -972,7 +1113,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 					opType: operation.OpTypeBeforeUpsert,
 					name:   "before hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-						if opCtx.Filter == nil || opCtx.Replacement == nil {
+						if opCtx.Filter == nil || opCtx.Updates == nil {
 							return errors.New("before hook error")
 						}
 						return nil
@@ -982,7 +1123,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 					opType: operation.OpTypeAfterUpsert,
 					name:   "after hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-						if opCtx.Filter == nil || opCtx.Replacement == nil {
+						if opCtx.Filter == nil || opCtx.Updates == nil {
 							return errors.New("after hook error")
 						}
 						return nil
@@ -1027,9 +1168,11 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: bson.M{
-				"name": "chenmingyong",
-				"age":  18,
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+					"age":  18,
+				},
 			},
 			want: nil,
 			afterHook: []afterHookFn{
@@ -1058,14 +1201,16 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			replacement: bson.M{
-				"name": "chenmingyong",
-				"age":  18,
+			updates: bson.M{
+				"$set": bson.M{
+					"name": "chenmingyong",
+					"age":  18,
+				},
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil},
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *BeforeOpContext, opts ...any) error {
-					if opCtx.Filter == nil || opCtx.Replacement == nil {
+					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("before hook error")
 					}
 					return nil
@@ -1073,7 +1218,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			afterHook: []afterHookFn{
 				func(ctx context.Context, opCtx *AfterOpContext, opts ...any) error {
-					if opCtx.Filter == nil || opCtx.Replacement == nil {
+					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("after hook error")
 					}
 					return nil
@@ -1088,7 +1233,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
 			}
-			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Replacement(tc.replacement).Upsert(tc.ctx, tc.opts...)
+			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Updates(tc.updates).Upsert(tc.ctx, tc.opts...)
 			tc.wantErr(t, err)
 			tc.after(tc.ctx, t)
 

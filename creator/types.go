@@ -22,9 +22,10 @@ import (
 
 //go:generate optioner -type OpContext
 type OpContext[T any] struct {
-	Col  *mongo.Collection `opt:"-"`
-	Doc  *T
-	Docs []*T
+	Col          *mongo.Collection `opt:"-"`
+	Doc          *T
+	Docs         []*T
+	MongoOptions any
 }
 
 type (

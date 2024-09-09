@@ -25,9 +25,10 @@ import (
 
 //go:generate optioner -type OpContext
 type OpContext struct {
-	Col     *mongo.Collection `opt:"-"`
-	Filter  any               `opt:"-"`
-	Updates any
+	Col          *mongo.Collection `opt:"-"`
+	Filter       any               `opt:"-"`
+	Updates      any
+	MongoOptions any
 }
 
 //go:generate optioner -type AfterOpContext

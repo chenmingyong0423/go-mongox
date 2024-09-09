@@ -36,18 +36,21 @@ type Model struct {
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
-func (m *Model) DefaultId() {
+func (m *Model) DefaultId() primitive.ObjectID {
 	if m.ID.IsZero() {
 		m.ID = primitive.NewObjectID()
 	}
+	return m.ID
 }
 
-func (m *Model) DefaultCreatedAt() {
+func (m *Model) DefaultCreatedAt() time.Time {
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = time.Now().Local()
 	}
+	return m.CreatedAt
 }
 
-func (m *Model) DefaultUpdatedAt() {
+func (m *Model) DefaultUpdatedAt() time.Time {
 	m.UpdatedAt = time.Now().Local()
+	return m.UpdatedAt
 }

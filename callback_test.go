@@ -163,12 +163,12 @@ func TestRegisterPlugin_Update(t *testing.T) {
 			isCalled = true
 			return nil
 		}, operation.OpTypeBeforeUpdate)
-		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdate(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
+		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
 		require.Nil(t, err)
 		assert.True(t, isCalled)
 		isCalled = false
 		RemovePlugin("before update", operation.OpTypeBeforeUpdate)
-		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdate(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
+		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
 		require.Nil(t, err)
 		assert.False(t, isCalled)
 	})
@@ -181,12 +181,12 @@ func TestRegisterPlugin_Update(t *testing.T) {
 			isCalled = true
 			return nil
 		}, operation.OpTypeAfterUpdate)
-		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdate(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeAfterUpdate)
+		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeAfterUpdate)
 		require.Nil(t, err)
 		assert.True(t, isCalled)
 		isCalled = false
 		RemovePlugin("after update", operation.OpTypeAfterUpdate)
-		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdate(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeAfterUpdate)
+		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeAfterUpdate)
 		require.Nil(t, err)
 		assert.False(t, isCalled)
 	})
@@ -260,10 +260,13 @@ func TestPluginInit_EnableEnableDefaultFieldHook(t *testing.T) {
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
 	})
 	t.Run("beforeUpsert", func(t *testing.T) {
-		model := &Model{}
+		var (
+			model = &Model{}
+			m     = bson.M{}
+		)
 		err := callback.GetCallback().Execute(
 			context.Background(),
-			operation.NewOpContext(nil, operation.WithDoc(model)),
+			operation.NewOpContext(nil, operation.WithDoc(model), operation.WithUpdates(m)),
 			operation.OpTypeBeforeUpsert,
 		)
 		require.Nil(t, err)
@@ -278,13 +281,23 @@ func TestPluginInit_EnableEnableDefaultFieldHook(t *testing.T) {
 
 		err = callback.GetCallback().Execute(
 			context.Background(),
-			operation.NewOpContext(nil, operation.WithReplacement(model)),
+			operation.NewOpContext(nil, operation.WithDoc(model), operation.WithUpdates(m)),
 			operation.OpTypeBeforeUpsert,
 		)
 		require.Nil(t, err)
 		require.NotZero(t, model.ID)
 		require.NotZero(t, model.CreatedAt)
 		require.NotZero(t, model.UpdatedAt)
+		require.Equal(t, bson.M{
+			"$set": bson.M{
+				"updated_at": model.UpdatedAt,
+			},
+			"$setOnInsert": bson.M{
+				"_id":        model.ID,
+				"created_at": model.CreatedAt,
+			},
+		}, m)
+
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
 	})

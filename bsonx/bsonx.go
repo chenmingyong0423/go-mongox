@@ -41,3 +41,47 @@ func D(key string, value any) bson.D {
 func Id(value any) bson.M {
 	return M("_id", value)
 }
+
+func ToBsonM(data any) bson.M {
+	if data == nil {
+		return nil
+	}
+	if d, ok := data.(bson.M); ok {
+		return d
+	}
+
+	if d, ok := data.(bson.D); ok {
+		return dToM(d)
+	}
+
+	if d, ok := data.(map[string]any); ok {
+		return MapToBsonM(d)
+	}
+
+	if d, ok := data.(*map[string]any); ok && d != nil {
+		return MapToBsonM(*d)
+	}
+
+	return nil
+}
+
+func MapToBsonM(data map[string]any) bson.M {
+	m := bson.M{}
+	for k, v := range data {
+		m[k] = v
+	}
+	return m
+}
+
+func dToM(d bson.D) bson.M {
+	marshal, err := bson.Marshal(d)
+	if err != nil {
+		return nil
+	}
+	var m bson.M
+	err = bson.Unmarshal(marshal, &m)
+	if err != nil {
+		return nil
+	}
+	return m
+}
