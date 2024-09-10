@@ -46,7 +46,7 @@ type PluginConfig struct {
 
 func InitPlugin(config *PluginConfig) {
 	if config.EnableDefaultFieldHook {
-		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpsert}
+		opTypes := []operation.OpType{operation.OpTypeBeforeInsert, operation.OpTypeBeforeUpdate, operation.OpTypeBeforeUpsert}
 		for _, opType := range opTypes {
 			typ := opType
 			RegisterPlugin("mongox:default_field", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
@@ -57,8 +57,10 @@ func InitPlugin(config *PluginConfig) {
 	if config.EnableModelHook {
 		opTypes := []operation.OpType{
 			operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert,
+			operation.OpTypeBeforeDelete, operation.OpTypeAfterDelete,
+			operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate,
 			operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert,
-			operation.OpTypeAfterFind,
+			operation.OpTypeBeforeFind, operation.OpTypeAfterFind,
 		}
 		for _, opType := range opTypes {
 			typ := opType
