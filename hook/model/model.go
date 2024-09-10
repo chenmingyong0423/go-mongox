@@ -28,13 +28,14 @@ func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
 	if opCtx.ModelHook != nil {
 		return opCtx.ModelHook
 	}
+
 	switch opType {
 	case operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert, operation.OpTypeAfterFind:
 		return opCtx.Doc
-	case operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
+	case operation.OpTypeBeforeUpdate, operation.OpTypeAfterUpdate, operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
 		return opCtx.Updates
 	default:
-		return nil
+		return opCtx.ModelHook
 	}
 }
 
@@ -81,6 +82,22 @@ func execute(ctx context.Context, doc any, opType operation.OpType, _ ...any) er
 		if m, ok := doc.(AfterInsert); ok {
 			return m.AfterInsert(ctx)
 		}
+	case operation.OpTypeBeforeDelete:
+		if m, ok := doc.(BeforeDelete); ok {
+			return m.BeforeDelete(ctx)
+		}
+	case operation.OpTypeAfterDelete:
+		if m, ok := doc.(AfterDelete); ok {
+			return m.AfterDelete(ctx)
+		}
+	case operation.OpTypeBeforeUpdate:
+		if m, ok := doc.(BeforeUpdate); ok {
+			return m.BeforeUpdate(ctx)
+		}
+	case operation.OpTypeAfterUpdate:
+		if m, ok := doc.(AfterUpdate); ok {
+			return m.AfterUpdate(ctx)
+		}
 	case operation.OpTypeBeforeUpsert:
 		if m, ok := doc.(BeforeUpsert); ok {
 			return m.BeforeUpsert(ctx)
@@ -88,6 +105,10 @@ func execute(ctx context.Context, doc any, opType operation.OpType, _ ...any) er
 	case operation.OpTypeAfterUpsert:
 		if m, ok := doc.(AfterUpsert); ok {
 			return m.AfterUpsert(ctx)
+		}
+	case operation.OpTypeBeforeFind:
+		if m, ok := doc.(BeforeFind); ok {
+			return m.BeforeFind(ctx)
 		}
 	case operation.OpTypeAfterFind:
 		if m, ok := doc.(AfterFind); ok {

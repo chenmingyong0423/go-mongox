@@ -27,10 +27,13 @@ import (
 type entity struct {
 	beforeInsert int
 	afterInsert  int
+	beforeDelete int
+	afterDelete  int
 	beforeUpdate int
 	afterUpdate  int
 	beforeUpsert int
 	afterUpsert  int
+	beforeFind   int
 	afterFind    int
 }
 
@@ -44,6 +47,16 @@ func (m *entity) BeforeInsert(_ context.Context) error {
 
 func (m *entity) AfterInsert(_ context.Context) error {
 	m.afterInsert++
+	return nil
+}
+
+func (m *entity) BeforeDelete(_ context.Context) error {
+	m.beforeDelete++
+	return nil
+}
+
+func (m *entity) AfterDelete(_ context.Context) error {
+	m.afterDelete++
 	return nil
 }
 
@@ -64,6 +77,11 @@ func (m *entity) BeforeUpsert(_ context.Context) error {
 
 func (m *entity) AfterUpsert(_ context.Context) error {
 	m.afterUpsert++
+	return nil
+}
+
+func (m *entity) BeforeFind(_ context.Context) error {
+	m.beforeFind++
 	return nil
 }
 
@@ -128,6 +146,42 @@ func Test_getPayload(t *testing.T) {
 			want:   &entity{afterInsert: 1},
 		},
 		{
+			name:   "before delete",
+			opCtx:  operation.NewOpContext(nil, operation.WithModelHook(&entity{})),
+			opType: operation.OpTypeBeforeDelete,
+			want:   &entity{},
+		},
+		{
+			name:   "after delete",
+			opCtx:  operation.NewOpContext(nil, operation.WithModelHook(&entity{})),
+			opType: operation.OpTypeAfterDelete,
+			want:   &entity{},
+		},
+		{
+			name:   "before update",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{})),
+			opType: operation.OpTypeBeforeUpdate,
+			want:   &entity{},
+		},
+		{
+			name:   "before update with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{}), operation.WithModelHook(&entity{beforeUpdate: 1})),
+			opType: operation.OpTypeBeforeUpdate,
+			want:   &entity{beforeUpdate: 1},
+		},
+		{
+			name:   "after update",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{})),
+			opType: operation.OpTypeAfterUpdate,
+			want:   &entity{},
+		},
+		{
+			name:   "after update with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{}), operation.WithModelHook(&entity{afterUpdate: 1})),
+			opType: operation.OpTypeAfterUpdate,
+			want:   &entity{afterUpdate: 1},
+		},
+		{
 			name:   "before upsert",
 			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{})),
 			opType: operation.OpTypeBeforeUpsert,
@@ -150,6 +204,12 @@ func Test_getPayload(t *testing.T) {
 			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{}), operation.WithModelHook(&entity{afterUpsert: 1})),
 			opType: operation.OpTypeAfterUpsert,
 			want:   &entity{afterUpsert: 1},
+		},
+		{
+			name:   "before find",
+			opCtx:  operation.NewOpContext(nil, operation.WithModelHook(&entity{})),
+			opType: operation.OpTypeBeforeFind,
+			want:   &entity{},
 		},
 		{
 			name:   "after find",
@@ -304,6 +364,42 @@ func Test_execute(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name:   "before delete",
+			ctx:    context.Background(),
+			doc:    &entity{},
+			opType: operation.OpTypeBeforeDelete,
+
+			want:    &entity{beforeDelete: 1},
+			wantErr: nil,
+		},
+		{
+			name:   "after delete",
+			ctx:    context.Background(),
+			doc:    &entity{},
+			opType: operation.OpTypeAfterDelete,
+
+			want:    &entity{afterDelete: 1},
+			wantErr: nil,
+		},
+		{
+			name:   "before update",
+			ctx:    context.Background(),
+			doc:    &entity{},
+			opType: operation.OpTypeBeforeUpdate,
+
+			want:    &entity{beforeUpdate: 1},
+			wantErr: nil,
+		},
+		{
+			name:   "after update",
+			ctx:    context.Background(),
+			doc:    &entity{},
+			opType: operation.OpTypeAfterUpdate,
+
+			want:    &entity{afterUpdate: 1},
+			wantErr: nil,
+		},
+		{
 			name:   "before upsert",
 			ctx:    context.Background(),
 			doc:    &entity{},
@@ -319,6 +415,15 @@ func Test_execute(t *testing.T) {
 			opType: operation.OpTypeAfterUpsert,
 
 			want:    &entity{afterUpsert: 1},
+			wantErr: nil,
+		},
+		{
+			name:   "before find",
+			ctx:    context.Background(),
+			doc:    &entity{},
+			opType: operation.OpTypeBeforeFind,
+
+			want:    &entity{beforeFind: 1},
 			wantErr: nil,
 		},
 		{
@@ -391,6 +496,42 @@ func Test_executeSlice(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name:   "before delete",
+			ctx:    context.Background(),
+			docs:   reflect.ValueOf([]*entity{{}, {}}),
+			opType: operation.OpTypeBeforeDelete,
+			want:   []*entity{{beforeDelete: 1}, {beforeDelete: 1}},
+			opts:   nil,
+		},
+		{
+			name:    "after delete",
+			ctx:     context.Background(),
+			docs:    reflect.ValueOf([]*entity{{}, {}}),
+			opType:  operation.OpTypeAfterDelete,
+			opts:    nil,
+			want:    []*entity{{afterDelete: 1}, {afterDelete: 1}},
+			wantErr: nil,
+		},
+		{
+			name:   "before update",
+			ctx:    context.Background(),
+			docs:   reflect.ValueOf([]*entity{{}, {}}),
+			opType: operation.OpTypeBeforeUpdate,
+			opts:   nil,
+
+			want:    []*entity{{beforeUpdate: 1}, {beforeUpdate: 1}},
+			wantErr: nil,
+		},
+		{
+			name:    "after update",
+			ctx:     context.Background(),
+			docs:    reflect.ValueOf([]*entity{{}, {}}),
+			opType:  operation.OpTypeAfterUpdate,
+			opts:    nil,
+			want:    []*entity{{afterUpdate: 1}, {afterUpdate: 1}},
+			wantErr: nil,
+		},
+		{
 			name:   "before upsert",
 			ctx:    context.Background(),
 			docs:   reflect.ValueOf([]*entity{{}, {}}),
@@ -407,6 +548,16 @@ func Test_executeSlice(t *testing.T) {
 			opType:  operation.OpTypeAfterUpsert,
 			opts:    nil,
 			want:    []*entity{{afterUpsert: 1}, {afterUpsert: 1}},
+			wantErr: nil,
+		},
+		{
+			name:   "before find",
+			ctx:    context.Background(),
+			docs:   reflect.ValueOf([]*entity{{}, {}}),
+			opType: operation.OpTypeBeforeFind,
+			opts:   nil,
+
+			want:    []*entity{{beforeFind: 1}, {beforeFind: 1}},
 			wantErr: nil,
 		},
 		{

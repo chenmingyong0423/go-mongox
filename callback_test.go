@@ -257,6 +257,46 @@ func TestPluginInit_EnableEnableDefaultFieldHook(t *testing.T) {
 		require.NotZero(t, model.ID)
 		require.NotZero(t, model.CreatedAt)
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpdate)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
+	})
+	t.Run("beforeUpdate", func(t *testing.T) {
+		var (
+			model = &Model{}
+			m     = bson.M{}
+		)
+		err := callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(model), operation.WithUpdates(m)),
+			operation.OpTypeBeforeUpdate,
+		)
+		require.Nil(t, err)
+		require.Zero(t, model.ID)
+		require.Zero(t, model.CreatedAt)
+		require.Zero(t, model.UpdatedAt)
+
+		cfg := &PluginConfig{
+			EnableDefaultFieldHook: true,
+		}
+		InitPlugin(cfg)
+
+		err = callback.GetCallback().Execute(
+			context.Background(),
+			operation.NewOpContext(nil, operation.WithDoc(model), operation.WithUpdates(m)),
+			operation.OpTypeBeforeUpdate,
+		)
+		require.Nil(t, err)
+		require.Zero(t, model.ID)
+		require.Zero(t, model.CreatedAt)
+		require.NotZero(t, model.UpdatedAt)
+		require.Equal(t, bson.M{
+			"$set": bson.M{
+				"updated_at": model.UpdatedAt,
+			},
+		}, m)
+
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpdate)
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
 	})
 	t.Run("beforeUpsert", func(t *testing.T) {
@@ -299,6 +339,7 @@ func TestPluginInit_EnableEnableDefaultFieldHook(t *testing.T) {
 		}, m)
 
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeInsert)
+		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpdate)
 		RemovePlugin("mongox:default_field", operation.OpTypeBeforeUpsert)
 	})
 }
@@ -315,12 +356,37 @@ func (t *testModelHookStruct) AfterInsert(_ context.Context) error {
 	return nil
 }
 
+func (t *testModelHookStruct) BeforeDelete(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) AfterDelete(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) BeforeUpdate(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) AfterUpdate(_ context.Context) error {
+	*t++
+	return nil
+}
+
 func (t *testModelHookStruct) BeforeUpsert(_ context.Context) error {
 	*t++
 	return nil
 }
 
 func (t *testModelHookStruct) AfterUpsert(_ context.Context) error {
+	*t++
+	return nil
+}
+
+func (t *testModelHookStruct) BeforeFind(_ context.Context) error {
 	*t++
 	return nil
 }
@@ -393,6 +459,82 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 			want:    2,
 		},
 		{
+			name: "beforeDelete",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeDelete,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "afterDelete",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterDelete,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "beforeUpdate",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithUpdates(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeUpdate,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "beforeUpdate with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithUpdates(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeUpdate,
+			wantErr: nil,
+			want:    2,
+		},
+		{
+			name: "afterUpdate",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithUpdates(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterUpdate,
+			wantErr: nil,
+			want:    1,
+		},
+		{
+			name: "afterUpdate with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithUpdates(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterUpdate,
+			wantErr: nil,
+			want:    2,
+		},
+		{
 			name: "beforeUpsert",
 			ctx:  context.Background(),
 			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
@@ -443,6 +585,18 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 			opType:  operation.OpTypeAfterUpsert,
 			wantErr: nil,
 			want:    2,
+		},
+		{
+			name: "beforeFind",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeFind,
+			wantErr: nil,
+			want:    1,
 		},
 		{
 			name: "afterFind",
@@ -500,8 +654,13 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 func remoteModelPlugin() {
 	RemovePlugin("mongox:model", operation.OpTypeBeforeInsert)
 	RemovePlugin("mongox:model", operation.OpTypeAfterInsert)
+	RemovePlugin("mongox:model", operation.OpTypeBeforeDelete)
+	RemovePlugin("mongox:model", operation.OpTypeAfterDelete)
+	RemovePlugin("mongox:model", operation.OpTypeBeforeUpdate)
+	RemovePlugin("mongox:model", operation.OpTypeAfterUpdate)
 	RemovePlugin("mongox:model", operation.OpTypeBeforeUpsert)
 	RemovePlugin("mongox:model", operation.OpTypeAfterUpsert)
+	RemovePlugin("mongox:model", operation.OpTypeBeforeFind)
 	RemovePlugin("mongox:model", operation.OpTypeAfterFind)
 }
 
