@@ -25,6 +25,7 @@ type OpContext struct {
 	Col          *mongo.Collection `opt:"-"`
 	Filter       any               `opt:"-"`
 	MongoOptions any
+	ModelHook    any
 }
 
 type (

@@ -25,11 +25,14 @@ func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
 	if opCtx == nil {
 		return nil
 	}
+	if opCtx.ModelHook != nil {
+		return opCtx.ModelHook
+	}
 	switch opType {
 	case operation.OpTypeBeforeInsert, operation.OpTypeAfterInsert, operation.OpTypeAfterFind:
 		return opCtx.Doc
 	case operation.OpTypeBeforeUpsert, operation.OpTypeAfterUpsert:
-		return opCtx.Replacement
+		return opCtx.Updates
 	default:
 		return nil
 	}
