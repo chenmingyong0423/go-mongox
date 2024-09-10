@@ -16,6 +16,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -35,6 +36,9 @@ type entity struct {
 
 func (m *entity) BeforeInsert(_ context.Context) error {
 	m.beforeInsert++
+	if m.beforeInsert == 66 {
+		return errors.New("error")
+	}
 	return nil
 }
 
@@ -94,10 +98,22 @@ func Test_getPayload(t *testing.T) {
 			want:   nil,
 		},
 		{
+			name:   "before insert error",
+			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{})),
+			opType: operation.OpTypeBeforeInsert,
+			want:   &entity{},
+		},
+		{
 			name:   "before insert",
 			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{})),
 			opType: operation.OpTypeBeforeInsert,
 			want:   &entity{},
+		},
+		{
+			name:   "before insert with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{}), operation.WithModelHook(&entity{beforeInsert: 1})),
+			opType: operation.OpTypeBeforeInsert,
+			want:   &entity{beforeInsert: 1},
 		},
 		{
 			name:   "after insert",
@@ -106,22 +122,46 @@ func Test_getPayload(t *testing.T) {
 			want:   &entity{},
 		},
 		{
+			name:   "after insert with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{}), operation.WithModelHook(&entity{afterInsert: 1})),
+			opType: operation.OpTypeAfterInsert,
+			want:   &entity{afterInsert: 1},
+		},
+		{
 			name:   "before upsert",
-			opCtx:  operation.NewOpContext(nil, operation.WithReplacement(&entity{})),
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{})),
 			opType: operation.OpTypeBeforeUpsert,
 			want:   &entity{},
 		},
 		{
+			name:   "before upsert with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{}), operation.WithModelHook(&entity{beforeUpsert: 1})),
+			opType: operation.OpTypeBeforeUpsert,
+			want:   &entity{beforeUpsert: 1},
+		},
+		{
 			name:   "after upsert",
-			opCtx:  operation.NewOpContext(nil, operation.WithReplacement(&entity{})),
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{})),
 			opType: operation.OpTypeAfterUpsert,
 			want:   &entity{},
+		},
+		{
+			name:   "after upsert with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithUpdates(&entity{}), operation.WithModelHook(&entity{afterUpsert: 1})),
+			opType: operation.OpTypeAfterUpsert,
+			want:   &entity{afterUpsert: 1},
 		},
 		{
 			name:   "after find",
 			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{})),
 			opType: operation.OpTypeAfterFind,
 			want:   &entity{},
+		},
+		{
+			name:   "after find with model hook",
+			opCtx:  operation.NewOpContext(nil, operation.WithDoc(&entity{}), operation.WithModelHook(&entity{afterFind: 1})),
+			opType: operation.OpTypeAfterFind,
+			want:   &entity{afterFind: 1},
 		},
 	}
 	for _, tc := range testCases {
@@ -194,6 +234,14 @@ func TestExecute(t *testing.T) {
 			name:    "slice",
 			ctx:     context.Background(),
 			opCtx:   operation.NewOpContext(nil, operation.WithDoc([]*entity{{}, {}})),
+			opType:  operation.OpTypeBeforeInsert,
+			opts:    nil,
+			wantErr: nil,
+		},
+		{
+			name:    "model hook",
+			ctx:     context.Background(),
+			opCtx:   operation.NewOpContext(nil, operation.WithDoc(&entity{}), operation.WithModelHook(&entity{beforeInsert: 1})),
 			opType:  operation.OpTypeBeforeInsert,
 			opts:    nil,
 			wantErr: nil,
@@ -322,6 +370,16 @@ func Test_executeSlice(t *testing.T) {
 
 			want:    []*entity{{beforeInsert: 1}, {beforeInsert: 1}},
 			wantErr: nil,
+		},
+		{
+			name:   "before insert error",
+			ctx:    context.Background(),
+			docs:   reflect.ValueOf([]*entity{{beforeInsert: 65}, {}}),
+			opType: operation.OpTypeBeforeInsert,
+			opts:   nil,
+
+			want:    []*entity{{beforeInsert: 66}, {beforeInsert: 0}},
+			wantErr: errors.New("error"),
 		},
 		{
 			name:    "after insert",

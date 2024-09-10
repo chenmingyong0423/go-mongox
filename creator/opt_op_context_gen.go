@@ -37,3 +37,9 @@ func WithMongoOptions[T any](mongoOptions any) OpContextOption[T] {
 		opContext.MongoOptions = mongoOptions
 	}
 }
+
+func WithModelHook[T any](modelHook any) OpContextOption[T] {
+	return func(opContext *OpContext[T]) {
+		opContext.ModelHook = modelHook
+	}
+}

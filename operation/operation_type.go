@@ -41,4 +41,5 @@ type OpContext struct {
 	Updates      any
 	Replacement  any
 	MongoOptions any
+	ModelHook    any
 }

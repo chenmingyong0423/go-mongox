@@ -37,6 +37,7 @@ func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
 type Deleter[T any] struct {
 	collection  *mongo.Collection
 	filter      any
+	modelHook   any
 	beforeHooks []beforeHookFn
 	afterHooks  []afterHookFn
 }
@@ -85,9 +86,14 @@ func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
 	return d
 }
 
+func (d *Deleter[T]) ModelHook(modelHook any) *Deleter[T] {
+	d.modelHook = modelHook
+	return d
+}
+
 func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts))
-	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts)), operation.OpTypeBeforeDelete)
+	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
+	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +103,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptio
 		return nil, err
 	}
 
-	err = d.postActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts)), operation.OpTypeAfterDelete)
+	err = d.postActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -106,8 +112,8 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptio
 }
 
 func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
-	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts))
-	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts)), operation.OpTypeBeforeDelete)
+	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
+	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +123,7 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOpti
 		return nil, err
 	}
 
-	err = d.postActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts)), operation.OpTypeAfterDelete)
+	err = d.postActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}

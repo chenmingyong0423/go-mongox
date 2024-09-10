@@ -29,6 +29,7 @@ type CondContext struct {
 	Updates      any
 	Replacement  any
 	MongoOptions any
+	ModelHook    any
 }
 
 //go:generate optioner -type BeforeOpContext

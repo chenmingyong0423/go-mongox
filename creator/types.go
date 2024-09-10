@@ -26,6 +26,7 @@ type OpContext[T any] struct {
 	Doc          *T
 	Docs         []*T
 	MongoOptions any
+	ModelHook    any
 }
 
 type (

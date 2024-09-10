@@ -334,7 +334,7 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 	testCases := []struct {
 		name     string
 		ctx      context.Context
-		ocOption func(tm *testModelHookStruct) operation.OpContextOption
+		ocOption func(tm *testModelHookStruct) []operation.OpContextOption
 		opType   operation.OpType
 
 		wantErr error
@@ -343,52 +343,132 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 		{
 			name: "beforeInsert",
 			ctx:  context.Background(),
-			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
-				return operation.WithDoc(tm)
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithDoc(tm),
+				}
 			},
 			opType:  operation.OpTypeBeforeInsert,
 			wantErr: nil,
 			want:    1,
 		},
 		{
+			name: "beforeInsert with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithDoc(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeInsert,
+			wantErr: nil,
+			want:    2,
+		},
+		{
 			name: "afterInsert",
 			ctx:  context.Background(),
-			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
-				return operation.WithDoc(tm)
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithDoc(tm),
+				}
 			},
 			opType:  operation.OpTypeAfterInsert,
 			wantErr: nil,
 			want:    1,
 		},
 		{
+			name: "afterInsert with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithDoc(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterInsert,
+			wantErr: nil,
+			want:    2,
+		},
+		{
 			name: "beforeUpsert",
 			ctx:  context.Background(),
-			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
-				return operation.WithReplacement(tm)
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithUpdates(tm),
+				}
 			},
 			opType:  operation.OpTypeBeforeUpsert,
 			wantErr: nil,
 			want:    1,
 		},
 		{
+			name: "beforeUpsert with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithUpdates(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeBeforeUpsert,
+			wantErr: nil,
+			want:    2,
+		},
+		{
 			name: "afterUpsert",
 			ctx:  context.Background(),
-			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
-				return operation.WithReplacement(tm)
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithUpdates(tm),
+				}
 			},
 			opType:  operation.OpTypeAfterUpsert,
 			wantErr: nil,
 			want:    1,
 		},
 		{
+			name: "afterUpsert with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithUpdates(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterUpsert,
+			wantErr: nil,
+			want:    2,
+		},
+		{
 			name: "afterFind",
 			ctx:  context.Background(),
-			ocOption: func(tm *testModelHookStruct) operation.OpContextOption {
-				return operation.WithDoc(tm)
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				return []operation.OpContextOption{
+					operation.WithDoc(tm),
+				}
 			},
 			opType:  operation.OpTypeAfterFind,
 			wantErr: nil,
 			want:    1,
+		},
+		{
+			name: "afterFind with model hook",
+			ctx:  context.Background(),
+			ocOption: func(tm *testModelHookStruct) []operation.OpContextOption {
+				*tm = 1
+				return []operation.OpContextOption{
+					operation.WithDoc(new(testModelHookStruct)),
+					operation.WithModelHook(tm),
+				}
+			},
+			opType:  operation.OpTypeAfterFind,
+			wantErr: nil,
+			want:    2,
 		},
 	}
 
@@ -397,7 +477,7 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 			tm := new(testModelHookStruct)
 			err := callback.GetCallback().Execute(
 				tc.ctx,
-				operation.NewOpContext(nil, tc.ocOption(tm)),
+				operation.NewOpContext(nil, tc.ocOption(tm)...),
 				tc.opType,
 			)
 			require.Nil(t, err)
@@ -407,7 +487,7 @@ func TestPluginInit_EnableModelHook(t *testing.T) {
 			InitPlugin(cfg)
 			err = callback.GetCallback().Execute(
 				tc.ctx,
-				operation.NewOpContext(nil, tc.ocOption(tm)),
+				operation.NewOpContext(nil, tc.ocOption(tm)...),
 				tc.opType,
 			)
 			require.Equal(t, tc.wantErr, err)

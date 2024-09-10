@@ -29,6 +29,7 @@ type OpContext struct {
 	Filter       any               `opt:"-"`
 	Updates      any
 	MongoOptions any
+	ModelHook    any
 }
 
 //go:generate optioner -type AfterOpContext

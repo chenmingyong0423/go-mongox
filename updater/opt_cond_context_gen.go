@@ -35,3 +35,9 @@ func WithMongoOptions(mongoOptions any) CondContextOption {
 		condContext.MongoOptions = mongoOptions
 	}
 }
+
+func WithModelHook(modelHook any) CondContextOption {
+	return func(condContext *CondContext) {
+		condContext.ModelHook = modelHook
+	}
+}
