@@ -22,29 +22,27 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/builder/update"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/operation"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func getCollection(t *testing.T) *mongo.Collection {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
 		Password:   "test",
 		AuthSource: "db-test",
@@ -77,7 +75,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter     any
-		opts       []*options.FindOneOptions
+		opts       []options.Lister[options.FindOneOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
@@ -90,14 +88,14 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			name: "no document",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
@@ -110,22 +108,22 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			name: "find by name",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter: query.Eq("name", "chenmingyong"),
+			filter: query.Eq("name", "Mingyong Chen"),
 			want: &TestUser{
-				Name: "chenmingyong",
+				Name: "Mingyong Chen",
 				Age:  24,
 			},
 		},
@@ -133,27 +131,25 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter: query.Eq("name", "chenmingyong"),
-			opts: []*options.FindOneOptions{
-				{
-					Projection: bsonx.M("age", 0),
-				},
+			filter: query.Eq("name", "Mingyong Chen"),
+			opts: []options.Lister[options.FindOneOptions]{
+				options.FindOne().SetProjection(bsonx.M("age", 0)),
 			},
 			want: &TestUser{
-				Name: "chenmingyong",
+				Name: "Mingyong Chen",
 			},
 		},
 		{
@@ -364,7 +360,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter     any
-		opts       []*options.FindOptions
+		opts       []options.Lister[options.FindOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
@@ -387,7 +383,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&IllegalUser{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  "24",
 					},
 					&IllegalUser{
@@ -399,7 +395,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
@@ -412,7 +408,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&TestUser{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					&TestUser{
@@ -424,7 +420,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
@@ -439,7 +435,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&TestUser{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					&TestUser{
@@ -451,7 +447,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
@@ -460,7 +456,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			filter: bson.D{},
 			want: []*TestUser{
 				{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				},
 				{
@@ -475,7 +471,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&TestUser{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					&TestUser{
@@ -487,16 +483,16 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
-			filter: query.In("name", "chenmingyong", "burt"),
+			filter: query.In("name", "Mingyong Chen", "burt"),
 			want: []*TestUser{
 				{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				},
 				{
@@ -511,7 +507,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&TestUser{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					&TestUser{
@@ -523,21 +519,19 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
-			filter: query.In("name", "chenmingyong", "burt"),
-			opts: []*options.FindOptions{
-				{
-					Projection: bsonx.M("age", 0),
-				},
+			filter: query.In("name", "Mingyong Chen", "burt"),
+			opts: []options.Lister[options.FindOptions]{
+				options.Find().SetProjection(bsonx.M("age", 0)),
 			},
 			want: []*TestUser{
 				{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 				},
 				{
 					Name: "burt",
@@ -776,7 +770,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			if err == nil {
 				require.Equal(t, len(tc.want), len(users))
 				for _, user := range users {
-					var zero primitive.ObjectID
+					var zero bson.ObjectID
 					user.ID = zero
 				}
 				require.ElementsMatch(t, tc.want, users)
@@ -800,7 +794,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter any
-		opts   []*options.CountOptions
+		opts   []options.Lister[options.CountOptions]
 
 		ctx     context.Context
 		want    int64
@@ -824,18 +818,18 @@ func TestFinder_e2e_Count(t *testing.T) {
 			name: "returns 1",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			opts: []*options.CountOptions{
+			opts: []options.Lister[options.CountOptions]{
 				options.Count().SetComment("test"),
 			},
 			filter:  bson.D{},
@@ -867,10 +861,10 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 
 		fieldName string
 		filter    any
-		opts      []*options.DistinctOptions
+		opts      []options.Lister[options.DistinctOptions]
 
 		ctx     context.Context
-		want    []any
+		want    []string
 		wantErr require.ErrorAssertionFunc
 	}{
 		{
@@ -890,35 +884,35 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 			filter:    bson.D{},
 			fieldName: "name",
 			ctx:       context.Background(),
-			want:      []any{},
+			want:      []string{},
 			wantErr:   require.NoError,
 		},
 		{
 			name: "returns all documents",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, []*TestUser{
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					{
 						Name: "burt",
 						Age:  45,
 					},
-				}...))
+				})
 				require.NoError(t, err)
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
 			ctx:       context.Background(),
-			want: []any{
-				"chenmingyong",
+			want: []string{
+				"Mingyong Chen",
 				"burt",
 			},
 			wantErr: require.NoError,
@@ -926,33 +920,33 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 		{
 			name: "name distinct",
 			before: func(ctx context.Context, t *testing.T) {
-				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
+				insertManyResult, err := collection.InsertMany(ctx, []*TestUser{
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  25,
 					},
 					{
 						Name: "burt",
 						Age:  26,
 					},
-				}...))
+				})
 				require.NoError(t, err)
 				require.Len(t, insertManyResult.InsertedIDs, 3)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(3), deleteResult.DeletedCount)
 			},
 			filter:    bson.D{},
 			fieldName: "name",
 			ctx:       context.Background(),
-			want: []any{
-				"chenmingyong",
+			want: []string{
+				"Mingyong Chen",
 				"burt",
 			},
 			wantErr: require.NoError,
@@ -961,10 +955,13 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			result, err := finder.Filter(tc.filter).Distinct(tc.ctx, tc.fieldName, tc.opts...)
+			distinctResult := finder.Filter(tc.filter).Distinct(tc.ctx, tc.fieldName, tc.opts...)
 			tc.after(tc.ctx, t)
-			tc.wantErr(t, err)
-			if err == nil {
+			tc.wantErr(t, distinctResult.Err())
+			if distinctResult.Err() == nil {
+				result := make([]string, 0)
+				err := distinctResult.Decode(&result)
+				require.NoError(t, err)
 				require.ElementsMatch(t, tc.want, result)
 			}
 		})
@@ -983,7 +980,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 		fieldName string
 		filter    any
 		result    []string
-		opts      []*options.DistinctOptions
+		opts      []options.Lister[options.DistinctOptions]
 
 		ctx     context.Context
 		want    []string
@@ -1014,7 +1011,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					{
@@ -1026,7 +1023,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 2)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
@@ -1035,7 +1032,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			ctx:       context.Background(),
 			result:    []string{},
 			want: []string{
-				"chenmingyong",
+				"Mingyong Chen",
 				"burt",
 			},
 			wantErr: require.NoError,
@@ -1045,11 +1042,11 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, utils.ToAnySlice([]*TestUser{
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  24,
 					},
 					{
-						Name: "chenmingyong",
+						Name: "Mingyong Chen",
 						Age:  25,
 					},
 					{
@@ -1061,7 +1058,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, 3)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "chenmingyong", "burt"))
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(3), deleteResult.DeletedCount)
 			},
@@ -1070,7 +1067,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			ctx:       context.Background(),
 			result:    []string{},
 			want: []string{
-				"chenmingyong",
+				"Mingyong Chen",
 				"burt",
 			},
 			wantErr: require.NoError,
@@ -1087,11 +1084,6 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 			}
 		})
 	}
-	t.Run("parse error", func(t *testing.T) {
-		var result []int
-		err := finder.Filter(bson.D{}).DistinctWithParse(context.Background(), "name", result)
-		require.Error(t, err)
-	})
 }
 
 func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
@@ -1110,7 +1102,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 
 		filter     any
 		updates    any
-		opts       []*options.FindOneAndUpdateOptions
+		opts       []options.Lister[options.FindOneAndUpdateOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
@@ -1123,14 +1115,14 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "nil document",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  24,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
@@ -1143,24 +1135,24 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "find by name and update age",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  18,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "chenmingyong"),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.Set("age", 24),
-			opts:    []*options.FindOneAndUpdateOptions{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			opts:    []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
 			want: &TestUser{
-				Name: "chenmingyong",
+				Name: "Mingyong Chen",
 				Age:  24,
 			},
 		},
@@ -1184,22 +1176,22 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "global after hook error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  18,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "chenmingyong"),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.Set("age", 24),
-			opts:    []*options.FindOneAndUpdateOptions{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			opts:    []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeAfterFind,
@@ -1215,28 +1207,28 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "global before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  18,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "chenmingyong"),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.Set("age", 24),
-			opts:    []*options.FindOneAndUpdateOptions{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			opts:    []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeBeforeFind,
 					name:   "before hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
-						if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "chenmingyong" {
+						if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
 							return errors.New("filter error")
 						}
 						if opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Key != "age" || opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Value != 24 {
@@ -1250,7 +1242,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					name:   "after hook",
 					fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 						user := opCtx.Doc.(*TestUser)
-						if user.Name != "chenmingyong" || user.Age != 24 {
+						if user.Name != "Mingyong Chen" || user.Age != 24 {
 							return errors.New("result error")
 						}
 						return nil
@@ -1258,7 +1250,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				},
 			},
 			want: &TestUser{
-				Name: "chenmingyong",
+				Name: "Mingyong Chen",
 				Age:  24,
 			},
 		},
@@ -1266,7 +1258,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name:   "before hook error",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			filter: query.Eq("name", "chenmingyong"),
+			filter: query.Eq("name", "Mingyong Chen"),
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return errors.New("before hook error")
@@ -1278,22 +1270,22 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "after hook error",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  18,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "chenmingyong"),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.Set("age", 24),
-			opts:    []*options.FindOneAndUpdateOptions{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			opts:    []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
 			afterHook: []afterHookFn[TestUser]{
 				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					return errors.New("after hook error")
@@ -1305,25 +1297,25 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			name: "before and after hook",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertOne(ctx, &TestUser{
-					Name: "chenmingyong",
+					Name: "Mingyong Chen",
 					Age:  18,
 				})
 				require.NoError(t, err)
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "chenmingyong"))
+				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "chenmingyong"),
+			filter:  query.Eq("name", "Mingyong Chen"),
 			updates: update.Set("age", 24),
-			opts:    []*options.FindOneAndUpdateOptions{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			opts:    []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
-					if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "chenmingyong" {
+					if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
 						return errors.New("filter error")
 					}
 					if opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Key != "age" || opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Value != 24 {
@@ -1335,14 +1327,14 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			afterHook: []afterHookFn[TestUser]{
 				func(ctx context.Context, opCtx *AfterOpContext[TestUser], opts ...any) error {
 					user := opCtx.Doc
-					if user.Name != "chenmingyong" || user.Age != 24 {
+					if user.Name != "Mingyong Chen" || user.Age != 24 {
 						return errors.New("after error")
 					}
 					return nil
 				},
 			},
 			want: &TestUser{
-				Name: "chenmingyong",
+				Name: "Mingyong Chen",
 				Age:  24,
 			},
 		},

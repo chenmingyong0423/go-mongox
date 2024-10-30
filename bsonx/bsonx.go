@@ -15,7 +15,9 @@
 package bsonx
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
+	"bytes"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func M(key string, value any) bson.M {
@@ -79,7 +81,9 @@ func dToM(d bson.D) bson.M {
 		return nil
 	}
 	var m bson.M
-	err = bson.Unmarshal(marshal, &m)
+	decoder := bson.NewDecoder(bson.NewDocumentReader(bytes.NewReader(marshal)))
+	decoder.DefaultDocumentM()
+	err = decoder.Decode(&m)
 	if err != nil {
 		return nil
 	}

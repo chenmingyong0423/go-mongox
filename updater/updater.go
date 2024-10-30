@@ -17,26 +17,30 @@ package updater
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
+
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 //go:generate mockgen -source=updater.go -destination=../mock/updater.mock.go -package=mocks
 type iUpdater[T any] interface {
-	UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
-	UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
-	Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error)
+	UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
+	UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
+	Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
 }
 
 func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
 	return &Updater[T]{collection: collection, filter: nil}
 }
+
+var _ iUpdater[any] = (*Updater[any])(nil)
 
 type Updater[T any] struct {
 	collection  *mongo.Collection
@@ -108,7 +112,7 @@ func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 	return nil
 }
 
-func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
@@ -132,7 +136,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptio
 	return result, nil
 }
 
-func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
@@ -156,11 +160,16 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOpti
 	return result, nil
 }
 
-func (u *Updater[T]) Upsert(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	if len(opts) == 0 {
 		opts = append(opts, options.Update().SetUpsert(true))
 	} else {
-		opts[0].SetUpsert(true)
+		if uob, ok := opts[0].(*options.UpdateOptionsBuilder); ok {
+			uob.Opts = append(uob.Opts, func(o *options.UpdateOptions) error {
+				o.Upsert = utils.ToPtr(true)
+				return nil
+			})
+		}
 	}
 
 	updates := bsonx.ToBsonM(u.updates)

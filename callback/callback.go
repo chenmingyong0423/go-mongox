@@ -17,7 +17,7 @@ package callback
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
 type CbFn func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error

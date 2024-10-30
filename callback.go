@@ -19,13 +19,13 @@ import (
 
 	validator2 "github.com/go-playground/validator/v10"
 
-	"github.com/chenmingyong0423/go-mongox/hook/validator"
+	"github.com/chenmingyong0423/go-mongox/v2/hook/validator"
 
-	"github.com/chenmingyong0423/go-mongox/hook/model"
+	"github.com/chenmingyong0423/go-mongox/v2/hook/model"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/hook/field"
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/hook/field"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
 func RegisterPlugin(name string, cb callback.CbFn, opType operation.OpType) {

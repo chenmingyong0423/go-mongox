@@ -17,7 +17,7 @@ package mongox
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // Model is a base struct which includes the following fields:
@@ -31,14 +31,14 @@ import (
 //		mongox.Model
 //	}
 type Model struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+	ID        bson.ObjectID `bson:"_id,omitempty"`
+	CreatedAt time.Time     `bson:"created_at"`
+	UpdatedAt time.Time     `bson:"updated_at"`
 }
 
-func (m *Model) DefaultId() primitive.ObjectID {
+func (m *Model) DefaultId() bson.ObjectID {
 	if m.ID.IsZero() {
-		m.ID = primitive.NewObjectID()
+		m.ID = bson.NewObjectID()
 	}
 	return m.ID
 }

@@ -20,22 +20,20 @@ import (
 	"context"
 	"testing"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/stretchr/testify/require"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/aggregation"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/builder/aggregation"
-	"github.com/chenmingyong0423/go-mongox/builder/query"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func getCollection(t *testing.T) *mongo.Collection {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
 		Password:   "test",
 		AuthSource: "db-test",
@@ -64,7 +62,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		pipeline           any
-		aggregationOptions []*options.AggregateOptions
+		aggregationOptions []options.Lister[options.AggregateOptions]
 
 		ctx     context.Context
 		want    []*TestUser
@@ -190,7 +188,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			pipeline: aggregation.NewStageBuilder().Sort(bsonx.M("age", 1)).Build(),
-			aggregationOptions: []*options.AggregateOptions{
+			aggregationOptions: []options.Lister[options.AggregateOptions]{
 				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
 			},
 			want: []*TestUser{
@@ -214,7 +212,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 			if err == nil {
 				require.Equal(t, len(tc.want), len(testUsers))
 				for _, tu := range testUsers {
-					var zero primitive.ObjectID
+					var zero bson.ObjectID
 					tu.ID = zero
 				}
 				require.ElementsMatch(t, tc.want, testUsers)
@@ -239,7 +237,7 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 		before             func(ctx context.Context, t *testing.T)
 		after              func(ctx context.Context, t *testing.T)
 		pipeline           any
-		aggregationOptions *options.AggregateOptions
+		aggregationOptions []options.Lister[options.AggregateOptions]
 		ctx                context.Context
 		result             any
 		want               []*User
@@ -301,9 +299,11 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
 				{Id: "2", Name: "gopher", Age: 20, IsProgrammer: true},
 			},
-			aggregationOptions: options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
-			ctx:                context.Background(),
-			wantErr:            require.NoError,
+			aggregationOptions: []options.Lister[options.AggregateOptions]{
+				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
+			},
+			ctx:     context.Background(),
+			wantErr: require.NoError,
 		},
 		{
 			name: "got error from cursor",
@@ -320,18 +320,20 @@ func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			pipeline:           aggregation.NewStageBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
-			result:             []string{},
-			want:               []*User{},
-			aggregationOptions: options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
-			ctx:                context.Background(),
-			wantErr:            require.Error,
+			pipeline: aggregation.NewStageBuilder().Set(bsonx.M("is_programmer", true)).Sort(bsonx.M("name", 1)).Build(),
+			result:   []string{},
+			want:     []*User{},
+			aggregationOptions: []options.Lister[options.AggregateOptions]{
+				options.Aggregate().SetCollation(&options.Collation{Locale: "en", Strength: 2}),
+			},
+			ctx:     context.Background(),
+			wantErr: require.Error,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
-			err := aggregator.Pipeline(tc.pipeline).AggregateWithParse(tc.ctx, &tc.result, tc.aggregationOptions)
+			err := aggregator.Pipeline(tc.pipeline).AggregateWithParse(tc.ctx, &tc.result, tc.aggregationOptions...)
 			tc.after(tc.ctx, t)
 			tc.wantErr(t, err)
 			if err == nil {

@@ -15,8 +15,7 @@
 package query
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type elementQueryBuilder struct {
@@ -31,7 +30,7 @@ func (b *elementQueryBuilder) Exists(key string, exists bool) *Builder {
 	return b.parent
 }
 
-func (b *elementQueryBuilder) Type(key string, t bsontype.Type) *Builder {
+func (b *elementQueryBuilder) Type(key string, t bson.Type) *Builder {
 	e := bson.E{Key: TypeOp, Value: t}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})
@@ -47,7 +46,7 @@ func (b *elementQueryBuilder) TypeAlias(key string, alias string) *Builder {
 	return b.parent
 }
 
-func (b *elementQueryBuilder) TypeArray(key string, ts ...bsontype.Type) *Builder {
+func (b *elementQueryBuilder) TypeArray(key string, ts ...bson.Type) *Builder {
 	e := bson.E{Key: TypeOp, Value: ts}
 	if !b.parent.tryMergeValue(key, e) {
 		b.parent.data = append(b.parent.data, bson.E{Key: key, Value: bson.D{e}})

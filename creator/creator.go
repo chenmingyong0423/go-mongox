@@ -17,20 +17,22 @@ package creator
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 //go:generate mockgen -source=creator.go -destination=../mock/creator.mock.go -package=mocks
 type iCreator[T any] interface {
-	InsertOne(ctx context.Context, docs *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
-	InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error)
+	InsertOne(ctx context.Context, docs *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error)
+	InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error)
 }
+
+var _ iCreator[any] = (*Creator[any])(nil)
 
 type Creator[T any] struct {
 	collection  *mongo.Collection
@@ -91,7 +93,7 @@ func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 	return nil
 }
 
-func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook))
 	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeBeforeInsert)
 	if err != nil {
@@ -111,7 +113,7 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...*options.Ins
 	return result, nil
 }
 
-func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error) {
 	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook))
 	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeBeforeInsert)
 	if err != nil {

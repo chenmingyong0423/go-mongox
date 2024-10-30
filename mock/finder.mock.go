@@ -12,7 +12,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	options "go.mongodb.org/mongo-driver/mongo/options"
+	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,7 +40,7 @@ func (m *MockiFinder[T]) EXPECT() *MockiFinderMockRecorder[T] {
 }
 
 // Count mocks base method.
-func (m *MockiFinder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
+func (m *MockiFinder[T]) Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -59,47 +59,8 @@ func (mr *MockiFinderMockRecorder[T]) Count(ctx any, opts ...any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockiFinder[T])(nil).Count), varargs...)
 }
 
-// Distinct mocks base method.
-func (m *MockiFinder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx, fieldName}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Distinct", varargs...)
-	ret0, _ := ret[0].([]any)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Distinct indicates an expected call of Distinct.
-func (mr *MockiFinderMockRecorder[T]) Distinct(ctx, fieldName any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, fieldName}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Distinct", reflect.TypeOf((*MockiFinder[T])(nil).Distinct), varargs...)
-}
-
-// DistinctWithParse mocks base method.
-func (m *MockiFinder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error {
-	m.ctrl.T.Helper()
-	varargs := []any{ctx, fieldName, result}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "DistinctWithParse", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DistinctWithParse indicates an expected call of DistinctWithParse.
-func (mr *MockiFinderMockRecorder[T]) DistinctWithParse(ctx, fieldName, result any, opts ...any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, fieldName, result}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DistinctWithParse", reflect.TypeOf((*MockiFinder[T])(nil).DistinctWithParse), varargs...)
-}
-
 // Find mocks base method.
-func (m *MockiFinder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
+func (m *MockiFinder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -119,7 +80,7 @@ func (mr *MockiFinderMockRecorder[T]) Find(ctx any, opts ...any) *gomock.Call {
 }
 
 // FindOne mocks base method.
-func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
+func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {

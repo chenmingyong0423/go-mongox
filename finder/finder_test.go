@@ -19,10 +19,10 @@ import (
 	"errors"
 	"testing"
 
-	mocks "github.com/chenmingyong0423/go-mongox/mock"
+	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/mock/gomock"
 )
 
@@ -187,123 +187,6 @@ func TestFinder_Count(t *testing.T) {
 			users, err := finder.Count(tc.ctx)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
-		})
-	}
-}
-
-func TestFinder_Distinct(t *testing.T) {
-	testCases := []struct {
-		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser]
-		ctx  context.Context
-
-		want    []any
-		wantErr error
-	}{
-		{
-			name: "nil filter error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().Distinct(ctx, "name").Return(nil, mongo.ErrNilDocument).Times(1)
-				return mockCollection
-			},
-			wantErr: mongo.ErrNilDocument,
-		},
-		{
-			name: "empty documents",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().Distinct(ctx, "name").Return([]any{}, nil).Times(1)
-				return mockCollection
-			},
-			want: []any{},
-		},
-		{
-			name: "duplicate name",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().Distinct(ctx, "name").Return([]any{
-					"chenmingyong",
-					"burt",
-				}, nil).Times(1)
-				return mockCollection
-			},
-			want: []any{
-				"chenmingyong",
-				"burt",
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-			finder := tc.mock(tc.ctx, ctl)
-
-			users, err := finder.Distinct(tc.ctx, "name")
-			assert.Equal(t, tc.wantErr, err)
-			assert.Equal(t, tc.want, users)
-		})
-	}
-}
-
-func TestFinder_DistinctWithParse(t *testing.T) {
-	testCases := []struct {
-		name   string
-		mock   func(ctx context.Context, ctl *gomock.Controller, result any) iFinder[TestUser]
-		ctx    context.Context
-		result any
-
-		want    any
-		wantErr error
-	}{
-		{
-			name: "nil filter error",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().DistinctWithParse(ctx, "name", result).Return(mongo.ErrNilDocument).Times(1)
-				return mockCollection
-			},
-			result:  nil,
-			wantErr: mongo.ErrNilDocument,
-		},
-		{
-			name: "empty documents",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().DistinctWithParse(ctx, "name", result).Return(nil).Times(1)
-				return mockCollection
-			},
-			result: []any{},
-			want:   []any{},
-		},
-		{
-			name: "duplicate name",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
-				mockCollection.EXPECT().DistinctWithParse(ctx, "name", result).Return(nil).Times(1)
-				return mockCollection
-			},
-			result: []any{
-				"chenmingyong",
-				"burt",
-			},
-			want: []any{
-				"chenmingyong",
-				"burt",
-			},
-		},
-	}
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-			finder := tc.mock(tc.ctx, ctl, tc.result)
-
-			err := finder.DistinctWithParse(tc.ctx, "name", tc.result)
-			if assert.Equal(t, tc.wantErr, err) {
-				assert.Equal(t, tc.want, tc.result)
-			}
 		})
 	}
 }

@@ -21,7 +21,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
 var validate = validator.New()

@@ -15,12 +15,12 @@
 package mongox
 
 import (
-	"github.com/chenmingyong0423/go-mongox/aggregator"
-	"github.com/chenmingyong0423/go-mongox/creator"
-	"github.com/chenmingyong0423/go-mongox/deleter"
-	"github.com/chenmingyong0423/go-mongox/finder"
-	"github.com/chenmingyong0423/go-mongox/updater"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/chenmingyong0423/go-mongox/v2/aggregator"
+	"github.com/chenmingyong0423/go-mongox/v2/creator"
+	"github.com/chenmingyong0423/go-mongox/v2/deleter"
+	"github.com/chenmingyong0423/go-mongox/v2/finder"
+	"github.com/chenmingyong0423/go-mongox/v2/updater"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func NewCollection[T any](collection *mongo.Collection) *Collection[T] {

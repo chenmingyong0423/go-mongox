@@ -17,12 +17,12 @@ package hook
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type DefaultModel interface {
 	// DefaultId set and get
-	DefaultId() primitive.ObjectID
+	DefaultId() bson.ObjectID
 	// DefaultCreatedAt set and get
 	DefaultCreatedAt() time.Time
 	// DefaultUpdatedAt set and get

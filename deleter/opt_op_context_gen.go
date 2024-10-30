@@ -4,7 +4,7 @@
 
 package deleter
 
-import "go.mongodb.org/mongo-driver/mongo"
+import "go.mongodb.org/mongo-driver/v2/mongo"
 
 type OpContextOption func(*OpContext)
 

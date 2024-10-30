@@ -18,7 +18,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
 func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {

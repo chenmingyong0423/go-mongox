@@ -17,18 +17,20 @@ package deleter
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 //go:generate mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
 type iDeleter[T any] interface {
-	DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
-	DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+	DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error)
+	DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error)
 }
+
+var _ iDeleter[any] = (*Deleter[any])(nil)
 
 func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
 	return &Deleter[T]{collection: collection, filter: nil}
@@ -91,7 +93,7 @@ func (d *Deleter[T]) ModelHook(modelHook any) *Deleter[T] {
 	return d
 }
 
-func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
 	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
 	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {
@@ -111,7 +113,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptio
 	return result, nil
 }
 
-func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
 	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
 	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {

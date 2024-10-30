@@ -12,7 +12,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	options "go.mongodb.org/mongo-driver/mongo/options"
+	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -40,7 +40,7 @@ func (m *MockiAggregator[T]) EXPECT() *MockiAggregatorMockRecorder[T] {
 }
 
 // Aggregate mocks base method.
-func (m *MockiAggregator[T]) Aggregate(ctx context.Context, opts ...*options.AggregateOptions) ([]*T, error) {
+func (m *MockiAggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[options.AggregateOptions]) ([]*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -60,7 +60,7 @@ func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any, opts ...any) *gomoc
 }
 
 // AggregateWithParse mocks base method.
-func (m *MockiAggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...*options.AggregateOptions) error {
+func (m *MockiAggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...options.Lister[options.AggregateOptions]) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, result}
 	for _, a := range opts {

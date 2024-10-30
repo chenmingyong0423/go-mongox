@@ -18,9 +18,9 @@ import (
 	"context"
 	"testing"
 
-	mocks "github.com/chenmingyong0423/go-mongox/mock"
+	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/mock/gomock"
 )
 
