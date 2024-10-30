@@ -17,21 +17,19 @@ package finder
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 type iFinder[T any] interface {
-	FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error)
-	Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error)
-	Count(ctx context.Context, opts ...*options.CountOptions) (int64, error)
-	Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error)
-	DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error
+	FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error)
+	Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error)
+	Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error)
 }
 
 func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
@@ -110,7 +108,7 @@ func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *oper
 	return
 }
 
-func (f *Finder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
+func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -132,7 +130,7 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions
 	return t, nil
 }
 
-func (f *Finder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
+func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
 	t := make([]*T, 0)
 
 	opContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -160,35 +158,29 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*
 	return t, nil
 }
 
-func (f *Finder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
+func (f *Finder[T]) Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error) {
 	return f.collection.CountDocuments(ctx, f.filter, opts...)
 }
 
-func (f *Finder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {
+func (f *Finder[T]) Distinct(ctx context.Context, fieldName string, opts ...options.Lister[options.DistinctOptions]) *mongo.DistinctResult {
 	return f.collection.Distinct(ctx, fieldName, f.filter, opts...)
 }
 
 // DistinctWithParse is used to parse the result of Distinct
 // result must be a pointer
-func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error {
-	docs, err := f.collection.Distinct(ctx, fieldName, f.filter, opts...)
-	if err != nil {
-		return err
+func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...options.Lister[options.DistinctOptions]) error {
+	distinctResult := f.collection.Distinct(ctx, fieldName, f.filter, opts...)
+	if distinctResult.Err() != nil {
+		return distinctResult.Err()
 	}
-
-	valueType, valueBytes, err := bson.MarshalValue(docs)
-	if err != nil {
-		return err
-	}
-	rawValue := bson.RawValue{Type: valueType, Value: valueBytes}
-	err = rawValue.Unmarshal(result)
+	err := distinctResult.Decode(result)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...*options.FindOneAndUpdateOptions) (*T, error) {
+func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister[options.FindOneAndUpdateOptions]) (*T, error) {
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithUpdates(f.updates), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))

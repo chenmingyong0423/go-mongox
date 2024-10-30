@@ -12,8 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	mongo "go.mongodb.org/mongo-driver/mongo"
-	options "go.mongodb.org/mongo-driver/mongo/options"
+	mongo "go.mongodb.org/mongo-driver/v2/mongo"
+	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func (m *MockiUpdater[T]) EXPECT() *MockiUpdaterMockRecorder[T] {
 }
 
 // UpdateMany mocks base method.
-func (m *MockiUpdater[T]) UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -61,7 +61,7 @@ func (mr *MockiUpdaterMockRecorder[T]) UpdateMany(ctx any, opts ...any) *gomock.
 }
 
 // UpdateOne mocks base method.
-func (m *MockiUpdater[T]) UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -81,7 +81,7 @@ func (mr *MockiUpdaterMockRecorder[T]) UpdateOne(ctx any, opts ...any) *gomock.C
 }
 
 // Upsert mocks base method.
-func (m *MockiUpdater[T]) Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
+func (m *MockiUpdater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {

@@ -18,8 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func TestId(t *testing.T) {
@@ -295,7 +294,7 @@ func TestType(t *testing.T) {
 	testCases := []struct {
 		name  string
 		key   string
-		value bsontype.Type
+		value bson.Type
 		want  bson.D
 	}{
 		{
@@ -337,14 +336,14 @@ func TestTypeArray(t *testing.T) {
 	testCases := []struct {
 		name   string
 		key    string
-		values []bsontype.Type
+		values []bson.Type
 		want   bson.D
 	}{
 		{
 			name:   "test type array",
 			key:    "age",
-			values: []bsontype.Type{bson.TypeInt32, bson.TypeInt64},
-			want:   bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$type", Value: []bsontype.Type{bson.TypeInt32, bson.TypeInt64}}}}},
+			values: []bson.Type{bson.TypeInt32, bson.TypeInt64},
+			want:   bson.D{bson.E{Key: "age", Value: bson.D{{Key: "$type", Value: []bson.Type{bson.TypeInt32, bson.TypeInt64}}}}},
 		},
 	}
 	for _, tc := range testCases {

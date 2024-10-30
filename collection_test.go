@@ -17,13 +17,13 @@ package mongox
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/updater"
+	"github.com/chenmingyong0423/go-mongox/v2/updater"
 
-	"github.com/chenmingyong0423/go-mongox/creator"
+	"github.com/chenmingyong0423/go-mongox/v2/creator"
 
-	"github.com/chenmingyong0423/go-mongox/finder"
+	"github.com/chenmingyong0423/go-mongox/v2/finder"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func TestCollection_New(t *testing.T) {

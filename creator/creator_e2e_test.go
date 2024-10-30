@@ -22,24 +22,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chenmingyong0423/go-mongox/callback"
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 type User struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	Name         string             `bson:"name"`
+	ID           bson.ObjectID `bson:"_id,omitempty"`
+	Name         string        `bson:"name"`
 	Age          int64
 	UnknownField string    `bson:"-"`
 	CreatedAt    time.Time `bson:"created_at"`
@@ -48,7 +48,7 @@ type User struct {
 
 func (u *User) DefaultId() {
 	if u.ID.IsZero() {
-		u.ID = primitive.NewObjectID()
+		u.ID = bson.NewObjectID()
 	}
 }
 
@@ -63,7 +63,7 @@ func (u *User) DefaultUpdatedAt() {
 }
 
 func newCollection(t *testing.T) *mongo.Collection {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
 		Password:   "test",
 		AuthSource: "db-test",
@@ -89,7 +89,7 @@ func TestCreator_e2e_One(t *testing.T) {
 		name       string
 		before     func(ctx context.Context, t *testing.T)
 		after      func(ctx context.Context, t *testing.T)
-		opts       []*options.InsertOneOptions
+		opts       []options.Lister[options.InsertOneOptions]
 		ctx        context.Context
 		doc        *User
 		globalHook []globalHook
@@ -103,7 +103,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc:       nil,
@@ -118,7 +118,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
@@ -138,7 +138,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: nil,
@@ -164,7 +164,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
@@ -193,7 +193,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
@@ -229,7 +229,7 @@ func TestCreator_e2e_One(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: nil,
@@ -251,7 +251,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
@@ -276,7 +276,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertOneOptions{
+			opts: []options.Lister[options.InsertOneOptions]{
 				options.InsertOne().SetComment("test"),
 			},
 			doc: &User{
@@ -343,7 +343,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 
 		ctx        context.Context
 		docs       []*User
-		opts       []*options.InsertManyOptions
+		opts       []options.Lister[options.InsertManyOptions]
 		globalHook []globalHook
 		beforeHook []hookFn[User]
 		afterHook  []hookFn[User]
@@ -355,7 +355,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 			name:   "nil docs",
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			ctx:       context.Background(),
@@ -370,7 +370,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			ctx: context.Background(),
@@ -392,7 +392,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: nil,
@@ -418,7 +418,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: []*User{
@@ -453,7 +453,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: []*User{
@@ -496,7 +496,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 			before: func(ctx context.Context, t *testing.T) {},
 			after:  func(ctx context.Context, t *testing.T) {},
 			ctx:    context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: nil,
@@ -518,7 +518,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: []*User{
@@ -549,7 +549,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
 			ctx: context.Background(),
-			opts: []*options.InsertManyOptions{
+			opts: []options.Lister[options.InsertManyOptions]{
 				options.InsertMany().SetComment("test"),
 			},
 			docs: []*User{

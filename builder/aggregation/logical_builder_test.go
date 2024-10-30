@@ -17,12 +17,12 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/builder/query"
+	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func Test_logicalBuilder_And(t *testing.T) {

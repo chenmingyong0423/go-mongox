@@ -27,9 +27,14 @@
 - 支持插件化编程
 
 # 安装
-```go
-go get github.com/chenmingyong0423/go-mongox
-```
+- 如果使用 `mongo-driver 1.x` 版本：
+    ```go
+    go get github.com/chenmingyong0423/go-mongox
+    ```
+- 如果使用 `mongo-driver 2.x` 版本：
+    ```go
+    go get github.com/chenmingyong0423/go-mongox/v2
+    ```
 
 # 快速开始
 - `go mongox` 指南： [https://go-mongox.dev](https://go-mongox.dev)

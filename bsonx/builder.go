@@ -14,7 +14,7 @@
 
 package bsonx
 
-import "go.mongodb.org/mongo-driver/bson"
+import "go.mongodb.org/mongo-driver/v2/bson"
 
 // DBuilder is a builder for bson.D
 type DBuilder struct {

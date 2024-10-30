@@ -18,8 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func Test_elementQueryBuilder_Exists(t *testing.T) {
@@ -39,7 +38,7 @@ func TestNewBuilder_TypeArray(t *testing.T) {
 	testCases := []struct {
 		name string
 		key  string
-		ts   []bsontype.Type
+		ts   []bson.Type
 
 		want bson.D
 	}{
@@ -47,31 +46,31 @@ func TestNewBuilder_TypeArray(t *testing.T) {
 			name: "nil values",
 			key:  "name",
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: ([]bsontype.Type)(nil)}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: ([]bson.Type)(nil)}}},
 			},
 		},
 		{
 			name: "empty values",
 			key:  "name",
-			ts:   []bsontype.Type{},
+			ts:   []bson.Type{},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bson.Type{}}}},
 			},
 		},
 		{
 			name: "one value",
 			key:  "name",
-			ts:   []bsontype.Type{bson.TypeString},
+			ts:   []bson.Type{bson.TypeString},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{bson.TypeString}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bson.Type{bson.TypeString}}}},
 			},
 		},
 		{
 			name: "multiple values",
 			key:  "name",
-			ts:   []bsontype.Type{bson.TypeString, bson.TypeInt32},
+			ts:   []bson.Type{bson.TypeString, bson.TypeInt32},
 			want: bson.D{
-				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bsontype.Type{bson.TypeString, bson.TypeInt32}}}},
+				bson.E{Key: "name", Value: bson.D{bson.E{Key: TypeOp, Value: []bson.Type{bson.TypeString, bson.TypeInt32}}}},
 			},
 		},
 	}

@@ -20,14 +20,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/creator"
+	"github.com/chenmingyong0423/go-mongox/v2/creator"
 
-	"github.com/chenmingyong0423/go-mongox/finder"
+	"github.com/chenmingyong0423/go-mongox/v2/finder"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func TestCollection_e2e_Deleter(t *testing.T) {
@@ -63,7 +63,7 @@ func TestCollection_e2e_New(t *testing.T) {
 }
 
 func getCollection[T any](t *testing.T) *Collection[T] {
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
+	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
 		Password:   "test",
 		AuthSource: "db-test",

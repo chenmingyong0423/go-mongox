@@ -15,8 +15,7 @@
 package query
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func All[T any](values ...T) bson.D {
@@ -132,7 +131,7 @@ func Text(search string, opt *TextOptions) bson.D {
 	return bson.D{bson.E{Key: TextOp, Value: d}}
 }
 
-func Type(key string, value bsontype.Type) bson.D {
+func Type(key string, value bson.Type) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: value}}}}
 }
 
@@ -140,7 +139,7 @@ func TypeAlias(key string, value string) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: value}}}}
 }
 
-func TypeArray(key string, values ...bsontype.Type) bson.D {
+func TypeArray(key string, values ...bson.Type) bson.D {
 	return bson.D{bson.E{Key: key, Value: bson.D{{Key: TypeOp, Value: values}}}}
 }
 

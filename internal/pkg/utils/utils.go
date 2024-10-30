@@ -18,10 +18,14 @@ import (
 	"fmt"
 	"reflect"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
+
+func ToPtr[T any](v T) *T {
+	return &v
+}
 
 func ToAnySlice[T any](values ...T) []any {
 	if values == nil {

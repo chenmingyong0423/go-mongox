@@ -27,9 +27,14 @@ English | [中文简体](./README-zh_CN.md)
 - Plugin programming support
 
 # Install
-```go
-go get github.com/chenmingyong0423/go-mongox
-```
+- If you are using `mongo-driver 1.x` version:
+    ```go
+    go get github.com/chenmingyong0423/go-mongox
+    ```
+- If you are using `mongo-driver 2.x` version:
+    ```go
+    go get github.com/chenmingyong0423/go-mongox/v2
+    ```
 
 # Getting Started
 - `go mongox` Guides: [https://go-mongox.dev](https://go-mongox.dev/en)

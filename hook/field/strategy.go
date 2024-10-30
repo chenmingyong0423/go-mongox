@@ -15,9 +15,9 @@
 package field
 
 import (
-	"github.com/chenmingyong0423/go-mongox/hook"
-	"github.com/chenmingyong0423/go-mongox/operation"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/v2/hook"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type (

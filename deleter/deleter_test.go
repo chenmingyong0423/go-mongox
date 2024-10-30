@@ -20,18 +20,17 @@ import (
 	"testing"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	mocks "github.com/chenmingyong0423/go-mongox/mock"
+	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/mock/gomock"
 )
 
 type TestUser struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	Name         string             `bson:"name"`
+	ID           bson.ObjectID `bson:"_id,omitempty"`
+	Name         string        `bson:"name"`
 	Age          int64
 	UnknownField string    `bson:"-"`
 	CreatedAt    time.Time `bson:"created_at"`

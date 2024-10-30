@@ -15,8 +15,8 @@
 package query
 
 import (
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type evaluationQueryBuilder struct {

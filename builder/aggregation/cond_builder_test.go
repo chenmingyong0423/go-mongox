@@ -17,9 +17,9 @@ package aggregation
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func Test_condBuilder_Cond(t *testing.T) {

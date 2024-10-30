@@ -12,8 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	mongo "go.mongodb.org/mongo-driver/mongo"
-	options "go.mongodb.org/mongo-driver/mongo/options"
+	mongo "go.mongodb.org/mongo-driver/v2/mongo"
+	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func (m *MockiCreator[T]) EXPECT() *MockiCreatorMockRecorder[T] {
 }
 
 // InsertMany mocks base method.
-func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, docs}
 	for _, a := range opts {
@@ -61,7 +61,7 @@ func (mr *MockiCreatorMockRecorder[T]) InsertMany(ctx, docs any, opts ...any) *g
 }
 
 // InsertOne mocks base method.
-func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, docs}
 	for _, a := range opts {

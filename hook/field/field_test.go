@@ -21,20 +21,20 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
 type model struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	CreatedAt time.Time          `bson:"created_at"`
-	UpdatedAt time.Time          `bson:"updated_at"`
+	ID        bson.ObjectID `bson:"_id"`
+	CreatedAt time.Time     `bson:"created_at"`
+	UpdatedAt time.Time     `bson:"updated_at"`
 }
 
-func (m *model) DefaultId() primitive.ObjectID {
+func (m *model) DefaultId() bson.ObjectID {
 	if m.ID.IsZero() {
-		m.ID = primitive.NewObjectID()
+		m.ID = bson.NewObjectID()
 	}
 	return m.ID
 }
@@ -59,7 +59,7 @@ type customModel struct {
 
 func (c *customModel) CustomID() (string, any) {
 	if c.ID == "" {
-		c.ID = primitive.NewObjectID().Hex()
+		c.ID = bson.NewObjectID().Hex()
 	}
 	return "_id", c.ID
 }

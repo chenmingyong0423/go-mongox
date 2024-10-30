@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/operation"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"github.com/stretchr/testify/assert"
 )
 

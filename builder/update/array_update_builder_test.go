@@ -17,12 +17,12 @@ package update
 import (
 	"testing"
 
-	"github.com/chenmingyong0423/go-mongox/internal/pkg/utils"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/bsonx"
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func Test_arrayUpdateBuilder_AddToSet(t *testing.T) {

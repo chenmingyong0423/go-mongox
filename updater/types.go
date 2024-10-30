@@ -18,9 +18,9 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 //go:generate optioner -type CondContext
@@ -57,17 +57,17 @@ type User struct {
 }
 
 type TestUser struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	Name         string             `bson:"name"`
+	ID           bson.ObjectID `bson:"_id,omitempty"`
+	Name         string        `bson:"name"`
 	Age          int64
 	UnknownField string    `bson:"-"`
 	CreatedAt    time.Time `bson:"created_at"`
 	UpdatedAt    time.Time `bson:"updated_at"`
 }
 
-func (m *TestUser) DefaultId() primitive.ObjectID {
+func (m *TestUser) DefaultId() bson.ObjectID {
 	if m.ID.IsZero() {
-		m.ID = primitive.NewObjectID()
+		m.ID = bson.NewObjectID()
 	}
 	return m.ID
 }
@@ -95,7 +95,7 @@ type TestUser2 struct {
 
 func (m *TestUser2) CustomID() (string, any) {
 	if m.ID == "" {
-		m.ID = primitive.NewObjectID().Hex()
+		m.ID = bson.NewObjectID().Hex()
 	}
 	return "_id", m.ID
 }

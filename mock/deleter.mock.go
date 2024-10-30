@@ -12,8 +12,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	mongo "go.mongodb.org/mongo-driver/mongo"
-	options "go.mongodb.org/mongo-driver/mongo/options"
+	mongo "go.mongodb.org/mongo-driver/v2/mongo"
+	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -41,7 +41,7 @@ func (m *MockiDeleter[T]) EXPECT() *MockiDeleterMockRecorder[T] {
 }
 
 // DeleteMany mocks base method.
-func (m *MockiDeleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (m *MockiDeleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -61,7 +61,7 @@ func (mr *MockiDeleterMockRecorder[T]) DeleteMany(ctx any, opts ...any) *gomock.
 }
 
 // DeleteOne mocks base method.
-func (m *MockiDeleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (m *MockiDeleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
