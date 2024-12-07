@@ -17,31 +17,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockiCreator is a mock of iCreator interface.
-type MockiCreator[T any] struct {
+// MockICreator is a mock of ICreator interface.
+type MockICreator[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiCreatorMockRecorder[T]
+	recorder *MockICreatorMockRecorder[T]
 }
 
-// MockiCreatorMockRecorder is the mock recorder for MockiCreator.
-type MockiCreatorMockRecorder[T any] struct {
-	mock *MockiCreator[T]
+// MockICreatorMockRecorder is the mock recorder for MockICreator.
+type MockICreatorMockRecorder[T any] struct {
+	mock *MockICreator[T]
 }
 
-// NewMockiCreator creates a new mock instance.
-func NewMockiCreator[T any](ctrl *gomock.Controller) *MockiCreator[T] {
-	mock := &MockiCreator[T]{ctrl: ctrl}
-	mock.recorder = &MockiCreatorMockRecorder[T]{mock}
+// NewMockICreator creates a new mock instance.
+func NewMockICreator[T any](ctrl *gomock.Controller) *MockICreator[T] {
+	mock := &MockICreator[T]{ctrl: ctrl}
+	mock.recorder = &MockICreatorMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiCreator[T]) EXPECT() *MockiCreatorMockRecorder[T] {
+func (m *MockICreator[T]) EXPECT() *MockICreatorMockRecorder[T] {
 	return m.recorder
 }
 
 // InsertMany mocks base method.
-func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
+func (m *MockICreator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, docs}
 	for _, a := range opts {
@@ -54,14 +54,14 @@ func (m *MockiCreator[T]) InsertMany(ctx context.Context, docs []*T, opts ...*op
 }
 
 // InsertMany indicates an expected call of InsertMany.
-func (mr *MockiCreatorMockRecorder[T]) InsertMany(ctx, docs any, opts ...any) *gomock.Call {
+func (mr *MockICreatorMockRecorder[T]) InsertMany(ctx, docs any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, docs}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockiCreator[T])(nil).InsertMany), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMany", reflect.TypeOf((*MockICreator[T])(nil).InsertMany), varargs...)
 }
 
 // InsertOne mocks base method.
-func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+func (m *MockICreator[T]) InsertOne(ctx context.Context, docs *T, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, docs}
 	for _, a := range opts {
@@ -74,8 +74,8 @@ func (m *MockiCreator[T]) InsertOne(ctx context.Context, docs *T, opts ...*optio
 }
 
 // InsertOne indicates an expected call of InsertOne.
-func (mr *MockiCreatorMockRecorder[T]) InsertOne(ctx, docs any, opts ...any) *gomock.Call {
+func (mr *MockICreatorMockRecorder[T]) InsertOne(ctx, docs any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, docs}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockiCreator[T])(nil).InsertOne), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockICreator[T])(nil).InsertOne), varargs...)
 }

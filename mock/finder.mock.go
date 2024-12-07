@@ -16,31 +16,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockiFinder is a mock of iFinder interface.
-type MockiFinder[T any] struct {
+// MockIFinder is a mock of IFinder interface.
+type MockIFinder[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiFinderMockRecorder[T]
+	recorder *MockIFinderMockRecorder[T]
 }
 
-// MockiFinderMockRecorder is the mock recorder for MockiFinder.
-type MockiFinderMockRecorder[T any] struct {
-	mock *MockiFinder[T]
+// MockIFinderMockRecorder is the mock recorder for MockIFinder.
+type MockIFinderMockRecorder[T any] struct {
+	mock *MockIFinder[T]
 }
 
-// NewMockiFinder creates a new mock instance.
-func NewMockiFinder[T any](ctrl *gomock.Controller) *MockiFinder[T] {
-	mock := &MockiFinder[T]{ctrl: ctrl}
-	mock.recorder = &MockiFinderMockRecorder[T]{mock}
+// NewMockIFinder creates a new mock instance.
+func NewMockIFinder[T any](ctrl *gomock.Controller) *MockIFinder[T] {
+	mock := &MockIFinder[T]{ctrl: ctrl}
+	mock.recorder = &MockIFinderMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiFinder[T]) EXPECT() *MockiFinderMockRecorder[T] {
+func (m *MockIFinder[T]) EXPECT() *MockIFinderMockRecorder[T] {
 	return m.recorder
 }
 
 // Count mocks base method.
-func (m *MockiFinder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
+func (m *MockIFinder[T]) Count(ctx context.Context, opts ...*options.CountOptions) (int64, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -53,14 +53,14 @@ func (m *MockiFinder[T]) Count(ctx context.Context, opts ...*options.CountOption
 }
 
 // Count indicates an expected call of Count.
-func (mr *MockiFinderMockRecorder[T]) Count(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) Count(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockiFinder[T])(nil).Count), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockIFinder[T])(nil).Count), varargs...)
 }
 
 // Distinct mocks base method.
-func (m *MockiFinder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {
+func (m *MockIFinder[T]) Distinct(ctx context.Context, fieldName string, opts ...*options.DistinctOptions) ([]any, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, fieldName}
 	for _, a := range opts {
@@ -73,14 +73,14 @@ func (m *MockiFinder[T]) Distinct(ctx context.Context, fieldName string, opts ..
 }
 
 // Distinct indicates an expected call of Distinct.
-func (mr *MockiFinderMockRecorder[T]) Distinct(ctx, fieldName any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) Distinct(ctx, fieldName any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, fieldName}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Distinct", reflect.TypeOf((*MockiFinder[T])(nil).Distinct), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Distinct", reflect.TypeOf((*MockIFinder[T])(nil).Distinct), varargs...)
 }
 
 // DistinctWithParse mocks base method.
-func (m *MockiFinder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error {
+func (m *MockIFinder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...*options.DistinctOptions) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, fieldName, result}
 	for _, a := range opts {
@@ -92,14 +92,14 @@ func (m *MockiFinder[T]) DistinctWithParse(ctx context.Context, fieldName string
 }
 
 // DistinctWithParse indicates an expected call of DistinctWithParse.
-func (mr *MockiFinderMockRecorder[T]) DistinctWithParse(ctx, fieldName, result any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) DistinctWithParse(ctx, fieldName, result any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, fieldName, result}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DistinctWithParse", reflect.TypeOf((*MockiFinder[T])(nil).DistinctWithParse), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DistinctWithParse", reflect.TypeOf((*MockIFinder[T])(nil).DistinctWithParse), varargs...)
 }
 
 // Find mocks base method.
-func (m *MockiFinder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
+func (m *MockIFinder[T]) Find(ctx context.Context, opts ...*options.FindOptions) ([]*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -112,14 +112,14 @@ func (m *MockiFinder[T]) Find(ctx context.Context, opts ...*options.FindOptions)
 }
 
 // Find indicates an expected call of Find.
-func (mr *MockiFinderMockRecorder[T]) Find(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) Find(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockiFinder[T])(nil).Find), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockIFinder[T])(nil).Find), varargs...)
 }
 
 // FindOne mocks base method.
-func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
+func (m *MockIFinder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOptions) (*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -132,8 +132,28 @@ func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...*options.FindOneOp
 }
 
 // FindOne indicates an expected call of FindOne.
-func (mr *MockiFinderMockRecorder[T]) FindOne(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) FindOne(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockiFinder[T])(nil).FindOne), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockIFinder[T])(nil).FindOne), varargs...)
+}
+
+// FindOneAndUpdate mocks base method.
+func (m *MockIFinder[T]) FindOneAndUpdate(ctx context.Context, opts ...*options.FindOneAndUpdateOptions) (*T, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "FindOneAndUpdate", varargs...)
+	ret0, _ := ret[0].(*T)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneAndUpdate indicates an expected call of FindOneAndUpdate.
+func (mr *MockIFinderMockRecorder[T]) FindOneAndUpdate(ctx any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneAndUpdate", reflect.TypeOf((*MockIFinder[T])(nil).FindOneAndUpdate), varargs...)
 }

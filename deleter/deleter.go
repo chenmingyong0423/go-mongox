@@ -25,7 +25,7 @@ import (
 )
 
 //go:generate mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
-type iDeleter[T any] interface {
+type IDeleter[T any] interface {
 	DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 }
@@ -33,6 +33,8 @@ type iDeleter[T any] interface {
 func NewDeleter[T any](collection *mongo.Collection) *Deleter[T] {
 	return &Deleter[T]{collection: collection, filter: nil}
 }
+
+var _ IDeleter[any] = (*Deleter[any])(nil)
 
 type Deleter[T any] struct {
 	collection  *mongo.Collection
