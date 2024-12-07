@@ -27,12 +27,12 @@ import (
 )
 
 //go:generate mockgen -source=creator.go -destination=../mock/creator.mock.go -package=mocks
-type iCreator[T any] interface {
+type ICreator[T any] interface {
 	InsertOne(ctx context.Context, docs *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error)
 	InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error)
 }
 
-var _ iCreator[any] = (*Creator[any])(nil)
+var _ ICreator[any] = (*Creator[any])(nil)
 
 type Creator[T any] struct {
 	collection  *mongo.Collection

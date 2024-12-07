@@ -26,7 +26,7 @@ import (
 )
 
 //go:generate mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
-type iFinder[T any] interface {
+type IFinder[T any] interface {
 	FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error)
 	Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error)
 	Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error)
@@ -36,7 +36,7 @@ func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
 	return &Finder[T]{collection: collection, filter: bson.D{}}
 }
 
-var _ iFinder[any] = (*Finder[any])(nil)
+var _ IFinder[any] = (*Finder[any])(nil)
 
 type Finder[T any] struct {
 	collection  *mongo.Collection

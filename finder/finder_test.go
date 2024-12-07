@@ -37,7 +37,7 @@ func TestFinder_New(t *testing.T) {
 func TestFinder_One(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
 		ctx  context.Context
 
 		want    *TestUser
@@ -45,8 +45,8 @@ func TestFinder_One(t *testing.T) {
 	}{
 		{
 			name: "error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().FindOne(gomock.Any()).Return(nil, mongo.ErrNoDocuments).Times(1)
 				return mockCollection
 			},
@@ -54,8 +54,8 @@ func TestFinder_One(t *testing.T) {
 		},
 		{
 			name: "match the first one",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().FindOne(gomock.Any()).Return(&TestUser{
 					Name: "chenmingyong",
 					Age:  24,
@@ -84,7 +84,7 @@ func TestFinder_One(t *testing.T) {
 func TestFinder_All(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
 		ctx  context.Context
 
 		want    []*TestUser
@@ -92,8 +92,8 @@ func TestFinder_All(t *testing.T) {
 	}{
 		{
 			name: "empty documents",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().Find(ctx).Return([]*TestUser{}, nil).Times(1)
 				return mockCollection
 			},
@@ -101,8 +101,8 @@ func TestFinder_All(t *testing.T) {
 		},
 		{
 			name: "matched",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().Find(ctx).Return([]*TestUser{
 					{
 						Name: "chenmingyong",
@@ -143,7 +143,7 @@ func TestFinder_All(t *testing.T) {
 func TestFinder_Count(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
 		ctx  context.Context
 
 		want    int64
@@ -151,8 +151,8 @@ func TestFinder_Count(t *testing.T) {
 	}{
 		{
 			name: "error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().Count(ctx).Return(int64(0), errors.New("nil filter error")).Times(1)
 				return mockCollection
 			},
@@ -161,8 +161,8 @@ func TestFinder_Count(t *testing.T) {
 		},
 		{
 			name: "matched 0",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().Count(ctx).Return(int64(0), nil).Times(1)
 				return mockCollection
 			},
@@ -170,8 +170,8 @@ func TestFinder_Count(t *testing.T) {
 		},
 		{
 			name: "matched 1",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iFinder[TestUser] {
-				mockCollection := mocks.NewMockiFinder[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().Count(ctx).Return(int64(1), nil).Times(1)
 				return mockCollection
 			},

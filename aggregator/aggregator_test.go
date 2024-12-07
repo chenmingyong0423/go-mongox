@@ -80,15 +80,15 @@ func TestAggregator_New(t *testing.T) {
 func TestAggregator_Aggregation(t *testing.T) {
 	testCases := []struct {
 		name    string
-		mock    func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser]
+		mock    func(ctx context.Context, ctl *gomock.Controller) IAggregator[TestUser]
 		ctx     context.Context
 		want    []*TestUser
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "got error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser] {
-				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
 				aggregator.EXPECT().Aggregate(ctx).Return(nil, errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
@@ -97,8 +97,8 @@ func TestAggregator_Aggregation(t *testing.T) {
 		},
 		{
 			name: "got result",
-			mock: func(ctx context.Context, ctl *gomock.Controller) iAggregator[TestUser] {
-				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
 				aggregator.EXPECT().Aggregate(ctx).Return([]*TestUser{
 					{Name: "chenmingyong", Age: 24},
 					{Name: "gopher", Age: 25},
@@ -136,7 +136,7 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 	}
 	testCases := []struct {
 		name    string
-		mock    func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser]
+		mock    func(ctx context.Context, ctl *gomock.Controller, result any) IAggregator[TestUser]
 		ctx     context.Context
 		result  []*User
 		want    []*User
@@ -144,8 +144,8 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 	}{
 		{
 			name: "got error",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser] {
-				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
 				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(errors.New("can only marshal slices and arrays into aggregation pipelines, but got invalid")).Times(1)
 				return aggregator
 			},
@@ -155,8 +155,8 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 		},
 		{
 			name: "got result",
-			mock: func(ctx context.Context, ctl *gomock.Controller, result any) iAggregator[TestUser] {
-				aggregator := mocks.NewMockiAggregator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
 				aggregator.EXPECT().AggregateWithParse(ctx, result).Return(nil).Times(1)
 				return aggregator
 			},

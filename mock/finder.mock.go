@@ -16,31 +16,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockiFinder is a mock of iFinder interface.
-type MockiFinder[T any] struct {
+// MockIFinder is a mock of IFinder interface.
+type MockIFinder[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiFinderMockRecorder[T]
+	recorder *MockIFinderMockRecorder[T]
 }
 
-// MockiFinderMockRecorder is the mock recorder for MockiFinder.
-type MockiFinderMockRecorder[T any] struct {
-	mock *MockiFinder[T]
+// MockIFinderMockRecorder is the mock recorder for MockIFinder.
+type MockIFinderMockRecorder[T any] struct {
+	mock *MockIFinder[T]
 }
 
-// NewMockiFinder creates a new mock instance.
-func NewMockiFinder[T any](ctrl *gomock.Controller) *MockiFinder[T] {
-	mock := &MockiFinder[T]{ctrl: ctrl}
-	mock.recorder = &MockiFinderMockRecorder[T]{mock}
+// NewMockIFinder creates a new mock instance.
+func NewMockIFinder[T any](ctrl *gomock.Controller) *MockIFinder[T] {
+	mock := &MockIFinder[T]{ctrl: ctrl}
+	mock.recorder = &MockIFinderMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiFinder[T]) EXPECT() *MockiFinderMockRecorder[T] {
+func (m *MockIFinder[T]) EXPECT() *MockIFinderMockRecorder[T] {
 	return m.recorder
 }
 
 // Count mocks base method.
-func (m *MockiFinder[T]) Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error) {
+func (m *MockIFinder[T]) Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -53,14 +53,14 @@ func (m *MockiFinder[T]) Count(ctx context.Context, opts ...options.Lister[optio
 }
 
 // Count indicates an expected call of Count.
-func (mr *MockiFinderMockRecorder[T]) Count(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) Count(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockiFinder[T])(nil).Count), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockIFinder[T])(nil).Count), varargs...)
 }
 
 // Find mocks base method.
-func (m *MockiFinder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
+func (m *MockIFinder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -73,14 +73,14 @@ func (m *MockiFinder[T]) Find(ctx context.Context, opts ...options.Lister[option
 }
 
 // Find indicates an expected call of Find.
-func (mr *MockiFinderMockRecorder[T]) Find(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) Find(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockiFinder[T])(nil).Find), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockIFinder[T])(nil).Find), varargs...)
 }
 
 // FindOne mocks base method.
-func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
+func (m *MockIFinder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -93,8 +93,8 @@ func (m *MockiFinder[T]) FindOne(ctx context.Context, opts ...options.Lister[opt
 }
 
 // FindOne indicates an expected call of FindOne.
-func (mr *MockiFinderMockRecorder[T]) FindOne(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIFinderMockRecorder[T]) FindOne(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockiFinder[T])(nil).FindOne), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockIFinder[T])(nil).FindOne), varargs...)
 }
