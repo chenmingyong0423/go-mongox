@@ -28,15 +28,17 @@ import (
 )
 
 //go:generate mockgen -source=updater.go -destination=../mock/updater.mock.go -package=mocks
-type iUpdater[T any] interface {
+type IUpdater[T any] interface {
 	UpdateOne(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
-	Upsert(ctx context.Context, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error)
+	Upsert(ctx context.Context, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 }
 
 func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
 	return &Updater[T]{collection: collection, filter: nil}
 }
+
+var _ IUpdater[any] = (*Updater[any])(nil)
 
 type Updater[T any] struct {
 	collection  *mongo.Collection

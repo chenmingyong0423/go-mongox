@@ -17,31 +17,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockiDeleter is a mock of iDeleter interface.
-type MockiDeleter[T any] struct {
+// MockIDeleter is a mock of IDeleter interface.
+type MockIDeleter[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiDeleterMockRecorder[T]
+	recorder *MockIDeleterMockRecorder[T]
 }
 
-// MockiDeleterMockRecorder is the mock recorder for MockiDeleter.
-type MockiDeleterMockRecorder[T any] struct {
-	mock *MockiDeleter[T]
+// MockIDeleterMockRecorder is the mock recorder for MockIDeleter.
+type MockIDeleterMockRecorder[T any] struct {
+	mock *MockIDeleter[T]
 }
 
-// NewMockiDeleter creates a new mock instance.
-func NewMockiDeleter[T any](ctrl *gomock.Controller) *MockiDeleter[T] {
-	mock := &MockiDeleter[T]{ctrl: ctrl}
-	mock.recorder = &MockiDeleterMockRecorder[T]{mock}
+// NewMockIDeleter creates a new mock instance.
+func NewMockIDeleter[T any](ctrl *gomock.Controller) *MockIDeleter[T] {
+	mock := &MockIDeleter[T]{ctrl: ctrl}
+	mock.recorder = &MockIDeleterMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiDeleter[T]) EXPECT() *MockiDeleterMockRecorder[T] {
+func (m *MockIDeleter[T]) EXPECT() *MockIDeleterMockRecorder[T] {
 	return m.recorder
 }
 
 // DeleteMany mocks base method.
-func (m *MockiDeleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (m *MockIDeleter[T]) DeleteMany(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -54,14 +54,14 @@ func (m *MockiDeleter[T]) DeleteMany(ctx context.Context, opts ...*options.Delet
 }
 
 // DeleteMany indicates an expected call of DeleteMany.
-func (mr *MockiDeleterMockRecorder[T]) DeleteMany(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIDeleterMockRecorder[T]) DeleteMany(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMany", reflect.TypeOf((*MockiDeleter[T])(nil).DeleteMany), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMany", reflect.TypeOf((*MockIDeleter[T])(nil).DeleteMany), varargs...)
 }
 
 // DeleteOne mocks base method.
-func (m *MockiDeleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
+func (m *MockIDeleter[T]) DeleteOne(ctx context.Context, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -74,8 +74,8 @@ func (m *MockiDeleter[T]) DeleteOne(ctx context.Context, opts ...*options.Delete
 }
 
 // DeleteOne indicates an expected call of DeleteOne.
-func (mr *MockiDeleterMockRecorder[T]) DeleteOne(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIDeleterMockRecorder[T]) DeleteOne(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOne", reflect.TypeOf((*MockiDeleter[T])(nil).DeleteOne), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOne", reflect.TypeOf((*MockIDeleter[T])(nil).DeleteOne), varargs...)
 }

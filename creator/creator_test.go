@@ -60,7 +60,7 @@ func TestNewCreator(t *testing.T) {
 func TestCreator_One(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) ICreator[TestUser]
 		ctx  context.Context
 		doc  *TestUser
 
@@ -68,8 +68,8 @@ func TestCreator_One(t *testing.T) {
 	}{
 		{
 			name: "nil doc",
-			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser] {
-				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertOne(ctx, doc).Return(nil, errors.New("nil filter")).Times(1)
 				return mockCollection
 			},
@@ -79,8 +79,8 @@ func TestCreator_One(t *testing.T) {
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) iCreator[TestUser] {
-				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertOne(ctx, doc).Return(&mongo.InsertOneResult{InsertedID: "?"}, nil).Times(1)
 				return mockCollection
 			},
@@ -109,7 +109,7 @@ func TestCreator_One(t *testing.T) {
 func TestCreator_Many(t *testing.T) {
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) ICreator[TestUser]
 		ctx  context.Context
 		docs []*TestUser
 
@@ -118,8 +118,8 @@ func TestCreator_Many(t *testing.T) {
 	}{
 		{
 			name: "nil docs",
-			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser] {
-				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertMany(ctx, docs).Return(nil, errors.New("nil docs")).Times(1)
 				return mockCollection
 			},
@@ -132,8 +132,8 @@ func TestCreator_Many(t *testing.T) {
 		},
 		{
 			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) iCreator[TestUser] {
-				mockCollection := mocks.NewMockiCreator[TestUser](ctl)
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
 				mockCollection.EXPECT().InsertMany(ctx, docs).Return(&mongo.InsertManyResult{InsertedIDs: make([]interface{}, 2)}, nil).Times(1)
 				return mockCollection
 			},
