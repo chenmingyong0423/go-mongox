@@ -16,31 +16,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockiAggregator is a mock of iAggregator interface.
-type MockiAggregator[T any] struct {
+// MockIAggregator is a mock of IAggregator interface.
+type MockIAggregator[T any] struct {
 	ctrl     *gomock.Controller
-	recorder *MockiAggregatorMockRecorder[T]
+	recorder *MockIAggregatorMockRecorder[T]
 }
 
-// MockiAggregatorMockRecorder is the mock recorder for MockiAggregator.
-type MockiAggregatorMockRecorder[T any] struct {
-	mock *MockiAggregator[T]
+// MockIAggregatorMockRecorder is the mock recorder for MockIAggregator.
+type MockIAggregatorMockRecorder[T any] struct {
+	mock *MockIAggregator[T]
 }
 
-// NewMockiAggregator creates a new mock instance.
-func NewMockiAggregator[T any](ctrl *gomock.Controller) *MockiAggregator[T] {
-	mock := &MockiAggregator[T]{ctrl: ctrl}
-	mock.recorder = &MockiAggregatorMockRecorder[T]{mock}
+// NewMockIAggregator creates a new mock instance.
+func NewMockIAggregator[T any](ctrl *gomock.Controller) *MockIAggregator[T] {
+	mock := &MockIAggregator[T]{ctrl: ctrl}
+	mock.recorder = &MockIAggregatorMockRecorder[T]{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockiAggregator[T]) EXPECT() *MockiAggregatorMockRecorder[T] {
+func (m *MockIAggregator[T]) EXPECT() *MockIAggregatorMockRecorder[T] {
 	return m.recorder
 }
 
 // Aggregate mocks base method.
-func (m *MockiAggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[options.AggregateOptions]) ([]*T, error) {
+func (m *MockIAggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[options.AggregateOptions]) ([]*T, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -53,14 +53,14 @@ func (m *MockiAggregator[T]) Aggregate(ctx context.Context, opts ...options.List
 }
 
 // Aggregate indicates an expected call of Aggregate.
-func (mr *MockiAggregatorMockRecorder[T]) Aggregate(ctx any, opts ...any) *gomock.Call {
+func (mr *MockIAggregatorMockRecorder[T]) Aggregate(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockiAggregator[T])(nil).Aggregate), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Aggregate", reflect.TypeOf((*MockIAggregator[T])(nil).Aggregate), varargs...)
 }
 
 // AggregateWithParse mocks base method.
-func (m *MockiAggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...options.Lister[options.AggregateOptions]) error {
+func (m *MockIAggregator[T]) AggregateWithParse(ctx context.Context, result any, opts ...options.Lister[options.AggregateOptions]) error {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx, result}
 	for _, a := range opts {
@@ -72,8 +72,8 @@ func (m *MockiAggregator[T]) AggregateWithParse(ctx context.Context, result any,
 }
 
 // AggregateWithParse indicates an expected call of AggregateWithParse.
-func (mr *MockiAggregatorMockRecorder[T]) AggregateWithParse(ctx, result any, opts ...any) *gomock.Call {
+func (mr *MockIAggregatorMockRecorder[T]) AggregateWithParse(ctx, result any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, result}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithParse", reflect.TypeOf((*MockiAggregator[T])(nil).AggregateWithParse), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AggregateWithParse", reflect.TypeOf((*MockIAggregator[T])(nil).AggregateWithParse), varargs...)
 }

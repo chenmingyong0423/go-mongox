@@ -22,12 +22,12 @@ import (
 )
 
 //go:generate mockgen -source=aggregator.go -destination=../mock/aggregator.mock.go -package=mocks
-type iAggregator[T any] interface {
+type IAggregator[T any] interface {
 	Aggregate(ctx context.Context, opts ...options.Lister[options.AggregateOptions]) ([]*T, error)
 	AggregateWithParse(ctx context.Context, result any, opts ...options.Lister[options.AggregateOptions]) error
 }
 
-var _ iAggregator[any] = (*Aggregator[any])(nil)
+var _ IAggregator[any] = (*Aggregator[any])(nil)
 
 type Aggregator[T any] struct {
 	collection *mongo.Collection
