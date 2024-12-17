@@ -79,7 +79,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter     bson.D
-		opts       []options.Lister[options.DeleteOptions]
+		opts       []options.Lister[options.DeleteOneOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn
@@ -94,7 +94,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:     func(_ context.Context, _ *testing.T) {},
 			filter:    nil,
 			ctx:       context.Background(),
-			opts:      []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:      []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			want:      nil,
 			wantError: require.Error,
 		},
@@ -112,7 +112,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.NewBuilder().Id("2").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 				Acknowledged: true,
@@ -133,7 +133,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 1,
 				Acknowledged: true,
@@ -146,7 +146,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeBeforeDelete,
@@ -167,7 +167,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeAfterDelete,
@@ -196,7 +196,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeBeforeDelete,
@@ -231,7 +231,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
@@ -248,7 +248,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			afterHook: []afterHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("after hook error")
@@ -273,7 +273,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			},
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
@@ -332,7 +332,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		after  func(ctx context.Context, t *testing.T)
 
 		filter     any
-		opts       []options.Lister[options.DeleteOptions]
+		opts       []options.Lister[options.DeleteManyOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn
@@ -347,7 +347,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			after:     func(_ context.Context, _ *testing.T) {},
 			filter:    nil,
 			ctx:       context.Background(),
-			opts:      []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:      []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want:      nil,
 			wantError: require.Error,
 		},
@@ -368,7 +368,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 0,
 				Acknowledged: true,
@@ -392,7 +392,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: bsonx.M("name", "Mingyong Chen"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 				Acknowledged: true,
@@ -405,7 +405,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			globalHook: []globalHook{
 				{
 					opType: operation.OpTypeBeforeDelete,
@@ -446,7 +446,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want:   nil,
 			wantError: func(t require.TestingT, err error, i ...interface{}) {
 				require.Equal(t, "after hook error", err.Error())
@@ -491,7 +491,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: query.In("_id", "1", "2"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 				Acknowledged: true,
@@ -504,7 +504,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			after:  func(ctx context.Context, t *testing.T) {},
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			beforeHook: []beforeHookFn{
 				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
@@ -537,7 +537,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: query.In("_id", "1", "2"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want:   nil,
 			wantError: func(t require.TestingT, err error, i ...interface{}) {
 				require.Equal(t, "after hook error", err.Error())
@@ -576,7 +576,7 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			},
 			filter: query.In("_id", "1", "2"),
 			ctx:    context.Background(),
-			opts:   []options.Lister[options.DeleteOptions]{options.Delete().SetComment("test")},
+			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
 			want: &mongo.DeleteResult{
 				DeletedCount: 2,
 				Acknowledged: true,

@@ -31,9 +31,9 @@ import (
 
 //go:generate mockgen -source=updater.go -destination=../mock/updater.mock.go -package=mocks
 type IUpdater[T any] interface {
-	UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
-	UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
-	Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error)
+	UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error)
+	UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateManyOptions]) (*mongo.UpdateResult, error)
+	Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error)
 }
 
 func NewUpdater[T any](collection *mongo.Collection) *Updater[T] {
@@ -112,7 +112,7 @@ func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 	return nil
 }
 
-func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
@@ -136,7 +136,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[optio
 	return result, nil
 }
 
-func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateManyOptions]) (*mongo.UpdateResult, error) {
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
@@ -160,12 +160,12 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[opti
 	return result, nil
 }
 
-func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
 	if len(opts) == 0 {
-		opts = append(opts, options.Update().SetUpsert(true))
+		opts = append(opts, options.UpdateOne().SetUpsert(true))
 	} else {
-		if uob, ok := opts[0].(*options.UpdateOptionsBuilder); ok {
-			uob.Opts = append(uob.Opts, func(o *options.UpdateOptions) error {
+		if uob, ok := opts[0].(*options.UpdateOneOptionsBuilder); ok {
+			uob.Opts = append(uob.Opts, func(o *options.UpdateOneOptions) error {
 				o.Upsert = utils.ToPtr(true)
 				return nil
 			})
