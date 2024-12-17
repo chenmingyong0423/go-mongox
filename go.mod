@@ -3,7 +3,7 @@ module github.com/chenmingyong0423/go-mongox/v2
 go 1.18
 
 require (
-	github.com/go-playground/validator/v10 v10.20.0
+	github.com/go-playground/validator/v10 v10.23.0
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver/v2 v2.0.0-beta2
 	go.uber.org/mock v0.4.0
