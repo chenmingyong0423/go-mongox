@@ -26,8 +26,8 @@ import (
 
 //go:generate mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
 type IDeleter[T any] interface {
-	DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error)
-	DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error)
+	DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error)
+	DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error)
 }
 
 var _ IDeleter[any] = (*Deleter[any])(nil)
@@ -93,7 +93,7 @@ func (d *Deleter[T]) ModelHook(modelHook any) *Deleter[T] {
 	return d
 }
 
-func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
+func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error) {
 	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
 	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {
@@ -113,7 +113,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[optio
 	return result, nil
 }
 
-func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
+func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error) {
 	globalPoContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook))
 	err := d.preActionHandler(ctx, globalPoContext, NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook)), operation.OpTypeBeforeDelete)
 	if err != nil {

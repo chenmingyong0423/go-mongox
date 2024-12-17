@@ -41,7 +41,7 @@ func (m *MockIDeleter[T]) EXPECT() *MockIDeleterMockRecorder[T] {
 }
 
 // DeleteMany mocks base method.
-func (m *MockIDeleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
+func (m *MockIDeleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -61,7 +61,7 @@ func (mr *MockIDeleterMockRecorder[T]) DeleteMany(ctx any, opts ...any) *gomock.
 }
 
 // DeleteOne mocks base method.
-func (m *MockIDeleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOptions]) (*mongo.DeleteResult, error) {
+func (m *MockIDeleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {

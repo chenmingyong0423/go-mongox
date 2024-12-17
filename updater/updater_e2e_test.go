@@ -78,7 +78,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		ctx        context.Context
 		filter     any
 		updates    any
-		opts       []options.Lister[options.UpdateOptions]
+		opts       []options.Lister[options.UpdateOneOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn
@@ -237,8 +237,8 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			ctx:     context.Background(),
 			filter:  query.Eq("_id", "2"),
 			updates: update.Set("name", "chenmingyong"),
-			opts: []options.Lister[options.UpdateOptions]{
-				options.Update().SetUpsert(true),
+			opts: []options.Lister[options.UpdateOneOptions]{
+				options.UpdateOne().SetUpsert(true),
 			},
 			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "2", Acknowledged: true},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -485,7 +485,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		ctx        context.Context
 		filter     any
 		updates    any
-		opts       []options.Lister[options.UpdateOptions]
+		opts       []options.Lister[options.UpdateManyOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn
@@ -580,8 +580,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			ctx:     context.Background(),
 			filter:  bsonx.Id("2"),
 			updates: update.Set("name", "cmy"),
-			opts: []options.Lister[options.UpdateOptions]{
-				options.Update().SetUpsert(true),
+			opts: []options.Lister[options.UpdateManyOptions]{
+				options.UpdateMany().SetUpsert(true),
 			},
 			want: &mongo.UpdateResult{MatchedCount: 0, ModifiedCount: 0, UpsertedCount: 1, UpsertedID: "2", Acknowledged: true},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
@@ -855,7 +855,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 		ctx        context.Context
 		filter     any
 		updates    any
-		opts       []options.Lister[options.UpdateOptions]
+		opts       []options.Lister[options.UpdateOneOptions]
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn
@@ -1011,7 +1011,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			},
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Eq("name", "Mingyong Chen").Build(),
-			opts:   []options.Lister[options.UpdateOptions]{options.Update().SetComment("upsert")},
+			opts:   []options.Lister[options.UpdateOneOptions]{options.UpdateOne().SetComment("upsert")},
 			updates: bson.D{
 				{Key: "$set", Value: bson.D{
 					{Key: "name", Value: "Mingyong Chen"},

@@ -41,7 +41,7 @@ func (m *MockIUpdater[T]) EXPECT() *MockIUpdaterMockRecorder[T] {
 }
 
 // UpdateMany mocks base method.
-func (m *MockIUpdater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (m *MockIUpdater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateManyOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -61,7 +61,7 @@ func (mr *MockIUpdaterMockRecorder[T]) UpdateMany(ctx any, opts ...any) *gomock.
 }
 
 // UpdateOne mocks base method.
-func (m *MockIUpdater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (m *MockIUpdater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
@@ -81,7 +81,7 @@ func (mr *MockIUpdaterMockRecorder[T]) UpdateOne(ctx any, opts ...any) *gomock.C
 }
 
 // Upsert mocks base method.
-func (m *MockIUpdater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOptions]) (*mongo.UpdateResult, error) {
+func (m *MockIUpdater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
