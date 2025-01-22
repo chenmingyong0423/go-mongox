@@ -34,7 +34,7 @@ type Model struct {
 	ID        bson.ObjectID `bson:"_id,omitempty"`
 	CreatedAt time.Time     `bson:"created_at"`
 	UpdatedAt time.Time     `bson:"updated_at"`
-	DeletedAt time.Time     `bson:"deleted_at"`
+	DeletedAt time.Time     `bson:"deleted_at,omitempty"`
 }
 
 func (m *Model) DefaultId() bson.ObjectID {
