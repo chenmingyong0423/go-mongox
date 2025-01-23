@@ -40,7 +40,7 @@ func getPayload(opCtx *operation.OpContext, opType operation.OpType) any {
 	case operation.OpTypeBeforeInsert:
 		return opCtx.Doc
 	case operation.OpTypeBeforeUpsert:
-		return opCtx.Replacement
+		return opCtx.Updates
 	default:
 		return nil
 	}

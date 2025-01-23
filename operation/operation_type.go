@@ -31,6 +31,8 @@ const (
 	OpTypeAfterUpsert  OpType = "afterUpsert"
 	OpTypeBeforeFind   OpType = "beforeFind"
 	OpTypeAfterFind    OpType = "afterFind"
+	OpTypeBeforeAny    OpType = "before*"
+	OpTypeAfterAny     OpType = "after*"
 )
 
 type OpContext struct {
@@ -39,7 +41,9 @@ type OpContext struct {
 	// filter also can be used as query
 	Filter       any
 	Updates      any
-	Replacement  any
 	MongoOptions any
 	ModelHook    any
+
+	// result of the collection operation
+	result any
 }

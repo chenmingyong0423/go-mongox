@@ -16,6 +16,7 @@ package mongox
 
 import (
 	"github.com/chenmingyong0423/go-mongox/v2/aggregator"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
 	"github.com/chenmingyong0423/go-mongox/v2/creator"
 	"github.com/chenmingyong0423/go-mongox/v2/deleter"
 	"github.com/chenmingyong0423/go-mongox/v2/finder"
@@ -23,12 +24,18 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func NewCollection[T any](collection *mongo.Collection) *Collection[T] {
-	return &Collection[T]{collection: collection}
+func NewCollection[T any](db *Database, collection string) *Collection[T] {
+	return &Collection[T]{
+		collection: db.database().Collection(collection),
+		callbacks:  db.callbacks,
+	}
 }
 
 type Collection[T any] struct {
+	db         *Database
 	collection *mongo.Collection
+	// callbacks inherited from database
+	callbacks *callback.Callback
 }
 
 func (c *Collection[T]) Finder() *finder.Finder[T] {

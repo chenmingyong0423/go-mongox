@@ -20,14 +20,15 @@ import (
 	"context"
 	"testing"
 
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
+
 	"github.com/chenmingyong0423/go-mongox/v2/creator"
 
 	"github.com/chenmingyong0423/go-mongox/v2/finder"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
-	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 func TestCollection_e2e_Deleter(t *testing.T) {
@@ -70,7 +71,6 @@ func getCollection[T any](t *testing.T) *Collection[T] {
 	}))
 	assert.NoError(t, err)
 	assert.NoError(t, client.Ping(context.Background(), readpref.Primary()))
-
-	collection := NewCollection[T](client.Database("db-test").Collection("test_user"))
+	collection := NewCollection[T](NewClient(client, &Config{}).NewDatabase("db-test"), "test_user")
 	return collection
 }

@@ -198,16 +198,16 @@ func TestRegisterPlugin_Upsert(t *testing.T) {
 	t.Run("before upsert", func(t *testing.T) {
 		RegisterPlugin("before upsert", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 			require.NotNil(t, opCtx.Filter)
-			require.NotNil(t, opCtx.Replacement)
+			require.NotNil(t, opCtx.Updates)
 			isCalled = true
 			return nil
 		}, operation.OpTypeBeforeUpsert)
-		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithReplacement(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
+		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
 		require.Nil(t, err)
 		assert.True(t, isCalled)
 		isCalled = false
 		RemovePlugin("before upsert", operation.OpTypeBeforeUpsert)
-		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithReplacement(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
+		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
 		require.Nil(t, err)
 		assert.False(t, isCalled)
 	})
@@ -216,16 +216,16 @@ func TestRegisterPlugin_Upsert(t *testing.T) {
 	t.Run("after upsert", func(t *testing.T) {
 		RegisterPlugin("after upsert", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 			require.NotNil(t, opCtx.Filter)
-			require.NotNil(t, opCtx.Replacement)
+			require.NotNil(t, opCtx.Updates)
 			isCalled = true
 			return nil
 		}, operation.OpTypeAfterUpsert)
-		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithReplacement(bson.M{"name": "Burt"})), operation.OpTypeAfterUpsert)
+		err := callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeAfterUpsert)
 		require.Nil(t, err)
 		assert.True(t, isCalled)
 		isCalled = false
 		RemovePlugin("after upsert", operation.OpTypeAfterUpsert)
-		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithReplacement(bson.M{"name": "Burt"})), operation.OpTypeAfterUpsert)
+		err = callback.Callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeAfterUpsert)
 		require.Nil(t, err)
 		assert.False(t, isCalled)
 	})
@@ -705,7 +705,7 @@ func TestPluginInit_EnableValidationHook(t *testing.T) {
 
 		err = callback.GetCallback().Execute(
 			context.Background(),
-			operation.NewOpContext(nil, operation.WithReplacement(&TestModel{})),
+			operation.NewOpContext(nil, operation.WithUpdates(&TestModel{})),
 			operation.OpTypeBeforeUpsert,
 		)
 		require.NotNil(t, err.(validator.ValidationErrors))

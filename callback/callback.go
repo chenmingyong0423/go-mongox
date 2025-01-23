@@ -39,6 +39,21 @@ func initializeCallbacks() *Callback {
 	}
 }
 
+func InitializeCallbacks() *Callback {
+	return &Callback{
+		beforeInsert: make([]callbackHandler, 0),
+		afterInsert:  make([]callbackHandler, 0),
+		beforeUpdate: make([]callbackHandler, 0),
+		afterUpdate:  make([]callbackHandler, 0),
+		beforeDelete: make([]callbackHandler, 0),
+		afterDelete:  make([]callbackHandler, 0),
+		beforeUpsert: make([]callbackHandler, 0),
+		afterUpsert:  make([]callbackHandler, 0),
+		beforeFind:   make([]callbackHandler, 0),
+		afterFind:    make([]callbackHandler, 0),
+	}
+}
+
 func GetCallback() *Callback {
 	return Callbacks
 }

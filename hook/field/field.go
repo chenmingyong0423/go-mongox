@@ -27,7 +27,7 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 		return nil
 	}
 	valueOf := reflect.ValueOf(doc)
-	opts = append([]any{opCtx.Updates, opCtx.Replacement, opCtx.MongoOptions}, opts...)
+	opts = append([]any{opCtx.Updates, opCtx.Updates, opCtx.MongoOptions}, opts...)
 	switch valueOf.Type().Kind() {
 	case reflect.Slice:
 		return executeSlice(ctx, valueOf, opType, opts...)

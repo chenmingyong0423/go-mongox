@@ -34,12 +34,6 @@ func WithFilter(filter any) OpContextOption {
 	}
 }
 
-func WithReplacement(replacement any) OpContextOption {
-	return func(opContext *OpContext) {
-		opContext.Replacement = replacement
-	}
-}
-
 func WithUpdates(updates any) OpContextOption {
 	return func(opContext *OpContext) {
 		opContext.Updates = updates
