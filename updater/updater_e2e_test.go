@@ -135,12 +135,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			},
 		},
 		{
-			name:    "got error when updates(struct) not contains any operator",
+			name:    "invalid updates",
 			before:  func(ctx context.Context, t *testing.T) {},
 			after:   func(ctx context.Context, t *testing.T) {},
 			ctx:     context.Background(),
 			filter:  bson.D{},
-			updates: User{Id: "1", Name: "Mingyong Chen", Age: 18},
+			updates: "6",
 			want:    nil,
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.Error(t, err)
@@ -218,6 +218,46 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				},
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success when update with struct",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 19).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: User{Id: "1", Name: "chenmingyong", Age: 19},
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success when update with struct pointer",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 19).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: &User{Id: "1", Name: "chenmingyong", Age: 19},
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
 			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
 				return assert.NoError(t, err)
 			},
