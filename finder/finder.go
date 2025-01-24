@@ -16,8 +16,10 @@ package finder
 
 import (
 	"context"
-
+	
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -38,6 +40,11 @@ func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
 
 var _ IFinder[any] = (*Finder[any])(nil)
 
+type cursorQueryParams struct {
+	skip, limit *int64
+	sort        any
+}
+
 type Finder[T any] struct {
 	collection  *mongo.Collection
 	filter      any
@@ -45,6 +52,7 @@ type Finder[T any] struct {
 	modelHook   any
 	beforeHooks []beforeHookFn
 	afterHooks  []afterHookFn[T]
+	cursorQueryParams
 }
 
 func (f *Finder[T]) RegisterBeforeHooks(hooks ...beforeHookFn) *Finder[T] {
@@ -63,6 +71,21 @@ func (f *Finder[T]) RegisterAfterHooks(hooks ...afterHookFn[T]) *Finder[T] {
 // Filter is used to set the filter of the query
 func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	f.filter = filter
+	return f
+}
+
+func (f *Finder[T]) Limit(limit int64) *Finder[T] {
+	f.limit = utils.ToPtr(limit)
+	return f
+}
+
+func (f *Finder[T]) Skip(skip int64) *Finder[T] {
+	f.skip = utils.ToPtr(skip)
+	return f
+}
+
+func (f *Finder[T]) Sort(sort any) *Finder[T] {
+	f.sort = bsonx.ParseSortToBsonD(sort)
 	return f
 }
 
@@ -109,6 +132,14 @@ func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
+	params := f.cursorQueryParams
+	if params.skip != nil {
+		opts = append(opts, options.FindOne().SetSkip(*params.skip))
+	}
+	if params.sort != nil {
+		opts = append(opts, options.FindOne().SetSort(params.sort))
+	}
+
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -131,6 +162,17 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 }
 
 func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
+	params := f.cursorQueryParams
+	if params.skip != nil {
+		opts = append(opts, options.Find().SetSkip(*params.skip))
+	}
+	if params.limit != nil {
+		opts = append(opts, options.Find().SetLimit(*params.limit))
+	}
+	if params.sort != nil {
+		opts = append(opts, options.Find().SetSort(params.sort))
+	}
+
 	t := make([]*T, 0)
 
 	opContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))

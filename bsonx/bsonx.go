@@ -17,6 +17,8 @@ package bsonx
 import (
 	"bytes"
 
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -88,4 +90,33 @@ func dToM(d bson.D) bson.M {
 		return nil
 	}
 	return m
+}
+
+func stringSortToBsonD(sorts ...string) bson.D {
+	var res bson.D
+	for _, sort := range sorts {
+		key, n := utils.SplitSortField(sort)
+		if key == "" {
+			continue
+		}
+		res = append(res, bson.E{Key: key, Value: n})
+	}
+
+	return res
+}
+
+func ParseSortToBsonD(sort any) bson.D {
+	if d, ok := sort.(bson.D); ok {
+		return d
+	}
+
+	if s, ok := sort.(string); ok {
+		return stringSortToBsonD(s)
+	}
+
+	if sl, ok := sort.([]string); ok {
+		return stringSortToBsonD(sl...)
+	}
+
+	return nil
 }

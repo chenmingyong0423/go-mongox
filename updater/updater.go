@@ -17,12 +17,10 @@ package updater
 import (
 	"context"
 
-	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
-
 	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
-
+	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
-
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -116,6 +114,8 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[optio
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
+	} else {
+		u.updates = bsonx.M(update.SetOp, u.updates)
 	}
 
 	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook))
