@@ -106,7 +106,7 @@ func TestExecute(t *testing.T) {
 		{
 			name:   "fails to validate struct in case of BeforeUpsert",
 			ctx:    context.Background(),
-			doc:    operation.NewOpContext(nil, operation.WithReplacement(&User{Age: -1})),
+			doc:    operation.NewOpContext(nil, operation.WithUpdates(&User{Age: -1})),
 			opType: operation.OpTypeBeforeUpsert,
 			errFunc: func(t require.TestingT, err error, i ...interface{}) {
 				var e validator.ValidationErrors
@@ -150,7 +150,7 @@ func TestExecute(t *testing.T) {
 		{
 			name:    "validate struct successfully in case of BeforeUpsert",
 			ctx:     context.Background(),
-			doc:     operation.NewOpContext(nil, operation.WithReplacement(&User{Age: 18})),
+			doc:     operation.NewOpContext(nil, operation.WithUpdates(&User{Age: 18})),
 			opType:  operation.OpTypeBeforeUpsert,
 			errFunc: require.NoError,
 		},
@@ -202,7 +202,7 @@ func Test_getPayload(t *testing.T) {
 		},
 		{
 			name:   "BeforeUpsert",
-			opCtx:  &operation.OpContext{Replacement: &User{}},
+			opCtx:  &operation.OpContext{Updates: &User{}},
 			opType: operation.OpTypeBeforeUpsert,
 
 			want: &User{},
