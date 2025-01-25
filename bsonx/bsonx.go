@@ -17,6 +17,8 @@ package bsonx
 import (
 	"bytes"
 
+	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -88,4 +90,20 @@ func dToM(d bson.D) bson.M {
 		return nil
 	}
 	return m
+}
+
+// StringSortToBsonD transform string sort to bson D
+// "-created_at" => bson.D{{"created_at", -1}}
+// []string{"age", "-created_at"} => bson.D{{"age", 1}, {"created_at", -1}}
+func StringSortToBsonD(sorts ...string) bson.D {
+	var res bson.D
+	for _, sort := range sorts {
+		key, n := utils.SplitSortField(sort)
+		if key == "" {
+			continue
+		}
+		res = append(res, bson.E{Key: key, Value: n})
+	}
+
+	return res
 }
