@@ -154,38 +154,9 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				Age:  25,
 			},
 		},
-		{
-			name: "find by name with sort and skip",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
-					&TestUser{
-						Name: "Mingyong Chen",
-						Age:  24,
-					},
-					&TestUser{
-						Name: "Mingyong Chen",
-						Age:  25,
-					},
-				})
-				require.NoError(t, err)
-				require.NotNil(t, insertOneResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteMany(ctx, query.Eq("name", "Mingyong Chen"))
-				require.NoError(t, err)
-				require.Equal(t, int64(2), deleteOneResult.DeletedCount)
-			},
-			filter: query.Eq("name", "Mingyong Chen"),
-			sort:   bsonx.StringSortToBsonD("-age"),
-			skip:   1,
-			want: &TestUser{
-				Name: "Mingyong Chen",
-				Age:  24,
-			},
-		},
 
 		{
-			name: "find by name and sort, limit not effect in find one",
+			name: "find by name and sort, limit and skip will not effect in find one",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
 					&TestUser{
@@ -211,7 +182,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			limit:  2,
 			want: &TestUser{
 				Name: "Mingyong Chen",
-				Age:  24,
+				Age:  25,
 			},
 		},
 

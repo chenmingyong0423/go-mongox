@@ -130,9 +130,6 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 	if f.sort != nil {
 		opts = append(opts, options.FindOne().SetSort(f.sort))
 	}
-	if f.skip != 0 {
-		opts = append(opts, options.FindOne().SetSkip(f.skip))
-	}
 
 	t := new(T)
 
