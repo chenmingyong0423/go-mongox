@@ -45,6 +45,9 @@ type Finder[T any] struct {
 	modelHook   any
 	beforeHooks []beforeHookFn
 	afterHooks  []afterHookFn[T]
+
+	skip, limit int64
+	sort        any
 }
 
 func (f *Finder[T]) RegisterBeforeHooks(hooks ...beforeHookFn) *Finder[T] {
@@ -63,6 +66,21 @@ func (f *Finder[T]) RegisterAfterHooks(hooks ...afterHookFn[T]) *Finder[T] {
 // Filter is used to set the filter of the query
 func (f *Finder[T]) Filter(filter any) *Finder[T] {
 	f.filter = filter
+	return f
+}
+
+func (f *Finder[T]) Limit(limit int64) *Finder[T] {
+	f.limit = limit
+	return f
+}
+
+func (f *Finder[T]) Skip(skip int64) *Finder[T] {
+	f.skip = skip
+	return f
+}
+
+func (f *Finder[T]) Sort(sort any) *Finder[T] {
+	f.sort = sort
 	return f
 }
 
@@ -109,6 +127,10 @@ func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
+	if f.sort != nil {
+		opts = append(opts, options.FindOne().SetSort(f.sort))
+	}
+
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -131,6 +153,16 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 }
 
 func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
+	if f.sort != nil {
+		opts = append(opts, options.Find().SetSort(f.sort))
+	}
+	if f.skip != 0 {
+		opts = append(opts, options.Find().SetSkip(f.skip))
+	}
+	if f.limit != 0 {
+		opts = append(opts, options.Find().SetLimit(f.limit))
+	}
+
 	t := make([]*T, 0)
 
 	opContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))

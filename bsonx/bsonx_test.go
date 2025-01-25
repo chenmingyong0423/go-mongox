@@ -62,3 +62,40 @@ func TestA(t *testing.T) {
 	}
 
 }
+
+func TestStringSortToBsonD(t *testing.T) {
+	testCases := []struct {
+		name  string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "empty string",
+			value: []string{""},
+			want:  nil,
+		},
+		{
+			name:  "only minus sign",
+			value: []string{"-"},
+			want:  nil,
+		},
+		{
+			name:  "one sort",
+			value: []string{"-created_at"},
+			want:  bson.D{{Key: "created_at", Value: -1}},
+		},
+		{
+			name:  "two sort",
+			value: []string{"age", "-created_at"},
+			want:  bson.D{{Key: "age", Value: 1}, {Key: "created_at", Value: -1}},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			w, _ := bson.Marshal(tc.want)
+			v, _ := bson.Marshal(StringSortToBsonD(tc.value.([]string)...))
+			assert.Equal(t, string(w), string(v))
+		})
+	}
+}

@@ -62,7 +62,6 @@ func TestFinder_e2e_New(t *testing.T) {
 
 func TestFinder_e2e_FindOne(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
 
 	type globalHook struct {
 		opType operation.OpType
@@ -79,6 +78,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
+		sort       any
 
 		ctx     context.Context
 		want    *TestUser
@@ -98,8 +98,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter:  query.Eq("name", "burt"),
 			wantErr: mongo.ErrNoDocuments,
@@ -118,8 +116,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			want: &TestUser{
@@ -127,6 +123,36 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				Age:  24,
 			},
 		},
+
+		{
+			name: "find by name with sort",
+			before: func(ctx context.Context, t *testing.T) {
+				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
+					&TestUser{
+						Name: "Mingyong Chen",
+						Age:  24,
+					},
+					&TestUser{
+						Name: "Mingyong Chen",
+						Age:  25,
+					},
+				})
+				require.NoError(t, err)
+				require.NotNil(t, insertOneResult.InsertedIDs)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteOneResult, err := collection.DeleteMany(ctx, query.Eq("name", "Mingyong Chen"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), deleteOneResult.DeletedCount)
+			},
+			filter: query.Eq("name", "Mingyong Chen"),
+			sort:   bsonx.StringSortToBsonD("-age"),
+			want: &TestUser{
+				Name: "Mingyong Chen",
+				Age:  25,
+			},
+		},
+
 		{
 			name: "ignore age field",
 			before: func(ctx context.Context, t *testing.T) {
@@ -141,8 +167,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			opts: []options.Lister[options.FindOneOptions]{
@@ -182,8 +206,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			globalHook: []globalHook{
@@ -211,8 +233,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			globalHook: []globalHook{
@@ -269,8 +289,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			afterHook: []afterHookFn[TestUser]{
@@ -294,8 +312,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
-
-				finder.filter = bson.D{}
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			beforeHook: []beforeHookFn{
@@ -323,13 +339,21 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			finder := NewFinder[TestUser](collection)
+
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
 			}
-			user, err := finder.RegisterBeforeHooks(tc.beforeHook...).
-				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).
+
+			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).
+				Filter(tc.filter).
+				Sort(tc.sort)
+
+			user, err := finder.
 				FindOne(tc.ctx, tc.opts...)
+
 			tc.after(tc.ctx, t)
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
@@ -339,15 +363,12 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)
 			}
-			finder.beforeHooks = nil
-			finder.afterHooks = nil
 		})
 	}
 }
 
 func TestFinder_e2e_Find(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
 
 	type globalHook struct {
 		opType operation.OpType
@@ -364,6 +385,9 @@ func TestFinder_e2e_Find(t *testing.T) {
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
+		skip       int64
+		limit      int64
+		sort       any
 
 		ctx     context.Context
 		want    []*TestUser
@@ -398,7 +422,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			filter:  bson.D{},
 			wantErr: require.Error,
@@ -423,7 +446,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:     context.Background(),
 			filter:  query.Eq("name", "cmy"),
@@ -450,7 +472,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: bson.D{},
@@ -462,6 +483,60 @@ func TestFinder_e2e_Find(t *testing.T) {
 				{
 					Name: "burt",
 					Age:  25,
+				},
+			},
+			wantErr: require.NoError,
+		},
+		{
+			name: "returns docs with pagination and sort",
+			before: func(ctx context.Context, t *testing.T) {
+				insertManyResult, err := collection.InsertMany(ctx, []any{
+					&TestUser{
+						Name: "a",
+						Age:  1,
+					},
+					&TestUser{
+						Name: "b",
+						Age:  2,
+					},
+					&TestUser{
+						Name: "c",
+						Age:  3,
+					},
+					&TestUser{
+						Name: "d",
+						Age:  4,
+					},
+					&TestUser{
+						Name: "e",
+						Age:  2,
+					},
+				})
+				require.NoError(t, err)
+				require.Len(t, insertManyResult.InsertedIDs, 5)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "a", "b", "c", "d", "e"))
+				require.NoError(t, err)
+				require.Equal(t, int64(5), deleteResult.DeletedCount)
+			},
+			ctx:    context.Background(),
+			filter: bson.D{},
+			sort:   bsonx.StringSortToBsonD("age", "-name"),
+			skip:   1,
+			limit:  3,
+			want: []*TestUser{
+				{
+					Name: "e",
+					Age:  2,
+				},
+				{
+					Name: "b",
+					Age:  2,
+				},
+				&TestUser{
+					Name: "c",
+					Age:  3,
 				},
 			},
 			wantErr: require.NoError,
@@ -486,7 +561,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
@@ -522,7 +596,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
@@ -578,7 +651,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
@@ -615,7 +687,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
@@ -690,7 +761,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			ctx:    context.Background(),
 			filter: query.In("name", "Mingyong Chen", "burt"),
@@ -724,7 +794,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 				deleteResult, err := collection.DeleteMany(ctx, query.In("name", "Mingyong Chen", "burt"))
 				require.NoError(t, err)
 				require.Equal(t, int64(2), deleteResult.DeletedCount)
-				finder.filter = bson.D{}
 			},
 			filter: query.In("name", "Mingyong Chen", "burt"),
 			beforeHook: []beforeHookFn{
@@ -759,12 +828,21 @@ func TestFinder_e2e_Find(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			finder := NewFinder[TestUser](collection)
+
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
 			}
-			users, err := finder.RegisterBeforeHooks(tc.beforeHook...).
-				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Find(tc.ctx, tc.opts...)
+
+			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
+				RegisterAfterHooks(tc.afterHook...).
+				Filter(tc.filter).
+				Skip(tc.skip).
+				Limit(tc.limit).
+				Sort(tc.sort)
+
+			users, err := finder.Find(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantErr(t, err)
 			if err == nil {
@@ -778,8 +856,6 @@ func TestFinder_e2e_Find(t *testing.T) {
 			for _, hook := range tc.globalHook {
 				callback.GetCallback().Remove(hook.opType, hook.name)
 			}
-			finder.beforeHooks = nil
-			finder.afterHooks = nil
 		})
 	}
 }

@@ -89,3 +89,23 @@ func dToM(d bson.D) bson.M {
 	}
 	return m
 }
+
+// StringSortToBsonD transform string sort to bson D
+// "-created_at" => bson.D{{"created_at", -1}}
+// []string{"age", "-created_at"} => bson.D{{"age", 1}, {"created_at", -1}}
+func StringSortToBsonD(sorts ...string) bson.D {
+	var res bson.D
+	for _, sort := range sorts {
+		if len(sort) == 0 || sort == "-" {
+			continue
+		}
+
+		if sort[0] == '-' {
+			res = append(res, bson.E{Key: sort[1:], Value: -1})
+		} else {
+			res = append(res, bson.E{Key: sort, Value: 1})
+		}
+	}
+
+	return res
+}
