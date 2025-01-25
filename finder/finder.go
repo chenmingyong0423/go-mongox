@@ -127,7 +127,13 @@ func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
-	opts = append(opts, options.FindOne().SetSkip(f.skip).SetSort(f.sort))
+	if f.sort != nil {
+		opts = append(opts, options.FindOne().SetSort(f.sort))
+	}
+	if f.skip != 0 {
+		opts = append(opts, options.FindOne().SetSkip(f.skip))
+	}
+
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -150,7 +156,15 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 }
 
 func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
-	opts = append(opts, options.Find().SetSkip(f.skip).SetLimit(f.limit).SetSort(f.sort))
+	if f.sort != nil {
+		opts = append(opts, options.Find().SetSort(f.sort))
+	}
+	if f.skip != 0 {
+		opts = append(opts, options.Find().SetSkip(f.skip))
+	}
+	if f.limit != 0 {
+		opts = append(opts, options.Find().SetLimit(f.limit))
+	}
 
 	t := make([]*T, 0)
 
