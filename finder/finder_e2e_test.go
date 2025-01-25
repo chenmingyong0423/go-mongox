@@ -78,8 +78,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		globalHook []globalHook
 		beforeHook []beforeHookFn
 		afterHook  []afterHookFn[TestUser]
-		skip       int64
-		limit      int64
 		sort       any
 
 		ctx     context.Context
@@ -149,37 +147,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			},
 			filter: query.Eq("name", "Mingyong Chen"),
 			sort:   bsonx.StringSortToBsonD("-age"),
-			want: &TestUser{
-				Name: "Mingyong Chen",
-				Age:  25,
-			},
-		},
-
-		{
-			name: "find by name and sort, limit and skip will not effect in find one",
-			before: func(ctx context.Context, t *testing.T) {
-				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
-					&TestUser{
-						Name: "Mingyong Chen",
-						Age:  24,
-					},
-					&TestUser{
-						Name: "Mingyong Chen",
-						Age:  25,
-					},
-				})
-				require.NoError(t, err)
-				require.NotNil(t, insertOneResult.InsertedIDs)
-			},
-			after: func(ctx context.Context, t *testing.T) {
-				deleteOneResult, err := collection.DeleteMany(ctx, query.Eq("name", "Mingyong Chen"))
-				require.NoError(t, err)
-				require.Equal(t, int64(2), deleteOneResult.DeletedCount)
-			},
-			filter: query.Eq("name", "Mingyong Chen"),
-			sort:   bsonx.StringSortToBsonD("-age"),
-			skip:   1,
-			limit:  2,
 			want: &TestUser{
 				Name: "Mingyong Chen",
 				Age:  25,
@@ -382,8 +349,6 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).
 				Filter(tc.filter).
-				Skip(tc.skip).
-				Limit(tc.limit).
 				Sort(tc.sort)
 
 			user, err := finder.
@@ -523,7 +488,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 			wantErr: require.NoError,
 		},
 		{
-			name: "returns docs with limit and set",
+			name: "returns docs with pagination and sort",
 			before: func(ctx context.Context, t *testing.T) {
 				insertManyResult, err := collection.InsertMany(ctx, []any{
 					&TestUser{
