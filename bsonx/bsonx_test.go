@@ -70,14 +70,24 @@ func TestStringSortToBsonD(t *testing.T) {
 		want  bson.D
 	}{
 		{
+			name:  "empty string",
+			value: []string{""},
+			want:  nil,
+		},
+		{
+			name:  "only minus sign",
+			value: []string{"-"},
+			want:  nil,
+		},
+		{
 			name:  "one sort",
 			value: []string{"-created_at"},
-			want:  bson.D{{"created_at", -1}},
+			want:  bson.D{{Key: "created_at", Value: -1}},
 		},
 		{
 			name:  "two sort",
 			value: []string{"age", "-created_at"},
-			want:  bson.D{{"age", 1}, {"created_at", -1}},
+			want:  bson.D{{Key: "age", Value: 1}, {Key: "created_at", Value: -1}},
 		},
 	}
 

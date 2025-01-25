@@ -17,8 +17,6 @@ package bsonx
 import (
 	"bytes"
 
-	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
-
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -98,11 +96,15 @@ func dToM(d bson.D) bson.M {
 func StringSortToBsonD(sorts ...string) bson.D {
 	var res bson.D
 	for _, sort := range sorts {
-		key, n := utils.SplitSortField(sort)
-		if key == "" {
+		if len(sort) == 0 || sort == "-" {
 			continue
 		}
-		res = append(res, bson.E{Key: key, Value: n})
+
+		if sort[0] == '-' {
+			res = append(res, bson.E{Key: sort[1:], Value: -1})
+		} else {
+			res = append(res, bson.E{Key: sort, Value: 1})
+		}
 	}
 
 	return res

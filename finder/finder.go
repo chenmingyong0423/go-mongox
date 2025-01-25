@@ -16,6 +16,7 @@ package finder
 
 import (
 	"context"
+
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
@@ -126,13 +127,7 @@ func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error) {
-	if f.skip > 0 {
-		opts = append(opts, options.FindOne().SetSkip(f.skip))
-	}
-	if f.sort != nil {
-		opts = append(opts, options.FindOne().SetSort(f.sort))
-	}
-
+	opts = append(opts, options.FindOne().SetSkip(f.skip).SetSort(f.sort))
 	t := new(T)
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithDoc(t), operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
@@ -155,15 +150,7 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 }
 
 func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error) {
-	if f.skip > 0 {
-		opts = append(opts, options.Find().SetSkip(f.skip))
-	}
-	if f.limit > 0 {
-		opts = append(opts, options.Find().SetLimit(f.limit))
-	}
-	if f.sort != nil {
-		opts = append(opts, options.Find().SetSort(f.sort))
-	}
+	opts = append(opts, options.Find().SetSkip(f.skip).SetLimit(f.limit).SetSort(f.sort))
 
 	t := make([]*T, 0)
 

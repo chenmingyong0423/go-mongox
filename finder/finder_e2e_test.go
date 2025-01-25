@@ -127,7 +127,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 		},
 
 		{
-			name: "find by name and sort",
+			name: "find by name with sort",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
 					&TestUser{
@@ -155,7 +155,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			},
 		},
 		{
-			name: "find by name and sort",
+			name: "find by name with sort and skip",
 			before: func(ctx context.Context, t *testing.T) {
 				insertOneResult, err := collection.InsertMany(ctx, []*TestUser{
 					&TestUser{
@@ -409,13 +409,11 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 			}
 
 			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
-				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter)
-			if tc.skip > 0 {
-				finder = finder.Skip(tc.skip)
-			}
-			if tc.sort != nil {
-				finder = finder.Sort(tc.sort)
-			}
+				RegisterAfterHooks(tc.afterHook...).
+				Filter(tc.filter).
+				Skip(tc.skip).
+				Limit(tc.limit).
+				Sort(tc.sort)
 
 			user, err := finder.
 				FindOne(tc.ctx, tc.opts...)
@@ -902,16 +900,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 			}
 
 			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
-				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter)
-			if tc.skip > 0 {
-				finder = finder.Skip(tc.skip)
-			}
-			if tc.sort != nil {
-				finder = finder.Sort(tc.sort)
-			}
-			if tc.limit > 0 {
-				finder = finder.Limit(tc.limit)
-			}
+				RegisterAfterHooks(tc.afterHook...).
+				Filter(tc.filter).
+				Skip(tc.skip).
+				Limit(tc.limit).
+				Sort(tc.sort)
 
 			users, err := finder.Find(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
