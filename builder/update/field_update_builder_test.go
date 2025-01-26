@@ -34,24 +34,59 @@ func Test_fieldUpdateBuilder_Set(t *testing.T) {
 }
 
 func Test_fieldUpdateBuilder_SetFields(t *testing.T) {
-	t.Run("nil value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: nil}}, NewBuilder().SetFields(nil).Build())
+	testCases := []struct {
+		name  string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "nil value",
+			value: nil,
+			want:  bson.D{bson.E{Key: "$set", Value: nil}},
+		},
+		{
+			name:  "string value",
+			value: "Alice",
+			want:  bson.D{bson.E{Key: "$set", Value: "Alice"}},
+		},
+		{
+			name:  "map value",
+			value: map[string]any{"name": "Alice"},
+			want:  bson.D{bson.E{Key: "$set", Value: map[string]any{"name": "Alice"}}},
+		},
+		{
+			name:  "bson value",
+			value: bson.D{bson.E{Key: "name", Value: "Alice"}},
+			want:  bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}},
+		},
+		{
+			name:  "pointer struct value",
+			value: &bson.D{bson.E{Key: "name", Value: "Alice"}},
+			want:  bson.D{bson.E{Key: "$set", Value: &bson.D{bson.E{Key: "name", Value: "Alice"}}}},
+		},
+		{
+			name:  "struct value",
+			value: struct{ Name string }{Name: "Alice"},
+			want:  bson.D{bson.E{Key: "$set", Value: struct{ Name string }{Name: "Alice"}}},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, NewBuilder().SetFields(tc.value).Build())
+		})
+	}
+
+	t.Run("multiple set_fields", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: struct{ Name string }{Name: "cmy"}}, {Key: "$set", Value: struct{ Age int64 }{Age: 24}}}, NewBuilder().SetFields(struct{ Name string }{Name: "cmy"}).SetFields(struct{ Age int64 }{Age: 24}).Build())
 	})
 
-	t.Run("string value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: "cmy"}}, NewBuilder().SetFields("cmy").Build())
+	t.Run("set_fields with struct value and set single operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: struct{ Name string }{Name: "cmy"}}, {Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}}}}, NewBuilder().SetFields(struct{ Name string }{Name: "cmy"}).Set("name", "cmy").Build())
 	})
 
-	t.Run("map value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: map[string]any{"name": "cmy"}}}, NewBuilder().SetFields(map[string]any{"name": "cmy"}).Build())
-	})
-
-	t.Run("struct value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: struct{ Name string }{Name: "cmy"}}}, NewBuilder().SetFields(struct{ Name string }{Name: "cmy"}).Build())
-	})
-
-	t.Run("pointer value", func(t *testing.T) {
-		assert.Equal(t, bson.D{{Key: "$set", Value: &struct{ Name string }{Name: "cmy"}}}, NewBuilder().SetFields(&struct{ Name string }{Name: "cmy"}).Build())
+	t.Run("set_fields with pointer struct value and set multiple operation", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: struct{ Name string }{Name: "cmy"}}, {Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "cmy"}, bson.E{Key: "age", Value: 24}}}}, NewBuilder().SetFields(struct{ Name string }{Name: "cmy"}).Set("name", "cmy").Set("age", 24).Build())
 	})
 }
 
