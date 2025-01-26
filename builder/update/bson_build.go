@@ -58,6 +58,10 @@ func Set(key string, value any) bson.D {
 	return bson.D{{Key: SetOp, Value: bson.D{{Key: key, Value: value}}}}
 }
 
+func SetFields(value any) bson.D {
+	return bson.D{{Key: SetOp, Value: value}}
+}
+
 func Unset(keys ...string) bson.D {
 	value := bson.D{}
 	for i := range keys {

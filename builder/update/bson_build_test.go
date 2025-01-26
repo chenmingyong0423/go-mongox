@@ -110,6 +110,50 @@ func TestSet(t *testing.T) {
 	})
 }
 
+func TestSetFields(t *testing.T) {
+	type FieldStruct struct {
+		Name string `bson:"name,omitempty"`
+		Age  int    `bson:"age,omitempty"`
+	}
+
+	testCases := []struct {
+		name  string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "nil value",
+			value: nil,
+			want:  bson.D{bson.E{Key: "$set", Value: nil}},
+		},
+		{
+			name:  "string value",
+			value: "Alice",
+			want:  bson.D{bson.E{Key: "$set", Value: "Alice"}},
+		},
+		{
+			name:  "map value",
+			value: map[string]any{"name": "Alice"},
+			want:  bson.D{bson.E{Key: "$set", Value: map[string]any{"name": "Alice"}}},
+		},
+		{
+			name:  "bson value",
+			value: bson.D{bson.E{Key: "name", Value: "Alice"}},
+			want:  bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}},
+		},
+		{
+			name:  "struct value",
+			value: FieldStruct{Name: "Alice", Age: 18},
+			want:  bson.D{bson.E{Key: "$set", Value: FieldStruct{Name: "Alice", Age: 18}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, SetFields(tc.value))
+		})
+	}
+}
+
 func TestUnset(t *testing.T) {
 	testCases := []struct {
 		name  string
