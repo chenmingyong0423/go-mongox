@@ -222,6 +222,88 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				return assert.NoError(t, err)
 			},
 		},
+
+		{
+			name: "update one success when update use set_fields with struct",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 19).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: update.SetFields(User{Id: "1", Name: "chenmingyong", Age: 19}),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success when update use set_fields with one field struct",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, UserTestField{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 18).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: update.SetFields(UserTestField{Id: "1", Name: "chenmingyong"}),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success when update use set_fields with struct pointer",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 19).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: update.SetFields(&User{Id: "1", Name: "chenmingyong", Age: 19}),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+		{
+			name: "update one success when update use set_fields with map",
+			before: func(ctx context.Context, t *testing.T) {
+				insertResult, err := collection.InsertOne(ctx, User{Id: "1", Name: "Mingyong Chen", Age: 18})
+				assert.NoError(t, err)
+				assert.NotNil(t, insertResult.InsertedID)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				deleteResult, err := collection.DeleteOne(ctx, query.NewBuilder().Eq("name", "chenmingyong").Eq("age", 19).Build())
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), deleteResult.DeletedCount)
+			},
+			ctx:     context.Background(),
+			filter:  query.Id("1"),
+			updates: update.SetFields(map[string]any{"name": "chenmingyong", "age": 19}),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
+
 		{
 			name: "upserted count is 1",
 			before: func(ctx context.Context, t *testing.T) {

@@ -33,6 +33,28 @@ func Test_fieldUpdateBuilder_Set(t *testing.T) {
 	})
 }
 
+func Test_fieldUpdateBuilder_SetFields(t *testing.T) {
+	t.Run("nil value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: nil}}, NewBuilder().SetFields(nil).Build())
+	})
+
+	t.Run("string value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: "cmy"}}, NewBuilder().SetFields("cmy").Build())
+	})
+
+	t.Run("map value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: map[string]any{"name": "cmy"}}}, NewBuilder().SetFields(map[string]any{"name": "cmy"}).Build())
+	})
+
+	t.Run("struct value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: struct{ Name string }{Name: "cmy"}}}, NewBuilder().SetFields(struct{ Name string }{Name: "cmy"}).Build())
+	})
+
+	t.Run("pointer value", func(t *testing.T) {
+		assert.Equal(t, bson.D{{Key: "$set", Value: &struct{ Name string }{Name: "cmy"}}}, NewBuilder().SetFields(&struct{ Name string }{Name: "cmy"}).Build())
+	})
+}
+
 func Test_fieldUpdateBuilder_Unset(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "$unset", Value: bson.D{}}}, NewBuilder().Unset().Build())
 	assert.Equal(t, bson.D{{Key: "$unset", Value: bson.D{bson.E{Key: "name", Value: ""}}}}, NewBuilder().Unset("name").Build())

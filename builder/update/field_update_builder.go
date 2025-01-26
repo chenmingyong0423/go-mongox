@@ -30,6 +30,15 @@ func (b *fieldUpdateBuilder) Set(key string, value any) *Builder {
 	return b.parent
 }
 
+func (b *fieldUpdateBuilder) SetFields(value any) *Builder {
+	e := bson.E{Key: SetOp, Value: value}
+	if !b.parent.tryMergeValue(SetOp, e) {
+		b.parent.data = append(b.parent.data, e)
+	}
+
+	return b.parent
+}
+
 func (b *fieldUpdateBuilder) Unset(keys ...string) *Builder {
 	value := bson.D{}
 	for i := range keys {

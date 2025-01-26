@@ -56,6 +56,13 @@ type User struct {
 	UnknownField string `bson:"-"`
 }
 
+type UserTestField struct {
+	Id           string `bson:"_id"`
+	Name         string `bson:"name"`
+	Age          int64  `bson:"age,omitempty"`
+	UnknownField string `bson:"-"`
+}
+
 type TestUser struct {
 	ID           bson.ObjectID `bson:"_id,omitempty"`
 	Name         string        `bson:"name"`

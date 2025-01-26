@@ -110,6 +110,24 @@ func TestSet(t *testing.T) {
 	})
 }
 
+func TestSetFields(t *testing.T) {
+	type FieldStruct struct {
+		Name string `bson:"name,omitempty"`
+		Age  int    `bson:"age,omitempty"`
+	}
+
+	t.Run("test SetFields", func(t *testing.T) {
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: nil}}, SetFields(nil))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: "Alice"}}, SetFields("Alice"))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: map[string]any{"name": "Alice"}}}, SetFields(map[string]any{"name": "Alice"}))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}}, SetFields(bson.D{bson.E{Key: "name", Value: "Alice"}}))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}, bson.E{Key: "age", Value: 18}}}}, SetFields(bson.D{bson.E{Key: "name", Value: "Alice"}, bson.E{Key: "age", Value: 18}}))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: FieldStruct{Name: "Alice"}}}, SetFields(FieldStruct{Name: "Alice"}))
+		assert.Equal(t, bson.D{bson.E{Key: "$set", Value: FieldStruct{Name: "Alice", Age: 18}}}, SetFields(FieldStruct{Name: "Alice", Age: 18}))
+
+	})
+}
+
 func TestUnset(t *testing.T) {
 	testCases := []struct {
 		name  string
