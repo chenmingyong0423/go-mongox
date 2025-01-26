@@ -77,7 +77,7 @@ func newCollection(t *testing.T) *mongo.Collection {
 
 func TestCreator_e2e_One(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[User](collection)
+	creator := NewCreator[User](collection, &callback.Callback{})
 
 	type globalHook struct {
 		opType operation.OpType
@@ -306,7 +306,7 @@ func TestCreator_e2e_One(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+				creator.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			insertOneResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).InsertOne(tc.ctx, tc.doc, tc.opts...)
@@ -318,7 +318,7 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.NotNil(t, insertOneResult.InsertedID)
 			}
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Remove(hook.opType, hook.name)
+				creator.dbCallbacks.Remove(hook.opType, hook.name)
 			}
 			creator.beforeHooks = nil
 			creator.afterHooks = nil
@@ -328,7 +328,7 @@ func TestCreator_e2e_One(t *testing.T) {
 
 func TestCreator_e2e_Many(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[User](collection)
+	creator := NewCreator[User](collection, &callback.Callback{})
 
 	type globalHook struct {
 		opType operation.OpType
@@ -586,7 +586,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+				creator.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			insertManyResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).InsertMany(tc.ctx, tc.docs, tc.opts...)
@@ -599,7 +599,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, tc.wantIdsLength)
 			}
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Remove(hook.opType, hook.name)
+				creator.dbCallbacks.Remove(hook.opType, hook.name)
 			}
 			creator.beforeHooks = nil
 			creator.afterHooks = nil

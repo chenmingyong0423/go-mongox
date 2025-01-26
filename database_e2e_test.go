@@ -274,3 +274,109 @@ func TestRegisterPlugin_Upsert(t *testing.T) {
 		assert.False(t, isCalled)
 	})
 }
+
+func TestRegisterPlugin_BeforeAny(t *testing.T) {
+	c := getMongoClient(t)
+
+	// before find
+	t.Run("before find", func(t *testing.T) {
+		var isCalled bool
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+		db.RegisterPlugin("before find", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			require.NotNil(t, opCtx.Filter)
+			isCalled = true
+			return nil
+		}, operation.OpTypeBeforeAny)
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"})), operation.OpTypeBeforeFind)
+		require.Nil(t, err)
+		assert.True(t, isCalled)
+		isCalled = false
+		db.RemovePlugin("before find", operation.OpTypeBeforeAny)
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"})), operation.OpTypeBeforeFind)
+		require.Nil(t, err)
+		assert.False(t, isCalled)
+	})
+
+	// before insert
+	t.Run("before insert", func(t *testing.T) {
+		type User struct {
+			Name string
+			Age  int
+		}
+		var isCalled bool
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+		db.RegisterPlugin("before insert", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			user := opCtx.Doc.(*User)
+			require.NotNil(t, user)
+			isCalled = true
+			return nil
+		}, operation.OpTypeBeforeAny)
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithDoc(&User{Name: "Mingyong Chen", Age: 18})), operation.OpTypeBeforeInsert)
+		require.Nil(t, err)
+		assert.True(t, isCalled)
+		isCalled = false
+		db.RemovePlugin("before insert", operation.OpTypeBeforeAny)
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithDoc(&User{Name: "Mingyong Chen", Age: 18})), operation.OpTypeBeforeInsert)
+		require.Nil(t, err)
+		assert.False(t, isCalled)
+	})
+
+	// before delete
+	t.Run("before delete", func(t *testing.T) {
+		var isCalled bool
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+		db.RegisterPlugin("before delete", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			require.NotNil(t, opCtx.Filter)
+			isCalled = true
+			return nil
+		}, operation.OpTypeBeforeAny)
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"})), operation.OpTypeBeforeDelete)
+		require.Nil(t, err)
+		assert.True(t, isCalled)
+		isCalled = false
+		db.RemovePlugin("before delete", operation.OpTypeBeforeAny)
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"})), operation.OpTypeBeforeDelete)
+		require.Nil(t, err)
+		assert.False(t, isCalled)
+	})
+
+	// before update
+	t.Run("before update", func(t *testing.T) {
+		var isCalled bool
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+		db.RegisterPlugin("before update", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			require.NotNil(t, opCtx.Filter)
+			require.NotNil(t, opCtx.Updates)
+			isCalled = true
+			return nil
+		}, operation.OpTypeBeforeAny)
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
+		require.Nil(t, err)
+		assert.True(t, isCalled)
+		isCalled = false
+		db.RemovePlugin("before update", operation.OpTypeBeforeAny)
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"$set": bson.M{"name": "Burt"}})), operation.OpTypeBeforeUpdate)
+		require.Nil(t, err)
+		assert.False(t, isCalled)
+	})
+
+	// before upsert
+	t.Run("before upsert", func(t *testing.T) {
+		var isCalled bool
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+		db.RegisterPlugin("before upsert", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			require.NotNil(t, opCtx.Filter)
+			require.NotNil(t, opCtx.Updates)
+			isCalled = true
+			return nil
+		}, operation.OpTypeBeforeAny)
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
+		require.Nil(t, err)
+		assert.True(t, isCalled)
+		isCalled = false
+		db.RemovePlugin("before upsert", operation.OpTypeBeforeAny)
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithFilter(bson.M{"name": "Mingyong Chen"}), operation.WithUpdates(bson.M{"name": "Burt"})), operation.OpTypeBeforeUpsert)
+		require.Nil(t, err)
+		assert.False(t, isCalled)
+	})
+}

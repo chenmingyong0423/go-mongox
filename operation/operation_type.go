@@ -45,5 +45,5 @@ type OpContext struct {
 	ModelHook    any
 
 	// result of the collection operation
-	result any
+	Result any
 }

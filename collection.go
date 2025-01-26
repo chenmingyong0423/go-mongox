@@ -26,6 +26,7 @@ import (
 
 func NewCollection[T any](db *Database, collection string) *Collection[T] {
 	return &Collection[T]{
+		db:         db,
 		collection: db.database().Collection(collection),
 		callbacks:  db.callbacks,
 	}
@@ -39,19 +40,19 @@ type Collection[T any] struct {
 }
 
 func (c *Collection[T]) Finder() *finder.Finder[T] {
-	return finder.NewFinder[T](c.collection)
+	return finder.NewFinder[T](c.collection, c.callbacks)
 }
 
 func (c *Collection[T]) Creator() *creator.Creator[T] {
-	return creator.NewCreator[T](c.collection)
+	return creator.NewCreator[T](c.collection, c.callbacks)
 }
 
 func (c *Collection[T]) Updater() *updater.Updater[T] {
-	return updater.NewUpdater[T](c.collection)
+	return updater.NewUpdater[T](c.collection, c.callbacks)
 }
 
 func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
-	return deleter.NewDeleter[T](c.collection)
+	return deleter.NewDeleter[T](c.collection, c.callbacks)
 }
 func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
 	return aggregator.NewAggregator[T](c.collection)

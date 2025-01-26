@@ -25,7 +25,7 @@ import (
 )
 
 func TestNewUpdater(t *testing.T) {
-	updater := NewUpdater[any](&mongo.Collection{})
+	updater := NewUpdater[any](&mongo.Collection{}, nil)
 	assert.NotNil(t, updater)
 }
 

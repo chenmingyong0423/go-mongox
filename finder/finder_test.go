@@ -29,7 +29,7 @@ import (
 func TestFinder_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
 
-	result := NewFinder[any](mongoCollection)
+	result := NewFinder[any](mongoCollection, nil)
 	assert.NotNil(t, result, "Expected non-nil Finder")
 	assert.Equal(t, mongoCollection, result.collection, "Expected finder field to be initialized correctly")
 }

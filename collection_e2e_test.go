@@ -48,14 +48,14 @@ func TestCollection_e2e_Updater(t *testing.T) {
 func TestCollection_e2e_Finder(t *testing.T) {
 	collection := getCollection[any](t)
 
-	f := finder.NewFinder[any](collection.collection)
+	f := finder.NewFinder[any](collection.collection, nil)
 	assert.NotNil(t, f, "Expected non-nil Finder")
 }
 
 func TestCollection_e2e_Creator(t *testing.T) {
 	collection := getCollection[any](t)
 
-	c := creator.NewCreator[any](collection.collection)
+	c := creator.NewCreator[any](collection.collection, nil)
 	assert.NotNil(t, c, "Expected non-nil Creator")
 }
 

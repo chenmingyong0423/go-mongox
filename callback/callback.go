@@ -22,23 +22,6 @@ import (
 
 type CbFn func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error
 
-var Callbacks = initializeCallbacks()
-
-func initializeCallbacks() *Callback {
-	return &Callback{
-		beforeInsert: make([]callbackHandler, 0),
-		afterInsert:  make([]callbackHandler, 0),
-		beforeUpdate: make([]callbackHandler, 0),
-		afterUpdate:  make([]callbackHandler, 0),
-		beforeDelete: make([]callbackHandler, 0),
-		afterDelete:  make([]callbackHandler, 0),
-		beforeUpsert: make([]callbackHandler, 0),
-		afterUpsert:  make([]callbackHandler, 0),
-		beforeFind:   make([]callbackHandler, 0),
-		afterFind:    make([]callbackHandler, 0),
-	}
-}
-
 func InitializeCallbacks() *Callback {
 	return &Callback{
 		beforeInsert: make([]callbackHandler, 0),
@@ -54,10 +37,6 @@ func InitializeCallbacks() *Callback {
 	}
 }
 
-func GetCallback() *Callback {
-	return Callbacks
-}
-
 type Callback struct {
 	beforeInsert []callbackHandler
 	afterInsert  []callbackHandler
@@ -69,6 +48,46 @@ type Callback struct {
 	afterUpsert  []callbackHandler
 	beforeFind   []callbackHandler
 	afterFind    []callbackHandler
+}
+
+func (c *Callback) BeforeInsert() []callbackHandler {
+	return c.beforeInsert
+}
+
+func (c *Callback) AfterInsert() []callbackHandler {
+	return c.afterInsert
+}
+
+func (c *Callback) BeforeUpdate() []callbackHandler {
+	return c.beforeUpdate
+}
+
+func (c *Callback) AfterUpdate() []callbackHandler {
+	return c.afterUpdate
+}
+
+func (c *Callback) BeforeDelete() []callbackHandler {
+	return c.beforeDelete
+}
+
+func (c *Callback) AfterDelete() []callbackHandler {
+	return c.afterDelete
+}
+
+func (c *Callback) BeforeUpsert() []callbackHandler {
+	return c.beforeUpsert
+}
+
+func (c *Callback) AfterUpsert() []callbackHandler {
+	return c.afterUpsert
+}
+
+func (c *Callback) BeforeFind() []callbackHandler {
+	return c.beforeFind
+}
+
+func (c *Callback) AfterFind() []callbackHandler {
+	return c.afterFind
 }
 
 func (c *Callback) Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
@@ -158,6 +177,48 @@ func (c *Callback) Register(opType operation.OpType, name string, fn CbFn) {
 			name: name,
 			fn:   fn,
 		})
+	case operation.OpTypeBeforeAny:
+		c.beforeInsert = append(c.beforeInsert, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.beforeUpdate = append(c.beforeUpdate, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.beforeDelete = append(c.beforeDelete, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.beforeUpsert = append(c.beforeUpsert, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.beforeFind = append(c.beforeFind, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+	case operation.OpTypeAfterAny:
+		c.afterInsert = append(c.afterInsert, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.afterUpdate = append(c.afterUpdate, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.afterDelete = append(c.afterDelete, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.afterUpsert = append(c.afterUpsert, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.afterFind = append(c.afterFind, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
 	}
 }
 
@@ -182,6 +243,18 @@ func (c *Callback) Remove(opType operation.OpType, name string) {
 	case operation.OpTypeBeforeFind:
 		c.beforeFind = c.remove(c.beforeFind, name)
 	case operation.OpTypeAfterFind:
+		c.afterFind = c.remove(c.afterFind, name)
+	case operation.OpTypeBeforeAny:
+		c.beforeInsert = c.remove(c.beforeInsert, name)
+		c.beforeUpdate = c.remove(c.beforeUpdate, name)
+		c.beforeDelete = c.remove(c.beforeDelete, name)
+		c.beforeUpsert = c.remove(c.beforeUpsert, name)
+		c.beforeFind = c.remove(c.beforeFind, name)
+	case operation.OpTypeAfterAny:
+		c.afterInsert = c.remove(c.afterInsert, name)
+		c.afterUpdate = c.remove(c.afterUpdate, name)
+		c.afterDelete = c.remove(c.afterDelete, name)
+		c.afterUpsert = c.remove(c.afterUpsert, name)
 		c.afterFind = c.remove(c.afterFind, name)
 	}
 }

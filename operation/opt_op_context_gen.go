@@ -51,3 +51,9 @@ func WithModelHook(modelHook any) OpContextOption {
 		opContext.ModelHook = modelHook
 	}
 }
+
+func WithResult(result any) OpContextOption {
+	return func(opContext *OpContext) {
+		opContext.Result = result
+	}
+}

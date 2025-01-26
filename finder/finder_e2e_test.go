@@ -55,7 +55,7 @@ func getCollection(t *testing.T) *mongo.Collection {
 func TestFinder_e2e_New(t *testing.T) {
 	collection := getCollection(t)
 
-	result := NewFinder[TestUser](collection)
+	result := NewFinder[TestUser](collection, &callback.Callback{})
 	require.NotNil(t, result, "Expected non-nil Finder")
 	require.Equal(t, collection, result.collection, "Expected finder field to be initialized correctly")
 }
@@ -339,11 +339,11 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			finder := NewFinder[TestUser](collection)
+			finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+				finder.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 
 			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
@@ -361,7 +361,7 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 				require.Equal(t, tc.want, user)
 			}
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Remove(hook.opType, hook.name)
+				finder.dbCallbacks.Remove(hook.opType, hook.name)
 			}
 		})
 	}
@@ -828,11 +828,11 @@ func TestFinder_e2e_Find(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			finder := NewFinder[TestUser](collection)
+			finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+				finder.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 
 			finder = finder.RegisterBeforeHooks(tc.beforeHook...).
@@ -854,7 +854,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 				require.ElementsMatch(t, tc.want, users)
 			}
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Remove(hook.opType, hook.name)
+				finder.dbCallbacks.Remove(hook.opType, hook.name)
 			}
 		})
 	}
@@ -862,7 +862,7 @@ func TestFinder_e2e_Find(t *testing.T) {
 
 func TestFinder_e2e_Count(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
+	finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 	testCases := []struct {
 		name   string
@@ -928,7 +928,7 @@ func TestFinder_e2e_Count(t *testing.T) {
 
 func TestFinder_e2e_Distinct(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
+	finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 	testCases := []struct {
 		name   string
@@ -1046,7 +1046,7 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 
 func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
+	finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 	testCases := []struct {
 		name   string
@@ -1164,7 +1164,7 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 
 func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 	collection := getCollection(t)
-	finder := NewFinder[TestUser](collection)
+	finder := NewFinder[TestUser](collection, &callback.Callback{})
 
 	type globalHook struct {
 		opType operation.OpType
@@ -1420,7 +1420,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Register(hook.opType, hook.name, hook.fn)
+				finder.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			user, err := finder.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Updates(tc.updates).
@@ -1432,7 +1432,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				require.Equal(t, tc.want, user)
 			}
 			for _, hook := range tc.globalHook {
-				callback.GetCallback().Remove(hook.opType, hook.name)
+				finder.dbCallbacks.Remove(hook.opType, hook.name)
 			}
 			finder.beforeHooks = nil
 			finder.afterHooks = nil

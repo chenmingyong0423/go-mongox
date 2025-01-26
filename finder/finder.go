@@ -18,9 +18,10 @@ import (
 	"context"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"go.mongodb.org/mongo-driver/v2/bson"
+
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
@@ -32,17 +33,19 @@ type IFinder[T any] interface {
 	Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error)
 }
 
-func NewFinder[T any](collection *mongo.Collection) *Finder[T] {
-	return &Finder[T]{collection: collection, filter: bson.D{}}
+func NewFinder[T any](collection *mongo.Collection, callbacks *callback.Callback) *Finder[T] {
+	return &Finder[T]{collection: collection, filter: bson.D{}, dbCallbacks: callbacks}
 }
 
 var _ IFinder[any] = (*Finder[any])(nil)
 
 type Finder[T any] struct {
-	collection  *mongo.Collection
-	filter      any
-	updates     any
-	modelHook   any
+	collection *mongo.Collection
+	filter     any
+	updates    any
+	modelHook  any
+
+	dbCallbacks *callback.Callback
 	beforeHooks []beforeHookFn
 	afterHooks  []afterHookFn[T]
 
@@ -96,7 +99,7 @@ func (f *Finder[T]) ModelHook(modelHook any) *Finder[T] {
 
 func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opTypes ...operation.OpType) (err error) {
 	for _, opType := range opTypes {
-		err = callback.GetCallback().Execute(ctx, globalOpContext, opType)
+		err = f.dbCallbacks.Execute(ctx, globalOpContext, opType)
 		if err != nil {
 			return
 		}
@@ -112,7 +115,7 @@ func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *opera
 
 func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext[T], opTypes ...operation.OpType) (err error) {
 	for _, opType := range opTypes {
-		err = callback.GetCallback().Execute(ctx, globalOpContext, opType)
+		err = f.dbCallbacks.Execute(ctx, globalOpContext, opType)
 		if err != nil {
 			return
 		}
@@ -139,11 +142,13 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 		return nil, err
 	}
 
-	err = f.collection.FindOne(ctx, f.filter, opts...).Decode(t)
+	result := f.collection.FindOne(ctx, f.filter, opts...)
+	err = result.Decode(t)
 	if err != nil {
 		return nil, err
 	}
 
+	globalOpContext.Result = result
 	err = f.postActionHandler(ctx, globalOpContext, NewAfterOpContext[T](NewOpContext(f.collection, f.filter, WithMongoOptions(opts), WithModelHook(f.modelHook)), WithDoc(t)), operation.OpTypeAfterFind)
 	if err != nil {
 		return nil, err
@@ -165,8 +170,8 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 
 	t := make([]*T, 0)
 
-	opContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
-	err := f.preActionHandler(ctx, opContext, NewOpContext(f.collection, f.filter, WithMongoOptions(opts), WithModelHook(f.modelHook)), operation.OpTypeBeforeFind)
+	globalOpContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook))
+	err := f.preActionHandler(ctx, globalOpContext, NewOpContext(f.collection, f.filter, WithMongoOptions(opts), WithModelHook(f.modelHook)), operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
@@ -181,8 +186,9 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 		return nil, err
 	}
 
-	opContext.Doc = t
-	err = f.postActionHandler(ctx, opContext, NewAfterOpContext[T](NewOpContext(f.collection, f.filter, WithMongoOptions(opts), WithModelHook(f.modelHook)), WithDocs(t)), operation.OpTypeAfterFind)
+	globalOpContext.Result = cursor
+	globalOpContext.Doc = t
+	err = f.postActionHandler(ctx, globalOpContext, NewAfterOpContext[T](NewOpContext(f.collection, f.filter, WithMongoOptions(opts), WithModelHook(f.modelHook)), WithDocs(t)), operation.OpTypeAfterFind)
 	if err != nil {
 		return nil, err
 	}
@@ -221,11 +227,13 @@ func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister
 		return nil, err
 	}
 
-	err = f.collection.FindOneAndUpdate(ctx, f.filter, f.updates, opts...).Decode(t)
+	result := f.collection.FindOneAndUpdate(ctx, f.filter, f.updates, opts...)
+	err = result.Decode(t)
 	if err != nil {
 		return nil, err
 	}
 
+	globalOpContext.Result = result
 	err = f.postActionHandler(ctx, globalOpContext, NewAfterOpContext[T](NewOpContext(f.collection, f.filter, WithUpdates(f.updates), WithMongoOptions(opts), WithModelHook(f.modelHook)), WithDoc(t)), operation.OpTypeAfterFind, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
