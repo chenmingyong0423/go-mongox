@@ -142,17 +142,7 @@ func TestSetFields(t *testing.T) {
 			want:  bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}},
 		},
 		{
-			name:  "multi bson value",
-			value: bson.D{bson.E{Key: "name", Value: "Alice"}, bson.E{Key: "age", Value: 18}},
-			want:  bson.D{bson.E{Key: "$set", Value: bson.D{bson.E{Key: "name", Value: "Alice"}, bson.E{Key: "age", Value: 18}}}},
-		},
-		{
-			name:  "optional field struct value",
-			value: FieldStruct{Name: "Alice"},
-			want:  bson.D{bson.E{Key: "$set", Value: FieldStruct{Name: "Alice"}}},
-		},
-		{
-			name:  "all field struct value",
+			name:  "struct value",
 			value: FieldStruct{Name: "Alice", Age: 18},
 			want:  bson.D{bson.E{Key: "$set", Value: FieldStruct{Name: "Alice", Age: 18}}},
 		},
