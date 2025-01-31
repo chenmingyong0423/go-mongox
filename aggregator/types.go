@@ -2,7 +2,7 @@
 // If you have any questions, please create issues and submit contributions at:
 // https://github.com/chenmingyong0423/go-optioner
 
-// Copyright 2024 chenmingyong0423
+// Copyright 2025 chenmingyong0423
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,28 +16,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package deleter
+package aggregator
 
 import (
 	"context"
 	"time"
 
 	"github.com/chenmingyong0423/go-mongox/v2/field"
-
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 //go:generate optioner -type OpContext -output types.go -mode append
 type OpContext struct {
-	Col          *mongo.Collection `opt:"-"`
-	Filter       any               `opt:"-"`
+	Col      *mongo.Collection `opt:"-"`
+	Pipeline any               `opt:"-"`
+
+	Fields []*field.Filed
+
 	MongoOptions any
 	ModelHook    any
 	StartTime    time.Time
 
-	Fields []*field.Filed
-
-	// result of the collection operation
 	Result any
 }
 
@@ -48,10 +47,10 @@ type (
 
 type OpContextOption func(*OpContext)
 
-func NewOpContext(col *mongo.Collection, filter any, opts ...OpContextOption) *OpContext {
+func NewOpContext(col *mongo.Collection, pipeline any, opts ...OpContextOption) *OpContext {
 	opContext := &OpContext{
-		Col:    col,
-		Filter: filter,
+		Col:      col,
+		Pipeline: pipeline,
 	}
 
 	for _, opt := range opts {
@@ -59,6 +58,12 @@ func NewOpContext(col *mongo.Collection, filter any, opts ...OpContextOption) *O
 	}
 
 	return opContext
+}
+
+func WithFields(fields []*field.Filed) OpContextOption {
+	return func(opContext *OpContext) {
+		opContext.Fields = fields
+	}
 }
 
 func WithMongoOptions(mongoOptions any) OpContextOption {
@@ -76,12 +81,6 @@ func WithModelHook(modelHook any) OpContextOption {
 func WithStartTime(startTime time.Time) OpContextOption {
 	return func(opContext *OpContext) {
 		opContext.StartTime = startTime
-	}
-}
-
-func WithFields(fields []*field.Filed) OpContextOption {
-	return func(opContext *OpContext) {
-		opContext.Fields = fields
 	}
 }
 

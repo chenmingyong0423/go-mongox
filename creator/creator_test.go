@@ -49,7 +49,7 @@ func (tu *TestUser) DefaultUpdatedAt() {
 
 func TestNewCreator(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
-	creator := NewCreator[any](mongoCollection, nil)
+	creator := NewCreator[any](mongoCollection, nil, nil)
 
 	assert.NotNil(t, creator)
 	assert.Equal(t, mongoCollection, creator.collection)

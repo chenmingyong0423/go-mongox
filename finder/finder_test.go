@@ -18,8 +18,10 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
+	"go.mongodb.org/mongo-driver/v2/bson"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -29,12 +31,20 @@ import (
 func TestFinder_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
 
-	result := NewFinder[any](mongoCollection, nil)
+	result := NewFinder[any](mongoCollection, nil, nil)
 	assert.NotNil(t, result, "Expected non-nil Finder")
 	assert.Equal(t, mongoCollection, result.collection, "Expected finder field to be initialized correctly")
 }
 
 func TestFinder_One(t *testing.T) {
+	type TestUser struct {
+		ID           bson.ObjectID `bson:"_id,omitempty"`
+		Name         string        `bson:"name"`
+		Age          int64
+		UnknownField string    `bson:"-"`
+		CreatedAt    time.Time `bson:"created_at"`
+		UpdatedAt    time.Time `bson:"updated_at"`
+	}
 	testCases := []struct {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
@@ -82,6 +92,14 @@ func TestFinder_One(t *testing.T) {
 }
 
 func TestFinder_All(t *testing.T) {
+	type TestUser struct {
+		ID           bson.ObjectID `bson:"_id,omitempty"`
+		Name         string        `bson:"name"`
+		Age          int64
+		UnknownField string    `bson:"-"`
+		CreatedAt    time.Time `bson:"created_at"`
+		UpdatedAt    time.Time `bson:"updated_at"`
+	}
 	testCases := []struct {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
@@ -141,6 +159,14 @@ func TestFinder_All(t *testing.T) {
 }
 
 func TestFinder_Count(t *testing.T) {
+	type TestUser struct {
+		ID           bson.ObjectID `bson:"_id,omitempty"`
+		Name         string        `bson:"name"`
+		Age          int64
+		UnknownField string    `bson:"-"`
+		CreatedAt    time.Time `bson:"created_at"`
+		UpdatedAt    time.Time `bson:"updated_at"`
+	}
 	testCases := []struct {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]

@@ -33,17 +33,17 @@ func TestCollection_New(t *testing.T) {
 }
 
 func TestCollection_Finder(t *testing.T) {
-	f := finder.NewFinder[any](&mongo.Collection{}, nil)
+	f := finder.NewFinder[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, f, "Expected non-nil Finder")
 }
 
 func TestCollection_Creator(t *testing.T) {
-	c := creator.NewCreator[any](&mongo.Collection{}, nil)
+	c := creator.NewCreator[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, c, "Expected non-nil Creator")
 }
 
 func TestCollection_Updater(t *testing.T) {
-	u := updater.NewUpdater[any](&mongo.Collection{}, nil)
+	u := updater.NewUpdater[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, u, "Expected non-nil Updater")
 }
 

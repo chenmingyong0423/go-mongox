@@ -17,6 +17,8 @@ package callback
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/v2/internal/hook/field"
+
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 )
 
@@ -24,16 +26,37 @@ type CbFn func(ctx context.Context, opCtx *operation.OpContext, opts ...any) err
 
 func InitializeCallbacks() *Callback {
 	return &Callback{
-		beforeInsert: make([]callbackHandler, 0),
-		afterInsert:  make([]callbackHandler, 0),
-		beforeUpdate: make([]callbackHandler, 0),
+		beforeInsert: []callbackHandler{
+			{
+				name: "mongox:fieds",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
+				},
+			},
+		},
+		afterInsert: make([]callbackHandler, 0),
+		beforeUpdate: []callbackHandler{
+			{
+				name: "mongox:fieds",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpdate, opts...)
+				},
+			},
+		},
 		afterUpdate:  make([]callbackHandler, 0),
 		beforeDelete: make([]callbackHandler, 0),
 		afterDelete:  make([]callbackHandler, 0),
-		beforeUpsert: make([]callbackHandler, 0),
-		afterUpsert:  make([]callbackHandler, 0),
-		beforeFind:   make([]callbackHandler, 0),
-		afterFind:    make([]callbackHandler, 0),
+		beforeUpsert: []callbackHandler{
+			{
+				name: "mongox:fieds",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+				},
+			},
+		},
+		afterUpsert: make([]callbackHandler, 0),
+		beforeFind:  make([]callbackHandler, 0),
+		afterFind:   make([]callbackHandler, 0),
 	}
 }
 

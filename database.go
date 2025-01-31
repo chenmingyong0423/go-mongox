@@ -35,7 +35,7 @@ func newDatabase(c *Client, database string) *Database {
 	}
 }
 
-func (d *Database) database() *mongo.Database {
+func (d *Database) Database() *mongo.Database {
 	return d.db
 }
 

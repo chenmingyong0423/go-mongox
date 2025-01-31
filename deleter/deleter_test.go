@@ -50,7 +50,7 @@ func (tu *TestUser) DefaultUpdatedAt() {
 func TestDeleter_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
 
-	result := NewDeleter[any](mongoCollection, nil)
+	result := NewDeleter[any](mongoCollection, nil, nil)
 	assert.NotNil(t, result, "Expected non-nil Deleter")
 	assert.Equal(t, mongoCollection, result.collection, "Expected deleter field to be initialized correctly")
 }

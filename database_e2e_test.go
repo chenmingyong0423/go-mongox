@@ -34,7 +34,7 @@ func Test_e2e_newDatabase(t *testing.T) {
 	c := getMongoClient(t)
 
 	db := newDatabase(NewClient(c, &Config{}), "db-test")
-	require.Equal(t, db.database().Name(), "db-test")
+	require.Equal(t, db.Database().Name(), "db-test")
 
 	db.RegisterPlugin("global before find", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 		return nil

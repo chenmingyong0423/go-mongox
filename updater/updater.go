@@ -16,6 +16,9 @@ package updater
 
 import (
 	"context"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/v2/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
 
@@ -36,14 +39,15 @@ type IUpdater[T any] interface {
 	Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error)
 }
 
-func NewUpdater[T any](collection *mongo.Collection, dbCallbacks *callback.Callback) *Updater[T] {
-	return &Updater[T]{collection: collection, dbCallbacks: dbCallbacks}
+func NewUpdater[T any](collection *mongo.Collection, dbCallbacks *callback.Callback, fields []*field.Filed) *Updater[T] {
+	return &Updater[T]{collection: collection, dbCallbacks: dbCallbacks, fields: fields}
 }
 
 var _ IUpdater[any] = (*Updater[any])(nil)
 
 type Updater[T any] struct {
 	collection *mongo.Collection
+	fields     []*field.Filed
 
 	filter      any
 	updates     any
@@ -87,7 +91,7 @@ func (u *Updater[T]) RegisterAfterHooks(hooks ...afterHookFn) *Updater[T] {
 	return u
 }
 
-func (u *Updater[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *BeforeOpContext, opType operation.OpType) error {
+func (u *Updater[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
 	err := u.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
@@ -101,7 +105,7 @@ func (u *Updater[T]) preActionHandler(ctx context.Context, globalOpContext *oper
 	return nil
 }
 
-func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *AfterOpContext, opType operation.OpType) error {
+func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
 	err := u.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
@@ -116,13 +120,17 @@ func (u *Updater[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 }
 
 func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
+
+	currentTime := time.Now()
+
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
 	}
 
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook))
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeBeforeUpdate)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook), operation.WithFields(u.fields), operation.WithStartTime(currentTime))
+	opContext := NewOpContext(u.collection, u.filter, u.updates, WithMongoOptions(opts), WithModelHook(u.modelHook), WithFields(u.fields), WithStartTime(currentTime))
+	err := u.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +141,8 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[optio
 	}
 
 	globalOpContext.Result = result
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeAfterUpdate)
+	opContext.Result = result
+	err = u.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -141,13 +150,17 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[optio
 }
 
 func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[options.UpdateManyOptions]) (*mongo.UpdateResult, error) {
+	currentTime := time.Now()
+
 	updates := bsonx.ToBsonM(u.updates)
 	if len(updates) != 0 {
 		u.updates = updates
 	}
 
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook))
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeBeforeUpdate)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook), operation.WithFields(u.fields), operation.WithStartTime(currentTime))
+	opContext := NewOpContext(u.collection, u.filter, u.updates, WithMongoOptions(opts), WithModelHook(u.modelHook), WithFields(u.fields), WithStartTime(currentTime))
+
+	err := u.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +171,8 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[opti
 	}
 
 	globalOpContext.Result = result
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeAfterUpdate)
+	opContext.Result = result
+	err = u.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -166,6 +180,8 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[opti
 }
 
 func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.UpdateOneOptions]) (*mongo.UpdateResult, error) {
+	currentTime := time.Now()
+
 	if len(opts) == 0 {
 		opts = append(opts, options.UpdateOne().SetUpsert(true))
 	} else {
@@ -182,9 +198,9 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.
 		u.updates = updates
 	}
 
-	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook))
-
-	err := u.preActionHandler(ctx, globalOpContext, NewBeforeOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeBeforeUpsert)
+	globalOpContext := operation.NewOpContext(u.collection, operation.WithDoc(new(T)), operation.WithFilter(u.filter), operation.WithUpdates(u.updates), operation.WithMongoOptions(opts), operation.WithModelHook(u.modelHook), operation.WithStartTime(currentTime), operation.WithFields(u.fields))
+	opContext := NewOpContext(u.collection, u.filter, u.updates, WithMongoOptions(opts), WithModelHook(u.modelHook), WithStartTime(currentTime), WithFields(u.fields))
+	err := u.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeUpsert)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +211,8 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.
 	}
 
 	globalOpContext.Result = result
-	err = u.postActionHandler(ctx, globalOpContext, NewAfterOpContext(u.collection, NewCondContext(u.filter, WithUpdates(u.updates), WithMongoOptions(opts), WithModelHook(u.modelHook))), operation.OpTypeAfterUpsert)
+	opContext.Result = result
+	err = u.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterUpsert)
 	if err != nil {
 		return nil, err
 	}

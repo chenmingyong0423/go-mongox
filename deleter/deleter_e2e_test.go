@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/v2/field"
+
 	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
@@ -59,13 +61,13 @@ func newCollection(t *testing.T) *mongo.Collection {
 }
 
 func TestDeleter_e2e_New(t *testing.T) {
-	result := NewDeleter[any](newCollection(t), &callback.Callback{})
+	result := NewDeleter[any](newCollection(t), callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 	require.NotNil(t, result, "Expected non-nil Deleter")
 }
 
 func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[testTempUser](collection, &callback.Callback{})
+	deleter := NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 
 	type globalHook struct {
 		opType operation.OpType
@@ -318,7 +320,7 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 
 func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[testTempUser](collection, &callback.Callback{})
+	deleter := NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 
 	type globalHook struct {
 		opType operation.OpType

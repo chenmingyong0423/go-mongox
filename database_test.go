@@ -26,7 +26,7 @@ import (
 
 func Test_newDatabase(t *testing.T) {
 	db := newDatabase(NewClient(&mongo.Client{}, &Config{}), "db-test")
-	require.Equal(t, db.database().Name(), "db-test")
+	require.Equal(t, db.Database().Name(), "db-test")
 
 	db.RegisterPlugin("global before find", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 		return nil
