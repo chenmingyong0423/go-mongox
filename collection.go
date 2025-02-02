@@ -16,38 +16,50 @@ package mongox
 
 import (
 	"github.com/chenmingyong0423/go-mongox/v2/aggregator"
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
 	"github.com/chenmingyong0423/go-mongox/v2/creator"
 	"github.com/chenmingyong0423/go-mongox/v2/deleter"
+	"github.com/chenmingyong0423/go-mongox/v2/field"
 	"github.com/chenmingyong0423/go-mongox/v2/finder"
 	"github.com/chenmingyong0423/go-mongox/v2/updater"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-func NewCollection[T any](collection *mongo.Collection) *Collection[T] {
-	return &Collection[T]{collection: collection}
+func NewCollection[T any](db *Database, collection string) *Collection[T] {
+	return &Collection[T]{
+		db:         db,
+		collection: db.Database().Collection(collection),
+		callbacks:  db.callbacks,
+		fields:     field.ParseFields(new(T)),
+	}
 }
 
 type Collection[T any] struct {
+	db         *Database
 	collection *mongo.Collection
+	// callbacks inherited from database
+	callbacks *callback.Callback
+
+	fields []*field.Filed
 }
 
 func (c *Collection[T]) Finder() *finder.Finder[T] {
-	return finder.NewFinder[T](c.collection)
+	return finder.NewFinder[T](c.collection, c.callbacks, c.fields)
 }
 
 func (c *Collection[T]) Creator() *creator.Creator[T] {
-	return creator.NewCreator[T](c.collection)
+	return creator.NewCreator[T](c.collection, c.callbacks, c.fields)
 }
 
 func (c *Collection[T]) Updater() *updater.Updater[T] {
-	return updater.NewUpdater[T](c.collection)
+	return updater.NewUpdater[T](c.collection, c.callbacks, c.fields)
 }
 
 func (c *Collection[T]) Deleter() *deleter.Deleter[T] {
-	return deleter.NewDeleter[T](c.collection)
+	return deleter.NewDeleter[T](c.collection, c.callbacks, c.fields)
 }
 func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
-	return aggregator.NewAggregator[T](c.collection)
+	return aggregator.NewAggregator[T](c.collection, c.callbacks, c.fields)
 }
 
 func (c *Collection[T]) Collection() *mongo.Collection {

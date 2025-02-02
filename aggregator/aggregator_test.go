@@ -71,7 +71,7 @@ type UserName struct {
 
 func TestAggregator_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
-	aggregator := NewAggregator[any](mongoCollection)
+	aggregator := NewAggregator[any](mongoCollection, nil, nil)
 
 	assert.NotNil(t, aggregator)
 	assert.Equal(t, mongoCollection, aggregator.collection)

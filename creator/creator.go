@@ -16,10 +16,15 @@ package creator
 
 import (
 	"context"
+	"reflect"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/v2/field"
+
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
 
 	"github.com/chenmingyong0423/go-mongox/v2/internal/pkg/utils"
 
-	"github.com/chenmingyong0423/go-mongox/v2/callback"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -35,15 +40,22 @@ type ICreator[T any] interface {
 var _ ICreator[any] = (*Creator[any])(nil)
 
 type Creator[T any] struct {
-	collection  *mongo.Collection
-	modelHook   any
+	collection *mongo.Collection
+
+	modelHook any
+
+	dbCallbacks *callback.Callback
 	beforeHooks []hookFn[T]
 	afterHooks  []hookFn[T]
+
+	fields []*field.Filed
 }
 
-func NewCreator[T any](collection *mongo.Collection) *Creator[T] {
+func NewCreator[T any](collection *mongo.Collection, dbCallbacks *callback.Callback, fields []*field.Filed) *Creator[T] {
 	return &Creator[T]{
-		collection: collection,
+		collection:  collection,
+		dbCallbacks: dbCallbacks,
+		fields:      fields,
 	}
 }
 
@@ -66,7 +78,7 @@ func (c *Creator[T]) RegisterAfterHooks(hooks ...hookFn[T]) *Creator[T] {
 }
 
 func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
@@ -80,7 +92,7 @@ func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := callback.GetCallback().Execute(ctx, globalOpContext, opType)
+	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
@@ -94,8 +106,13 @@ func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 }
 
 func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error) {
-	opContext := operation.NewOpContext(c.collection, operation.WithDoc(doc), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook))
-	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeBeforeInsert)
+	currentTime := time.Now()
+	docValue := reflect.ValueOf(doc)
+
+	globalOpContext := operation.NewOpContext(c.collection, operation.WithDoc(doc), operation.WithReflectValue(docValue), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook), operation.WithStartTime(currentTime), operation.WithFields(c.fields))
+	opContext := NewOpContext(c.collection, WithDoc(doc), WithReflectValue[T](docValue), WithStartTime[T](currentTime), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook), WithFields[T](c.fields))
+
+	err := c.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +122,9 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...options.List
 		return nil, err
 	}
 
-	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDoc(doc), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeAfterInsert)
+	globalOpContext.Result = result
+	opContext.Result = result
+	err = c.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -114,8 +133,13 @@ func (c *Creator[T]) InsertOne(ctx context.Context, doc *T, opts ...options.List
 }
 
 func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error) {
-	opContext := operation.NewOpContext(c.collection, operation.WithDoc(docs), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook))
-	err := c.preActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeBeforeInsert)
+	currentTime := time.Now()
+	docsValue := reflect.ValueOf(docs)
+
+	globalOpContext := operation.NewOpContext(c.collection, operation.WithDoc(docs), operation.WithReflectValue(docsValue), operation.WithStartTime(currentTime), operation.WithMongoOptions(opts), operation.WithModelHook(c.modelHook), operation.WithFields(c.fields))
+	opContext := NewOpContext(c.collection, WithDocs(docs), WithReflectValue[T](docsValue), WithStartTime[T](currentTime), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook), WithFields[T](c.fields))
+
+	err := c.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeInsert)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +149,9 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.
 		return nil, err
 	}
 
-	err = c.postActionHandler(ctx, opContext, NewOpContext(c.collection, WithDocs(docs), WithMongoOptions[T](opts), WithModelHook[T](c.modelHook)), operation.OpTypeAfterInsert)
+	globalOpContext.Result = result
+	opContext.Result = result
+	err = c.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterInsert)
 	if err != nil {
 		return nil, err
 	}

@@ -20,6 +20,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/field"
+
 	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/stretchr/testify/require"
 
@@ -47,14 +50,14 @@ func getCollection(t *testing.T) *mongo.Collection {
 func TestAggregator_e2e_New(t *testing.T) {
 	collection := getCollection(t)
 
-	result := NewAggregator[TestUser](collection)
+	result := NewAggregator[TestUser](collection, nil, nil)
 	require.NotNil(t, result, "Expected non-nil Aggregator")
 	require.Equal(t, collection, result.collection, "Expected collection field to be initialized correctly")
 }
 
 func TestAggregator_e2e_Aggregation(t *testing.T) {
 	collection := getCollection(t)
-	aggregator := NewAggregator[TestUser](collection)
+	aggregator := NewAggregator[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser{}))
 
 	testCases := []struct {
 		name   string
@@ -223,7 +226,7 @@ func TestAggregator_e2e_Aggregation(t *testing.T) {
 
 func TestAggregator_e2e_AggregateWithParse(t *testing.T) {
 	collection := getCollection(t)
-	aggregator := NewAggregator[TestUser](collection)
+	aggregator := NewAggregator[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser{}))
 
 	type User struct {
 		Id           string `bson:"_id"`

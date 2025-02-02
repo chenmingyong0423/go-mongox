@@ -31,7 +31,7 @@ import (
 //		mongox.Model
 //	}
 type Model struct {
-	ID        bson.ObjectID `bson:"_id,omitempty"`
+	ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
 	CreatedAt time.Time     `bson:"created_at"`
 	UpdatedAt time.Time     `bson:"updated_at"`
 	DeletedAt time.Time     `bson:"deleted_at,omitempty"`

@@ -27,40 +27,38 @@ import (
 )
 
 func TestCollection_New(t *testing.T) {
-	mockMongoCollection := &mongo.Collection{}
-
-	result := NewCollection[any](mockMongoCollection)
+	result := NewCollection[any](NewClient(&mongo.Client{}, &Config{}).NewDatabase("db-test"), "collection-test")
 
 	assert.NotNil(t, result, "Expected non-nil Collection")
-	assert.Equal(t, mockMongoCollection, result.collection, "Expected collection field to be initialized correctly")
 }
 
 func TestCollection_Finder(t *testing.T) {
-	f := finder.NewFinder[any](&mongo.Collection{})
+	f := finder.NewFinder[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, f, "Expected non-nil Finder")
 }
 
 func TestCollection_Creator(t *testing.T) {
-	c := creator.NewCreator[any](&mongo.Collection{})
+	c := creator.NewCreator[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, c, "Expected non-nil Creator")
 }
 
 func TestCollection_Updater(t *testing.T) {
-	u := updater.NewUpdater[any](&mongo.Collection{})
+	u := updater.NewUpdater[any](&mongo.Collection{}, nil, nil)
 	assert.NotNil(t, u, "Expected non-nil Updater")
 }
 
 func TestCollection_Deleter(t *testing.T) {
-	d := NewCollection[any](&mongo.Collection{}).Deleter()
+	d := NewCollection[any](NewClient(&mongo.Client{}, &Config{}).NewDatabase("db-test"), "collection-test").Deleter()
 	assert.NotNil(t, d, "Expected non-nil Deleter")
 }
 
 func TestCollection_Aggregator(t *testing.T) {
-	a := NewCollection[any](&mongo.Collection{}).Aggregator()
+
+	a := NewCollection[any](NewClient(&mongo.Client{}, &Config{}).NewDatabase("db-test"), "collection-test").Aggregator()
 	assert.NotNil(t, a, "Expected non-nil Aggregator")
 }
 
 func TestCollection_Collection(t *testing.T) {
-	a := NewCollection[any](&mongo.Collection{})
+	a := NewCollection[any](NewClient(&mongo.Client{}, &Config{}).NewDatabase("db-test"), "collection-test")
 	assert.NotNil(t, a.Collection(), "Expected non-nil *mongo.Collection")
 }
