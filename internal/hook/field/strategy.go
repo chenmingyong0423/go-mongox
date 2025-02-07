@@ -62,19 +62,29 @@ func processFields4Insert(dest reflect.Value, currentTime time.Time, fields []*f
 func handleTimeField(dest reflect.Value, fd *field.Filed, currentTime time.Time) {
 	switch {
 	case fd.AutoCreateTime != 0:
-		setTimeField(dest, fd.AutoCreateTime, currentTime)
+		setTimeField(dest, fd.AutoCreateTime, currentTime, fd.FieldType)
 	case fd.AutoUpdateTime != 0:
-		setTimeField(dest, fd.AutoUpdateTime, currentTime)
+		setTimeField(dest, fd.AutoUpdateTime, currentTime, fd.FieldType)
 	}
 }
 
 // 设置具体的时间值
-func setTimeField(dest reflect.Value, timeType field.TimeType, currentTime time.Time) {
+func setTimeField(dest reflect.Value, timeType field.TimeType, currentTime time.Time, fieldType reflect.Type) {
 	switch timeType {
 	case field.UnixTime:
 		dest.Set(reflect.ValueOf(currentTime))
 	case field.UnixSecond:
-		dest.Set(reflect.ValueOf(currentTime.Unix()))
+		switch fieldType.Kind() {
+		case reflect.Int64:
+			dest.Set(reflect.ValueOf(currentTime.Unix()))
+		case reflect.Int:
+			dest.Set(reflect.ValueOf(int(currentTime.Unix())))
+		case reflect.Uint64:
+			dest.Set(reflect.ValueOf(uint64(currentTime.Unix())))
+		case reflect.Uint:
+			dest.Set(reflect.ValueOf(uint(currentTime.Unix())))
+		default:
+		}
 	case field.UnixMillisecond:
 		dest.Set(reflect.ValueOf(currentTime.UnixMilli()))
 	case field.UnixNanosecond:

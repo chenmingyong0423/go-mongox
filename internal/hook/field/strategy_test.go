@@ -110,6 +110,58 @@ func TestBeforeInsert(t *testing.T) {
 				require.NotZero(t, u.UpdateNanoTime)
 			},
 		},
+		{
+			name: "int64 / int type for default time field",
+			doc: reflect.ValueOf(&struct {
+				ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+				CreatedAt int64         `bson:"created_at"`
+				UpdatedAt int           `bson:"updated_at"`
+			}{}),
+			currentTime: time.Now(),
+			fields: field.ParseFields(struct {
+				ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+				CreatedAt int64         `bson:"created_at"`
+				UpdatedAt int           `bson:"updated_at"`
+			}{}),
+			wantErr: nil,
+			validateFunc: func(t *testing.T, v any) {
+				u, ok := v.(*struct {
+					ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+					CreatedAt int64         `bson:"created_at"`
+					UpdatedAt int           `bson:"updated_at"`
+				})
+				require.True(t, ok)
+				require.NotZero(t, u.ID)
+				require.NotZero(t, u.CreatedAt)
+				require.NotZero(t, u.UpdatedAt)
+			},
+		},
+		{
+			name: "uint64 / uint type for default time field",
+			doc: reflect.ValueOf(&struct {
+				ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+				CreatedAt uint64        `bson:"created_at"`
+				UpdatedAt uint          `bson:"updated_at"`
+			}{}),
+			currentTime: time.Now(),
+			fields: field.ParseFields(struct {
+				ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+				CreatedAt uint64        `bson:"created_at"`
+				UpdatedAt uint          `bson:"updated_at"`
+			}{}),
+			wantErr: nil,
+			validateFunc: func(t *testing.T, v any) {
+				u, ok := v.(*struct {
+					ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+					CreatedAt uint64        `bson:"created_at"`
+					UpdatedAt uint          `bson:"updated_at"`
+				})
+				require.True(t, ok)
+				require.NotZero(t, u.ID)
+				require.NotZero(t, u.CreatedAt)
+				require.NotZero(t, u.UpdatedAt)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -163,6 +215,16 @@ func Test_beforeUpdate(t *testing.T) {
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 			fields:      field.ParseFields(&inlinedUser{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
+		},
+		{
+			name:        "a bson.M updates and not time.Time type for default time field",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields: field.ParseFields(struct {
+				CreatedAt int64 `bson:"created_at"`
+				UpdatedAt int   `bson:"updated_at"`
+			}{}),
+			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}},
 		},
 	}
 	for _, tt := range tests {
@@ -222,6 +284,16 @@ func Test_beforeUpsert(t *testing.T) {
 			fields:      field.ParseFields(&inlinedUpdatedUser{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "create_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "create_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "create_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
+		{
+			name:        "a bson.M updates and not time.Time type for default time field",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields: field.ParseFields(struct {
+				CreatedAt int64 `bson:"created_at"`
+				UpdatedAt int   `bson:"updated_at"`
+			}{}),
+			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -230,4 +302,18 @@ func Test_beforeUpsert(t *testing.T) {
 			require.Equal(t, tt.want, tt.updates)
 		})
 	}
+}
+
+func Test_getTimeValue(t *testing.T) {
+	t.Run("invalid type", func(t *testing.T) {
+		require.Nil(t, getTimeValue(0, time.Time{}))
+	})
+}
+
+func Test_setTimeField(t *testing.T) {
+	t.Run("invalid time type 4 field.UnixSecond", func(t *testing.T) {
+		var v int
+		setTimeField(reflect.ValueOf(v), field.UnixSecond, time.Time{}, reflect.TypeOf(""))
+		require.Zero(t, v)
+	})
 }
