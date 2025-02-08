@@ -52,6 +52,10 @@ const (
 	AutoUpdateTime = "autoUpdateTime"
 )
 
+var (
+	timeType = reflect.TypeOf(time.Time{})
+)
+
 func ParseFields[T any](doc T) []*Filed {
 	docType := reflect.TypeOf(doc)
 	if docType == nil {
@@ -80,10 +84,14 @@ func ParseFields[T any](doc T) []*Filed {
 
 		fd.MongoField = getMongoField(bsonTag, structField.Name)
 
-		if structField.Name == CreatedAt && structField.Type == reflect.TypeOf(time.Time{}) {
-			fd.AutoCreateTime = UnixTime
-		} else if structField.Name == UpdatedAt && structField.Type == reflect.TypeOf(time.Time{}) {
-			fd.AutoUpdateTime = UnixTime
+		if structField.Name == CreatedAt {
+			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
+				fd.AutoCreateTime = timeType
+			})
+		} else if structField.Name == UpdatedAt {
+			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
+				fd.AutoUpdateTime = timeType
+			})
 		} else {
 			tag := structField.Tag.Get("mongox")
 			if tag != "" {
@@ -94,6 +102,18 @@ func ParseFields[T any](doc T) []*Filed {
 	}
 
 	return fields
+}
+
+func parseDefaultTimeType(structField reflect.StructField, fd *Filed, set func(timeType TimeType)) {
+	switch structField.Type.Kind() {
+	case reflect.Struct:
+		if structField.Type == timeType {
+			set(UnixTime)
+		}
+	case reflect.Int64, reflect.Int:
+		set(UnixSecond)
+	default:
+	}
 }
 
 func getMongoField(bsonTag string, defaultValue string) string {
@@ -125,13 +145,15 @@ func parseTimeType(tag string) TimeType {
 	if strings.Contains(tag, ":") {
 		timeType := strings.Split(tag, ":")[1]
 		switch timeType {
-		case "second":
-			return UnixSecond
 		case "milli":
 			return UnixMillisecond
 		case "nano":
 			return UnixNanosecond
+		case "second":
+			return UnixSecond
+		default:
+			return 0
 		}
 	}
-	return 0
+	return UnixSecond
 }

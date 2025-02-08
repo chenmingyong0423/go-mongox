@@ -50,7 +50,7 @@ type user struct {
 	UpdatedAt           time.Time     `bson:"updated_at"`
 	DeletedAt           time.Time     `bson:"deleted_at,omitempty"`
 	Name                string        `bson:"name"`
-	CreateSecondTime    int64         `bson:"create_second_time" mongox:"autoCreateTime:second"`
+	CreateSecondTime    int64         `bson:"create_second_time" mongox:"autoCreateTime"`
 	UpdateSecondTime    int64         `bson:"update_second_time" mongox:"autoUpdateTime:second"`
 	CreateMilliTime     int64         `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
 	UpdateMilliTime     int64         `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
@@ -64,7 +64,7 @@ type updatedUser struct {
 	UpdatedAt           time.Time `bson:"updated_at"`
 	DeletedAt           time.Time `bson:"deleted_at,omitempty"`
 	Name                string    `bson:"name"`
-	CreateSecondTime    int64     `bson:"create_second_time" mongox:"autoCreateTime:second"`
+	CreateSecondTime    int64     `bson:"create_second_time" mongox:"autoCreateTime"`
 	UpdateSecondTime    int64     `bson:"update_second_time" mongox:"autoUpdateTime:second"`
 	CreateMilliTime     int64     `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
 	UpdateMilliTime     int64     `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
@@ -76,7 +76,7 @@ type updatedUser struct {
 type inlinedUpdatedUser struct {
 	updatedModel     `bson:",inline"`
 	Name             string `bson:"name"`
-	CreateSecondTime int64  `bson:"create_second_time" mongox:"autoCreateTime:second"`
+	CreateSecondTime int64  `bson:"create_second_time" mongox:"autoCreateTime"`
 	UpdateSecondTime int64  `bson:"update_second_time" mongox:"autoUpdateTime:second"`
 	CreateMilliTime  int64  `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
 	UpdateMilliTime  int64  `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`

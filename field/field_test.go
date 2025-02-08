@@ -159,8 +159,8 @@ func TestParseFields(t *testing.T) {
 			doc: struct {
 				model            `bson:",inline"`
 				Name             string `bson:"name"`
-				CreateSecondTime int64  `bson:"create_second_time" mongox:"autoCreateTime:second"`
-				UpdateSecondTime int64  `bson:"update_second_time" mongox:"autoUpdateTime:second"`
+				CreateSecondTime int64  `bson:"create_second_time" mongox:"autoCreateTime"`
+				UpdateSecondTime int64  `bson:"update_second_time" mongox:"autoUpdateTime"`
 				CreateMilliTime  int64  `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
 				UpdateMilliTime  int64  `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
 				CreateNanoTime   int64  `bson:"create_nano_time" mongox:"autoCreateTime:nano"`
@@ -236,6 +236,48 @@ func TestParseFields(t *testing.T) {
 					MongoField:     "update_nano_time",
 					FieldType:      reflect.TypeOf(int64(0)),
 					AutoUpdateTime: UnixNanosecond,
+				},
+			},
+		},
+		{
+			name: "Not time.Time type for default time field",
+			doc: struct {
+				CreatedAt int64 `bson:"created_at"`
+				UpdatedAt int   `bson:"updated_at"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(int64(0)),
+					AutoCreateTime: UnixSecond,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(0),
+					AutoUpdateTime: UnixSecond,
+				},
+			},
+		},
+		{
+			name: "invalid type 4 default time field",
+			doc: struct {
+				CreatedAt string `bson:"created_at"`
+				UpdatedAt bool   `bson:"updated_at"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(""),
+					AutoCreateTime: 0,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(false),
+					AutoUpdateTime: 0,
 				},
 			},
 		},
