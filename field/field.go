@@ -110,7 +110,7 @@ func parseDefaultTimeType(structField reflect.StructField, fd *Filed, set func(t
 		if structField.Type == timeType {
 			set(UnixTime)
 		}
-	case reflect.Int64, reflect.Int, reflect.Uint64, reflect.Uint:
+	case reflect.Int64, reflect.Int:
 		set(UnixSecond)
 	default:
 	}

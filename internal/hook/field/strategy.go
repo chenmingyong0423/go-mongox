@@ -42,16 +42,19 @@ func beforeInsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 
 func processFields4Insert(dest reflect.Value, currentTime time.Time, fields []*field.Filed) error {
 	for idx, fd := range fields {
+		value := dest.Field(idx)
 		if fd.InlinedFields != nil {
-			err := processFields4Insert(dest.Field(idx), currentTime, fd.InlinedFields)
+			err := processFields4Insert(value, currentTime, fd.InlinedFields)
 			if err != nil {
 				return err
 			}
 		} else {
 			if fd.AutoID {
-				dest.Field(idx).Set(reflect.ValueOf(bson.NewObjectID()))
+				if value.IsZero() {
+					value.Set(reflect.ValueOf(bson.NewObjectID()))
+				}
 			} else {
-				handleTimeField(dest.Field(idx), fd, currentTime)
+				handleTimeField(value, fd, currentTime)
 			}
 		}
 	}
@@ -70,20 +73,18 @@ func handleTimeField(dest reflect.Value, fd *field.Filed, currentTime time.Time)
 
 // 设置具体的时间值
 func setTimeField(dest reflect.Value, timeType field.TimeType, currentTime time.Time, fieldType reflect.Type) {
+	if !dest.IsZero() {
+		return
+	}
 	switch timeType {
 	case field.UnixTime:
 		dest.Set(reflect.ValueOf(currentTime))
 	case field.UnixSecond:
 		switch fieldType.Kind() {
-		case reflect.Int64:
-			dest.Set(reflect.ValueOf(currentTime.Unix()))
 		case reflect.Int:
 			dest.Set(reflect.ValueOf(int(currentTime.Unix())))
-		case reflect.Uint64:
-			dest.Set(reflect.ValueOf(uint64(currentTime.Unix())))
-		case reflect.Uint:
-			dest.Set(reflect.ValueOf(uint(currentTime.Unix())))
 		default:
+			dest.Set(reflect.ValueOf(currentTime.Unix()))
 		}
 	case field.UnixMillisecond:
 		dest.Set(reflect.ValueOf(currentTime.UnixMilli()))
@@ -106,7 +107,9 @@ func beforeUpdate(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 	updatedFields := findAdditionalFields(currentTime, fields, findUpdatedFields)
 
 	for k, v := range updatedFields {
-		setFields[k] = v
+		if _, exit := setFields[k]; !exit {
+			setFields[k] = v
+		}
 	}
 
 	return nil
@@ -125,7 +128,9 @@ func beforeUpsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 	updatedTimes := findAdditionalFields(currentTime, fields, findUpdatedFields)
 
 	for k, v := range updatedTimes {
-		setFields[k] = v
+		if _, exit := setFields[k]; !exit {
+			setFields[k] = v
+		}
 	}
 
 	idAndCreateFields := findAdditionalFields(currentTime, fields, findUpsertFields)
@@ -134,13 +139,12 @@ func beforeUpsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 			updates["$setOnInsert"] = bson.M{}
 		}
 
-		setOnInsertFields, ok := updates["$setOnInsert"].(bson.M)
-		if !ok {
-			return nil
-		}
-
-		for k, v := range idAndCreateFields {
-			setOnInsertFields[k] = v
+		if setOnInsertFields, ok := updates["$setOnInsert"].(bson.M); ok {
+			for k, v := range idAndCreateFields {
+				if _, exit := setOnInsertFields[k]; !exit {
+					setOnInsertFields[k] = v
+				}
+			}
 		}
 	}
 
