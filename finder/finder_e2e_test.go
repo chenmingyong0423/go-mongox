@@ -1351,7 +1351,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 						if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
 							return errors.New("filter error")
 						}
-						if opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Key != "age" || opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Value != 24 {
+
+						if opCtx.Updates.(bson.M)["$set"].(bson.M)["age"].(int32) != 24 {
 							return errors.New("updates error")
 						}
 						return nil
@@ -1438,7 +1439,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					if opCtx.Filter.(bson.D)[0].Key != "name" || opCtx.Filter.(bson.D)[0].Value.(bson.D)[0].Value != "Mingyong Chen" {
 						return errors.New("filter error")
 					}
-					if opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Key != "age" || opCtx.Updates.(bson.D)[0].Value.(bson.D)[0].Value != 24 {
+					if opCtx.Updates.(bson.M)["$set"].(bson.M)["age"].(int32) != 24 {
 						return errors.New("updates error")
 					}
 					return nil
@@ -1473,6 +1474,13 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
 				tc.want.ID = user.ID
+				zeroTim := time.Time{}
+				if user != nil && user.UpdatedAt != zeroTim {
+					if user.UpdatedAt == tc.want.UpdatedAt {
+						t.FailNow()
+					}
+					tc.want.UpdatedAt = user.UpdatedAt
+				}
 				require.Equal(t, tc.want, user)
 			}
 			for _, hook := range tc.globalHook {
