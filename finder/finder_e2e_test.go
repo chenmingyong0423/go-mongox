@@ -1262,6 +1262,12 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				require.NotNil(t, insertOneResult.InsertedID)
 			},
 			after: func(ctx context.Context, t *testing.T) {
+				result, err := finder.Filter(query.Eq("name", "Mingyong Chen")).FindOne(ctx)
+				require.NoError(t, err)
+				zeroTim := time.Time{}
+				if result.UpdatedAt == zeroTim {
+					require.Error(t, errors.New("updatedAt is not updated"))
+				}
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
@@ -1366,6 +1372,10 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 						if user.Name != "Mingyong Chen" || user.Age != 24 {
 							return errors.New("result error")
 						}
+						zeroTim := time.Time{}
+						if user.UpdatedAt == zeroTim {
+							return errors.New("updatedAt is not updated")
+						}
 						return nil
 					},
 				},
@@ -1450,6 +1460,10 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					user := opCtx.Doc
 					if user.Name != "Mingyong Chen" || user.Age != 24 {
 						return errors.New("after error")
+					}
+					zeroTim := time.Time{}
+					if user.UpdatedAt == zeroTim {
+						return errors.New("updatedAt is not updated")
 					}
 					return nil
 				},
