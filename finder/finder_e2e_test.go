@@ -1227,9 +1227,10 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 		beforeHook []beforeHookFn[TestUser]
 		afterHook  []afterHookFn[TestUser]
 
-		ctx     context.Context
-		want    *TestUser
-		wantErr error
+		ctx             context.Context
+		want            *TestUser
+		wantErr         error
+		resultIsUpdated bool
 	}{
 		{
 			name: "nil document",
@@ -1248,8 +1249,9 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 
 				finder.filter = bson.D{}
 			},
-			filter:  query.Eq("name", "burt"),
-			wantErr: mongo.ErrNilDocument,
+			filter:          query.Eq("name", "burt"),
+			wantErr:         mongo.ErrNilDocument,
+			resultIsUpdated: false,
 		},
 		{
 			name: "find by name and update age",
@@ -1263,11 +1265,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			},
 			after: func(ctx context.Context, t *testing.T) {
 				result, err := finder.Filter(query.Eq("name", "Mingyong Chen")).FindOne(ctx)
-				require.NoError(t, err)
-				zeroTim := time.Time{}
-				if result.UpdatedAt == zeroTim {
-					require.Error(t, errors.New("updatedAt is not updated"))
-				}
+				require.NotZero(t, result.UpdatedAt)
 				deleteOneResult, err := collection.DeleteOne(ctx, query.Eq("name", "Mingyong Chen"))
 				require.NoError(t, err)
 				require.Equal(t, int64(1), deleteOneResult.DeletedCount)
@@ -1281,6 +1279,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  24,
 			},
+			resultIsUpdated: true,
 		},
 		{
 			name:   "global before hook error",
@@ -1296,7 +1295,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					},
 				},
 			},
-			wantErr: errors.New("global before hook error"),
+			wantErr:         errors.New("global before hook error"),
+			resultIsUpdated: false,
 		},
 		{
 			name: "global after hook error",
@@ -1327,7 +1327,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					},
 				},
 			},
-			wantErr: errors.New("global after hook error"),
+			wantErr:         errors.New("global after hook error"),
+			resultIsUpdated: false,
 		},
 		{
 			name: "global before and after hook",
@@ -1372,10 +1373,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 						if user.Name != "Mingyong Chen" || user.Age != 24 {
 							return errors.New("result error")
 						}
-						zeroTim := time.Time{}
-						if user.UpdatedAt == zeroTim {
-							return errors.New("updatedAt is not updated")
-						}
+						require.NotZero(t, user.UpdatedAt)
 						return nil
 					},
 				},
@@ -1384,6 +1382,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  24,
 			},
+			resultIsUpdated: true,
 		},
 		{
 			name:   "before hook error",
@@ -1395,7 +1394,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					return errors.New("before hook error")
 				},
 			},
-			wantErr: errors.New("before hook error"),
+			wantErr:         errors.New("before hook error"),
+			resultIsUpdated: false,
 		},
 		{
 			name: "after hook error",
@@ -1422,7 +1422,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					return errors.New("after hook error")
 				},
 			},
-			wantErr: errors.New("after hook error"),
+			wantErr:         errors.New("after hook error"),
+			resultIsUpdated: false,
 		},
 		{
 			name: "before and after hook",
@@ -1461,10 +1462,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 					if user.Name != "Mingyong Chen" || user.Age != 24 {
 						return errors.New("after error")
 					}
-					zeroTim := time.Time{}
-					if user.UpdatedAt == zeroTim {
-						return errors.New("updatedAt is not updated")
-					}
+					require.NotZero(t, user.UpdatedAt)
 					return nil
 				},
 			},
@@ -1472,6 +1470,7 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  24,
 			},
+			resultIsUpdated: true,
 		},
 	}
 
@@ -1488,11 +1487,8 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
 				tc.want.ID = user.ID
-				zeroTim := time.Time{}
-				if user != nil && user.UpdatedAt != zeroTim {
-					if user.UpdatedAt == tc.want.UpdatedAt {
-						t.FailNow()
-					}
+				if tc.resultIsUpdated {
+					require.NotZero(t, user.UpdatedAt)
 					tc.want.UpdatedAt = user.UpdatedAt
 				}
 				require.Equal(t, tc.want, user)
