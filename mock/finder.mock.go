@@ -5,6 +5,7 @@
 //
 //	mockgen -source=finder.go -destination=../mock/finder.mock.go -package=mocks
 //
+
 // Package mocks is a generated GoMock package.
 package mocks
 
@@ -20,6 +21,7 @@ import (
 type MockIFinder[T any] struct {
 	ctrl     *gomock.Controller
 	recorder *MockIFinderMockRecorder[T]
+	isgomock struct{}
 }
 
 // MockIFinderMockRecorder is the mock recorder for MockIFinder.
@@ -97,4 +99,24 @@ func (mr *MockIFinderMockRecorder[T]) FindOne(ctx any, opts ...any) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockIFinder[T])(nil).FindOne), varargs...)
+}
+
+// FindOneAndUpdate mocks base method.
+func (m *MockIFinder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister[options.FindOneAndUpdateOptions]) (*T, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "FindOneAndUpdate", varargs...)
+	ret0, _ := ret[0].(*T)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindOneAndUpdate indicates an expected call of FindOneAndUpdate.
+func (mr *MockIFinderMockRecorder[T]) FindOneAndUpdate(ctx any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOneAndUpdate", reflect.TypeOf((*MockIFinder[T])(nil).FindOneAndUpdate), varargs...)
 }
