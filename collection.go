@@ -21,6 +21,7 @@ import (
 	"github.com/chenmingyong0423/go-mongox/v2/deleter"
 	"github.com/chenmingyong0423/go-mongox/v2/field"
 	"github.com/chenmingyong0423/go-mongox/v2/finder"
+	"github.com/chenmingyong0423/go-mongox/v2/transaction"
 	"github.com/chenmingyong0423/go-mongox/v2/updater"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -64,4 +65,8 @@ func (c *Collection[T]) Aggregator() *aggregator.Aggregator[T] {
 
 func (c *Collection[T]) Collection() *mongo.Collection {
 	return c.collection
+}
+
+func (c *Collection[T]) Transaction() *transaction.Transaction {
+	return transaction.NewTransaction(c.collection)
 }

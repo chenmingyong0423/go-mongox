@@ -15,6 +15,9 @@
 package mongox
 
 import (
+	"context"
+	"errors"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"testing"
 
 	"github.com/chenmingyong0423/go-mongox/v2/updater"
@@ -61,4 +64,45 @@ func TestCollection_Aggregator(t *testing.T) {
 func TestCollection_Collection(t *testing.T) {
 	a := NewCollection[any](NewClient(&mongo.Client{}, &Config{}).NewDatabase("db-test"), "collection-test")
 	assert.NotNil(t, a.Collection(), "Expected non-nil *mongo.Collection")
+}
+
+type Student struct {
+	Name string
+}
+
+func TestAuto1(t *testing.T) {
+	client, _ := mongo.Connect(options.Client().ApplyURI("mongodb://127.0.0.1:27017/?replicaSet=rs0"))
+	coll := NewCollection[Student](NewClient(client, &Config{}).NewDatabase("db-test"), "collection-test")
+	_, err := coll.Transaction().Auto(context.TODO(), func(ctx context.Context) (interface{}, error) {
+		return coll.Creator().InsertOne(ctx, &Student{Name: "codepzj"})
+	})
+	assert.Nil(t, err, "事务失败")
+}
+
+func TestAuto2(t *testing.T) {
+	client, _ := mongo.Connect(options.Client().ApplyURI("mongodb://127.0.0.1:27017/?replicaSet=rs0"))
+	coll := NewCollection[Student](NewClient(client, &Config{}).NewDatabase("db-test"), "collection-test")
+	_, err := coll.Transaction().Auto(context.TODO(), func(ctx context.Context) (interface{}, error) {
+		coll.Creator().InsertOne(ctx, &Student{Name: "codepzj"})
+		return nil, errors.New("不行")
+	})
+	assert.Nil(t, err, "事务失败")
+}
+
+func TestHand3(t *testing.T) {
+	client, _ := mongo.Connect(options.Client().ApplyURI("mongodb://127.0.0.1:27017/?replicaSet=rs0"))
+	coll := NewCollection[Student](NewClient(client, &Config{}).NewDatabase("db-test"), "collection-test")
+	tx, err := coll.Transaction().Begin(context.TODO())
+	coll.Creator().InsertOne(tx.SessionCtx, &Student{Name: "666"})
+	tx.Commit()
+	assert.Nil(t, err, "事务失败")
+}
+
+func TestHand4(t *testing.T) {
+	client, _ := mongo.Connect(options.Client().ApplyURI("mongodb://127.0.0.1:27017/?replicaSet=rs0"))
+	coll := NewCollection[Student](NewClient(client, &Config{}).NewDatabase("db-test"), "collection-test")
+	tx, err := coll.Transaction().Begin(context.TODO())
+	coll.collection.InsertOne(tx.SessionCtx, &Student{Name: "666"})
+	tx.RollBack()
+	assert.Nil(t, err, "事务失败")
 }
