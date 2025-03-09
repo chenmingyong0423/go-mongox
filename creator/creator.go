@@ -35,6 +35,10 @@ import (
 type ICreator[T any] interface {
 	InsertOne(ctx context.Context, docs *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error)
 	InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error)
+	ModelHook(modelHook any) *Creator[T]
+	RegisterAfterHooks(hooks ...HookFn[T]) *Creator[T]
+	RegisterBeforeHooks(hooks ...HookFn[T]) *Creator[T]
+	GetCollection() *mongo.Collection
 }
 
 var _ ICreator[any] = (*Creator[any])(nil)
@@ -45,8 +49,8 @@ type Creator[T any] struct {
 	modelHook any
 
 	dbCallbacks *callback.Callback
-	beforeHooks []hookFn[T]
-	afterHooks  []hookFn[T]
+	beforeHooks []HookFn[T]
+	afterHooks  []HookFn[T]
 
 	fields []*field.Filed
 }
@@ -67,12 +71,12 @@ func (c *Creator[T]) ModelHook(modelHook any) *Creator[T] {
 // RegisterBeforeHooks is used to set the after hooks of the insert operation
 // If you register the hook for InsertOne, the opContext.Docs will be nil
 // If you register the hook for InsertMany, the opContext.Doc will be nil
-func (c *Creator[T]) RegisterBeforeHooks(hooks ...hookFn[T]) *Creator[T] {
+func (c *Creator[T]) RegisterBeforeHooks(hooks ...HookFn[T]) *Creator[T] {
 	c.beforeHooks = append(c.beforeHooks, hooks...)
 	return c
 }
 
-func (c *Creator[T]) RegisterAfterHooks(hooks ...hookFn[T]) *Creator[T] {
+func (c *Creator[T]) RegisterAfterHooks(hooks ...HookFn[T]) *Creator[T] {
 	c.afterHooks = append(c.afterHooks, hooks...)
 	return c
 }
@@ -156,4 +160,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.
 		return nil, err
 	}
 	return result, nil
+}
+func (c *Creator[T]) GetCollection() *mongo.Collection {
+	return c.collection
 }
