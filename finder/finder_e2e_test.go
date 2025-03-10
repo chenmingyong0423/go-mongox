@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package finder
+package finder_test
 
 import (
 	"context"

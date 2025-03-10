@@ -34,6 +34,20 @@ type IFinder[T any] interface {
 	FindOne(ctx context.Context, opts ...options.Lister[options.FindOneOptions]) (*T, error)
 	Find(ctx context.Context, opts ...options.Lister[options.FindOptions]) ([]*T, error)
 	Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error)
+	Distinct(ctx context.Context, fieldName string, opts ...options.Lister[options.DistinctOptions]) *mongo.DistinctResult
+	DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...options.Lister[options.DistinctOptions]) error
+	Filter(filter any) IFinder[T]
+	FindOneAndUpdate(ctx context.Context, opts ...options.Lister[options.FindOneAndUpdateOptions]) (*T, error)
+	Limit(limit int64) IFinder[T]
+	ModelHook(modelHook any) IFinder[T]
+	RegisterAfterHooks(hooks ...AfterHookFn[T]) IFinder[T]
+	RegisterBeforeHooks(hooks ...BeforeHookFn[T]) IFinder[T]
+	Skip(skip int64) IFinder[T]
+	Sort(sort any) IFinder[T]
+	Updates(update any) IFinder[T]
+	PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error)
+	PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error)
+	GetCollection() *mongo.Collection
 }
 
 func NewFinder[T any](collection *mongo.Collection, callbacks *callback.Callback, fields []*field.Filed) *Finder[T] {
@@ -50,14 +64,14 @@ type Finder[T any] struct {
 
 	fields      []*field.Filed
 	dbCallbacks *callback.Callback
-	beforeHooks []beforeHookFn[T]
-	afterHooks  []afterHookFn[T]
+	beforeHooks []BeforeHookFn[T]
+	afterHooks  []AfterHookFn[T]
 
 	skip, limit int64
 	sort        any
 }
 
-func (f *Finder[T]) RegisterBeforeHooks(hooks ...beforeHookFn[T]) *Finder[T] {
+func (f *Finder[T]) RegisterBeforeHooks(hooks ...BeforeHookFn[T]) IFinder[T] {
 	f.beforeHooks = append(f.beforeHooks, hooks...)
 	return f
 }
@@ -65,43 +79,43 @@ func (f *Finder[T]) RegisterBeforeHooks(hooks ...beforeHookFn[T]) *Finder[T] {
 // RegisterAfterHooks is used to set the after hooks of the query
 // If you register the hook for FindOne, the opContext.Docs will be nil
 // If you register the hook for Find, the opContext.Doc will be nil
-func (f *Finder[T]) RegisterAfterHooks(hooks ...afterHookFn[T]) *Finder[T] {
+func (f *Finder[T]) RegisterAfterHooks(hooks ...AfterHookFn[T]) IFinder[T] {
 	f.afterHooks = append(f.afterHooks, hooks...)
 	return f
 }
 
 // Filter is used to set the filter of the query
-func (f *Finder[T]) Filter(filter any) *Finder[T] {
+func (f *Finder[T]) Filter(filter any) IFinder[T] {
 	f.filter = filter
 	return f
 }
 
-func (f *Finder[T]) Limit(limit int64) *Finder[T] {
+func (f *Finder[T]) Limit(limit int64) IFinder[T] {
 	f.limit = limit
 	return f
 }
 
-func (f *Finder[T]) Skip(skip int64) *Finder[T] {
+func (f *Finder[T]) Skip(skip int64) IFinder[T] {
 	f.skip = skip
 	return f
 }
 
-func (f *Finder[T]) Sort(sort any) *Finder[T] {
+func (f *Finder[T]) Sort(sort any) IFinder[T] {
 	f.sort = sort
 	return f
 }
 
-func (f *Finder[T]) Updates(update any) *Finder[T] {
+func (f *Finder[T]) Updates(update any) IFinder[T] {
 	f.updates = update
 	return f
 }
 
-func (f *Finder[T]) ModelHook(modelHook any) *Finder[T] {
+func (f *Finder[T]) ModelHook(modelHook any) IFinder[T] {
 	f.modelHook = modelHook
 	return f
 }
 
-func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error) {
+func (f *Finder[T]) PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error) {
 	for _, opType := range opTypes {
 		err = f.dbCallbacks.Execute(ctx, globalOpContext, opType)
 		if err != nil {
@@ -117,7 +131,7 @@ func (f *Finder[T]) preActionHandler(ctx context.Context, globalOpContext *opera
 	return
 }
 
-func (f *Finder[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error) {
+func (f *Finder[T]) PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opTypes ...operation.OpType) (err error) {
 	for _, opType := range opTypes {
 		err = f.dbCallbacks.Execute(ctx, globalOpContext, opType)
 		if err != nil {
@@ -143,7 +157,7 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
 	opContext := NewOpContext(f.collection, f.filter, WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
-	err := f.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
+	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +172,7 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 	globalOpContext.Doc = t
 	opContext.Result = result
 	opContext.Doc = t
-	err = f.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind)
+	err = f.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +197,7 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
 	opContext := NewOpContext(f.collection, f.filter, WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
-	err := f.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
+	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +216,7 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 	globalOpContext.Doc = t
 	opContext.Result = cursor
 	opContext.Docs = t
-	err = f.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind)
+	err = f.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +252,7 @@ func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithUpdates(f.updates), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
 	opContext := NewOpContext(f.collection, f.filter, WithUpdates[T](f.updates), WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
 
-	err := f.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate)
+	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate)
 	if err != nil {
 		return nil, err
 	}
@@ -253,10 +267,14 @@ func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister
 	globalOpContext.Doc = t
 	opContext.Result = result
 	opContext.Doc = t
-	err = f.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind, operation.OpTypeAfterUpdate)
+	err = f.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterFind, operation.OpTypeAfterUpdate)
 	if err != nil {
 		return nil, err
 	}
 
 	return t, nil
+}
+
+func (f *Finder[T]) GetCollection() *mongo.Collection {
+	return f.collection
 }
