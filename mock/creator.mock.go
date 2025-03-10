@@ -98,10 +98,10 @@ func (mr *MockICreatorMockRecorder[T]) InsertOne(ctx, docs any, opts ...any) *go
 }
 
 // ModelHook mocks base method.
-func (m *MockICreator[T]) ModelHook(modelHook any) *creator.Creator[T] {
+func (m *MockICreator[T]) ModelHook(modelHook any) creator.ICreator[T] {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ModelHook", modelHook)
-	ret0, _ := ret[0].(*creator.Creator[T])
+	ret0, _ := ret[0].(creator.ICreator[T])
 	return ret0
 }
 
@@ -112,14 +112,14 @@ func (mr *MockICreatorMockRecorder[T]) ModelHook(modelHook any) *gomock.Call {
 }
 
 // RegisterAfterHooks mocks base method.
-func (m *MockICreator[T]) RegisterAfterHooks(hooks ...creator.HookFn[T]) *creator.Creator[T] {
+func (m *MockICreator[T]) RegisterAfterHooks(hooks ...creator.HookFn[T]) creator.ICreator[T] {
 	m.ctrl.T.Helper()
 	varargs := []any{}
 	for _, a := range hooks {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "RegisterAfterHooks", varargs...)
-	ret0, _ := ret[0].(*creator.Creator[T])
+	ret0, _ := ret[0].(creator.ICreator[T])
 	return ret0
 }
 
@@ -130,14 +130,14 @@ func (mr *MockICreatorMockRecorder[T]) RegisterAfterHooks(hooks ...any) *gomock.
 }
 
 // RegisterBeforeHooks mocks base method.
-func (m *MockICreator[T]) RegisterBeforeHooks(hooks ...creator.HookFn[T]) *creator.Creator[T] {
+func (m *MockICreator[T]) RegisterBeforeHooks(hooks ...creator.HookFn[T]) creator.ICreator[T] {
 	m.ctrl.T.Helper()
 	varargs := []any{}
 	for _, a := range hooks {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "RegisterBeforeHooks", varargs...)
-	ret0, _ := ret[0].(*creator.Creator[T])
+	ret0, _ := ret[0].(creator.ICreator[T])
 	return ret0
 }
 
