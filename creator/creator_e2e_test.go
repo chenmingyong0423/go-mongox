@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package creator
+package creator_test
 
 import (
 	"context"

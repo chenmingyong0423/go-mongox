@@ -42,8 +42,8 @@ type OpContext struct {
 }
 
 type (
-	beforeHookFn func(ctx context.Context, opContext *OpContext, opts ...any) error
-	afterHookFn  func(ctx context.Context, opContext *OpContext, opts ...any) error
+	BeforeHookFn func(ctx context.Context, opContext *OpContext, opts ...any) error
+	AfterHookFn  func(ctx context.Context, opContext *OpContext, opts ...any) error
 )
 
 type OpContextOption func(*OpContext)
