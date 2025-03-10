@@ -18,6 +18,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/chenmingyong0423/go-mongox/v2/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
@@ -249,6 +250,12 @@ func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, res
 func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister[options.FindOneAndUpdateOptions]) (*T, error) {
 	currentTime := time.Now()
 	t := new(T)
+
+	updates := bsonx.ToBsonM(f.updates)
+	if len(updates) != 0 {
+		f.updates = updates
+	}
+
 	globalOpContext := operation.NewOpContext(f.collection, operation.WithFilter(f.filter), operation.WithUpdates(f.updates), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
 	opContext := NewOpContext(f.collection, f.filter, WithUpdates[T](f.updates), WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
 

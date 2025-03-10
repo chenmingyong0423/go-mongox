@@ -217,3 +217,56 @@ func TestFinder_Count(t *testing.T) {
 		})
 	}
 }
+
+func TestFindOneAndUpdate(t *testing.T) {
+	type TestUser struct {
+		ID           bson.ObjectID `bson:"_id,omitempty"`
+		Name         string        `bson:"name"`
+		Age          int64
+		UnknownField string    `bson:"-"`
+		CreatedAt    time.Time `bson:"created_at"`
+		UpdatedAt    time.Time `bson:"updated_at"`
+	}
+	testCases := []struct {
+		name string
+		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
+
+		ctx     context.Context
+		want    *TestUser
+		wantErr error
+	}{
+		{
+			name: "error",
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().FindOneAndUpdate(ctx).Return(nil, mongo.ErrNoDocuments).Times(1)
+				return mockCollection
+			},
+
+			ctx:     context.Background(),
+			want:    nil,
+			wantErr: mongo.ErrNoDocuments,
+		},
+		{
+			name: "match the first one and update",
+			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().FindOneAndUpdate(ctx).Return(&TestUser{Name: "hejiangda", Age: 18}, nil).Times(1)
+				return mockCollection
+			},
+			ctx:  context.Background(),
+			want: &TestUser{Name: "hejiangda", Age: 18},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			finder := tc.mock(tc.ctx, ctl)
+
+			user, err := finder.FindOneAndUpdate(tc.ctx)
+			assert.Equal(t, tc.wantErr, err)
+			assert.Equal(t, tc.want, user)
+		})
+	}
+}
