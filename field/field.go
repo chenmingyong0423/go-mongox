@@ -92,12 +92,13 @@ func ParseFields[T any](doc T) []*Filed {
 			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
 				fd.AutoUpdateTime = timeType
 			})
-		} else {
-			tag := structField.Tag.Get("mongox")
-			if tag != "" {
-				parseTag(tag, fd)
-			}
 		}
+
+		tag := structField.Tag.Get("mongox")
+		if tag != "" {
+			parseTag(tag, fd)
+		}
+
 		fields = append(fields, fd)
 	}
 

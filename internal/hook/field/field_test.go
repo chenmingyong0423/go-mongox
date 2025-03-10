@@ -59,6 +59,21 @@ type user struct {
 	InvalidTimeTagField time.Time     `bson:"invalid_time_tag_field" mongox:"autoCreateTime:time"`
 }
 
+type timeIntUser struct {
+	ID                  bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+	CreatedAt           int64         `bson:"created_at" mongox:"autoCreateTime:milli"`
+	UpdatedAt           int64         `bson:"updated_at" mongox:"autoUpdateTime:milli"`
+	DeletedAt           int64         `bson:"deleted_at,omitempty"`
+	Name                string        `bson:"name"`
+	CreateSecondTime    int64         `bson:"create_second_time" mongox:"autoCreateTime"`
+	UpdateSecondTime    int64         `bson:"update_second_time" mongox:"autoUpdateTime:second"`
+	CreateMilliTime     int64         `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
+	UpdateMilliTime     int64         `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
+	CreateNanoTime      int64         `bson:"create_nano_time" mongox:"autoCreateTime:nano"`
+	UpdateNanoTime      int64         `bson:"update_nano_time" mongox:"autoUpdateTime:nano"`
+	InvalidTimeTagField time.Time     `bson:"invalid_time_tag_field" mongox:"autoCreateTime:time"`
+}
+
 type updatedUser struct {
 	CreatedAt           time.Time `bson:"created_at"`
 	UpdatedAt           time.Time `bson:"updated_at"`
