@@ -96,13 +96,13 @@ func TestBeforeInsert(t *testing.T) {
 			},
 		},
 		{
-			name:        "not inlined struct in timeIntUser",
-			doc:         reflect.ValueOf(&timeIntUser{}).Elem(),
+			name:        "not inlined struct in mongoxActOnCreatedAtUser",
+			doc:         reflect.ValueOf(&mongoxActOnCreatedAtUser{}).Elem(),
 			currentTime: time.Now(),
-			fields:      field.ParseFields(&timeIntUser{}),
+			fields:      field.ParseFields(&mongoxActOnCreatedAtUser{}),
 			wantErr:     nil,
 			validateFunc: func(t *testing.T, v any) {
-				u, ok := v.(timeIntUser)
+				u, ok := v.(mongoxActOnCreatedAtUser)
 				require.True(t, ok)
 				require.NotZero(t, u.ID)
 				require.NotZero(t, u.CreatedAt)
@@ -116,16 +116,16 @@ func TestBeforeInsert(t *testing.T) {
 			},
 		},
 		{
-			name: "not inlined struct with CreatedAt and UpdateSecondTime in timeIntUser",
-			doc: reflect.ValueOf(&timeIntUser{
+			name: "not inlined struct with CreatedAt and UpdateSecondTime in mongoxActOnCreatedAtUser",
+			doc: reflect.ValueOf(&mongoxActOnCreatedAtUser{
 				CreatedAt:        time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
 				UpdateSecondTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(),
 			}).Elem(),
 			currentTime: time.Now(),
-			fields:      field.ParseFields(&timeIntUser{}),
+			fields:      field.ParseFields(&mongoxActOnCreatedAtUser{}),
 			wantErr:     nil,
 			validateFunc: func(t *testing.T, v any) {
-				u, ok := v.(timeIntUser)
+				u, ok := v.(mongoxActOnCreatedAtUser)
 				require.True(t, ok)
 				require.NotZero(t, u.ID)
 				require.NotZero(t, u.CreatedAt)
@@ -264,14 +264,14 @@ func Test_beforeUpdate(t *testing.T) {
 			name:        "a bson.M updates and additional fields",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			fields:      field.ParseFields(&timeIntUser{}),
+			fields:      field.ParseFields(&mongoxActOnCreatedAtUser{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
 		{
 			name:        "a bson.M updates with updateTime and additional fields",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC)}},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			fields:      field.ParseFields(&timeIntUser{}),
+			fields:      field.ParseFields(&mongoxActOnCreatedAtUser{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
 		{
@@ -339,7 +339,7 @@ func Test_beforeUpsert(t *testing.T) {
 			name:        "a bson.M updates with invalid $setOnInsert",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}, "$setOnInsert": "invalid"},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			fields:      field.ParseFields(&timeIntUser{}),
+			fields:      field.ParseFields(&mongoxActOnCreatedAtUser{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": "invalid"},
 		},
 		{

@@ -36,7 +36,3 @@ func Test_logicalQueryBuilder_Nor(t *testing.T) {
 func Test_logicalQueryBuilder_Or(t *testing.T) {
 	assert.Equal(t, bson.D{{Key: "$or", Value: []any{bson.D{{Key: "name", Value: "cmy"}}}}}, NewBuilder().Or(bson.D{{Key: "name", Value: "cmy"}}).Build())
 }
-
-func TestLogicBuilder(t *testing.T) {
-	assert.Equal(t, bson.D{{Key: "$and", Value: []any{bson.D{bson.E{Key: "name", Value: "cmy"}}}}}, NewBuilder().And(bson.D{{Key: "name", Value: "cmy"}}).Build())
-}

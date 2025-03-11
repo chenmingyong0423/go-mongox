@@ -59,7 +59,7 @@ type user struct {
 	InvalidTimeTagField time.Time     `bson:"invalid_time_tag_field" mongox:"autoCreateTime:time"`
 }
 
-type timeIntUser struct {
+type mongoxActOnCreatedAtUser struct {
 	ID                  bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
 	CreatedAt           int64         `bson:"created_at" mongox:"autoCreateTime:milli"`
 	UpdatedAt           int64         `bson:"updated_at" mongox:"autoUpdateTime:milli"`
