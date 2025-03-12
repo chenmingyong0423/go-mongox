@@ -261,7 +261,7 @@ func TestParseFields(t *testing.T) {
 			},
 		},
 		{
-			name: "mongox and bson tag for default time field and mongox default unix second time field",
+			name: "mongox and bson tag for default time field with a value in unix seconds.",
 			doc: struct {
 				CreatedAt int64 `mongox:"autoCreateTime" bson:"created_at"`
 				UpdatedAt int   `bson:"updated_at"`
@@ -282,7 +282,7 @@ func TestParseFields(t *testing.T) {
 			},
 		},
 		{
-			name: "mongox and bson tag for default time field and mongox default unix millisecond time field",
+			name: "mongox and bson tag for default time field with a value in unix milli seconds.",
 			doc: struct {
 				CreatedAt int64 `bson:"created_at" mongox:"autoCreateTime:milli"`
 				UpdatedAt int   `bson:"updated_at"`
