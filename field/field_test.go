@@ -261,6 +261,48 @@ func TestParseFields(t *testing.T) {
 			},
 		},
 		{
+			name: "mongox and bson tag for default time field with a value in unix seconds.",
+			doc: struct {
+				CreatedAt int64 `mongox:"autoCreateTime" bson:"created_at"`
+				UpdatedAt int   `bson:"updated_at"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(int64(0)),
+					AutoCreateTime: UnixSecond,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(0),
+					AutoUpdateTime: UnixSecond,
+				},
+			},
+		},
+		{
+			name: "mongox and bson tag for default time field with a value in unix milli seconds.",
+			doc: struct {
+				CreatedAt int64 `bson:"created_at" mongox:"autoCreateTime:milli"`
+				UpdatedAt int   `bson:"updated_at"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(int64(0)),
+					AutoCreateTime: UnixMillisecond,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(0),
+					AutoUpdateTime: UnixSecond,
+				},
+			},
+		},
+		{
 			name: "invalid type 4 default time field",
 			doc: struct {
 				CreatedAt string `bson:"created_at"`

@@ -96,6 +96,51 @@ func TestBeforeInsert(t *testing.T) {
 			},
 		},
 		{
+			name:        "not inlined struct in user2",
+			doc:         reflect.ValueOf(&user2{}).Elem(),
+			currentTime: time.Now(),
+			fields:      field.ParseFields(&user2{}),
+			wantErr:     nil,
+			validateFunc: func(t *testing.T, v any) {
+				u, ok := v.(user2)
+				require.True(t, ok)
+				require.NotZero(t, u.ID)
+				require.NotZero(t, u.CreatedAt)
+				require.NotZero(t, u.UpdatedAt)
+				require.NotZero(t, u.CreateSecondTime)
+				require.NotZero(t, u.CreateMilliTime)
+				require.NotZero(t, u.CreateNanoTime)
+				require.NotZero(t, u.UpdateSecondTime)
+				require.NotZero(t, u.UpdateMilliTime)
+				require.NotZero(t, u.UpdateNanoTime)
+			},
+		},
+		{
+			name: "not inlined struct with CreatedAt and UpdateSecondTime in user2",
+			doc: reflect.ValueOf(&user2{
+				CreatedAt:        time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+				UpdateSecondTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(),
+			}).Elem(),
+			currentTime: time.Now(),
+			fields:      field.ParseFields(&user2{}),
+			wantErr:     nil,
+			validateFunc: func(t *testing.T, v any) {
+				u, ok := v.(user2)
+				require.True(t, ok)
+				require.NotZero(t, u.ID)
+				require.NotZero(t, u.CreatedAt)
+				require.NotZero(t, u.UpdatedAt)
+				require.NotEqual(t, u.CreatedAt, u.UpdatedAt)
+				require.NotZero(t, u.CreateSecondTime)
+				require.NotZero(t, u.CreateMilliTime)
+				require.NotZero(t, u.CreateNanoTime)
+				require.NotZero(t, u.UpdateSecondTime)
+				require.NotZero(t, u.UpdateMilliTime)
+				require.NotZero(t, u.UpdateNanoTime)
+				require.NotEqual(t, u.CreateSecondTime, u.UpdateSecondTime)
+			},
+		},
+		{
 			name:        "inlined struct",
 			doc:         reflect.ValueOf(&inlinedUser{}).Elem(),
 			currentTime: time.Now(),
@@ -216,6 +261,20 @@ func Test_beforeUpdate(t *testing.T) {
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
 		{
+			name:        "a bson.M updates and additional fields",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&user2{}),
+			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
+		},
+		{
+			name:        "a bson.M updates with updateTime and additional fields",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC)}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&user2{}),
+			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
+		},
+		{
 			name:        "a bson.M updates and additional-inlined fields",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -275,6 +334,13 @@ func Test_beforeUpsert(t *testing.T) {
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 			fields:      field.ParseFields(&user{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": "invalid"},
+		},
+		{
+			name:        "a bson.M updates with invalid $setOnInsert",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}, "$setOnInsert": "invalid"},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&user2{}),
+			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": "invalid"},
 		},
 		{
 			name:        "a bson.M updates",
