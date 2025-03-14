@@ -74,6 +74,10 @@ func SetOnInsert(key string, value any) bson.D {
 	return bson.D{{Key: SetOnInsertOp, Value: bson.D{{Key: key, Value: value}}}}
 }
 
+func SetFieldsOnInsert(value any) bson.D {
+	return bson.D{{Key: SetOnInsertOp, Value: value}}
+}
+
 func CurrentDate(key string, value any) bson.D {
 	return bson.D{{Key: CurrentDateOp, Value: bson.D{{Key: key, Value: value}}}}
 }
