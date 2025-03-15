@@ -94,21 +94,24 @@ func setTimeField(dest reflect.Value, timeType field.TimeType, currentTime time.
 }
 
 func beforeUpdate(dest any, currentTime time.Time, fields []*field.Filed, _ ...any) error {
-	updates, ok := dest.(bson.M)
-	if !ok || updates == nil {
-		return nil
-	}
-
-	setFields, ok := updates["$set"].(bson.M)
-	if !ok {
+	updates, exist := dest.(bson.M)
+	if !exist || updates == nil {
 		return nil
 	}
 
 	updatedFields := findAdditionalFields(currentTime, fields, findUpdatedFields)
+	if len(updatedFields) > 0 {
+		if updates["$set"] == nil {
+			updates["$set"] = bson.M{}
+		}
 
-	for k, v := range updatedFields {
-		if _, exit := setFields[k]; !exit {
-			setFields[k] = v
+		setFields, ok := updates["$set"].(bson.M)
+		if ok {
+			for k, v := range updatedFields {
+				if _, exit := setFields[k]; !exit {
+					setFields[k] = v
+				}
+			}
 		}
 	}
 
@@ -116,20 +119,25 @@ func beforeUpdate(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 }
 
 func beforeUpsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...any) error {
-	updates, ok := dest.(bson.M)
-	if !ok || updates == nil {
-		return nil
-	}
-	setFields, ok := updates["$set"].(bson.M)
-	if !ok {
+	updates, exist := dest.(bson.M)
+	if !exist || updates == nil {
 		return nil
 	}
 
 	updatedTimes := findAdditionalFields(currentTime, fields, findUpdatedFields)
 
-	for k, v := range updatedTimes {
-		if _, exit := setFields[k]; !exit {
-			setFields[k] = v
+	if len(updatedTimes) > 0 {
+		if updates["$set"] == nil {
+			updates["$set"] = bson.M{}
+		}
+
+		setFields, ok := updates["$set"].(bson.M)
+		if ok {
+			for k, v := range updatedTimes {
+				if _, exit := setFields[k]; !exit {
+					setFields[k] = v
+				}
+			}
 		}
 	}
 
