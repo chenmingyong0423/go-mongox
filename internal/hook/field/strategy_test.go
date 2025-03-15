@@ -235,10 +235,23 @@ func Test_beforeUpdate(t *testing.T) {
 			want:    nil,
 		},
 		{
-			name:    "a bson.M updates without $set",
+			name:    "a bson.M updates without $set and not additional fields",
 			updates: bson.M{},
 			fields:  []*field.Filed{},
 			want:    bson.M{},
+		},
+		{
+			name:        "a bson.M updates without $set",
+			updates:     bson.M{},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&user{}),
+			want:        bson.M{"$set": bson.M{"updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
+		},
+		{
+			name:    "a bson.M updates with invalid $set",
+			updates: bson.M{"$set": "invalid"},
+			fields:  field.ParseFields(&user{}),
+			want:    bson.M{"$set": "invalid"},
 		},
 		{
 			name:    "a bson.M updates but not additional fields",
@@ -317,10 +330,23 @@ func Test_beforeUpsert(t *testing.T) {
 			want:    nil,
 		},
 		{
-			name:    "a bson.M updates without $set",
+			name:    "a bson.M updates without $set and not additional fields",
 			updates: bson.M{},
 			fields:  []*field.Filed{},
 			want:    bson.M{},
+		},
+		{
+			name:        "a bson.M updates without $set",
+			updates:     bson.M{},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&updatedUser{}),
+			want:        bson.M{"$set": bson.M{"updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "create_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "create_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "create_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
+		},
+		{
+			name:    "a bson.M updates with invalid $set",
+			updates: bson.M{"$set": "invalid"},
+			fields:  []*field.Filed{},
+			want:    bson.M{"$set": "invalid"},
 		},
 		{
 			name:    "a bson.M updates but not additional fields",
@@ -334,13 +360,6 @@ func Test_beforeUpsert(t *testing.T) {
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 			fields:      field.ParseFields(&user{}),
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": "invalid"},
-		},
-		{
-			name:        "a bson.M updates with invalid $setOnInsert",
-			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}, "$setOnInsert": "invalid"},
-			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
-			fields:      field.ParseFields(&user2{}),
-			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": "invalid"},
 		},
 		{
 			name:        "a bson.M updates",
