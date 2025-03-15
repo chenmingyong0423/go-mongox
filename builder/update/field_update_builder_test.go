@@ -106,6 +106,45 @@ func Test_fieldUpdateBuilder_SetOnInsert(t *testing.T) {
 	})
 }
 
+func Test_fieldUpdateBuilder_SetOnInsertAny(t *testing.T) {
+	testCases := []struct {
+		name  string
+		value any
+		want  bson.D
+	}{
+		{
+			name:  "nil value",
+			value: nil,
+			want:  bson.D{bson.E{Key: "$setOnInsert", Value: nil}},
+		},
+		{
+			name:  "string value",
+			value: "Alice",
+			want:  bson.D{bson.E{Key: "$setOnInsert", Value: "Alice"}},
+		},
+		{
+			name:  "map value",
+			value: map[string]any{"name": "Alice"},
+			want:  bson.D{bson.E{Key: "$setOnInsert", Value: map[string]any{"name": "Alice"}}},
+		},
+		{
+			name:  "struct value",
+			value: struct{ Name string }{Name: "Alice"},
+			want:  bson.D{bson.E{Key: "$setOnInsert", Value: struct{ Name string }{Name: "Alice"}}},
+		},
+		{
+			name:  "bson value",
+			value: bson.D{bson.E{Key: "name", Value: "Alice"}},
+			want:  bson.D{bson.E{Key: "$setOnInsert", Value: bson.D{bson.E{Key: "name", Value: "Alice"}}}},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, NewBuilder().SetOnInsertAny(tc.value).Build())
+		})
+	}
+}
+
 func Test_fieldUpdateBuilder_Inc(t *testing.T) {
 	t.Run("single operation", func(t *testing.T) {
 		assert.Equal(t, bson.D{{Key: "$inc", Value: bson.D{bson.E{Key: "orders", Value: 1}}}}, NewBuilder().Inc("orders", 1).Build())

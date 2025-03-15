@@ -56,6 +56,14 @@ func (b *fieldUpdateBuilder) SetOnInsert(key string, value any) *Builder {
 	return b.parent
 }
 
+func (b *fieldUpdateBuilder) SetOnInsertAny(value any) *Builder {
+	e := bson.E{Key: SetOnInsertOp, Value: value}
+	if !b.parent.tryMergeValue(SetOnInsertOp, e) {
+		b.parent.data = append(b.parent.data, e)
+	}
+	return b.parent
+}
+
 func (b *fieldUpdateBuilder) CurrentDate(key string, value any) *Builder {
 	e := bson.E{Key: key, Value: value}
 	if !b.parent.tryMergeValue(CurrentDateOp, e) {
