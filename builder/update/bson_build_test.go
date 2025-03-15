@@ -179,7 +179,7 @@ func TestSetOnInsert(t *testing.T) {
 	})
 }
 
-func TestSetFieldsOnInsert(t *testing.T) {
+func TestSetOnInsertAny(t *testing.T) {
 	type FieldStruct struct {
 		Name string `bson:"name,omitempty"`
 		Age  int    `bson:"age,omitempty"`
@@ -218,7 +218,7 @@ func TestSetFieldsOnInsert(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, SetFieldsOnInsert(tc.value))
+			assert.Equal(t, tc.want, SetOnInsertAny(tc.value))
 		})
 	}
 }
