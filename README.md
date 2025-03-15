@@ -14,17 +14,16 @@
 English | [中文简体](./README-zh_CN.md)
 
 # go mongox
-`go mongox` is a generic library for Go Mongo based on the official driver, extending the official framework of MongoDB. Utilizing generic programming, it facilitates the binding of structs to `MongoDB` collections, aiming to provide type safety and streamlined data operations. `go mongox` introduces chainable calls for smoother document handling and offers a rich set of `BSON` builders and built-in functions to simplify the construction of `BSON` data. Moreover, it supports plugin-based programming and incorporates various hooks, offering flexibility for custom logic before and after database operations, thus enhancing the application's extensibility and maintainability.
+`go mongox` is a generic-based library that extends the official MongoDB framework. By using generics, it binds structs to MongoDB collections, aiming to provide type safety and simplified data operations. `go mongox` also introduces method chaining for smoother document operations and offers a rich set of BSON builders and built-in functions to simplify the construction of BSON data. Additionally, it supports plugin-based programming and provides various built-in hook functions, offering flexibility for custom logic before and after database operations, thus enhancing the scalability and maintainability of applications.
 
 # Feature Highlights
-- Generic MongoDB Collection
-- Support for constructing `BSON` data
-- `CRUD` operations on documents
+- Generic MongoDB Collections
+- CRUD operations for documents
 - Aggregation operations
-- Built-in basic `Model` structure for automated updates of default `field` fields
-- Struct tag validation
-- Hooks
-- Plugin programming support
+- Built-in basic `Model` struct with automatic updates to default `field` values
+- BSON data construction support
+- Built-in Hooks
+- Plugin-based programming support
 
 # Install
 ```go
