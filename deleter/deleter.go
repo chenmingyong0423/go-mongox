@@ -32,6 +32,13 @@ import (
 type IDeleter[T any] interface {
 	DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error)
+	Filter(filter any) IDeleter[T]
+	ModelHook(modelHook any) IDeleter[T]
+	RegisterAfterHooks(hooks ...AfterHookFn) IDeleter[T]
+	RegisterBeforeHooks(hooks ...BeforeHookFn) IDeleter[T]
+	PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error
+	PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error
+	GetCollection() *mongo.Collection
 }
 
 var _ IDeleter[any] = (*Deleter[any])(nil)
@@ -48,21 +55,21 @@ type Deleter[T any] struct {
 	modelHook any
 
 	dbCallbacks *callback.Callback
-	beforeHooks []beforeHookFn
-	afterHooks  []afterHookFn
+	beforeHooks []BeforeHookFn
+	afterHooks  []AfterHookFn
 }
 
-func (d *Deleter[T]) RegisterBeforeHooks(hooks ...beforeHookFn) *Deleter[T] {
+func (d *Deleter[T]) RegisterBeforeHooks(hooks ...BeforeHookFn) IDeleter[T] {
 	d.beforeHooks = append(d.beforeHooks, hooks...)
 	return d
 }
 
-func (d *Deleter[T]) RegisterAfterHooks(hooks ...afterHookFn) *Deleter[T] {
+func (d *Deleter[T]) RegisterAfterHooks(hooks ...AfterHookFn) IDeleter[T] {
 	d.afterHooks = append(d.afterHooks, hooks...)
 	return d
 }
 
-func (d *Deleter[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
+func (d *Deleter[T]) PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
 	err := d.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
@@ -76,7 +83,7 @@ func (d *Deleter[T]) preActionHandler(ctx context.Context, globalOpContext *oper
 	return nil
 }
 
-func (d *Deleter[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
+func (d *Deleter[T]) PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
 	err := d.dbCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
@@ -91,12 +98,12 @@ func (d *Deleter[T]) postActionHandler(ctx context.Context, globalOpContext *ope
 }
 
 // Filter is used to set the filter of the query
-func (d *Deleter[T]) Filter(filter any) *Deleter[T] {
+func (d *Deleter[T]) Filter(filter any) IDeleter[T] {
 	d.filter = filter
 	return d
 }
 
-func (d *Deleter[T]) ModelHook(modelHook any) *Deleter[T] {
+func (d *Deleter[T]) ModelHook(modelHook any) IDeleter[T] {
 	d.modelHook = modelHook
 	return d
 }
@@ -105,7 +112,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[optio
 	currentTime := time.Now()
 	globalOpContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook), operation.WithFields(d.fields), operation.WithStartTime(currentTime))
 	opContext := NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook), WithFields(d.fields), WithStartTime(currentTime))
-	err := d.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeDelete)
+	err := d.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +124,7 @@ func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[optio
 
 	globalOpContext.Result = result
 	opContext.Result = result
-	err = d.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterDelete)
+	err = d.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +136,7 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[opti
 	currentTime := time.Now()
 	globalOpContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook), operation.WithFields(d.fields), operation.WithStartTime(currentTime))
 	opContext := NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook), WithFields(d.fields), WithStartTime(currentTime))
-	err := d.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeDelete)
+	err := d.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeDelete)
 	if err != nil {
 		return nil, err
 	}
@@ -141,10 +148,13 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[opti
 
 	globalOpContext.Result = result
 	opContext.Result = result
-	err = d.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterDelete)
+	err = d.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterDelete)
 	if err != nil {
 		return nil, err
 	}
 
 	return result, nil
+}
+func (d *Deleter[T]) GetCollection() *mongo.Collection {
+	return d.collection
 }

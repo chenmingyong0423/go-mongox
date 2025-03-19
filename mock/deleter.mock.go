@@ -5,6 +5,7 @@
 //
 //	mockgen -source=deleter.go -destination=../mock/deleter.mock.go -package=mocks
 //
+
 // Package mocks is a generated GoMock package.
 package mocks
 
@@ -12,6 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
+	deleter "github.com/chenmingyong0423/go-mongox/v2/deleter"
+	operation "github.com/chenmingyong0423/go-mongox/v2/operation"
 	mongo "go.mongodb.org/mongo-driver/v2/mongo"
 	options "go.mongodb.org/mongo-driver/v2/mongo/options"
 	gomock "go.uber.org/mock/gomock"
@@ -21,6 +24,7 @@ import (
 type MockIDeleter[T any] struct {
 	ctrl     *gomock.Controller
 	recorder *MockIDeleterMockRecorder[T]
+	isgomock struct{}
 }
 
 // MockIDeleterMockRecorder is the mock recorder for MockIDeleter.
@@ -78,4 +82,110 @@ func (mr *MockIDeleterMockRecorder[T]) DeleteOne(ctx any, opts ...any) *gomock.C
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOne", reflect.TypeOf((*MockIDeleter[T])(nil).DeleteOne), varargs...)
+}
+
+// Filter mocks base method.
+func (m *MockIDeleter[T]) Filter(filter any) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Filter", filter)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// Filter indicates an expected call of Filter.
+func (mr *MockIDeleterMockRecorder[T]) Filter(filter any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Filter", reflect.TypeOf((*MockIDeleter[T])(nil).Filter), filter)
+}
+
+// GetCollection mocks base method.
+func (m *MockIDeleter[T]) GetCollection() *mongo.Collection {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCollection")
+	ret0, _ := ret[0].(*mongo.Collection)
+	return ret0
+}
+
+// GetCollection indicates an expected call of GetCollection.
+func (mr *MockIDeleterMockRecorder[T]) GetCollection() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCollection", reflect.TypeOf((*MockIDeleter[T])(nil).GetCollection))
+}
+
+// ModelHook mocks base method.
+func (m *MockIDeleter[T]) ModelHook(modelHook any) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ModelHook", modelHook)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// ModelHook indicates an expected call of ModelHook.
+func (mr *MockIDeleterMockRecorder[T]) ModelHook(modelHook any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModelHook", reflect.TypeOf((*MockIDeleter[T])(nil).ModelHook), modelHook)
+}
+
+// PostActionHandler mocks base method.
+func (m *MockIDeleter[T]) PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *deleter.OpContext, opType operation.OpType) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PostActionHandler", ctx, globalOpContext, opContext, opType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PostActionHandler indicates an expected call of PostActionHandler.
+func (mr *MockIDeleterMockRecorder[T]) PostActionHandler(ctx, globalOpContext, opContext, opType any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostActionHandler", reflect.TypeOf((*MockIDeleter[T])(nil).PostActionHandler), ctx, globalOpContext, opContext, opType)
+}
+
+// PreActionHandler mocks base method.
+func (m *MockIDeleter[T]) PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *deleter.OpContext, opType operation.OpType) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PreActionHandler", ctx, globalOpContext, opContext, opType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// PreActionHandler indicates an expected call of PreActionHandler.
+func (mr *MockIDeleterMockRecorder[T]) PreActionHandler(ctx, globalOpContext, opContext, opType any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PreActionHandler", reflect.TypeOf((*MockIDeleter[T])(nil).PreActionHandler), ctx, globalOpContext, opContext, opType)
+}
+
+// RegisterAfterHooks mocks base method.
+func (m *MockIDeleter[T]) RegisterAfterHooks(hooks ...deleter.AfterHookFn) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	varargs := []any{}
+	for _, a := range hooks {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RegisterAfterHooks", varargs...)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// RegisterAfterHooks indicates an expected call of RegisterAfterHooks.
+func (mr *MockIDeleterMockRecorder[T]) RegisterAfterHooks(hooks ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterAfterHooks", reflect.TypeOf((*MockIDeleter[T])(nil).RegisterAfterHooks), hooks...)
+}
+
+// RegisterBeforeHooks mocks base method.
+func (m *MockIDeleter[T]) RegisterBeforeHooks(hooks ...deleter.BeforeHookFn) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	varargs := []any{}
+	for _, a := range hooks {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RegisterBeforeHooks", varargs...)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// RegisterBeforeHooks indicates an expected call of RegisterBeforeHooks.
+func (mr *MockIDeleterMockRecorder[T]) RegisterBeforeHooks(hooks ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterBeforeHooks", reflect.TypeOf((*MockIDeleter[T])(nil).RegisterBeforeHooks), hooks...)
 }

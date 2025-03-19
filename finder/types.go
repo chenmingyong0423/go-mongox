@@ -45,8 +45,8 @@ type OpContext[T any] struct {
 }
 
 type (
-	beforeHookFn[T any] func(ctx context.Context, opContext *OpContext[T], opts ...any) error
-	afterHookFn[T any]  func(ctx context.Context, opContext *OpContext[T], opts ...any) error
+	BeforeHookFn[T any] func(ctx context.Context, opContext *OpContext[T], opts ...any) error
+	AfterHookFn[T any]  func(ctx context.Context, opContext *OpContext[T], opts ...any) error
 )
 
 type OpContextOption[T any] func(*OpContext[T])

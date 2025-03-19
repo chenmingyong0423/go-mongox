@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package updater
+package updater_test
 
 import (
 	"context"

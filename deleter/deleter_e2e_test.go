@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package deleter
+package deleter_test
 
 import (
 	"context"
