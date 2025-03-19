@@ -229,7 +229,7 @@ func TestFindOneAndUpdate(t *testing.T) {
 	}
 	testCases := []struct {
 		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser]
+		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 
 		ctx     context.Context
 		want    *TestUser
@@ -237,7 +237,7 @@ func TestFindOneAndUpdate(t *testing.T) {
 	}{
 		{
 			name: "error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
 				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().FindOneAndUpdate(ctx).Return(nil, mongo.ErrNoDocuments).Times(1)
 				return mockCollection
@@ -249,7 +249,7 @@ func TestFindOneAndUpdate(t *testing.T) {
 		},
 		{
 			name: "match the first one and update",
-			mock: func(ctx context.Context, ctl *gomock.Controller) IFinder[TestUser] {
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
 				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
 				mockCollection.EXPECT().FindOneAndUpdate(ctx).Return(&TestUser{Name: "hejiangda", Age: 18}, nil).Times(1)
 				return mockCollection
