@@ -84,7 +84,10 @@ func ParseFields[T any](doc T) []*Filed {
 
 		fd.MongoField = getMongoField(bsonTag, structField.Name)
 
-		if structField.Name == CreatedAt {
+		tag := structField.Tag.Get("mongox")
+		if len(tag) > 0 {
+			parseTag(tag, fd)
+		} else if structField.Name == CreatedAt {
 			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
 				fd.AutoCreateTime = timeType
 			})
@@ -92,12 +95,8 @@ func ParseFields[T any](doc T) []*Filed {
 			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
 				fd.AutoUpdateTime = timeType
 			})
-		} else {
-			tag := structField.Tag.Get("mongox")
-			if tag != "" {
-				parseTag(tag, fd)
-			}
 		}
+
 		fields = append(fields, fd)
 	}
 
