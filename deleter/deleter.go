@@ -44,7 +44,7 @@ type IDeleter[T any] interface {
 var _ IDeleter[any] = (*Deleter[any])(nil)
 
 func NewDeleter[T any](collection *mongo.Collection, dbCallbacks *callback.Callback, fields []*field.Filed) *Deleter[T] {
-	return &Deleter[T]{collection: collection, dbCallbacks: dbCallbacks, fields: fields}
+	return &Deleter[T]{collection: collection, DBCallbacks: dbCallbacks, fields: fields}
 }
 
 type Deleter[T any] struct {
@@ -54,27 +54,27 @@ type Deleter[T any] struct {
 	filter    any
 	modelHook any
 
-	dbCallbacks *callback.Callback
-	beforeHooks []BeforeHookFn
-	afterHooks  []AfterHookFn
+	DBCallbacks *callback.Callback
+	BeforeHooks []BeforeHookFn
+	AfterHooks  []AfterHookFn
 }
 
 func (d *Deleter[T]) RegisterBeforeHooks(hooks ...BeforeHookFn) IDeleter[T] {
-	d.beforeHooks = append(d.beforeHooks, hooks...)
+	d.BeforeHooks = append(d.BeforeHooks, hooks...)
 	return d
 }
 
 func (d *Deleter[T]) RegisterAfterHooks(hooks ...AfterHookFn) IDeleter[T] {
-	d.afterHooks = append(d.afterHooks, hooks...)
+	d.AfterHooks = append(d.AfterHooks, hooks...)
 	return d
 }
 
 func (d *Deleter[T]) PreActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
-	err := d.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := d.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, beforeHook := range d.beforeHooks {
+	for _, beforeHook := range d.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
@@ -84,11 +84,11 @@ func (d *Deleter[T]) PreActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (d *Deleter[T]) PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext, opType operation.OpType) error {
-	err := d.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := d.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, afterHook := range d.afterHooks {
+	for _, afterHook := range d.AfterHooks {
 		err = afterHook(ctx, opContext)
 		if err != nil {
 			return err

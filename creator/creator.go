@@ -48,9 +48,9 @@ type Creator[T any] struct {
 
 	modelHook any
 
-	dbCallbacks *callback.Callback
-	beforeHooks []HookFn[T]
-	afterHooks  []HookFn[T]
+	DBCallbacks *callback.Callback
+	BeforeHooks []HookFn[T]
+	AfterHooks  []HookFn[T]
 
 	fields []*field.Filed
 }
@@ -58,7 +58,7 @@ type Creator[T any] struct {
 func NewCreator[T any](collection *mongo.Collection, dbCallbacks *callback.Callback, fields []*field.Filed) *Creator[T] {
 	return &Creator[T]{
 		collection:  collection,
-		dbCallbacks: dbCallbacks,
+		DBCallbacks: dbCallbacks,
 		fields:      fields,
 	}
 }
@@ -72,21 +72,21 @@ func (c *Creator[T]) ModelHook(modelHook any) ICreator[T] {
 // If you register the hook for InsertOne, the opContext.Docs will be nil
 // If you register the hook for InsertMany, the opContext.Doc will be nil
 func (c *Creator[T]) RegisterBeforeHooks(hooks ...HookFn[T]) ICreator[T] {
-	c.beforeHooks = append(c.beforeHooks, hooks...)
+	c.BeforeHooks = append(c.BeforeHooks, hooks...)
 	return c
 }
 
 func (c *Creator[T]) RegisterAfterHooks(hooks ...HookFn[T]) ICreator[T] {
-	c.afterHooks = append(c.afterHooks, hooks...)
+	c.AfterHooks = append(c.AfterHooks, hooks...)
 	return c
 }
 
 func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := c.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, beforeHook := range c.beforeHooks {
+	for _, beforeHook := range c.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
@@ -96,11 +96,11 @@ func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := c.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, afterHook := range c.afterHooks {
+	for _, afterHook := range c.AfterHooks {
 		err = afterHook(ctx, opContext)
 		if err != nil {
 			return err

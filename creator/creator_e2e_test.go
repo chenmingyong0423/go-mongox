@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	xcreator "github.com/chenmingyong0423/go-mongox/v2/creator"
 	"github.com/chenmingyong0423/go-mongox/v2/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
@@ -70,7 +71,7 @@ func newCollection(t *testing.T) *mongo.Collection {
 
 func TestCreator_e2e_One(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[User](collection, callback.InitializeCallbacks(), field.ParseFields(User{}))
+	creator := xcreator.NewCreator[User](collection, callback.InitializeCallbacks(), field.ParseFields(User{}))
 
 	type globalHook struct {
 		opType operation.OpType
@@ -86,8 +87,8 @@ func TestCreator_e2e_One(t *testing.T) {
 		ctx        context.Context
 		doc        *User
 		globalHook []globalHook
-		beforeHook []hookFn[User]
-		afterHook  []hookFn[User]
+		beforeHook []xcreator.HookFn[User]
+		afterHook  []xcreator.HookFn[User]
 
 		wantError assert.ErrorAssertionFunc
 	}{
@@ -226,8 +227,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				options.InsertOne().SetComment("test"),
 			},
 			doc: nil,
-			beforeHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			beforeHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -251,8 +252,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -276,16 +277,16 @@ func TestCreator_e2e_One(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			beforeHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			beforeHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					if opContext.Doc == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					if opContext == nil {
 						return errors.New("after hook error")
 					}
@@ -322,8 +323,8 @@ func TestCreator_e2e_One(t *testing.T) {
 				Name: "Mingyong Chen",
 				Age:  18,
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					user := opContext.Doc
 					if user == nil {
 						return errors.New("user is nil")
@@ -372,7 +373,7 @@ func TestCreator_e2e_One(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				creator.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				creator.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			insertOneResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).InsertOne(tc.ctx, tc.doc, tc.opts...)
@@ -384,17 +385,17 @@ func TestCreator_e2e_One(t *testing.T) {
 				require.NotNil(t, insertOneResult.InsertedID)
 			}
 			for _, hook := range tc.globalHook {
-				creator.dbCallbacks.Remove(hook.opType, hook.name)
+				creator.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			creator.beforeHooks = nil
-			creator.afterHooks = nil
+			creator.BeforeHooks = nil
+			creator.AfterHooks = nil
 		})
 	}
 }
 
 func TestCreator_e2e_Many(t *testing.T) {
 	collection := newCollection(t)
-	creator := NewCreator[User](collection, callback.InitializeCallbacks(), field.ParseFields(User{}))
+	creator := xcreator.NewCreator[User](collection, callback.InitializeCallbacks(), field.ParseFields(User{}))
 
 	type globalHook struct {
 		opType operation.OpType
@@ -411,8 +412,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 		docs       []*User
 		opts       []options.Lister[options.InsertManyOptions]
 		globalHook []globalHook
-		beforeHook []hookFn[User]
-		afterHook  []hookFn[User]
+		beforeHook []xcreator.HookFn[User]
+		afterHook  []xcreator.HookFn[User]
 
 		wantIdsLength int
 		wantError     assert.ErrorAssertionFunc
@@ -566,8 +567,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 				options.InsertMany().SetComment("test"),
 			},
 			docs: nil,
-			beforeHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			beforeHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -597,8 +598,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Age:  19,
 				},
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -628,16 +629,16 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Age:  19,
 				},
 			},
-			beforeHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			beforeHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					if len(opContext.Docs) != 2 {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					if opContext == nil {
 						return errors.New("after hook error")
 					}
@@ -683,8 +684,8 @@ func TestCreator_e2e_Many(t *testing.T) {
 					Age:  18,
 				},
 			},
-			afterHook: []hookFn[User]{
-				func(ctx context.Context, opContext *OpContext[User], opts ...any) error {
+			afterHook: []xcreator.HookFn[User]{
+				func(ctx context.Context, opContext *xcreator.OpContext[User], opts ...any) error {
 					users := opContext.Docs
 					if users == nil {
 						return errors.New("users is nil")
@@ -736,7 +737,7 @@ func TestCreator_e2e_Many(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				creator.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				creator.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			insertManyResult, err := creator.RegisterBeforeHooks(tc.beforeHook...).
 				RegisterAfterHooks(tc.afterHook...).InsertMany(tc.ctx, tc.docs, tc.opts...)
@@ -749,10 +750,10 @@ func TestCreator_e2e_Many(t *testing.T) {
 				require.Len(t, insertManyResult.InsertedIDs, tc.wantIdsLength)
 			}
 			for _, hook := range tc.globalHook {
-				creator.dbCallbacks.Remove(hook.opType, hook.name)
+				creator.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			creator.beforeHooks = nil
-			creator.afterHooks = nil
+			creator.BeforeHooks = nil
+			creator.AfterHooks = nil
 		})
 	}
 }
