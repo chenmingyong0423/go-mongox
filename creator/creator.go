@@ -35,6 +35,10 @@ import (
 type ICreator[T any] interface {
 	InsertOne(ctx context.Context, docs *T, opts ...options.Lister[options.InsertOneOptions]) (*mongo.InsertOneResult, error)
 	InsertMany(ctx context.Context, docs []*T, opts ...options.Lister[options.InsertManyOptions]) (*mongo.InsertManyResult, error)
+	ModelHook(modelHook any) ICreator[T]
+	RegisterAfterHooks(hooks ...HookFn[T]) ICreator[T]
+	RegisterBeforeHooks(hooks ...HookFn[T]) ICreator[T]
+	GetCollection() *mongo.Collection
 }
 
 var _ ICreator[any] = (*Creator[any])(nil)
@@ -44,9 +48,9 @@ type Creator[T any] struct {
 
 	modelHook any
 
-	dbCallbacks *callback.Callback
-	beforeHooks []hookFn[T]
-	afterHooks  []hookFn[T]
+	DBCallbacks *callback.Callback
+	BeforeHooks []HookFn[T]
+	AfterHooks  []HookFn[T]
 
 	fields []*field.Filed
 }
@@ -54,12 +58,12 @@ type Creator[T any] struct {
 func NewCreator[T any](collection *mongo.Collection, dbCallbacks *callback.Callback, fields []*field.Filed) *Creator[T] {
 	return &Creator[T]{
 		collection:  collection,
-		dbCallbacks: dbCallbacks,
+		DBCallbacks: dbCallbacks,
 		fields:      fields,
 	}
 }
 
-func (c *Creator[T]) ModelHook(modelHook any) *Creator[T] {
+func (c *Creator[T]) ModelHook(modelHook any) ICreator[T] {
 	c.modelHook = modelHook
 	return c
 }
@@ -67,22 +71,22 @@ func (c *Creator[T]) ModelHook(modelHook any) *Creator[T] {
 // RegisterBeforeHooks is used to set the after hooks of the insert operation
 // If you register the hook for InsertOne, the opContext.Docs will be nil
 // If you register the hook for InsertMany, the opContext.Doc will be nil
-func (c *Creator[T]) RegisterBeforeHooks(hooks ...hookFn[T]) *Creator[T] {
-	c.beforeHooks = append(c.beforeHooks, hooks...)
+func (c *Creator[T]) RegisterBeforeHooks(hooks ...HookFn[T]) ICreator[T] {
+	c.BeforeHooks = append(c.BeforeHooks, hooks...)
 	return c
 }
 
-func (c *Creator[T]) RegisterAfterHooks(hooks ...hookFn[T]) *Creator[T] {
-	c.afterHooks = append(c.afterHooks, hooks...)
+func (c *Creator[T]) RegisterAfterHooks(hooks ...HookFn[T]) ICreator[T] {
+	c.AfterHooks = append(c.AfterHooks, hooks...)
 	return c
 }
 
 func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := c.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, beforeHook := range c.beforeHooks {
+	for _, beforeHook := range c.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
@@ -92,11 +96,11 @@ func (c *Creator[T]) preActionHandler(ctx context.Context, globalOpContext *oper
 }
 
 func (c *Creator[T]) postActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *OpContext[T], opType operation.OpType) error {
-	err := c.dbCallbacks.Execute(ctx, globalOpContext, opType)
+	err := c.DBCallbacks.Execute(ctx, globalOpContext, opType)
 	if err != nil {
 		return err
 	}
-	for _, afterHook := range c.afterHooks {
+	for _, afterHook := range c.AfterHooks {
 		err = afterHook(ctx, opContext)
 		if err != nil {
 			return err
@@ -156,4 +160,7 @@ func (c *Creator[T]) InsertMany(ctx context.Context, docs []*T, opts ...options.
 		return nil, err
 	}
 	return result, nil
+}
+func (c *Creator[T]) GetCollection() *mongo.Collection {
+	return c.collection
 }

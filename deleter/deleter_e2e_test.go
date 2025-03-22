@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package deleter
+package deleter_test
 
 import (
 	"context"
@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
+	xdeleter "github.com/chenmingyong0423/go-mongox/v2/deleter"
 
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 
@@ -61,13 +62,13 @@ func newCollection(t *testing.T) *mongo.Collection {
 }
 
 func TestDeleter_e2e_New(t *testing.T) {
-	result := NewDeleter[any](newCollection(t), callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
+	result := xdeleter.NewDeleter[any](newCollection(t), callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 	require.NotNil(t, result, "Expected non-nil Deleter")
 }
 
 func TestDeleter_e2e_DeleteOne(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
+	deleter := xdeleter.NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 
 	type globalHook struct {
 		opType operation.OpType
@@ -83,8 +84,8 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		filter     bson.D
 		opts       []options.Lister[options.DeleteOneOptions]
 		globalHook []globalHook
-		beforeHook []beforeHookFn
-		afterHook  []afterHookFn
+		beforeHook []xdeleter.BeforeHookFn
+		afterHook  []xdeleter.AfterHookFn
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
@@ -234,8 +235,8 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xdeleter.BeforeHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
 				},
 			},
@@ -251,8 +252,8 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xdeleter.AfterHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					return fmt.Errorf("after hook error")
 				},
 			},
@@ -276,16 +277,16 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 			filter: query.NewBuilder().Id("1").Build(),
 			ctx:    context.Background(),
 			opts:   []options.Lister[options.DeleteOneOptions]{options.DeleteOne().SetComment("test")},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xdeleter.BeforeHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xdeleter.AfterHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
@@ -303,24 +304,24 @@ func TestDeleter_e2e_DeleteOne(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				deleter.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				deleter.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			result, err := deleter.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).DeleteOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			require.Equal(t, tc.want, result)
 			for _, hook := range tc.globalHook {
-				deleter.dbCallbacks.Remove(hook.opType, hook.name)
+				deleter.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			deleter.beforeHooks = nil
-			deleter.afterHooks = nil
+			deleter.BeforeHooks = nil
+			deleter.AfterHooks = nil
 		})
 	}
 }
 
 func TestDeleter_e2e_DeleteMany(t *testing.T) {
 	collection := newCollection(t)
-	deleter := NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
+	deleter := xdeleter.NewDeleter[testTempUser](collection, callback.InitializeCallbacks(), field.ParseFields(testTempUser{}))
 
 	type globalHook struct {
 		opType operation.OpType
@@ -336,8 +337,8 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		filter     any
 		opts       []options.Lister[options.DeleteManyOptions]
 		globalHook []globalHook
-		beforeHook []beforeHookFn
-		afterHook  []afterHookFn
+		beforeHook []xdeleter.BeforeHookFn
+		afterHook  []xdeleter.AfterHookFn
 
 		ctx       context.Context
 		want      *mongo.DeleteResult
@@ -507,8 +508,8 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 			filter: bsonx.Id("789"),
 			ctx:    context.Background(),
 			opts:   []options.Lister[options.DeleteManyOptions]{options.DeleteMany().SetComment("test")},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xdeleter.BeforeHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					return fmt.Errorf("before hook error")
 				},
 			},
@@ -532,8 +533,8 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xdeleter.AfterHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					return fmt.Errorf("after hook error")
 				},
 			},
@@ -560,16 +561,16 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, int64(0), deleteResult.DeletedCount)
 			},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xdeleter.BeforeHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xdeleter.AfterHookFn{
+				func(ctx context.Context, opCtx *xdeleter.OpContext, opts ...any) error {
 					if opCtx.Filter == nil {
 						return fmt.Errorf("filter is nil")
 					}
@@ -590,17 +591,17 @@ func TestDeleter_e2e_DeleteMany(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				deleter.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				deleter.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			result, err := deleter.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).DeleteMany(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
 			tc.wantError(t, err)
 			require.Equal(t, tc.want, result)
 			for _, hook := range tc.globalHook {
-				deleter.dbCallbacks.Remove(hook.opType, hook.name)
+				deleter.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			deleter.beforeHooks = nil
-			deleter.afterHooks = nil
+			deleter.BeforeHooks = nil
+			deleter.AfterHooks = nil
 		})
 	}
 }

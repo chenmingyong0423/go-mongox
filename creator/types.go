@@ -43,7 +43,7 @@ type (
 
 		Result any
 	}
-	hookFn[T any] func(ctx context.Context, opContext *OpContext[T], opts ...any) error
+	HookFn[T any] func(ctx context.Context, opContext *OpContext[T], opts ...any) error
 )
 
 type OpContextOption[T any] func(*OpContext[T])

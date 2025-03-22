@@ -14,7 +14,7 @@
 
 //go:build e2e
 
-package updater
+package updater_test
 
 import (
 	"context"
@@ -35,6 +35,7 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/v2/builder/query"
 	"github.com/chenmingyong0423/go-mongox/v2/builder/update"
+	xupdater "github.com/chenmingyong0423/go-mongox/v2/updater"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -94,13 +95,13 @@ func getCollection(t *testing.T) *mongo.Collection {
 }
 
 func TestUpdater_e2e_New(t *testing.T) {
-	updater := NewUpdater[any](getCollection(t), nil, nil)
+	updater := xupdater.NewUpdater[any](getCollection(t), nil, nil)
 	assert.NotNil(t, updater)
 }
 
 func TestUpdater_e2e_UpdateOne(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
+	updater := xupdater.NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -120,8 +121,8 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		updates    any
 		opts       []options.Lister[options.UpdateOneOptions]
 		globalHook []globalHook
-		beforeHook []beforeHookFn
-		afterHook  []afterHookFn
+		beforeHook []xupdater.BeforeHookFn
+		afterHook  []xupdater.AfterHookFn
 
 		want    *mongo.UpdateResult
 		wantErr assert.ErrorAssertionFunc
@@ -465,8 +466,8 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			filter:  query.NewBuilder().Id("1").Build(),
 			updates: update.NewBuilder().Set("name", "Mingyong Chen").Build(),
 			want:    nil,
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opContext *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opContext *xupdater.OpContext, opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -486,8 +487,8 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opContext *xupdater.OpContext, opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -511,16 +512,16 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(1), deleteResult.DeletedCount)
 			},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opContext *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opContext *xupdater.OpContext, opts ...any) error {
 					if opContext.Filter == nil || opContext.Updates == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opContext *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opContext *xupdater.OpContext, opts ...any) error {
 					if opContext.Filter == nil || opContext.Updates == nil {
 						return errors.New("after hook error")
 					}
@@ -564,7 +565,7 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				updater.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Updates(tc.updates).UpdateOne(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
@@ -573,17 +574,17 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 			}
 			assert.Equal(t, tc.want, got)
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Remove(hook.opType, hook.name)
+				updater.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			updater.beforeHooks = nil
-			updater.afterHooks = nil
+			updater.BeforeHooks = nil
+			updater.AfterHooks = nil
 		})
 	}
 }
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
+	updater := xupdater.NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -603,8 +604,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		updates    any
 		opts       []options.Lister[options.UpdateManyOptions]
 		globalHook []globalHook
-		beforeHook []beforeHookFn
-		afterHook  []afterHookFn
+		beforeHook []xupdater.BeforeHookFn
+		afterHook  []xupdater.AfterHookFn
 
 		want    *mongo.UpdateResult
 		wantErr assert.ErrorAssertionFunc
@@ -836,8 +837,8 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			filter:  query.NewBuilder().Id("1").Build(),
 			updates: nil,
 			want:    nil,
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					return errors.New("before hook error")
 				},
 			},
@@ -860,16 +861,16 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -896,16 +897,16 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(2), deleteResult.DeletedCount)
 			},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("after hook error")
 					}
@@ -956,7 +957,7 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				updater.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Updates(tc.updates).UpdateMany(tc.ctx, tc.opts...)
 			tc.after(tc.ctx, t)
@@ -965,17 +966,17 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 			}
 			assert.Equal(t, tc.want, got)
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Remove(hook.opType, hook.name)
+				updater.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			updater.beforeHooks = nil
-			updater.afterHooks = nil
+			updater.BeforeHooks = nil
+			updater.AfterHooks = nil
 		})
 	}
 }
 
 func TestUpdater_e2e_Upsert(t *testing.T) {
 	collection := getCollection(t)
-	updater := NewUpdater[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser{}))
+	updater := xupdater.NewUpdater[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser{}))
 	assert.NotNil(t, updater)
 
 	type globalHook struct {
@@ -995,8 +996,8 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 		updates    any
 		opts       []options.Lister[options.UpdateOneOptions]
 		globalHook []globalHook
-		beforeHook []beforeHookFn
-		afterHook  []afterHookFn
+		beforeHook []xupdater.BeforeHookFn
+		afterHook  []xupdater.AfterHookFn
 
 		want    *mongo.UpdateResult
 		wantErr require.ErrorAssertionFunc
@@ -1232,8 +1233,8 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			ctx:    context.Background(),
 			filter: query.NewBuilder().Id("1").Build(),
 			want:   nil,
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Replacement == nil {
 						return errors.New("before hook error")
 					}
@@ -1268,8 +1269,8 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				},
 			},
 			want: nil,
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					return errors.New("after hook error")
 				},
 			},
@@ -1301,16 +1302,16 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				},
 			},
 			want: &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, UpsertedCount: 0, UpsertedID: nil, Acknowledged: true},
-			beforeHook: []beforeHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			beforeHook: []xupdater.BeforeHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("before hook error")
 					}
 					return nil
 				},
 			},
-			afterHook: []afterHookFn{
-				func(ctx context.Context, opCtx *OpContext, opts ...any) error {
+			afterHook: []xupdater.AfterHookFn{
+				func(ctx context.Context, opCtx *xupdater.OpContext, opts ...any) error {
 					if opCtx.Filter == nil || opCtx.Updates == nil {
 						return errors.New("after hook error")
 					}
@@ -1380,7 +1381,7 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.before(tc.ctx, t)
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Register(hook.opType, hook.name, hook.fn)
+				updater.DBCallbacks.Register(hook.opType, hook.name, hook.fn)
 			}
 			got, err := updater.RegisterBeforeHooks(tc.beforeHook...).RegisterAfterHooks(tc.afterHook...).Filter(tc.filter).Updates(tc.updates).Upsert(tc.ctx, tc.opts...)
 			tc.wantErr(t, err)
@@ -1392,10 +1393,10 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
 			}
 			for _, hook := range tc.globalHook {
-				updater.dbCallbacks.Remove(hook.opType, hook.name)
+				updater.DBCallbacks.Remove(hook.opType, hook.name)
 			}
-			updater.beforeHooks = nil
-			updater.afterHooks = nil
+			updater.BeforeHooks = nil
+			updater.AfterHooks = nil
 		})
 	}
 }
