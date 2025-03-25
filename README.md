@@ -10,6 +10,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/chenmingyong0423/go-mongox)](https://goreportcard.com/report/github.com/chenmingyong0423/go-mongox)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/chenmingyong0423/go-mongox)
 [![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors-)
+[![libs.tech recommends](https://libs.tech/project/668270985/badge.svg)](https://libs.tech/project/668270985/go-mongox)
 
 English | [中文简体](./README-zh_CN.md)
 
