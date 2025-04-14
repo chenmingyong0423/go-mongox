@@ -17,6 +17,8 @@ package callback
 import (
 	"context"
 
+	"github.com/chenmingyong0423/go-mongox/v2/internal/hook/model"
+
 	"github.com/chenmingyong0423/go-mongox/v2/internal/hook/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
@@ -33,8 +35,21 @@ func InitializeCallbacks() *Callback {
 					return field.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
 				},
 			},
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeInsert, opts...)
+				},
+			},
 		},
-		afterInsert: make([]callbackHandler, 0),
+		afterInsert: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterInsert, opts...)
+				},
+			},
+		},
 		beforeUpdate: []callbackHandler{
 			{
 				name: "mongox:fieds",
@@ -42,10 +57,37 @@ func InitializeCallbacks() *Callback {
 					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpdate, opts...)
 				},
 			},
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpdate, opts...)
+				},
+			},
 		},
-		afterUpdate:  make([]callbackHandler, 0),
-		beforeDelete: make([]callbackHandler, 0),
-		afterDelete:  make([]callbackHandler, 0),
+		afterUpdate: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterUpdate, opts...)
+				},
+			},
+		},
+		beforeDelete: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeDelete, opts...)
+				},
+			},
+		},
+		afterDelete: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterDelete, opts...)
+				},
+			},
+		},
 		beforeUpsert: []callbackHandler{
 			{
 				name: "mongox:fieds",
@@ -53,10 +95,37 @@ func InitializeCallbacks() *Callback {
 					return field.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
 				},
 			},
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeUpsert, opts...)
+				},
+			},
 		},
-		afterUpsert: make([]callbackHandler, 0),
-		beforeFind:  make([]callbackHandler, 0),
-		afterFind:   make([]callbackHandler, 0),
+		afterUpsert: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterUpsert, opts...)
+				},
+			},
+		},
+		beforeFind: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeFind, opts...)
+				},
+			},
+		},
+		afterFind: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterFind, opts...)
+				},
+			},
+		},
 	}
 }
 
