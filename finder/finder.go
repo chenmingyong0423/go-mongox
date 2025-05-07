@@ -207,7 +207,9 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		_ = cursor.Close(ctx)
+	}(cursor, ctx)
 	err = cursor.All(ctx, &t)
 	if err != nil {
 		return nil, err
