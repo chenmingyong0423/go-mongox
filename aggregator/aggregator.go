@@ -87,7 +87,9 @@ func (a *Aggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[op
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		_ = cursor.Close(ctx)
+	}(cursor, ctx)
 
 	result := make([]*T, 0)
 	err = cursor.All(ctx, &result)
@@ -122,7 +124,9 @@ func (a *Aggregator[T]) AggregateWithParse(ctx context.Context, result any, opts
 	if err != nil {
 		return err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		_ = cursor.Close(ctx)
+	}(cursor, ctx)
 	err = cursor.All(ctx, result)
 	if err != nil {
 		return err
