@@ -23,6 +23,7 @@ import (
 	"github.com/chenmingyong0423/go-mongox/v2/updater"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/mock/gomock"
 )
 
@@ -84,12 +85,35 @@ func TestUpdater_UpdateOne(t *testing.T) {
 				return assert.NoError(t, err)
 			},
 		},
+		{
+			name: "update successfully with options",
+			mock: func(ctx context.Context, ctl *gomock.Controller) updater.IUpdater[any] {
+				u := mocks.NewMockIUpdater[any](ctl)
+				u.EXPECT().UpdateOne(ctx, gomock.Any()).Return(&mongo.UpdateResult{ModifiedCount: 1}, nil).Times(1)
+				return u
+			},
+			ctx: context.Background(),
+			want: &mongo.UpdateResult{
+				ModifiedCount: 1,
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			u := tc.mock(context.Background(), ctl)
-			got, err := u.UpdateOne(tc.ctx)
+
+			var got *mongo.UpdateResult
+			var err error
+			// Test with opts parameter like in finder_test.go
+			if tc.name == "update successfully with options" {
+				got, err = u.UpdateOne(tc.ctx, &options.UpdateOneOptionsBuilder{})
+			} else {
+				got, err = u.UpdateOne(tc.ctx)
+			}
 			if tc.wantErr(t, err) {
 				return
 			}
@@ -150,12 +174,35 @@ func TestUpdater_UpdateMany(t *testing.T) {
 				return assert.NoError(t, err)
 			},
 		},
+		{
+			name: "update successfully with options",
+			mock: func(ctx context.Context, ctl *gomock.Controller) updater.IUpdater[any] {
+				u := mocks.NewMockIUpdater[any](ctl)
+				u.EXPECT().UpdateMany(ctx, gomock.Any()).Return(&mongo.UpdateResult{ModifiedCount: 2}, nil).Times(1)
+				return u
+			},
+			ctx: context.Background(),
+			want: &mongo.UpdateResult{
+				ModifiedCount: 2,
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			u := tc.mock(context.Background(), ctl)
-			got, err := u.UpdateMany(tc.ctx)
+
+			var got *mongo.UpdateResult
+			var err error
+			// Test with opts parameter like in finder_test.go
+			if tc.name == "update successfully with options" {
+				got, err = u.UpdateMany(tc.ctx, &options.UpdateManyOptionsBuilder{})
+			} else {
+				got, err = u.UpdateMany(tc.ctx)
+			}
 			if tc.wantErr(t, err) {
 				return
 			}
@@ -217,12 +264,35 @@ func TestUpdater_Upsert(t *testing.T) {
 				return assert.NoError(t, err)
 			},
 		},
+		{
+			name: "upsert successfully with options",
+			mock: func(ctx context.Context, ctl *gomock.Controller) updater.IUpdater[any] {
+				u := mocks.NewMockIUpdater[any](ctl)
+				u.EXPECT().Upsert(ctx, gomock.Any()).Return(&mongo.UpdateResult{UpsertedCount: 1}, nil).Times(1)
+				return u
+			},
+			ctx: context.Background(),
+			want: &mongo.UpdateResult{
+				UpsertedCount: 1,
+			},
+			wantErr: func(t assert.TestingT, err error, i ...interface{}) bool {
+				return assert.NoError(t, err)
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			u := tc.mock(context.Background(), ctl)
-			got, err := u.Upsert(tc.ctx)
+
+			var got *mongo.UpdateResult
+			var err error
+			// Test with opts parameter like in finder_test.go
+			if tc.name == "upsert successfully with options" {
+				got, err = u.Upsert(tc.ctx, &options.UpdateOneOptionsBuilder{})
+			} else {
+				got, err = u.Upsert(tc.ctx)
+			}
 			if tc.wantErr(t, err) {
 				return
 			}
