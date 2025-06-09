@@ -24,10 +24,11 @@ import (
 	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.uber.org/mock/gomock"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.uber.org/mock/gomock"
 )
 
 func TestFinder_New(t *testing.T) {
@@ -51,6 +52,7 @@ func TestFinder_One(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 		ctx  context.Context
+		opts []options.Lister[options.FindOneOptions]
 
 		want    *TestUser
 		wantErr error
@@ -79,6 +81,21 @@ func TestFinder_One(t *testing.T) {
 				Age:  24,
 			},
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().FindOne(gomock.Any(), gomock.Any()).Return(&TestUser{
+					Name: "chenmingyong",
+				}, nil).Times(1)
+				return mockCollection
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.FindOneOptions]{options.FindOne().SetProjection(bson.M{"age": 0})},
+			want: &TestUser{
+				Name: "chenmingyong",
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -86,7 +103,13 @@ func TestFinder_One(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			user, err := finder.FindOne(tc.ctx)
+			var user *TestUser
+			var err error
+			if tc.opts != nil {
+				user, err = finder.FindOne(tc.ctx, tc.opts...)
+			} else {
+				user, err = finder.FindOne(tc.ctx)
+			}
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
 		})
@@ -106,6 +129,7 @@ func TestFinder_All(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 		ctx  context.Context
+		opts []options.Lister[options.FindOptions]
 
 		want    []*TestUser
 		wantErr error
@@ -146,6 +170,27 @@ func TestFinder_All(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().Find(ctx, gomock.Any()).Return([]*TestUser{
+					{
+						Name: "chenmingyong",
+						Age:  24,
+					},
+				}, nil).Times(1)
+				return mockCollection
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.FindOptions]{options.Find().SetLimit(1)},
+			want: []*TestUser{
+				{
+					Name: "chenmingyong",
+					Age:  24,
+				},
+			},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -153,7 +198,13 @@ func TestFinder_All(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			users, err := finder.Find(tc.ctx)
+			var users []*TestUser
+			var err error
+			if tc.opts != nil {
+				users, err = finder.Find(tc.ctx, tc.opts...)
+			} else {
+				users, err = finder.Find(tc.ctx)
+			}
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})
@@ -173,6 +224,7 @@ func TestFinder_Count(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 		ctx  context.Context
+		opts []options.Lister[options.CountOptions]
 
 		want    int64
 		wantErr error
@@ -205,6 +257,17 @@ func TestFinder_Count(t *testing.T) {
 			},
 			want: 1,
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().Count(ctx, gomock.Any()).Return(int64(2), nil).Times(1)
+				return mockCollection
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.CountOptions]{options.Count().SetComment("test")},
+			want: 2,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -212,7 +275,13 @@ func TestFinder_Count(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			users, err := finder.Count(tc.ctx)
+			var users int64
+			var err error
+			if tc.opts != nil {
+				users, err = finder.Count(tc.ctx, tc.opts...)
+			} else {
+				users, err = finder.Count(tc.ctx)
+			}
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, users)
 		})
@@ -231,8 +300,9 @@ func TestFindOneAndUpdate(t *testing.T) {
 	testCases := []struct {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
+		ctx  context.Context
+		opts []options.Lister[options.FindOneAndUpdateOptions]
 
-		ctx     context.Context
 		want    *TestUser
 		wantErr error
 	}{
@@ -258,6 +328,17 @@ func TestFindOneAndUpdate(t *testing.T) {
 			ctx:  context.Background(),
 			want: &TestUser{Name: "hejiangda", Age: 18},
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().FindOneAndUpdate(ctx, gomock.Any()).Return(&TestUser{Name: "updated", Age: 30}, nil).Times(1)
+				return mockCollection
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			want: &TestUser{Name: "updated", Age: 30},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -265,7 +346,7 @@ func TestFindOneAndUpdate(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			user, err := finder.FindOneAndUpdate(tc.ctx)
+			user, err := finder.FindOneAndUpdate(tc.ctx, tc.opts...)
 			assert.Equal(t, tc.wantErr, err)
 			assert.Equal(t, tc.want, user)
 		})
@@ -285,6 +366,7 @@ func TestFinder_Distinct(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 		ctx  context.Context
+		opts []options.Lister[options.DistinctOptions]
 
 		fieldName string
 		want      *mongo.DistinctResult
@@ -302,6 +384,19 @@ func TestFinder_Distinct(t *testing.T) {
 			fieldName: "name",
 			want:      &mongo.DistinctResult{},
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				expectedResult := &mongo.DistinctResult{}
+				mockCollection.EXPECT().Distinct(ctx, "name", gomock.Any()).Return(expectedResult).Times(1)
+				return mockCollection
+			},
+			ctx:       context.Background(),
+			fieldName: "name",
+			opts:      []options.Lister[options.DistinctOptions]{options.Distinct().SetComment("test")},
+			want:      &mongo.DistinctResult{},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -309,7 +404,12 @@ func TestFinder_Distinct(t *testing.T) {
 			defer ctl.Finish()
 			finder := tc.mock(tc.ctx, ctl)
 
-			result := finder.Distinct(tc.ctx, tc.fieldName)
+			var result *mongo.DistinctResult
+			if tc.opts != nil {
+				result = finder.Distinct(tc.ctx, tc.fieldName, tc.opts...)
+			} else {
+				result = finder.Distinct(tc.ctx, tc.fieldName)
+			}
 			assert.Equal(t, tc.want, result)
 		})
 	}
@@ -328,6 +428,7 @@ func TestFinder_DistinctWithParse(t *testing.T) {
 		name string
 		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
 		ctx  context.Context
+		opts []options.Lister[options.DistinctOptions]
 
 		fieldName string
 		wantErr   error
@@ -354,6 +455,18 @@ func TestFinder_DistinctWithParse(t *testing.T) {
 			fieldName: "name",
 			wantErr:   errors.New("distinct error"),
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
+				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
+				mockCollection.EXPECT().DistinctWithParse(ctx, "name", gomock.Any(), gomock.Any()).Return(nil).Times(1)
+				return mockCollection
+			},
+			ctx:       context.Background(),
+			fieldName: "name",
+			opts:      []options.Lister[options.DistinctOptions]{options.Distinct().SetComment("test")},
+			wantErr:   nil,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -362,7 +475,12 @@ func TestFinder_DistinctWithParse(t *testing.T) {
 			finder := tc.mock(tc.ctx, ctl)
 
 			var names []string
-			err := finder.DistinctWithParse(tc.ctx, tc.fieldName, &names)
+			var err error
+			if tc.opts != nil {
+				err = finder.DistinctWithParse(tc.ctx, tc.fieldName, &names, tc.opts...)
+			} else {
+				err = finder.DistinctWithParse(tc.ctx, tc.fieldName, &names)
+			}
 			assert.Equal(t, tc.wantErr, err)
 		})
 	}
