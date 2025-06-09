@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/mock/gomock"
 )
 
@@ -60,15 +61,6 @@ type IllegalUser struct {
 	Age  string
 }
 
-type UpdatedUser struct {
-	Name string `bson:"name"`
-	Age  int64
-}
-
-type UserName struct {
-	Name string `bson:"name"`
-}
-
 func TestAggregator_New(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
 	aggregator := NewAggregator[any](mongoCollection, nil, nil)
@@ -82,6 +74,7 @@ func TestAggregator_Aggregation(t *testing.T) {
 		name    string
 		mock    func(ctx context.Context, ctl *gomock.Controller) IAggregator[TestUser]
 		ctx     context.Context
+		opts    []options.Lister[options.AggregateOptions]
 		want    []*TestUser
 		wantErr assert.ErrorAssertionFunc
 	}{
@@ -112,6 +105,22 @@ func TestAggregator_Aggregation(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
+				aggregator.EXPECT().Aggregate(ctx, gomock.Any()).Return([]*TestUser{
+					{Name: "chenmingyong", Age: 24},
+				}, nil).Times(1)
+				return aggregator
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.AggregateOptions]{options.Aggregate().SetComment("test aggregation")},
+			want: []*TestUser{
+				{Name: "chenmingyong", Age: 24},
+			},
+			wantErr: assert.NoError,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -119,7 +128,13 @@ func TestAggregator_Aggregation(t *testing.T) {
 			defer ctl.Finish()
 			aggregator := tc.mock(tc.ctx, ctl)
 
-			result, err := aggregator.Aggregate(tc.ctx)
+			var result []*TestUser
+			var err error
+			if tc.opts != nil {
+				result, err = aggregator.Aggregate(tc.ctx, tc.opts...)
+			} else {
+				result, err = aggregator.Aggregate(tc.ctx)
+			}
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, result)
 			}
@@ -138,6 +153,7 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 		name    string
 		mock    func(ctx context.Context, ctl *gomock.Controller, result any) IAggregator[TestUser]
 		ctx     context.Context
+		opts    []options.Lister[options.AggregateOptions]
 		result  []*User
 		want    []*User
 		wantErr assert.ErrorAssertionFunc
@@ -162,10 +178,27 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 			},
 			ctx: context.Background(),
 			result: []*User{
-				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
+				{Id: "1", Name: "chenmingyong", Age: 24, IsProgrammer: true},
 			},
 			want: []*User{
-				{Id: "1", Name: "cmy", Age: 24, IsProgrammer: true},
+				{Id: "1", Name: "chenmingyong", Age: 24, IsProgrammer: true},
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller, result any) IAggregator[TestUser] {
+				aggregator := mocks.NewMockIAggregator[TestUser](ctl)
+				aggregator.EXPECT().AggregateWithParse(ctx, result, gomock.Any()).Return(nil).Times(1)
+				return aggregator
+			},
+			ctx:  context.Background(),
+			opts: []options.Lister[options.AggregateOptions]{options.Aggregate().SetComment("test aggregation")},
+			result: []*User{
+				{Id: "1", Name: "chenmingyong", Age: 25, IsProgrammer: false},
+			},
+			want: []*User{
+				{Id: "1", Name: "chenmingyong", Age: 25, IsProgrammer: false},
 			},
 			wantErr: assert.NoError,
 		},
@@ -176,7 +209,12 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 			defer ctl.Finish()
 
 			aggregator := tc.mock(tc.ctx, ctl, tc.result)
-			err := aggregator.AggregateWithParse(tc.ctx, tc.result)
+			var err error
+			if tc.opts != nil {
+				err = aggregator.AggregateWithParse(tc.ctx, tc.result, tc.opts...)
+			} else {
+				err = aggregator.AggregateWithParse(tc.ctx, tc.result)
+			}
 			if tc.wantErr(t, err) {
 				assert.ElementsMatch(t, tc.want, tc.result)
 			}

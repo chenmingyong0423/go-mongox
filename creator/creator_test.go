@@ -20,12 +20,13 @@ import (
 	"testing"
 	"time"
 
-	creator "github.com/chenmingyong0423/go-mongox/v2/creator"
+	"github.com/chenmingyong0423/go-mongox/v2/creator"
 	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/mock/gomock"
 )
 
@@ -50,10 +51,10 @@ func (tu *TestUser) DefaultUpdatedAt() {
 
 func TestNewCreator(t *testing.T) {
 	mongoCollection := &mongo.Collection{}
-	creator := creator.NewCreator[any](mongoCollection, nil, nil)
+	c := creator.NewCreator[any](mongoCollection, nil, nil)
 
-	assert.NotNil(t, creator)
-	assert.Equal(t, mongoCollection, creator.GetCollection())
+	assert.NotNil(t, c)
+	assert.Equal(t, mongoCollection, c.GetCollection())
 }
 
 func TestCreator_One(t *testing.T) {
@@ -62,6 +63,7 @@ func TestCreator_One(t *testing.T) {
 		mock func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) creator.ICreator[TestUser]
 		ctx  context.Context
 		doc  *TestUser
+		opts []options.Lister[options.InsertOneOptions]
 
 		wantErr error
 	}{
@@ -89,14 +91,28 @@ func TestCreator_One(t *testing.T) {
 				Age:  24,
 			},
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller, doc *TestUser) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().InsertOne(ctx, doc, gomock.Any()).Return(&mongo.InsertOneResult{InsertedID: "with_opts"}, nil).Times(1)
+				return mockCollection
+			},
+			ctx: context.Background(),
+			doc: &TestUser{
+				Name: "chenmingyong",
+				Age:  24,
+			},
+			opts: []options.Lister[options.InsertOneOptions]{options.InsertOne().SetComment("test")},
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			creator := tc.mock(tc.ctx, ctl, tc.doc)
+			c := tc.mock(tc.ctx, ctl, tc.doc)
 
-			insertOneResult, err := creator.InsertOne(tc.ctx, tc.doc)
+			insertOneResult, err := c.InsertOne(tc.ctx, tc.doc, tc.opts...)
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.NotNil(t, insertOneResult.InsertedID)
@@ -111,6 +127,7 @@ func TestCreator_Many(t *testing.T) {
 		mock func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) creator.ICreator[TestUser]
 		ctx  context.Context
 		docs []*TestUser
+		opts []options.Lister[options.InsertManyOptions]
 
 		wantIdsLength int
 		wantErr       error
@@ -143,18 +160,192 @@ func TestCreator_Many(t *testing.T) {
 			},
 			wantIdsLength: 2,
 		},
+		{
+			name: "with options - should trigger opts loop",
+			mock: func(ctx context.Context, ctl *gomock.Controller, docs []*TestUser) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().InsertMany(ctx, docs, gomock.Any()).Return(&mongo.InsertManyResult{InsertedIDs: []interface{}{"1", "2"}}, nil).Times(1)
+				return mockCollection
+			},
+			ctx: context.Background(),
+			docs: []*TestUser{
+				{Name: "chenmingyong", Age: 24},
+				{Name: "burt", Age: 25},
+			},
+			opts:          []options.Lister[options.InsertManyOptions]{options.InsertMany().SetOrdered(false)},
+			wantIdsLength: 2,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			ctl := gomock.NewController(t)
 			defer ctl.Finish()
-			creator := tc.mock(tc.ctx, ctl, tc.docs)
+			c := tc.mock(tc.ctx, ctl, tc.docs)
 
-			insertResult, err := creator.InsertMany(tc.ctx, tc.docs)
+			insertResult, err := c.InsertMany(tc.ctx, tc.docs, tc.opts...)
 			require.Equal(t, tc.wantErr, err)
 			if err == nil {
 				assert.Equal(t, tc.wantIdsLength, len(insertResult.InsertedIDs))
 			}
+		})
+	}
+}
+
+func TestCreator_GetCollection(t *testing.T) {
+	testCases := []struct {
+		name string
+		mock func(ctl *gomock.Controller) creator.ICreator[TestUser]
+	}{
+		{
+			name: "get collection",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCollection := &mongo.Collection{}
+				mockCollection.EXPECT().GetCollection().Return(expectedCollection).Times(1)
+				return mockCollection
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			c := tc.mock(ctl)
+
+			result := c.GetCollection()
+			assert.NotNil(t, result)
+		})
+	}
+}
+
+func TestCreator_ModelHook(t *testing.T) {
+	testCases := []struct {
+		name string
+		mock func(ctl *gomock.Controller) creator.ICreator[TestUser]
+
+		modelHook any
+	}{
+		{
+			name: "set model hook",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCreator := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().ModelHook(&TestUser{}).Return(expectedCreator).Times(1)
+				return mockCollection
+			},
+			modelHook: &TestUser{},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			c := tc.mock(ctl)
+
+			result := c.ModelHook(tc.modelHook)
+			assert.NotNil(t, result)
+		})
+	}
+}
+
+func TestCreator_RegisterBeforeHooks(t *testing.T) {
+	testCases := []struct {
+		name string
+		mock func(ctl *gomock.Controller) creator.ICreator[TestUser]
+
+		hooks []creator.HookFn[TestUser]
+	}{
+		{
+			name: "register before hooks",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCreator := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().RegisterBeforeHooks(gomock.Any()).Return(expectedCreator).Times(1)
+				return mockCollection
+			},
+			hooks: []creator.HookFn[TestUser]{
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+			},
+		},
+		{
+			name: "register multiple before hooks - should trigger hooks loop",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCreator := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().RegisterBeforeHooks(gomock.Any(), gomock.Any()).Return(expectedCreator).Times(1)
+				return mockCollection
+			},
+			hooks: []creator.HookFn[TestUser]{
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			c := tc.mock(ctl)
+
+			result := c.RegisterBeforeHooks(tc.hooks...)
+			assert.NotNil(t, result)
+		})
+	}
+}
+
+func TestCreator_RegisterAfterHooks(t *testing.T) {
+	testCases := []struct {
+		name string
+		mock func(ctl *gomock.Controller) creator.ICreator[TestUser]
+
+		hooks []creator.HookFn[TestUser]
+	}{
+		{
+			name: "register after hooks",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCreator := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().RegisterAfterHooks(gomock.Any()).Return(expectedCreator).Times(1)
+				return mockCollection
+			},
+			hooks: []creator.HookFn[TestUser]{
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+			},
+		},
+		{
+			name: "register multiple after hooks - should trigger hooks loop",
+			mock: func(ctl *gomock.Controller) creator.ICreator[TestUser] {
+				mockCollection := mocks.NewMockICreator[TestUser](ctl)
+				expectedCreator := mocks.NewMockICreator[TestUser](ctl)
+				mockCollection.EXPECT().RegisterAfterHooks(gomock.Any(), gomock.Any()).Return(expectedCreator).Times(1)
+				return mockCollection
+			},
+			hooks: []creator.HookFn[TestUser]{
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+				func(ctx context.Context, opCtx *creator.OpContext[TestUser], opts ...any) error {
+					return nil
+				},
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctl := gomock.NewController(t)
+			defer ctl.Finish()
+			c := tc.mock(ctl)
+
+			result := c.RegisterAfterHooks(tc.hooks...)
+			assert.NotNil(t, result)
 		})
 	}
 }
