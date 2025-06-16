@@ -39,6 +39,12 @@ go get github.com/chenmingyong0423/go-mongox/v2
 # 贡献者
 非常感谢 [您们](https://github.com/chenmingyong0423/go-mongox/graphs/contributors) 为 `go mongox` 框架做出的贡献！
 
+# 社区
+
+加入我们的社区获取支持、分享想法、参与讨论！
+
+[![加入 Discord](https://img.shields.io/badge/Discord-加入聊天-5865F2?logo=discord&logoColor=white)](https://discord.gg/Cx8CMcRurb)
+
 # 版权
 © [陈明勇](https://github.com/chenmingyong0423)，2024-至今
 
