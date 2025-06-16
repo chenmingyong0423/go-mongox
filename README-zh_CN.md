@@ -45,6 +45,13 @@ go get github.com/chenmingyong0423/go-mongox/v2
 
 [![加入 Discord](https://img.shields.io/badge/Discord-加入聊天-5865F2?logo=discord&logoColor=white)](https://discord.gg/Cx8CMcRurb)
 
+# 贡献者
+
+衷心感谢所有为本项目做出贡献的开发者！  
+[![贡献值](https://contrib.rocks/image?repo=chenmingyong0423/go-mongox)](https://github.com/chenmingyong0423/go-mongox/graphs/contributors)
+
+你们的支持和努力使这个项目变得更加出色！
+
 # 版权
 © [陈明勇](https://github.com/chenmingyong0423)，2024-至今
 
