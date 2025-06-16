@@ -39,6 +39,13 @@ go get github.com/chenmingyong0423/go-mongox/v2
 # Contributors
 [Thank you](https://github.com/chenmingyong0423/go-mongox/graphs/contributors) for contributing to the `go mongox` framework!
 
+# Community
+
+Join our community to get support, share ideas, and collaborate with others!
+
+[![Join Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)]([https://discord.gg/your-invite-code](https://discord.gg/Cx8CMcRurb))
+
+
 # License
 © [Mingyong Chen](https://github.com/chenmingyong0423)，2024-now
 
