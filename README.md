@@ -43,7 +43,7 @@ go get github.com/chenmingyong0423/go-mongox/v2
 
 Join our community to get support, share ideas, and collaborate with others!
 
-[![Join Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)]([https://discord.gg/your-invite-code](https://discord.gg/Cx8CMcRurb))
+[![Join Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/Cx8CMcRurb)
 
 
 # License
