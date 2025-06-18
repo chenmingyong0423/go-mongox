@@ -50,7 +50,13 @@ Join our community to get support, share ideas, and collaborate with others!
 A heartfelt thank you to all the developers who have contributed to this project!  
 [![Contributors](https://contrib.rocks/image?repo=chenmingyong0423/go-mongox)](https://github.com/chenmingyong0423/go-mongox/graphs/contributors)
 
-Your support and efforts make this project
+Your support and efforts make this project.
+
+# Acknowledgements
+
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSourceSupport)
+
+Thanks to JetBrains for supporting this project through their [Open Source Licenses](https://www.jetbrains.com/community/opensource/) program.
 
 # License
 © [Mingyong Chen](https://github.com/chenmingyong0423)，2024-now
