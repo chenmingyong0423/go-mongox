@@ -78,7 +78,7 @@ func (a *Aggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[op
 	globalOpContext := operation.NewOpContext(a.collection, operation.WithPipeline(a.pipeline), operation.WithMongoOptions(opts), operation.WithModelHook(a.modelHook), operation.WithStartTime(currentTime), operation.WithFields(a.fields))
 	opContext := NewOpContext(a.collection, a.pipeline, WithMongoOptions(opts), WithModelHook(a.modelHook), WithStartTime(currentTime), WithFields(a.fields))
 
-	err := a.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeInsert)
+	err := a.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeAggregate)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (a *Aggregator[T]) Aggregate(ctx context.Context, opts ...options.Lister[op
 
 	globalOpContext.Result = cursor
 	opContext.Result = cursor
-	err = a.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterInsert)
+	err = a.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterAggregate)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (a *Aggregator[T]) AggregateWithParse(ctx context.Context, result any, opts
 	globalOpContext := operation.NewOpContext(a.collection, operation.WithPipeline(a.pipeline), operation.WithMongoOptions(opts), operation.WithModelHook(a.modelHook), operation.WithStartTime(currentTime), operation.WithFields(a.fields))
 	opContext := NewOpContext(a.collection, a.pipeline, WithMongoOptions(opts), WithModelHook(a.modelHook), WithStartTime(currentTime), WithFields(a.fields))
 
-	err := a.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeInsert)
+	err := a.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeAggregate)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (a *Aggregator[T]) AggregateWithParse(ctx context.Context, result any, opts
 
 	globalOpContext.Result = cursor
 	opContext.Result = cursor
-	err = a.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterInsert)
+	err = a.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterAggregate)
 	if err != nil {
 		return err
 	}

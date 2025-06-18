@@ -380,3 +380,44 @@ func TestRegisterPlugin_BeforeAny(t *testing.T) {
 		assert.False(t, isCalled)
 	})
 }
+
+func TestRegisterPlugin_Aggregate(t *testing.T) {
+	c := getMongoClient(t)
+
+	// Track which hooks are called
+	var calledHooks []string
+
+	t.Run("aggregation should use correct OpTypes", func(t *testing.T) {
+		db := newDatabase(NewClient(c, &Config{}), "db-test")
+
+		// Register hooks for different operations
+		db.RegisterPlugin("before-insert", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "before-insert")
+			return nil
+		}, operation.OpTypeBeforeInsert)
+
+		db.RegisterPlugin("before-aggregate", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "before-aggregate")
+			return nil
+		}, operation.OpTypeBeforeAggregate)
+
+		db.RegisterPlugin("after-aggregate", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "after-aggregate")
+			return nil
+		}, operation.OpTypeAfterAggregate)
+
+		// Test that aggregation hooks are called correctly
+		err := db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithPipeline(bson.A{bson.M{"$match": bson.M{}}})), operation.OpTypeBeforeAggregate)
+		require.Nil(t, err)
+
+		err = db.callbacks.Execute(context.Background(), operation.NewOpContext(nil, operation.WithPipeline(bson.A{bson.M{"$match": bson.M{}}})), operation.OpTypeAfterAggregate)
+		require.Nil(t, err)
+
+		// Verify correct hooks were called
+		assert.Contains(t, calledHooks, "before-aggregate")
+		assert.Contains(t, calledHooks, "after-aggregate")
+
+		// Verify insert hooks were NOT called during aggregation operations
+		assert.NotContains(t, calledHooks, "before-insert")
+	})
+}
