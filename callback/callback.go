@@ -126,20 +126,38 @@ func InitializeCallbacks() *Callback {
 				},
 			},
 		},
+		beforeAggregate: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeBeforeAggregate, opts...)
+				},
+			},
+		},
+		afterAggregate: []callbackHandler{
+			{
+				name: "mongox:model",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return model.Execute(ctx, opCtx, operation.OpTypeAfterAggregate, opts...)
+				},
+			},
+		},
 	}
 }
 
 type Callback struct {
-	beforeInsert []callbackHandler
-	afterInsert  []callbackHandler
-	beforeUpdate []callbackHandler
-	afterUpdate  []callbackHandler
-	beforeDelete []callbackHandler
-	afterDelete  []callbackHandler
-	beforeUpsert []callbackHandler
-	afterUpsert  []callbackHandler
-	beforeFind   []callbackHandler
-	afterFind    []callbackHandler
+	beforeInsert    []callbackHandler
+	afterInsert     []callbackHandler
+	beforeUpdate    []callbackHandler
+	afterUpdate     []callbackHandler
+	beforeDelete    []callbackHandler
+	afterDelete     []callbackHandler
+	beforeUpsert    []callbackHandler
+	afterUpsert     []callbackHandler
+	beforeFind      []callbackHandler
+	afterFind       []callbackHandler
+	beforeAggregate []callbackHandler
+	afterAggregate  []callbackHandler
 }
 
 func (c *Callback) BeforeInsert() []callbackHandler {
@@ -182,6 +200,14 @@ func (c *Callback) AfterFind() []callbackHandler {
 	return c.afterFind
 }
 
+func (c *Callback) BeforeAggregate() []callbackHandler {
+	return c.beforeAggregate
+}
+
+func (c *Callback) AfterAggregate() []callbackHandler {
+	return c.afterAggregate
+}
+
 func (c *Callback) Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
 	switch opType {
 	case operation.OpTypeBeforeInsert:
@@ -204,6 +230,10 @@ func (c *Callback) Execute(ctx context.Context, opCtx *operation.OpContext, opTy
 		return c.execute(ctx, opCtx, c.beforeFind, opts...)
 	case operation.OpTypeAfterFind:
 		return c.execute(ctx, opCtx, c.afterFind, opts...)
+	case operation.OpTypeBeforeAggregate:
+		return c.execute(ctx, opCtx, c.beforeAggregate, opts...)
+	case operation.OpTypeAfterAggregate:
+		return c.execute(ctx, opCtx, c.afterAggregate, opts...)
 	}
 	return nil
 }
@@ -269,6 +299,16 @@ func (c *Callback) Register(opType operation.OpType, name string, fn CbFn) {
 			name: name,
 			fn:   fn,
 		})
+	case operation.OpTypeBeforeAggregate:
+		c.beforeAggregate = append(c.beforeAggregate, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+	case operation.OpTypeAfterAggregate:
+		c.afterAggregate = append(c.afterAggregate, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
 	case operation.OpTypeBeforeAny:
 		c.beforeInsert = append(c.beforeInsert, callbackHandler{
 			name: name,
@@ -290,6 +330,10 @@ func (c *Callback) Register(opType operation.OpType, name string, fn CbFn) {
 			name: name,
 			fn:   fn,
 		})
+		c.beforeAggregate = append(c.beforeAggregate, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
 	case operation.OpTypeAfterAny:
 		c.afterInsert = append(c.afterInsert, callbackHandler{
 			name: name,
@@ -308,6 +352,10 @@ func (c *Callback) Register(opType operation.OpType, name string, fn CbFn) {
 			fn:   fn,
 		})
 		c.afterFind = append(c.afterFind, callbackHandler{
+			name: name,
+			fn:   fn,
+		})
+		c.afterAggregate = append(c.afterAggregate, callbackHandler{
 			name: name,
 			fn:   fn,
 		})
@@ -336,18 +384,24 @@ func (c *Callback) Remove(opType operation.OpType, name string) {
 		c.beforeFind = c.remove(c.beforeFind, name)
 	case operation.OpTypeAfterFind:
 		c.afterFind = c.remove(c.afterFind, name)
+	case operation.OpTypeBeforeAggregate:
+		c.beforeAggregate = c.remove(c.beforeAggregate, name)
+	case operation.OpTypeAfterAggregate:
+		c.afterAggregate = c.remove(c.afterAggregate, name)
 	case operation.OpTypeBeforeAny:
 		c.beforeInsert = c.remove(c.beforeInsert, name)
 		c.beforeUpdate = c.remove(c.beforeUpdate, name)
 		c.beforeDelete = c.remove(c.beforeDelete, name)
 		c.beforeUpsert = c.remove(c.beforeUpsert, name)
 		c.beforeFind = c.remove(c.beforeFind, name)
+		c.beforeAggregate = c.remove(c.beforeAggregate, name)
 	case operation.OpTypeAfterAny:
 		c.afterInsert = c.remove(c.afterInsert, name)
 		c.afterUpdate = c.remove(c.afterUpdate, name)
 		c.afterDelete = c.remove(c.afterDelete, name)
 		c.afterUpsert = c.remove(c.afterUpsert, name)
 		c.afterFind = c.remove(c.afterFind, name)
+		c.afterAggregate = c.remove(c.afterAggregate, name)
 	}
 }
 

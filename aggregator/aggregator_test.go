@@ -26,6 +26,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"go.uber.org/mock/gomock"
 )
 
@@ -220,4 +223,86 @@ func TestAggregator_AggregateWithParse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAggregator_CorrectOpTypes(t *testing.T) {
+	t.Run("aggregation should use correct OpTypes", func(t *testing.T) {
+		// Setup
+		col := &mongo.Collection{}
+		dbCallbacks := callback.InitializeCallbacks()
+
+		// Track which hooks are called
+		var calledHooks []string
+
+		// Register hooks for different operation types
+		dbCallbacks.Register(operation.OpTypeBeforeInsert, "insert-before", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "insert-before")
+			return nil
+		})
+
+		dbCallbacks.Register(operation.OpTypeAfterInsert, "insert-after", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "insert-after")
+			return nil
+		})
+
+		dbCallbacks.Register(operation.OpTypeBeforeAggregate, "aggregate-before", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "aggregate-before")
+			return nil
+		})
+
+		dbCallbacks.Register(operation.OpTypeAfterAggregate, "aggregate-after", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			calledHooks = append(calledHooks, "aggregate-after")
+			return nil
+		})
+
+		// Create aggregator
+		aggregator := NewAggregator[map[string]interface{}](col, dbCallbacks, nil)
+		pipeline := []interface{}{map[string]interface{}{"$match": map[string]interface{}{}}}
+
+		// Test preActionHandler and postActionHandler directly
+		ctx := context.Background()
+		globalOpContext := operation.NewOpContext(col)
+		opContext := NewOpContext(col, pipeline)
+
+		// Test before handler
+		err := aggregator.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeAggregate)
+		assert.NoError(t, err)
+
+		// Test after handler
+		err = aggregator.postActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterAggregate)
+		assert.NoError(t, err)
+
+		// Verify only aggregation hooks were called
+		assert.Contains(t, calledHooks, "aggregate-before")
+		assert.Contains(t, calledHooks, "aggregate-after")
+		assert.NotContains(t, calledHooks, "insert-before")
+		assert.NotContains(t, calledHooks, "insert-after")
+	})
+
+	t.Run("insert hooks should not be triggered by aggregation", func(t *testing.T) {
+		// Setup
+		col := &mongo.Collection{}
+		dbCallbacks := callback.InitializeCallbacks()
+
+		// Register an insert hook that should NOT be called
+		insertHookCalled := false
+		dbCallbacks.Register(operation.OpTypeBeforeInsert, "should-not-be-called", func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+			insertHookCalled = true
+			return errors.New("insert hook incorrectly called during aggregation")
+		})
+
+		// Create aggregator
+		aggregator := NewAggregator[map[string]interface{}](col, dbCallbacks, nil)
+		pipeline := []interface{}{map[string]interface{}{"$match": map[string]interface{}{}}}
+
+		// Test that insert hooks are NOT called
+		ctx := context.Background()
+		globalOpContext := operation.NewOpContext(col)
+		opContext := NewOpContext(col, pipeline)
+
+		// This should NOT trigger insert hooks
+		err := aggregator.preActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeAggregate)
+		assert.NoError(t, err)
+		assert.False(t, insertHookCalled, "Insert hook should not be called during aggregation")
+	})
 }

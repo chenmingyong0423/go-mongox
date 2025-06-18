@@ -30,18 +30,20 @@ import (
 type OpType string
 
 const (
-	OpTypeBeforeInsert OpType = "beforeInsert"
-	OpTypeAfterInsert  OpType = "afterInsert"
-	OpTypeBeforeUpdate OpType = "beforeUpdate"
-	OpTypeAfterUpdate  OpType = "afterUpdate"
-	OpTypeBeforeDelete OpType = "beforeDelete"
-	OpTypeAfterDelete  OpType = "afterDelete"
-	OpTypeBeforeUpsert OpType = "beforeUpsert"
-	OpTypeAfterUpsert  OpType = "afterUpsert"
-	OpTypeBeforeFind   OpType = "beforeFind"
-	OpTypeAfterFind    OpType = "afterFind"
-	OpTypeBeforeAny    OpType = "before*"
-	OpTypeAfterAny     OpType = "after*"
+	OpTypeBeforeInsert    OpType = "beforeInsert"
+	OpTypeAfterInsert     OpType = "afterInsert"
+	OpTypeBeforeUpdate    OpType = "beforeUpdate"
+	OpTypeAfterUpdate     OpType = "afterUpdate"
+	OpTypeBeforeDelete    OpType = "beforeDelete"
+	OpTypeAfterDelete     OpType = "afterDelete"
+	OpTypeBeforeUpsert    OpType = "beforeUpsert"
+	OpTypeAfterUpsert     OpType = "afterUpsert"
+	OpTypeBeforeFind      OpType = "beforeFind"
+	OpTypeAfterFind       OpType = "afterFind"
+	OpTypeBeforeAggregate OpType = "beforeAggregate"
+	OpTypeAfterAggregate  OpType = "afterAggregate"
+	OpTypeBeforeAny       OpType = "before*"
+	OpTypeAfterAny        OpType = "after*"
 )
 
 //go:generate optioner -type OpContext -output operation_type.go -mode append
