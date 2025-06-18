@@ -52,6 +52,12 @@ go get github.com/chenmingyong0423/go-mongox/v2
 
 你们的支持和努力使这个项目变得更加出色！
 
+# 致谢
+
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSourceSupport)
+
+感谢 JetBrains 通过其 [开源许可支持计划](https://www.jetbrains.com/community/opensource/) 对本项目的支持。
+
 # 版权
 © [陈明勇](https://github.com/chenmingyong0423)，2024-至今
 
