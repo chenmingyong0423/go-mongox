@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/stretchr/testify v1.10.0
-	go.mongodb.org/mongo-driver/v2 v2.2.2
+	go.mongodb.org/mongo-driver/v2 v2.2.3
 	go.uber.org/mock v0.4.0
 )
 
