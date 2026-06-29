@@ -88,11 +88,11 @@ func ParseFields[T any](doc T) []*Filed {
 		if len(tag) > 0 {
 			parseTag(tag, fd)
 		} else if structField.Name == CreatedAt {
-			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
+			parseDefaultTimeType(structField, func(timeType TimeType) {
 				fd.AutoCreateTime = timeType
 			})
 		} else if structField.Name == UpdatedAt {
-			parseDefaultTimeType(structField, fd, func(timeType TimeType) {
+			parseDefaultTimeType(structField, func(timeType TimeType) {
 				fd.AutoUpdateTime = timeType
 			})
 		}
@@ -103,16 +103,21 @@ func ParseFields[T any](doc T) []*Filed {
 	return fields
 }
 
-func parseDefaultTimeType(structField reflect.StructField, fd *Filed, set func(timeType TimeType)) {
-	switch structField.Type.Kind() {
+func parseDefaultTimeType(structField reflect.StructField, set func(timeType TimeType)) {
+	set(defaultTimeType(structField.Type))
+}
+
+func defaultTimeType(fieldType reflect.Type) TimeType {
+	switch fieldType.Kind() {
 	case reflect.Struct:
-		if structField.Type == timeType {
-			set(UnixTime)
+		if fieldType == timeType {
+			return UnixTime
 		}
 	case reflect.Int64, reflect.Int:
-		set(UnixSecond)
+		return UnixSecond
 	default:
 	}
+	return 0
 }
 
 func getMongoField(bsonTag string, defaultValue string) string {
@@ -133,26 +138,33 @@ func parseTag(tag string, fd *Filed) {
 		case s == "autoID":
 			fd.AutoID = true
 		case strings.HasPrefix(s, AutoCreateTime):
-			fd.AutoCreateTime = parseTimeType(s)
+			fd.AutoCreateTime = parseTimeType(s, fd.FieldType)
 		case strings.HasPrefix(s, AutoUpdateTime):
-			fd.AutoUpdateTime = parseTimeType(s)
+			fd.AutoUpdateTime = parseTimeType(s, fd.FieldType)
 		}
 	}
 }
 
-func parseTimeType(tag string) TimeType {
+func parseTimeType(tag string, fieldType reflect.Type) TimeType {
 	if strings.Contains(tag, ":") {
-		timeType := strings.Split(tag, ":")[1]
-		switch timeType {
+		timeTypeAlice := strings.Split(tag, ":")[1]
+		var parsedTimeType TimeType
+		switch timeTypeAlice {
 		case "milli":
-			return UnixMillisecond
+			parsedTimeType = UnixMillisecond
 		case "nano":
-			return UnixNanosecond
+			parsedTimeType = UnixNanosecond
 		case "second":
-			return UnixSecond
+			parsedTimeType = UnixSecond
 		default:
 			return 0
 		}
+		switch fieldType.Kind() {
+		case reflect.Int64, reflect.Int:
+			return parsedTimeType
+		default:
+		}
+		return 0
 	}
-	return UnixSecond
+	return defaultTimeType(fieldType)
 }

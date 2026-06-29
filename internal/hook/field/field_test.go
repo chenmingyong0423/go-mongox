@@ -16,10 +16,12 @@ package field
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 	"time"
 
+	mongoxfield "github.com/chenmingyong0423/go-mongox/v2/field"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"github.com/stretchr/testify/assert"
 
@@ -73,6 +75,16 @@ type user2 struct {
 	CreateNanoTime      int64         `bson:"create_nano_time" mongox:"autoCreateTime:nano"`
 	UpdateNanoTime      int64         `bson:"update_nano_time" mongox:"autoUpdateTime:nano"`
 	InvalidTimeTagField time.Time     `bson:"invalid_time_tag_field" mongox:"autoCreateTime:time"`
+}
+
+type userWithTaggedDefaultTimeFields struct {
+	CreatedAt        time.Time `bson:"created_at" mongox:"autoCreateTime"`
+	UpdatedAt        time.Time `bson:"updated_at" mongox:"autoUpdateTime"`
+	CreateSecondTime time.Time `bson:"create_second_time" mongox:"autoCreateTime:second"`
+	UpdateMilliTime  time.Time `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
+	CreateMilliTime  int       `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
+	UpdateNanoTime   int       `bson:"update_nano_time" mongox:"autoUpdateTime:nano"`
+	InvalidTime      string    `bson:"invalid_time" mongox:"autoCreateTime:milli"`
 }
 
 type updatedUser struct {
@@ -193,6 +205,54 @@ func TestExecute(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			err := Execute(tc.ctx, tc.opCtx, tc.opType, tc.opts...)
+			assert.Equal(t, tc.wantErr, err)
+		})
+	}
+}
+
+func Test_executeSlice(t *testing.T) {
+	wantErr := errors.New("execute error")
+	testCases := []struct {
+		name        string
+		ctx         context.Context
+		docs        reflect.Value
+		opType      operation.OpType
+		currentTime time.Time
+		fields      []*mongoxfield.Filed
+		setupFunc   func()
+		cleanupFunc func()
+
+		wantErr error
+	}{
+		{
+			name:        "execute error",
+			ctx:         context.Background(),
+			docs:        reflect.ValueOf([]model{{}}),
+			opType:      operation.OpTypeBeforeInsert,
+			currentTime: time.Now(),
+			fields:      nil,
+			setupFunc: func() {
+				strategies[operation.OpTypeBeforeInsert] = func(dest any, currentTime time.Time, fields []*mongoxfield.Filed, opts ...any) error {
+					return wantErr
+				}
+			},
+			cleanupFunc: func() {
+				strategies[operation.OpTypeBeforeInsert] = beforeInsert
+			},
+			wantErr: wantErr,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.setupFunc != nil {
+				tc.setupFunc()
+			}
+			if tc.cleanupFunc != nil {
+				defer tc.cleanupFunc()
+			}
+
+			err := executeSlice(tc.ctx, tc.docs, tc.opType, tc.currentTime, tc.fields)
 			assert.Equal(t, tc.wantErr, err)
 		})
 	}
