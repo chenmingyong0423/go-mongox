@@ -282,6 +282,55 @@ func TestParseFields(t *testing.T) {
 			},
 		},
 		{
+			name: "mongox tag for default time.Time fields",
+			doc: struct {
+				CreatedAt time.Time `bson:"created_at" mongox:"autoCreateTime"`
+				UpdatedAt time.Time `bson:"updated_at" mongox:"autoUpdateTime"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(time.Time{}),
+					AutoCreateTime: UnixTime,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(time.Time{}),
+					AutoUpdateTime: UnixTime,
+				},
+			},
+		},
+		{
+			name: "mongox timestamp precision tags on time.Time fields",
+			doc: struct {
+				CreateSecondTime time.Time `bson:"create_second_time" mongox:"autoCreateTime:second"`
+				UpdateMilliTime  time.Time `bson:"update_milli_time" mongox:"autoUpdateTime:milli"`
+				CreateNanoTime   time.Time `bson:"create_nano_time" mongox:"autoCreateTime:nano"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreateSecondTime",
+					MongoField:     "create_second_time",
+					FieldType:      reflect.TypeOf(time.Time{}),
+					AutoCreateTime: 0,
+				},
+				{
+					Name:           "UpdateMilliTime",
+					MongoField:     "update_milli_time",
+					FieldType:      reflect.TypeOf(time.Time{}),
+					AutoUpdateTime: 0,
+				},
+				{
+					Name:           "CreateNanoTime",
+					MongoField:     "create_nano_time",
+					FieldType:      reflect.TypeOf(time.Time{}),
+					AutoCreateTime: 0,
+				},
+			},
+		},
+		{
 			name: "mongox and bson tag for default time field with a value in unix milli seconds.",
 			doc: struct {
 				CreatedAt int64 `bson:"created_at" mongox:"autoCreateTime:milli"`
@@ -303,10 +352,52 @@ func TestParseFields(t *testing.T) {
 			},
 		},
 		{
+			name: "mongox timestamp precision tags on int fields",
+			doc: struct {
+				CreateMilliTime int `bson:"create_milli_time" mongox:"autoCreateTime:milli"`
+				UpdateNanoTime  int `bson:"update_nano_time" mongox:"autoUpdateTime:nano"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreateMilliTime",
+					MongoField:     "create_milli_time",
+					FieldType:      reflect.TypeOf(0),
+					AutoCreateTime: UnixMillisecond,
+				},
+				{
+					Name:           "UpdateNanoTime",
+					MongoField:     "update_nano_time",
+					FieldType:      reflect.TypeOf(0),
+					AutoUpdateTime: UnixNanosecond,
+				},
+			},
+		},
+		{
 			name: "invalid type 4 default time field",
 			doc: struct {
 				CreatedAt string `bson:"created_at"`
 				UpdatedAt bool   `bson:"updated_at"`
+			}{},
+			want: []*Filed{
+				{
+					Name:           "CreatedAt",
+					MongoField:     "created_at",
+					FieldType:      reflect.TypeOf(""),
+					AutoCreateTime: 0,
+				},
+				{
+					Name:           "UpdatedAt",
+					MongoField:     "updated_at",
+					FieldType:      reflect.TypeOf(false),
+					AutoUpdateTime: 0,
+				},
+			},
+		},
+		{
+			name: "invalid type for mongox time tag",
+			doc: struct {
+				CreatedAt string `bson:"created_at" mongox:"autoCreateTime"`
+				UpdatedAt bool   `bson:"updated_at" mongox:"autoUpdateTime:milli"`
 			}{},
 			want: []*Filed{
 				{

@@ -181,6 +181,24 @@ func TestBeforeInsert(t *testing.T) {
 			},
 		},
 		{
+			name:        "time.Time default fields with explicit mongox tag",
+			doc:         reflect.ValueOf(&userWithTaggedDefaultTimeFields{}).Elem(),
+			currentTime: time.Now(),
+			fields:      field.ParseFields(&userWithTaggedDefaultTimeFields{}),
+			wantErr:     nil,
+			validateFunc: func(t *testing.T, v any) {
+				u, ok := v.(userWithTaggedDefaultTimeFields)
+				require.True(t, ok)
+				require.NotZero(t, u.CreatedAt)
+				require.NotZero(t, u.UpdatedAt)
+				require.Zero(t, u.CreateSecondTime)
+				require.Zero(t, u.UpdateMilliTime)
+				require.NotZero(t, u.CreateMilliTime)
+				require.NotZero(t, u.UpdateNanoTime)
+				require.Zero(t, u.InvalidTime)
+			},
+		},
+		{
 			name: "int64 / int type for default time field",
 			doc: reflect.ValueOf(&struct {
 				ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
@@ -295,6 +313,13 @@ func Test_beforeUpdate(t *testing.T) {
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
 		{
+			name:        "a bson.M updates ignore precision tags on time.Time fields",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&userWithTaggedDefaultTimeFields{}),
+			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_nano_time": int(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano())}},
+		},
+		{
 			name:        "a bson.M updates and not time.Time type for default time field",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -302,7 +327,7 @@ func Test_beforeUpdate(t *testing.T) {
 				CreatedAt int64 `bson:"created_at"`
 				UpdatedAt int   `bson:"updated_at"`
 			}{}),
-			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}},
+			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": int(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix())}},
 		},
 	}
 	for _, tt := range tests {
@@ -383,6 +408,23 @@ func Test_beforeUpsert(t *testing.T) {
 			want:        bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "update_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "update_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "update_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC), "create_second_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix(), "create_milli_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(), "create_nano_time": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()}},
 		},
 		{
+			name:        "a bson.M upserts ignore precision tags on time.Time fields",
+			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
+			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+			fields:      field.ParseFields(&userWithTaggedDefaultTimeFields{}),
+			want: bson.M{
+				"$set": bson.M{
+					"name":             "Mingyong Chen",
+					"updated_at":       time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+					"update_nano_time": int(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixNano()),
+				},
+				"$setOnInsert": bson.M{
+					"created_at":        time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+					"create_milli_time": int(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()),
+				},
+			},
+		},
+		{
 			name:        "a bson.M updates and not time.Time type for default time field",
 			updates:     bson.M{"$set": bson.M{"name": "Mingyong Chen"}},
 			currentTime: time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -390,7 +432,7 @@ func Test_beforeUpsert(t *testing.T) {
 				CreatedAt int64 `bson:"created_at"`
 				UpdatedAt int   `bson:"updated_at"`
 			}{}),
-			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}},
+			want: bson.M{"$set": bson.M{"name": "Mingyong Chen", "updated_at": int(time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix())}, "$setOnInsert": bson.M{"created_at": time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).Unix()}},
 		},
 	}
 	for _, tt := range tests {
@@ -402,8 +444,124 @@ func Test_beforeUpsert(t *testing.T) {
 	}
 }
 
+func Test_setTimeField(t *testing.T) {
+	currentTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	type unixSecond int64
+
+	testCases := []struct {
+		name        string
+		doc         any
+		timeType    field.TimeType
+		currentTime time.Time
+		fieldType   reflect.Type
+
+		validateFunc func(*testing.T, any)
+	}{
+		{
+			name: "skip invalid field type",
+			doc: &struct {
+				Value string
+			}{},
+			timeType:    field.UnixMillisecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(""),
+			validateFunc: func(t *testing.T, v any) {
+				doc, ok := v.(*struct {
+					Value string
+				})
+				require.True(t, ok)
+				require.Zero(t, doc.Value)
+			},
+		},
+		{
+			name: "convertible time value",
+			doc: &struct {
+				Value unixSecond
+			}{},
+			timeType:    field.UnixSecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(int64(0)),
+			validateFunc: func(t *testing.T, v any) {
+				doc, ok := v.(*struct {
+					Value unixSecond
+				})
+				require.True(t, ok)
+				require.Equal(t, unixSecond(currentTime.Unix()), doc.Value)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			setTimeField(reflect.ValueOf(tc.doc).Elem().Field(0), tc.timeType, tc.currentTime, tc.fieldType)
+			if tc.validateFunc != nil {
+				tc.validateFunc(t, tc.doc)
+			}
+		})
+	}
+}
+
 func Test_getTimeValue(t *testing.T) {
-	t.Run("invalid type", func(t *testing.T) {
-		require.Nil(t, getTimeValue(0, time.Time{}))
-	})
+	currentTime := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name        string
+		timeType    field.TimeType
+		currentTime time.Time
+		fieldType   reflect.Type
+		want        any
+		wantOK      bool
+	}{
+		{
+			name:        "time.Time",
+			timeType:    field.UnixTime,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(time.Time{}),
+			want:        currentTime,
+			wantOK:      true,
+		},
+		{
+			name:        "time.Time with timestamp precision",
+			timeType:    field.UnixMillisecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(time.Time{}),
+			wantOK:      false,
+		},
+		{
+			name:        "int milli",
+			timeType:    field.UnixMillisecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(0),
+			want:        int(currentTime.UnixMilli()),
+			wantOK:      true,
+		},
+		{
+			name:        "int64 nano",
+			timeType:    field.UnixNanosecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(int64(0)),
+			want:        currentTime.UnixNano(),
+			wantOK:      true,
+		},
+		{
+			name:        "invalid time type",
+			timeType:    0,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(time.Time{}),
+			wantOK:      false,
+		},
+		{
+			name:        "invalid field type",
+			timeType:    field.UnixMillisecond,
+			currentTime: currentTime,
+			fieldType:   reflect.TypeOf(""),
+			wantOK:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := getTimeValue(tt.timeType, tt.currentTime, tt.fieldType)
+			require.Equal(t, tt.wantOK, ok)
+			require.Equal(t, tt.want, got)
+		})
+	}
 }

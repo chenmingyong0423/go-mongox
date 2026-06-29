@@ -71,25 +71,22 @@ func handleTimeField(dest reflect.Value, fd *field.Filed, currentTime time.Time)
 	}
 }
 
-// 设置具体的时间值
+// setTimeField sets a zero-valued auto time field.
 func setTimeField(dest reflect.Value, timeType field.TimeType, currentTime time.Time, fieldType reflect.Type) {
 	if !dest.IsZero() {
 		return
 	}
-	switch timeType {
-	case field.UnixTime:
-		dest.Set(reflect.ValueOf(currentTime))
-	case field.UnixSecond:
-		switch fieldType.Kind() {
-		case reflect.Int:
-			dest.Set(reflect.ValueOf(int(currentTime.Unix())))
-		default:
-			dest.Set(reflect.ValueOf(currentTime.Unix()))
-		}
-	case field.UnixMillisecond:
-		dest.Set(reflect.ValueOf(currentTime.UnixMilli()))
-	case field.UnixNanosecond:
-		dest.Set(reflect.ValueOf(currentTime.UnixNano()))
+	value, ok := getTimeValue(timeType, currentTime, fieldType)
+	if !ok {
+		return
+	}
+	reflectValue := reflect.ValueOf(value)
+	if reflectValue.Type().AssignableTo(dest.Type()) {
+		dest.Set(reflectValue)
+		return
+	}
+	if reflectValue.Type().ConvertibleTo(dest.Type()) {
+		dest.Set(reflectValue.Convert(dest.Type()))
 	}
 }
 
@@ -183,28 +180,52 @@ func findUpsertFields(fd *field.Filed, currentTime time.Time) (string, any) {
 	}
 
 	if fd.AutoCreateTime != 0 {
-		return fd.MongoField, getTimeValue(fd.AutoCreateTime, currentTime)
+		value, ok := getTimeValue(fd.AutoCreateTime, currentTime, fd.FieldType)
+		if ok {
+			return fd.MongoField, value
+		}
 	}
 	return "", nil
 }
 
 func findUpdatedFields(fd *field.Filed, currentTime time.Time) (string, any) {
 	if fd.AutoUpdateTime != 0 {
-		return fd.MongoField, getTimeValue(fd.AutoUpdateTime, currentTime)
+		value, ok := getTimeValue(fd.AutoUpdateTime, currentTime, fd.FieldType)
+		if ok {
+			return fd.MongoField, value
+		}
 	}
 	return "", nil
 }
 
-func getTimeValue(timeType field.TimeType, currentTime time.Time) any {
-	switch timeType {
-	case field.UnixTime:
-		return currentTime
-	case field.UnixSecond:
-		return currentTime.Unix()
-	case field.UnixMillisecond:
-		return currentTime.UnixMilli()
-	case field.UnixNanosecond:
-		return currentTime.UnixNano()
+func getTimeValue(timeType field.TimeType, currentTime time.Time, fieldType reflect.Type) (any, bool) {
+	if timeType == 0 {
+		return nil, false
 	}
-	return nil
+	switch fieldType.Kind() {
+	case reflect.Struct:
+		if fieldType == reflect.TypeOf(time.Time{}) && timeType == field.UnixTime {
+			return currentTime, true
+		}
+	case reflect.Int:
+		switch timeType {
+		case field.UnixSecond:
+			return int(currentTime.Unix()), true
+		case field.UnixMillisecond:
+			return int(currentTime.UnixMilli()), true
+		case field.UnixNanosecond:
+			return int(currentTime.UnixNano()), true
+		}
+	case reflect.Int64:
+		switch timeType {
+		case field.UnixSecond:
+			return currentTime.Unix(), true
+		case field.UnixMillisecond:
+			return currentTime.UnixMilli(), true
+		case field.UnixNanosecond:
+			return currentTime.UnixNano(), true
+		}
+	default:
+	}
+	return nil, false
 }
