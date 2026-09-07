@@ -49,7 +49,7 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 	switch valueOf.Type().Kind() {
 	case reflect.Slice:
 		return executeSlice(ctx, valueOf, opType, opts...)
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if valueOf.IsZero() {
 			return nil
 		}

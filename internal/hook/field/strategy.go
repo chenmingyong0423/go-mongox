@@ -32,7 +32,7 @@ var strategies = map[operation.OpType]func(dest any, currentTime time.Time, fiel
 
 func beforeInsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...any) error {
 	if v, ok := dest.(reflect.Value); ok {
-		if v.Kind() == reflect.Ptr {
+		if v.Kind() == reflect.Pointer {
 			v = v.Elem()
 		}
 		return processFields4Insert(v, currentTime, fields)

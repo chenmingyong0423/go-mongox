@@ -82,12 +82,12 @@ func TestStringSortToBsonD(t *testing.T) {
 		{
 			name:  "one sort",
 			value: []string{"-created_at"},
-			want:  bson.D{{Key: "created_at", Value: -1}},
+			want:  bson.D{bson.E{Key: "created_at", Value: -1}},
 		},
 		{
 			name:  "two sort",
 			value: []string{"age", "-created_at"},
-			want:  bson.D{{Key: "age", Value: 1}, {Key: "created_at", Value: -1}},
+			want:  bson.D{bson.E{Key: "age", Value: 1}, bson.E{Key: "created_at", Value: -1}},
 		},
 	}
 
