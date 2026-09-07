@@ -1,6 +1,6 @@
 module github.com/chenmingyong0423/go-mongox/v2
 
-go 1.19
+go 1.25.0
 
 require (
 	github.com/stretchr/testify v1.10.0

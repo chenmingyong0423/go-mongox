@@ -34,10 +34,10 @@ test -x $TARGET_PUSH || chmod +x $TARGET_PUSH
 test -x $TARGET_COMMIT || chmod +x $TARGET_COMMIT
 
 echo "install golangci-lint..."
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
 
 echo "install goimports..."
-go install golang.org/x/tools/cmd/goimports@latest
+go install golang.org/x/tools/cmd/goimports@v0.36.0
 
 echo "go mod tidy"
 go mod tidy

@@ -28,10 +28,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
 
     - name: Build
       run: go build -v ./...
@@ -39,9 +41,8 @@ jobs:
     - name: Test
       run: go test -race -coverprofile=cover.out -v ./...
 
-    - name: Post Coverage
-      uses: codecov/codecov-action@v4
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4.0.1
+      uses: codecov/codecov-action@v5
       with:
+        files: ./cover.out
         token: ${{ secrets.CODECOV_TOKEN }}
