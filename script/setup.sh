@@ -34,10 +34,12 @@ test -x $TARGET_PUSH || chmod +x $TARGET_PUSH
 test -x $TARGET_COMMIT || chmod +x $TARGET_COMMIT
 
 echo "install golangci-lint..."
-go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.4.0
+# Local Go versions may be newer than the version used by CI.
+# Allow developers to select a compatible release when needed.
+go install "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI_LINT_VERSION:-latest}" || exit 1
 
 echo "install goimports..."
-go install golang.org/x/tools/cmd/goimports@v0.36.0
+go install "golang.org/x/tools/cmd/goimports@${GOIMPORTS_VERSION:-latest}" || exit 1
 
 echo "go mod tidy"
 go mod tidy
