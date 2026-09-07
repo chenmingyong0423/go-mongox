@@ -61,7 +61,7 @@ func ParseFields[T any](doc T) []*Filed {
 	if docType == nil {
 		return nil
 	}
-	if docType.Kind() == reflect.Ptr {
+	if docType.Kind() == reflect.Pointer {
 		docType = docType.Elem()
 	}
 	if docType.Kind() != reflect.Struct {
