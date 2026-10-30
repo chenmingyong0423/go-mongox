@@ -22,9 +22,13 @@ import (
 	"github.com/chenmingyong0423/go-mongox/v2/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.OpType, opts ...any) error {
+	if opCtx == nil {
+		return nil
+	}
 	switch opType {
 	case operation.OpTypeBeforeInsert:
 		valueOf := opCtx.ReflectValue
@@ -45,9 +49,49 @@ func Execute(ctx context.Context, opCtx *operation.OpContext, opType operation.O
 			return nil
 		}
 	case operation.OpTypeBeforeUpdate, operation.OpTypeBeforeUpsert:
+		if isNilFilter(opCtx.Filter) {
+			return nil
+		}
+		opCtx.Filter = filterByDeleteScope(opCtx.Filter, opCtx.Fields, opCtx.SoftDeleteScope)
 		return execute(ctx, opCtx.Updates, opType, opCtx.StartTime, opCtx.Fields, opts...)
+	case operation.OpTypeBeforeFind:
+		if isNilFilter(opCtx.Filter) {
+			return nil
+		}
+		opCtx.Filter = filterByDeleteScope(opCtx.Filter, opCtx.Fields, opCtx.SoftDeleteScope)
+	case operation.OpTypeBeforeDelete:
+		if isNilFilter(opCtx.Filter) {
+			return nil
+		}
+		opCtx.Filter = FilterNotDeleted(opCtx.Filter, opCtx.Fields)
+		return beforeDelete(opCtx)
 	}
 	return nil
+}
+
+func isNilFilter(filter any) bool {
+	switch f := filter.(type) {
+	case nil:
+		return true
+	case bson.D:
+		return f == nil
+	case bson.M:
+		return f == nil
+	case map[string]any:
+		return f == nil
+	case *bson.D:
+		return f == nil || *f == nil
+	case *bson.M:
+		return f == nil || *f == nil
+	case *map[string]any:
+		return f == nil || *f == nil
+	case bson.Raw:
+		return f == nil
+	case []byte:
+		return f == nil
+	default:
+		return false
+	}
 }
 
 func executeSlice(ctx context.Context, docs reflect.Value, opType operation.OpType, currentTime time.Time, fields []*field.Filed, opts ...any) error {

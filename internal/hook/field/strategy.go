@@ -156,6 +156,67 @@ func beforeUpsert(dest any, currentTime time.Time, fields []*field.Filed, _ ...a
 	return nil
 }
 
+// FilterNotDeleted adds the model's deletion scope without changing the caller's
+// filter. Missing fields, nulls and zero times all represent live documents.
+// The filter must have been validated by Execute.
+func FilterNotDeleted(filter any, fields []*field.Filed) any {
+	return filterByDeleteScope(filter, fields, operation.SoftDeleteScopeNotDeleted)
+}
+
+func filterByDeleteScope(filter any, fields []*field.Filed, scope operation.SoftDeleteScope) any {
+	if scope == operation.SoftDeleteScopeWithDeleted {
+		return filter
+	}
+	conditions := bson.D{}
+	visitDeletedFields(fields, func(fd *field.Filed) {
+		zero := reflect.Zero(fd.FieldType).Interface()
+		conditions = append(conditions, bson.E{Key: fd.MongoField, Value: bson.D{
+			{Key: "$in", Value: bson.A{nil, zero}},
+		}})
+	})
+	if scope == operation.SoftDeleteScopeOnlyDeleted {
+		// Negate the entire live scope, including missing/null/zero values.
+		// Without deletion fields, the live scope is {}, so no documents match.
+		conditions = bson.D{{Key: "$nor", Value: bson.A{conditions}}}
+	} else if len(conditions) == 0 {
+		return filter
+	}
+	// Like mongo.Collection, interpret byte slice filters as raw BSON.
+	// Invalid filters are left for the driver/server to reject, not repaired.
+	if raw, ok := filter.([]byte); ok {
+		filter = bson.Raw(raw)
+	}
+	return bson.D{{Key: "$and", Value: bson.A{filter, conditions}}}
+}
+
+func visitDeletedFields(fields []*field.Filed, visit func(*field.Filed)) {
+	for _, fd := range fields {
+		if fd.InlinedFields != nil {
+			visitDeletedFields(fd.InlinedFields, visit)
+		} else if fd.AutoDeleteTime != 0 {
+			visit(fd)
+		}
+	}
+}
+
+func beforeDelete(opCtx *operation.OpContext) error {
+	setFields := findAdditionalFields(opCtx.StartTime, opCtx.Fields, func(fd *field.Filed, now time.Time) (string, any) {
+		if fd.AutoDeleteTime != 0 {
+			if value, ok := getTimeValue(fd.AutoDeleteTime, now, fd.FieldType); ok {
+				return fd.MongoField, value
+			}
+		}
+		return "", nil
+	})
+	opCtx.SoftDelete = len(setFields) > 0
+	if !opCtx.SoftDelete {
+		return nil
+	}
+	// Prepare the update document without executing update callbacks.
+	opCtx.Updates = bson.M{"$set": bson.M(setFields)}
+	return nil
+}
+
 // 通用字段处理
 func findAdditionalFields(currentTime time.Time, fields []*field.Filed, handler func(field *field.Filed, currentTime time.Time) (string, any)) map[string]any {
 	result := make(map[string]any, len(fields))
@@ -204,7 +265,7 @@ func getTimeValue(timeType field.TimeType, currentTime time.Time, fieldType refl
 	}
 	switch fieldType.Kind() {
 	case reflect.Struct:
-		if fieldType == reflect.TypeOf(time.Time{}) && timeType == field.UnixTime {
+		if fieldType == reflect.TypeFor[time.Time]() && timeType == field.UnixTime {
 			return currentTime, true
 		}
 	case reflect.Int:

@@ -218,6 +218,20 @@ func (mr *MockIFinderMockRecorder[T]) ModelHook(modelHook any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModelHook", reflect.TypeOf((*MockIFinder[T])(nil).ModelHook), modelHook)
 }
 
+// OnlyDeleted mocks base method.
+func (m *MockIFinder[T]) OnlyDeleted() finder.IFinder[T] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnlyDeleted")
+	ret0, _ := ret[0].(finder.IFinder[T])
+	return ret0
+}
+
+// OnlyDeleted indicates an expected call of OnlyDeleted.
+func (mr *MockIFinderMockRecorder[T]) OnlyDeleted() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnlyDeleted", reflect.TypeOf((*MockIFinder[T])(nil).OnlyDeleted))
+}
+
 // PostActionHandler mocks base method.
 func (m *MockIFinder[T]) PostActionHandler(ctx context.Context, globalOpContext *operation.OpContext, opContext *finder.OpContext[T], opTypes ...operation.OpType) error {
 	m.ctrl.T.Helper()
@@ -332,4 +346,18 @@ func (m *MockIFinder[T]) Updates(update any) finder.IFinder[T] {
 func (mr *MockIFinderMockRecorder[T]) Updates(update any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Updates", reflect.TypeOf((*MockIFinder[T])(nil).Updates), update)
+}
+
+// WithDeleted mocks base method.
+func (m *MockIFinder[T]) WithDeleted() finder.IFinder[T] {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithDeleted")
+	ret0, _ := ret[0].(finder.IFinder[T])
+	return ret0
+}
+
+// WithDeleted indicates an expected call of WithDeleted.
+func (mr *MockIFinderMockRecorder[T]) WithDeleted() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithDeleted", reflect.TypeOf((*MockIFinder[T])(nil).WithDeleted))
 }

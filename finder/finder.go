@@ -20,6 +20,7 @@ import (
 
 	"github.com/chenmingyong0423/go-mongox/v2/bsonx"
 	"github.com/chenmingyong0423/go-mongox/v2/field"
+	fieldhook "github.com/chenmingyong0423/go-mongox/v2/internal/hook/field"
 
 	"github.com/chenmingyong0423/go-mongox/v2/callback"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -38,6 +39,8 @@ type IFinder[T any] interface {
 	Distinct(ctx context.Context, fieldName string, opts ...options.Lister[options.DistinctOptions]) *mongo.DistinctResult
 	DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...options.Lister[options.DistinctOptions]) error
 	Filter(filter any) IFinder[T]
+	WithDeleted() IFinder[T]
+	OnlyDeleted() IFinder[T]
 	FindOneAndUpdate(ctx context.Context, opts ...options.Lister[options.FindOneAndUpdateOptions]) (*T, error)
 	Limit(limit int64) IFinder[T]
 	ModelHook(modelHook any) IFinder[T]
@@ -58,10 +61,11 @@ func NewFinder[T any](collection *mongo.Collection, callbacks *callback.Callback
 var _ IFinder[any] = (*Finder[any])(nil)
 
 type Finder[T any] struct {
-	Collection *mongo.Collection
-	FilterObj  any
-	updates    any
-	modelHook  any
+	Collection      *mongo.Collection
+	FilterObj       any
+	updates         any
+	modelHook       any
+	softDeleteScope operation.SoftDeleteScope
 
 	fields      []*field.Filed
 	DBCallbacks *callback.Callback
@@ -88,6 +92,21 @@ func (f *Finder[T]) RegisterAfterHooks(hooks ...AfterHookFn[T]) IFinder[T] {
 // Filter is used to set the filter of the query
 func (f *Finder[T]) Filter(filter any) IFinder[T] {
 	f.FilterObj = filter
+	return f
+}
+
+// WithDeleted includes both live and deleted documents in all finder operations,
+// including FindOneAndUpdate. The last scope method called takes precedence.
+func (f *Finder[T]) WithDeleted() IFinder[T] {
+	f.softDeleteScope = operation.SoftDeleteScopeWithDeleted
+	return f
+}
+
+// OnlyDeleted matches only deleted documents in all finder operations, including
+// FindOneAndUpdate. Models without a supported deletion field match no documents.
+// The last scope method called takes precedence.
+func (f *Finder[T]) OnlyDeleted() IFinder[T] {
+	f.softDeleteScope = operation.SoftDeleteScopeOnlyDeleted
 	return f
 }
 
@@ -123,12 +142,16 @@ func (f *Finder[T]) PreActionHandler(ctx context.Context, globalOpContext *opera
 			return
 		}
 	}
+	opContext.Filter = globalOpContext.Filter
+	opContext.Updates = globalOpContext.Updates
 	for _, beforeHook := range f.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
 		}
 	}
+	globalOpContext.Filter = opContext.Filter
+	globalOpContext.Updates = opContext.Updates
 	return
 }
 
@@ -156,14 +179,14 @@ func (f *Finder[T]) FindOne(ctx context.Context, opts ...options.Lister[options.
 
 	t := new(T)
 
-	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
+	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields), operation.WithSoftDeleteScope(f.softDeleteScope))
 	opContext := NewOpContext(f.Collection, f.FilterObj, WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
 	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
 
-	result := f.Collection.FindOne(ctx, f.FilterObj, opts...)
+	result := f.Collection.FindOne(ctx, opContext.Filter, opts...)
 	err = result.Decode(t)
 	if err != nil {
 		return nil, err
@@ -196,14 +219,14 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 
 	t := make([]*T, 0)
 
-	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
+	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields), operation.WithSoftDeleteScope(f.softDeleteScope))
 	opContext := NewOpContext(f.Collection, f.FilterObj, WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
 	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind)
 	if err != nil {
 		return nil, err
 	}
 
-	cursor, err := f.Collection.Find(ctx, f.FilterObj, opts...)
+	cursor, err := f.Collection.Find(ctx, opContext.Filter, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -228,17 +251,24 @@ func (f *Finder[T]) Find(ctx context.Context, opts ...options.Lister[options.Fin
 }
 
 func (f *Finder[T]) Count(ctx context.Context, opts ...options.Lister[options.CountOptions]) (int64, error) {
-	return f.Collection.CountDocuments(ctx, f.FilterObj, opts...)
+	opCtx := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithFields(f.fields), operation.WithSoftDeleteScope(f.softDeleteScope))
+	if err := fieldhook.Execute(ctx, opCtx, operation.OpTypeBeforeFind); err != nil {
+		return 0, err
+	}
+	return f.Collection.CountDocuments(ctx, opCtx.Filter, opts...)
 }
 
 func (f *Finder[T]) Distinct(ctx context.Context, fieldName string, opts ...options.Lister[options.DistinctOptions]) *mongo.DistinctResult {
-	return f.Collection.Distinct(ctx, fieldName, f.FilterObj, opts...)
+	opCtx := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithFields(f.fields), operation.WithSoftDeleteScope(f.softDeleteScope))
+	// The field beforeFind hook only prepares the filter and does not return errors.
+	_ = fieldhook.Execute(ctx, opCtx, operation.OpTypeBeforeFind)
+	return f.Collection.Distinct(ctx, fieldName, opCtx.Filter, opts...)
 }
 
 // DistinctWithParse is used to parse the result of Distinct
 // result must be a pointer
 func (f *Finder[T]) DistinctWithParse(ctx context.Context, fieldName string, result any, opts ...options.Lister[options.DistinctOptions]) error {
-	distinctResult := f.Collection.Distinct(ctx, fieldName, f.FilterObj, opts...)
+	distinctResult := f.Distinct(ctx, fieldName, opts...)
 	if distinctResult.Err() != nil {
 		return distinctResult.Err()
 	}
@@ -258,7 +288,7 @@ func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister
 		f.updates = updates
 	}
 
-	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithUpdates(f.updates), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields))
+	globalOpContext := operation.NewOpContext(f.Collection, operation.WithFilter(f.FilterObj), operation.WithUpdates(f.updates), operation.WithMongoOptions(opts), operation.WithModelHook(f.modelHook), operation.WithStartTime(currentTime), operation.WithFields(f.fields), operation.WithSoftDeleteScope(f.softDeleteScope))
 	opContext := NewOpContext(f.Collection, f.FilterObj, WithUpdates[T](f.updates), WithMongoOptions[T](opts), WithModelHook[T](f.modelHook), WithStartTime[T](currentTime), WithFields[T](f.fields))
 
 	err := f.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate)
@@ -266,7 +296,7 @@ func (f *Finder[T]) FindOneAndUpdate(ctx context.Context, opts ...options.Lister
 		return nil, err
 	}
 
-	result := f.Collection.FindOneAndUpdate(ctx, f.FilterObj, f.updates, opts...)
+	result := f.Collection.FindOneAndUpdate(ctx, opContext.Filter, opContext.Updates, opts...)
 	err = result.Decode(t)
 	if err != nil {
 		return nil, err

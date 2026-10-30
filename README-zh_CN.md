@@ -33,6 +33,52 @@ go get github.com/chenmingyong0423/go-mongox/v2
 # 快速开始
 - `go mongox` 指南： [https://go-mongox.dev](https://go-mongox.dev)
 
+## 软删除
+
+模型包含 `DeletedAt` 字段时，`DeleteOne` / `DeleteMany` 自动通过更新删除时间进行软删除。内嵌 `mongox.Model` 时请使用 `bson:",inline"`：
+
+```go
+type User struct {
+	mongox.Model `bson:",inline"`
+	Name string `bson:"name"`
+}
+```
+
+- `DeletedAt` 支持 `time.Time`、`int`、`int64`；整数默认为秒。自定义字段名或时间精度可使用 `mongox:"autoDeleteTime"`、`autoDeleteTime:second`、`autoDeleteTime:milli`、`autoDeleteTime:nano`，精度标签仅适用于整数。
+- 字段缺失、`null` 或类型对应的零值均表示未删除。插入时不会自动设置删除时间；软删除仅设置删除时间。
+- `FindOne`、`Find`、`Count`、`Distinct`、`DistinctWithParse`、`FindOneAndUpdate`、`UpdateOne`、`UpdateMany` 和 `Upsert` 默认只匹配未删除文档。重复删除返回的 `DeletedCount` 为零。
+- Finder 支持 `WithDeleted()` 查询全部文档（包括已删除），以及 `OnlyDeleted()` 仅查询已删除文档。这两个方法适用于 Finder 的全部操作，包括 `Count`、`Distinct` 和 `FindOneAndUpdate`；连续调用时以后一次为准，设置保留在当前 Finder 上，新建 Finder 恢复默认范围。
+- 没有有效软删除字段的模型，`WithDeleted()` 保持原查询条件，`OnlyDeleted()` 不匹配任何文档。
+- `Upsert` 不会恢复已删除文档；它可能插入新文档，或因已有文档占用唯一键而失败。
+- 没有有效软删除字段的模型保持物理删除行为。不支持的类型或时间精度不会启用软删除；`bson:"-"` 字段不参与处理。
+- 聚合管道和通过 `Collection()` 获取的官方集合保持原生行为，需要调用方自行指定过滤条件。永久删除、恢复等特殊操作也可通过官方集合完成。
+
+已有模型内嵌 `mongox.Model` 的应用，升级后其删除和上述查询操作会自动采用软删除语义。
+
+```go
+// 包含已删除文档，仍保留业务过滤条件。
+users, err := collection.Finder().WithDeleted().Filter(filter).Find(ctx)
+
+// 仅统计已删除文档。
+count, err := collection.Finder().OnlyDeleted().Filter(filter).Count(ctx)
+
+// 更新已删除文档，例如恢复 time.Time 类型的删除时间。
+user, err := collection.Finder().OnlyDeleted().Filter(filter).
+	Updates(bson.M{"$set": bson.M{"deleted_at": time.Time{}}}).
+	FindOneAndUpdate(ctx)
+```
+
+软删除的执行参数通过 `UpdateOneOptions` / `UpdateManyOptions` 配置，直接使用官方 Update options：
+
+```go
+_, err := collection.Deleter().
+	Filter(filter).
+	UpdateOneOptions(options.UpdateOne().SetHint("name_1")).
+	DeleteOne(ctx)
+```
+
+`DeleteOne` / `DeleteMany` 的 Delete options 仅用于物理删除，不会转换为 Update options。未配置 Update options 时使用官方默认值；每次链式配置替换此前的配置，传入空参数可清除配置。删除方式仍由模型字段自动确定。
+
 # 贡献
 [如果有您的加入，go-mongox 将会变得更加强大！](https://go-mongox.dev/contribute.html)
 

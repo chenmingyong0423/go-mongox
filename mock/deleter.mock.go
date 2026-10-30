@@ -189,3 +189,39 @@ func (mr *MockIDeleterMockRecorder[T]) RegisterBeforeHooks(hooks ...any) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterBeforeHooks", reflect.TypeOf((*MockIDeleter[T])(nil).RegisterBeforeHooks), hooks...)
 }
+
+// UpdateManyOptions mocks base method.
+func (m *MockIDeleter[T]) UpdateManyOptions(opts ...options.Lister[options.UpdateManyOptions]) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	varargs := []any{}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateManyOptions", varargs...)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// UpdateManyOptions indicates an expected call of UpdateManyOptions.
+func (mr *MockIDeleterMockRecorder[T]) UpdateManyOptions(opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateManyOptions", reflect.TypeOf((*MockIDeleter[T])(nil).UpdateManyOptions), opts...)
+}
+
+// UpdateOneOptions mocks base method.
+func (m *MockIDeleter[T]) UpdateOneOptions(opts ...options.Lister[options.UpdateOneOptions]) deleter.IDeleter[T] {
+	m.ctrl.T.Helper()
+	varargs := []any{}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateOneOptions", varargs...)
+	ret0, _ := ret[0].(deleter.IDeleter[T])
+	return ret0
+}
+
+// UpdateOneOptions indicates an expected call of UpdateOneOptions.
+func (mr *MockIDeleterMockRecorder[T]) UpdateOneOptions(opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneOptions", reflect.TypeOf((*MockIDeleter[T])(nil).UpdateOneOptions), opts...)
+}

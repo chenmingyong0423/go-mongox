@@ -32,6 +32,8 @@ import (
 type IDeleter[T any] interface {
 	DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error)
+	UpdateOneOptions(opts ...options.Lister[options.UpdateOneOptions]) IDeleter[T]
+	UpdateManyOptions(opts ...options.Lister[options.UpdateManyOptions]) IDeleter[T]
 	Filter(filter any) IDeleter[T]
 	ModelHook(modelHook any) IDeleter[T]
 	RegisterAfterHooks(hooks ...AfterHookFn) IDeleter[T]
@@ -54,6 +56,9 @@ type Deleter[T any] struct {
 	filter    any
 	modelHook any
 
+	updateOneOptions  []options.Lister[options.UpdateOneOptions]
+	updateManyOptions []options.Lister[options.UpdateManyOptions]
+
 	DBCallbacks *callback.Callback
 	BeforeHooks []BeforeHookFn
 	AfterHooks  []AfterHookFn
@@ -74,12 +79,16 @@ func (d *Deleter[T]) PreActionHandler(ctx context.Context, globalOpContext *oper
 	if err != nil {
 		return err
 	}
+	opContext.Filter = globalOpContext.Filter
+	opContext.Updates = globalOpContext.Updates
 	for _, beforeHook := range d.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
 		}
 	}
+	globalOpContext.Filter = opContext.Filter
+	globalOpContext.Updates = opContext.Updates
 	return nil
 }
 
@@ -108,31 +117,51 @@ func (d *Deleter[T]) ModelHook(modelHook any) IDeleter[T] {
 	return d
 }
 
+// UpdateOneOptions sets the driver options used when DeleteOne performs a soft deletion.
+// Each call replaces the previous options. No options means using driver defaults.
+func (d *Deleter[T]) UpdateOneOptions(opts ...options.Lister[options.UpdateOneOptions]) IDeleter[T] {
+	d.updateOneOptions = opts
+	return d
+}
+
+// UpdateManyOptions sets the driver options used when DeleteMany performs a soft deletion.
+// Each call replaces the previous options. No options means using driver defaults.
+func (d *Deleter[T]) UpdateManyOptions(opts ...options.Lister[options.UpdateManyOptions]) IDeleter[T] {
+	d.updateManyOptions = opts
+	return d
+}
+
+// DeleteOne marks a matching live document as deleted when T has an automatic
+// deletion time field. Otherwise it physically deletes the document.
 func (d *Deleter[T]) DeleteOne(ctx context.Context, opts ...options.Lister[options.DeleteOneOptions]) (*mongo.DeleteResult, error) {
-	currentTime := time.Now()
-	globalOpContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook), operation.WithFields(d.fields), operation.WithStartTime(currentTime))
-	opContext := NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook), WithFields(d.fields), WithStartTime(currentTime))
-	err := d.PreActionHandler(ctx, globalOpContext, opContext, operation.OpTypeBeforeDelete)
-	if err != nil {
-		return nil, err
-	}
-
-	result, err := d.collection.DeleteOne(ctx, d.filter, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	globalOpContext.Result = result
-	opContext.Result = result
-	err = d.PostActionHandler(ctx, globalOpContext, opContext, operation.OpTypeAfterDelete)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return d.executeDelete(ctx, opts,
+		func(opContext *OpContext) (*mongo.DeleteResult, error) {
+			return d.collection.DeleteOne(ctx, opContext.Filter, opts...)
+		},
+		func(opContext *OpContext) (*mongo.UpdateResult, error) {
+			return d.collection.UpdateOne(ctx, opContext.Filter, opContext.Updates, d.updateOneOptions...)
+		},
+	)
 }
 
+// DeleteMany marks matching live documents as deleted when T has an automatic
+// deletion time field. Otherwise, it physically deletes matching documents.
 func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[options.DeleteManyOptions]) (*mongo.DeleteResult, error) {
+	return d.executeDelete(ctx, opts,
+		func(opContext *OpContext) (*mongo.DeleteResult, error) {
+			return d.collection.DeleteMany(ctx, opContext.Filter, opts...)
+		},
+		func(opContext *OpContext) (*mongo.UpdateResult, error) {
+			return d.collection.UpdateMany(ctx, opContext.Filter, opContext.Updates, d.updateManyOptions...)
+		},
+	)
+}
+
+// executeDelete runs the shared lifecycle; callers provide the typed driver operations.
+func (d *Deleter[T]) executeDelete(ctx context.Context, opts any,
+	deleteFn func(*OpContext) (*mongo.DeleteResult, error),
+	updateFn func(*OpContext) (*mongo.UpdateResult, error),
+) (*mongo.DeleteResult, error) {
 	currentTime := time.Now()
 	globalOpContext := operation.NewOpContext(d.collection, operation.WithFilter(d.filter), operation.WithMongoOptions(opts), operation.WithModelHook(d.modelHook), operation.WithFields(d.fields), operation.WithStartTime(currentTime))
 	opContext := NewOpContext(d.collection, d.filter, WithMongoOptions(opts), WithModelHook(d.modelHook), WithFields(d.fields), WithStartTime(currentTime))
@@ -141,7 +170,16 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[opti
 		return nil, err
 	}
 
-	result, err := d.collection.DeleteMany(ctx, d.filter, opts...)
+	var result *mongo.DeleteResult
+	if globalOpContext.SoftDelete {
+		var updateResult *mongo.UpdateResult
+		updateResult, err = updateFn(opContext)
+		if err == nil {
+			result = &mongo.DeleteResult{DeletedCount: updateResult.ModifiedCount, Acknowledged: updateResult.Acknowledged}
+		}
+	} else {
+		result, err = deleteFn(opContext)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +193,7 @@ func (d *Deleter[T]) DeleteMany(ctx context.Context, opts ...options.Lister[opti
 
 	return result, nil
 }
+
 func (d *Deleter[T]) GetCollection() *mongo.Collection {
 	return d.collection
 }

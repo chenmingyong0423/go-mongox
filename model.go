@@ -24,11 +24,12 @@ import (
 // - ID: the primary key of the document
 // - CreatedAt: the time when the document was created
 // - UpdatedAt: the time when the document was last updated
+// - DeletedAt: the soft deletion time; zero means the document is not deleted
 // It may be embedded into a struct to provide these fields.
 // Example:
 //
 //	type User struct {
-//		mongox.Model
+//		mongox.Model `bson:",inline"`
 //	}
 type Model struct {
 	ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`

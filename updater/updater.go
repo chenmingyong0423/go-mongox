@@ -105,12 +105,16 @@ func (u *Updater[T]) PreActionHandler(ctx context.Context, globalOpContext *oper
 	if err != nil {
 		return err
 	}
+	opContext.Filter = globalOpContext.Filter
+	opContext.Updates = globalOpContext.Updates
 	for _, beforeHook := range u.BeforeHooks {
 		err = beforeHook(ctx, opContext)
 		if err != nil {
 			return err
 		}
 	}
+	globalOpContext.Filter = opContext.Filter
+	globalOpContext.Updates = opContext.Updates
 	return nil
 }
 
@@ -144,7 +148,7 @@ func (u *Updater[T]) UpdateOne(ctx context.Context, opts ...options.Lister[optio
 		return nil, err
 	}
 
-	result, err := u.collection.UpdateOne(ctx, u.filter, u.updates, opts...)
+	result, err := u.collection.UpdateOne(ctx, opContext.Filter, opContext.Updates, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +178,7 @@ func (u *Updater[T]) UpdateMany(ctx context.Context, opts ...options.Lister[opti
 		return nil, err
 	}
 
-	result, err := u.collection.UpdateMany(ctx, u.filter, u.updates, opts...)
+	result, err := u.collection.UpdateMany(ctx, opContext.Filter, opContext.Updates, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +218,7 @@ func (u *Updater[T]) Upsert(ctx context.Context, opts ...options.Lister[options.
 		return nil, err
 	}
 
-	result, err := u.collection.UpdateOne(ctx, u.filter, u.updates, opts...)
+	result, err := u.collection.UpdateOne(ctx, opContext.Filter, opContext.Updates, opts...)
 	if err != nil {
 		return nil, err
 	}

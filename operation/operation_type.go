@@ -61,6 +61,11 @@ type OpContext struct {
 	ReflectValue reflect.Value
 	StartTime    time.Time
 
+	// SoftDelete is set by the field hook when preparing a soft deletion.
+	SoftDelete bool
+	// SoftDeleteScope controls the deletion filter for find and update operations.
+	SoftDeleteScope SoftDeleteScope
+
 	// result of the collection operation
 	Result any
 }
@@ -82,6 +87,12 @@ func NewOpContext(col *mongo.Collection, opts ...OpContextOption) *OpContext {
 func WithFields(fields []*field.Filed) OpContextOption {
 	return func(opContext *OpContext) {
 		opContext.Fields = fields
+	}
+}
+
+func WithSoftDeleteScope(scope SoftDeleteScope) OpContextOption {
+	return func(opContext *OpContext) {
+		opContext.SoftDeleteScope = scope
 	}
 }
 

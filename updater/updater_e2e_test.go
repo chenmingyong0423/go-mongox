@@ -82,6 +82,15 @@ type TestUser2 struct {
 	UpdatedAt    time.Time `bson:"updatedAt"`
 }
 
+type testSoftDeleteUser struct {
+	ID        bson.ObjectID `bson:"_id,omitempty" mongox:"autoID"`
+	Name      string        `bson:"name"`
+	Touched   bool          `bson:"touched"`
+	CreatedAt time.Time     `bson:"created_at"`
+	UpdatedAt time.Time     `bson:"updated_at"`
+	DeletedAt time.Time     `bson:"deleted_at"`
+}
+
 func getCollection(t *testing.T) *mongo.Collection {
 	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
@@ -100,6 +109,12 @@ func TestUpdater_e2e_New(t *testing.T) {
 }
 
 func TestUpdater_e2e_UpdateOne(t *testing.T) {
+	t.Run("standard cases", testUpdaterUpdateOne)
+	t.Run("soft delete", testSoftUpdaterUpdateOne)
+}
+
+func testUpdaterUpdateOne(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	updater := xupdater.NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
 	assert.NotNil(t, updater)
@@ -583,6 +598,12 @@ func TestUpdater_e2e_UpdateOne(t *testing.T) {
 }
 
 func TestUpdater_e2e_UpdateMany(t *testing.T) {
+	t.Run("standard cases", testUpdaterUpdateMany)
+	t.Run("soft delete", testSoftUpdaterUpdateMany)
+}
+
+func testUpdaterUpdateMany(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	updater := xupdater.NewUpdater[TestUser2](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser2{}))
 	assert.NotNil(t, updater)
@@ -975,6 +996,12 @@ func TestUpdater_e2e_UpdateMany(t *testing.T) {
 }
 
 func TestUpdater_e2e_Upsert(t *testing.T) {
+	t.Run("standard cases", testUpdaterUpsert)
+	t.Run("soft delete", testSoftUpdaterUpsert)
+}
+
+func testUpdaterUpsert(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	updater := xupdater.NewUpdater[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(TestUser{}))
 	assert.NotNil(t, updater)
@@ -1397,6 +1424,304 @@ func TestUpdater_e2e_Upsert(t *testing.T) {
 			}
 			updater.BeforeHooks = nil
 			updater.AfterHooks = nil
+		})
+	}
+}
+
+func testSoftUpdaterUpdateOne(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	liveID := bson.NewObjectID()
+	deletedID := bson.NewObjectID()
+	updater := xupdater.NewUpdater[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name string
+
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx     context.Context
+		filter  any
+		updates any
+		opts    []options.Lister[options.UpdateOneOptions]
+
+		want    *mongo.UpdateResult
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "update live document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": liveID, "name": "live"},
+					bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				count, err := collection.CountDocuments(ctx, query.Eq("touched", true))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), count)
+				var updated testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(liveID)).Decode(&updated))
+				require.True(t, updated.Touched)
+				require.NotZero(t, updated.UpdatedAt)
+				require.Zero(t, updated.DeletedAt)
+				result, err := collection.DeleteMany(ctx, query.In("name", "live", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "live"),
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, Acknowledged: true},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				result, err := collection.DeleteOne(ctx, bsonx.Id(deletedID))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "deleted"),
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{Acknowledged: true},
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateOne(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			if err == nil {
+				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
+				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
+				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
+				require.Equal(t, tc.want.Acknowledged, got.Acknowledged)
+			}
+		})
+	}
+}
+
+func testSoftUpdaterUpdateMany(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	liveID := bson.NewObjectID()
+	deletedID := bson.NewObjectID()
+	updater := xupdater.NewUpdater[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name string
+
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx     context.Context
+		filter  any
+		updates any
+		opts    []options.Lister[options.UpdateManyOptions]
+
+		want    *mongo.UpdateResult
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "update live documents",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": liveID, "name": "live"},
+					bson.M{"name": "live", "deleted_at": nil},
+					bson.M{"name": "live", "deleted_at": time.Time{}},
+					bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				count, err := collection.CountDocuments(ctx, query.Eq("touched", true))
+				require.NoError(t, err)
+				require.Equal(t, int64(3), count)
+				var updated testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(liveID)).Decode(&updated))
+				require.True(t, updated.Touched)
+				require.NotZero(t, updated.UpdatedAt)
+				require.Zero(t, updated.DeletedAt)
+				result, err := collection.DeleteMany(ctx, query.In("name", "live", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(4), result.DeletedCount)
+			},
+			filter:  bson.D{},
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{MatchedCount: 3, ModifiedCount: 3, Acknowledged: true},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				result, err := collection.DeleteOne(ctx, bsonx.Id(deletedID))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "deleted"),
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{Acknowledged: true},
+			wantErr: assert.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := updater.Filter(tc.filter).Updates(tc.updates).UpdateMany(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			if err == nil {
+				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
+				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
+				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
+				require.Equal(t, tc.want.Acknowledged, got.Acknowledged)
+			}
+		})
+	}
+}
+
+func testSoftUpdaterUpsert(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	liveID := bson.NewObjectID()
+	deletedID := bson.NewObjectID()
+	updater := xupdater.NewUpdater[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name string
+
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		ctx     context.Context
+		filter  any
+		updates any
+		opts    []options.Lister[options.UpdateOneOptions]
+
+		want    *mongo.UpdateResult
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "upsert live document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": liveID, "name": "live"},
+					bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				count, err := collection.CountDocuments(ctx, query.Eq("touched", true))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), count)
+				var updated testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(liveID)).Decode(&updated))
+				require.True(t, updated.Touched)
+				require.NotZero(t, updated.UpdatedAt)
+				require.Zero(t, updated.DeletedAt)
+				result, err := collection.DeleteMany(ctx, query.In("name", "live", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "live"),
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{MatchedCount: 1, ModifiedCount: 1, Acknowledged: true},
+			wantErr: require.NoError,
+		},
+		{
+			name: "insert new document for deleted match",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": deletedID, "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var deleted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id(deletedID)).Decode(&deleted))
+				require.Equal(t, "deleted", deleted.Name)
+				require.Equal(t, past, deleted.DeletedAt)
+				require.Equal(t, past, deleted.UpdatedAt)
+				require.False(t, deleted.Touched)
+				var inserted testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, query.Eq("touched", true)).Decode(&inserted))
+				require.Equal(t, "deleted", inserted.Name)
+				require.NotZero(t, inserted.ID)
+				require.NotEqual(t, deletedID, inserted.ID)
+				require.NotZero(t, inserted.CreatedAt)
+				require.NotZero(t, inserted.UpdatedAt)
+				require.Zero(t, inserted.DeletedAt)
+				result, err := collection.DeleteMany(ctx, query.Eq("name", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "deleted"),
+			updates: bson.M{"$set": bson.M{"touched": true}},
+			ctx:     context.Background(),
+			want:    &mongo.UpdateResult{UpsertedCount: 1, Acknowledged: true},
+			wantErr: require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := updater.Filter(tc.filter).Updates(tc.updates).Upsert(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			if err == nil {
+				require.Equal(t, tc.want.MatchedCount, got.MatchedCount)
+				require.Equal(t, tc.want.ModifiedCount, got.ModifiedCount)
+				require.Equal(t, tc.want.UpsertedCount, got.UpsertedCount)
+				require.Equal(t, tc.want.Acknowledged, got.Acknowledged)
+			}
 		})
 	}
 }

@@ -86,6 +86,12 @@ type UserName struct {
 	Name string `bson:"name"`
 }
 
+type testSoftDeleteUser struct {
+	Name      string    `bson:"name"`
+	DeletedAt time.Time `bson:"deleted_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
+}
+
 func getCollection(t *testing.T) *mongo.Collection {
 	client, err := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(options.Credential{
 		Username:   "test",
@@ -106,6 +112,12 @@ func TestFinder_e2e_New(t *testing.T) {
 }
 
 func TestFinder_e2e_FindOne(t *testing.T) {
+	t.Run("standard cases", testFinderFindOne)
+	t.Run("soft delete", testSoftFinderFindOne)
+}
+
+func testFinderFindOne(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 
 	type globalHook struct {
@@ -413,6 +425,12 @@ func TestFinder_e2e_FindOne(t *testing.T) {
 }
 
 func TestFinder_e2e_Find(t *testing.T) {
+	t.Run("standard cases", testFinderFind)
+	t.Run("soft delete", testSoftFinderFind)
+}
+
+func testFinderFind(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 
 	type globalHook struct {
@@ -906,6 +924,12 @@ func TestFinder_e2e_Find(t *testing.T) {
 }
 
 func TestFinder_e2e_Count(t *testing.T) {
+	t.Run("standard cases", testFinderCount)
+	t.Run("soft delete", testSoftFinderCount)
+}
+
+func testFinderCount(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	finder := xfinder.NewFinder[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(&TestUser{}))
 
@@ -972,6 +996,12 @@ func TestFinder_e2e_Count(t *testing.T) {
 }
 
 func TestFinder_e2e_Distinct(t *testing.T) {
+	t.Run("standard cases", testFinderDistinct)
+	t.Run("soft delete", testSoftFinderDistinct)
+}
+
+func testFinderDistinct(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	finder := xfinder.NewFinder[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(&TestUser{}))
 
@@ -1090,6 +1120,12 @@ func TestFinder_e2e_Distinct(t *testing.T) {
 }
 
 func TestFinder_e2e_DistinctWithParse(t *testing.T) {
+	t.Run("standard cases", testFinderDistinctWithParse)
+	t.Run("soft delete", testSoftFinderDistinctWithParse)
+}
+
+func testFinderDistinctWithParse(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	finder := xfinder.NewFinder[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(&TestUser{}))
 
@@ -1208,6 +1244,12 @@ func TestFinder_e2e_DistinctWithParse(t *testing.T) {
 }
 
 func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
+	t.Run("standard cases", testFinderFindOneAndUpdate)
+	t.Run("soft delete", testSoftFinderFindOneAndUpdate)
+}
+
+func testFinderFindOneAndUpdate(t *testing.T) {
+	t.Helper()
 	collection := getCollection(t)
 	finder := xfinder.NewFinder[TestUser](collection, callback.InitializeCallbacks(), field.ParseFields(&TestUser{}))
 
@@ -1499,6 +1541,485 @@ func TestFinder_e2e_FindOneAndUpdate(t *testing.T) {
 			}
 			finder.BeforeHooks = nil
 			finder.AfterHooks = nil
+		})
+	}
+}
+
+func testSoftFinderFindOne(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter any
+		opts   []options.Lister[options.FindOneOptions]
+
+		ctx     context.Context
+		want    *testSoftDeleteUser
+		wantErr error
+	}{
+		{
+			name: "missing deletion time",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "missing", "name": "missing"})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteOne(ctx, bsonx.Id("missing"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "missing"),
+			ctx:     context.Background(),
+			want:    &testSoftDeleteUser{Name: "missing"},
+			wantErr: nil,
+		},
+		{
+			name: "null deletion time",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "null", "name": "null", "deleted_at": nil})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteOne(ctx, bsonx.Id("null"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "null"),
+			ctx:     context.Background(),
+			want:    &testSoftDeleteUser{Name: "null"},
+			wantErr: nil,
+		},
+		{
+			name: "zero deletion time",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "zero", "name": "zero", "deleted_at": time.Time{}})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteOne(ctx, bsonx.Id("zero"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "zero"),
+			ctx:     context.Background(),
+			want:    &testSoftDeleteUser{Name: "zero"},
+			wantErr: nil,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "deleted"),
+			ctx:     context.Background(),
+			want:    nil,
+			wantErr: mongo.ErrNoDocuments,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := finder.Filter(tc.filter).FindOne(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			require.Equal(t, tc.wantErr, err)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func testSoftFinderFind(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter any
+		opts   []options.Lister[options.FindOptions]
+
+		ctx     context.Context
+		want    []*testSoftDeleteUser
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "only live documents",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": "missing", "name": "missing"},
+					bson.M{"_id": "null", "name": "null", "deleted_at": nil},
+					bson.M{"_id": "zero", "name": "zero", "deleted_at": time.Time{}},
+					bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteMany(ctx, query.In("_id", "missing", "null", "zero", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(4), result.DeletedCount)
+			},
+			filter: bson.D{},
+
+			ctx:     context.Background(),
+			want:    []*testSoftDeleteUser{{Name: "missing"}, {Name: "null"}, {Name: "zero"}},
+			wantErr: require.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter: query.Eq("name", "deleted"),
+
+			ctx:     context.Background(),
+			want:    []*testSoftDeleteUser{},
+			wantErr: require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := finder.Filter(tc.filter).Find(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			require.ElementsMatch(t, tc.want, got)
+		})
+	}
+}
+
+func testSoftFinderCount(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter any
+		opts   []options.Lister[options.CountOptions]
+
+		ctx     context.Context
+		want    int64
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "only live documents",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": "missing", "name": "missing"},
+					bson.M{"_id": "null", "name": "null", "deleted_at": nil},
+					bson.M{"_id": "zero", "name": "zero", "deleted_at": time.Time{}},
+					bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteMany(ctx, query.In("_id", "missing", "null", "zero", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(4), result.DeletedCount)
+			},
+			filter: bson.D{},
+
+			ctx:     context.Background(),
+			want:    int64(3),
+			wantErr: require.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter: query.Eq("name", "deleted"),
+
+			ctx:     context.Background(),
+			want:    0,
+			wantErr: require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := finder.Filter(tc.filter).Count(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func testSoftFinderDistinct(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter    any
+		opts      []options.Lister[options.DistinctOptions]
+		fieldName string
+
+		ctx     context.Context
+		want    []string
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "only live documents",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": "missing", "name": "missing"},
+					bson.M{"_id": "null", "name": "null", "deleted_at": nil},
+					bson.M{"_id": "zero", "name": "zero", "deleted_at": time.Time{}},
+					bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteMany(ctx, query.In("_id", "missing", "null", "zero", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(4), result.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			want:      []string{"missing", "null", "zero"},
+			wantErr:   require.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:    query.Eq("name", "deleted"),
+			fieldName: "name",
+			ctx:       context.Background(),
+			want:      []string{},
+			wantErr:   require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			var got []string
+			err := finder.Filter(tc.filter).Distinct(tc.ctx, tc.fieldName, tc.opts...).Decode(&got)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			require.ElementsMatch(t, tc.want, got)
+		})
+	}
+}
+
+func testSoftFinderDistinctWithParse(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter    any
+		opts      []options.Lister[options.DistinctOptions]
+		fieldName string
+		result    []string
+
+		ctx     context.Context
+		want    []string
+		wantErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "only live documents",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{
+					bson.M{"_id": "missing", "name": "missing"},
+					bson.M{"_id": "null", "name": "null", "deleted_at": nil},
+					bson.M{"_id": "zero", "name": "zero", "deleted_at": time.Time{}},
+					bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past},
+				})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				result, err := collection.DeleteMany(ctx, query.In("_id", "missing", "null", "zero", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(4), result.DeletedCount)
+			},
+			filter:    bson.D{},
+			fieldName: "name",
+			ctx:       context.Background(),
+			want:      []string{"missing", "null", "zero"},
+			wantErr:   require.NoError,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:    query.Eq("name", "deleted"),
+			fieldName: "name",
+			ctx:       context.Background(),
+			want:      []string{},
+			wantErr:   require.NoError,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			err := finder.Filter(tc.filter).DistinctWithParse(tc.ctx, tc.fieldName, &tc.result, tc.opts...)
+			tc.after(tc.ctx, t)
+			tc.wantErr(t, err)
+			require.ElementsMatch(t, tc.want, tc.result)
+		})
+	}
+}
+
+func testSoftFinderFindOneAndUpdate(t *testing.T) {
+	t.Helper()
+	collection := getCollection(t)
+	past := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	finder := xfinder.NewFinder[testSoftDeleteUser](collection, callback.InitializeCallbacks(), field.ParseFields(testSoftDeleteUser{}))
+
+	testCases := []struct {
+		name   string
+		before func(ctx context.Context, t *testing.T)
+		after  func(ctx context.Context, t *testing.T)
+
+		filter  any
+		updates any
+		opts    []options.Lister[options.FindOneAndUpdateOptions]
+
+		ctx             context.Context
+		want            *testSoftDeleteUser
+		wantErr         error
+		resultIsUpdated bool
+	}{
+		{
+			name: "update live document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertMany(ctx, []any{bson.M{"_id": "live", "name": "live"}, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past}})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				var updated testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("live")).Decode(&updated))
+				require.Equal(t, "changed", updated.Name)
+				require.NotZero(t, updated.UpdatedAt)
+				require.Zero(t, updated.DeletedAt)
+				result, err := collection.DeleteMany(ctx, query.In("_id", "live", "deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(2), result.DeletedCount)
+			},
+			filter:          query.Eq("name", "live"),
+			updates:         bson.M{"$set": bson.M{"name": "changed"}},
+			opts:            []options.Lister[options.FindOneAndUpdateOptions]{options.FindOneAndUpdate().SetReturnDocument(options.After)},
+			ctx:             context.Background(),
+			want:            &testSoftDeleteUser{Name: "changed"},
+			wantErr:         nil,
+			resultIsUpdated: true,
+		},
+		{
+			name: "already deleted document",
+			before: func(ctx context.Context, t *testing.T) {
+				_, err := collection.InsertOne(ctx, bson.M{"_id": "deleted", "name": "deleted", "deleted_at": past, "updated_at": past})
+				require.NoError(t, err)
+			},
+			after: func(ctx context.Context, t *testing.T) {
+				var stored testSoftDeleteUser
+				require.NoError(t, collection.FindOne(ctx, bsonx.Id("deleted")).Decode(&stored))
+				require.Equal(t, past, stored.DeletedAt)
+				require.Equal(t, past, stored.UpdatedAt)
+				result, err := collection.DeleteOne(ctx, bsonx.Id("deleted"))
+				require.NoError(t, err)
+				require.Equal(t, int64(1), result.DeletedCount)
+			},
+			filter:  query.Eq("name", "deleted"),
+			updates: bson.M{"$set": bson.M{"name": "changed"}},
+			ctx:     context.Background(),
+			want:    nil,
+			wantErr: mongo.ErrNoDocuments,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.before(tc.ctx, t)
+			got, err := finder.Filter(tc.filter).Updates(tc.updates).FindOneAndUpdate(tc.ctx, tc.opts...)
+			tc.after(tc.ctx, t)
+			require.Equal(t, tc.wantErr, err)
+			if err == nil && tc.resultIsUpdated {
+				require.NotZero(t, got.UpdatedAt)
+				tc.want.UpdatedAt = got.UpdatedAt
+			}
+			require.Equal(t, tc.want, got)
 		})
 	}
 }

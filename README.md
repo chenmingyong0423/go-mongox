@@ -33,6 +33,45 @@ go get github.com/chenmingyong0423/go-mongox/v2
 # Getting Started
 - `go mongox` Guides: [https://go-mongox.dev](https://go-mongox.dev/en)
 
+## Soft deletion
+
+Models with a supported `DeletedAt` field automatically use soft deletion. Embed `mongox.Model` with `bson:",inline"` to use its deletion timestamp.
+
+- `DeleteOne` and `DeleteMany` set only the deletion time instead of removing documents. Repeated deletion reports zero `DeletedCount`.
+- `DeletedAt` supports `time.Time`, `int`, and `int64`. Integer timestamps default to seconds. Use `mongox:"autoDeleteTime"` for custom field names, or `autoDeleteTime:second`, `autoDeleteTime:milli`, and `autoDeleteTime:nano` for integer precision.
+- Missing fields, nulls, and type-specific zero values mean not deleted. Inserts do not automatically set the deletion time.
+- Find, count, distinct, update, find-and-update, and upsert operations exclude deleted documents. Upsert does not restore deleted documents: it may insert a new document or fail on an existing unique key.
+- Finder supports `WithDeleted()` to include live and deleted documents, and `OnlyDeleted()` to match deleted documents only. The scope applies to every Finder operation, including count, distinct, and `FindOneAndUpdate`. The last scope method called takes precedence and remains active on that Finder; a new Finder uses the default scope.
+- For models without a supported deletion field, `WithDeleted()` preserves the original filter and `OnlyDeleted()` matches no documents.
+- Models without a supported deletion field continue to use physical deletion. Unsupported types/precisions do not enable soft deletion; BSON-ignored fields are excluded.
+- Aggregation pipelines and the native collection returned by `Collection()` retain their original behavior. Use the native collection for custom filtering, permanent deletion, or restoration.
+
+Applications already embedding `mongox.Model` automatically adopt these deletion and query semantics after upgrading.
+
+```go
+// Include deleted documents while preserving the application filter.
+users, err := collection.Finder().WithDeleted().Filter(filter).Find(ctx)
+
+// Count deleted documents only.
+count, err := collection.Finder().OnlyDeleted().Filter(filter).Count(ctx)
+
+// Update deleted documents, for example to restore a time.Time deletion field.
+user, err := collection.Finder().OnlyDeleted().Filter(filter).
+	Updates(bson.M{"$set": bson.M{"deleted_at": time.Time{}}}).
+	FindOneAndUpdate(ctx)
+```
+
+Configure soft-delete parameters with `UpdateOneOptions` / `UpdateManyOptions`, using the driver's Update options directly:
+
+```go
+_, err := collection.Deleter().
+	Filter(filter).
+	UpdateOneOptions(options.UpdateOne().SetHint("name_1")).
+	DeleteOne(ctx)
+```
+
+Delete options passed to `DeleteOne` / `DeleteMany` apply only to physical deletion and are not converted to Update options. Omitted Update options use driver defaults. Each configuration call replaces the previous options; calling it without arguments clears them. Model fields still determine whether deletion is soft or physical.
+
 # Contributing
 [With your participation, go-mongox will become even more powerful!](https://go-mongox.dev/en/contribute.html)
 

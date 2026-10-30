@@ -15,6 +15,7 @@
 package field
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -24,6 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/chenmingyong0423/go-mongox/v2/field"
+	"github.com/chenmingyong0423/go-mongox/v2/operation"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -464,7 +466,7 @@ func Test_setTimeField(t *testing.T) {
 			}{},
 			timeType:    field.UnixMillisecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(""),
+			fieldType:   reflect.TypeFor[string](),
 			validateFunc: func(t *testing.T, v any) {
 				doc, ok := v.(*struct {
 					Value string
@@ -480,7 +482,7 @@ func Test_setTimeField(t *testing.T) {
 			}{},
 			timeType:    field.UnixSecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(int64(0)),
+			fieldType:   reflect.TypeFor[int64](),
 			validateFunc: func(t *testing.T, v any) {
 				doc, ok := v.(*struct {
 					Value unixSecond
@@ -515,7 +517,7 @@ func Test_getTimeValue(t *testing.T) {
 			name:        "time.Time",
 			timeType:    field.UnixTime,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(time.Time{}),
+			fieldType:   reflect.TypeFor[time.Time](),
 			want:        currentTime,
 			wantOK:      true,
 		},
@@ -523,14 +525,14 @@ func Test_getTimeValue(t *testing.T) {
 			name:        "time.Time with timestamp precision",
 			timeType:    field.UnixMillisecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(time.Time{}),
+			fieldType:   reflect.TypeFor[time.Time](),
 			wantOK:      false,
 		},
 		{
 			name:        "int milli",
 			timeType:    field.UnixMillisecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(0),
+			fieldType:   reflect.TypeFor[int](),
 			want:        int(currentTime.UnixMilli()),
 			wantOK:      true,
 		},
@@ -538,7 +540,7 @@ func Test_getTimeValue(t *testing.T) {
 			name:        "int64 nano",
 			timeType:    field.UnixNanosecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(int64(0)),
+			fieldType:   reflect.TypeFor[int64](),
 			want:        currentTime.UnixNano(),
 			wantOK:      true,
 		},
@@ -546,14 +548,14 @@ func Test_getTimeValue(t *testing.T) {
 			name:        "invalid time type",
 			timeType:    0,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(time.Time{}),
+			fieldType:   reflect.TypeFor[time.Time](),
 			wantOK:      false,
 		},
 		{
 			name:        "invalid field type",
 			timeType:    field.UnixMillisecond,
 			currentTime: currentTime,
-			fieldType:   reflect.TypeOf(""),
+			fieldType:   reflect.TypeFor[string](),
 			wantOK:      false,
 		},
 	}
@@ -564,4 +566,109 @@ func Test_getTimeValue(t *testing.T) {
 			require.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestSoftDeleteScope(t *testing.T) {
+	type Model struct {
+		DeletedAt time.Time `bson:"deleted_at,omitempty"`
+	}
+	type Doc struct {
+		Model `bson:",inline"`
+	}
+	fields := field.ParseFields(new(Doc))
+	guard := bson.D{{Key: "deleted_at", Value: bson.D{{Key: "$in", Value: bson.A{nil, time.Time{}}}}}}
+	for _, original := range []any{
+		bson.M{"name": "alice", "$or": bson.A{bson.M{"age": 20}, bson.M{"age": 30}}},
+		map[string]any{"name": "alice"},
+		bson.M{"$and": bson.A{bson.M{"name": "alice"}, bson.M{"age": 18}}},
+		map[string]any{"$and": bson.A{bson.M{"name": "alice"}, bson.M{"age": 18}}},
+		bson.D{{Key: "deleted_at", Value: bson.M{"$exists": true}}},
+		struct {
+			Name string `bson:"name"`
+		}{"alice"},
+		bson.M{},
+		bson.D{},
+		map[string]any{},
+	} {
+		before, err := bson.Marshal(original)
+		require.NoError(t, err)
+		for _, op := range []operation.OpType{operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate, operation.OpTypeBeforeUpsert, operation.OpTypeBeforeDelete} {
+			opCtx := operation.NewOpContext(nil, operation.WithFields(fields), operation.WithFilter(original), operation.WithStartTime(time.Now()))
+			require.NoError(t, Execute(context.Background(), opCtx, op))
+			require.Equal(t, bson.D{{Key: "$and", Value: bson.A{original, guard}}}, opCtx.Filter)
+			// Another phase adds its scope while preserving the existing filter.
+			previous := opCtx.Filter
+			require.NoError(t, Execute(context.Background(), opCtx, operation.OpTypeBeforeUpdate))
+			require.Equal(t, bson.D{{Key: "$and", Value: bson.A{previous, guard}}}, opCtx.Filter)
+		}
+		after, err := bson.Marshal(original)
+		require.NoError(t, err)
+		var beforeDoc, afterDoc bson.M
+		require.NoError(t, bson.Unmarshal(before, &beforeDoc))
+		require.NoError(t, bson.Unmarshal(after, &afterDoc))
+		require.Equal(t, beforeDoc, afterDoc)
+	}
+	require.Equal(t, bson.M{"x": 1}, FilterNotDeleted(bson.M{"x": 1}, nil))
+}
+
+func TestSoftDeleteRawFilter(t *testing.T) {
+	fields := field.ParseFields(struct {
+		DeletedAt time.Time `bson:"deleted_at"`
+	}{})
+	raw, err := bson.Marshal(bson.M{"name": "alice"})
+	require.NoError(t, err)
+	for _, filter := range []any{raw, bson.Raw(raw)} {
+		encoded, err := bson.Marshal(FilterNotDeleted(filter, fields))
+		require.NoError(t, err)
+		original := bson.Raw(encoded).Lookup("$and").Array().Index(0).Document()
+		require.Equal(t, "alice", original.Lookup("name").StringValue())
+	}
+}
+
+func TestSoftDeleteTimes(t *testing.T) {
+	now := time.Date(2026, 9, 15, 12, 0, 0, 123000000, time.UTC)
+	for _, tt := range []struct {
+		doc  any
+		want any
+	}{
+		{&struct {
+			DeletedAt time.Time `bson:"deleted_at"`
+			UpdatedAt time.Time `bson:"updated_at"`
+		}{}, now},
+		{&struct {
+			DeletedAt int       `bson:"deleted_at"`
+			UpdatedAt time.Time `bson:"updated_at"`
+		}{}, int(now.Unix())},
+		{&struct {
+			DeletedAt int64     `bson:"deleted_at" mongox:"autoDeleteTime:milli"`
+			UpdatedAt time.Time `bson:"updated_at"`
+		}{}, now.UnixMilli()},
+		{&struct {
+			Removed   int64     `bson:"deleted_at" mongox:"autoDeleteTime:nano"`
+			UpdatedAt time.Time `bson:"updated_at"`
+		}{}, now.UnixNano()},
+	} {
+		fields := field.ParseFields(tt.doc)
+		opCtx := operation.NewOpContext(nil, operation.WithFields(fields), operation.WithFilter(bson.M{}), operation.WithStartTime(now), operation.WithReflectValue(reflect.ValueOf(tt.doc)))
+		require.NoError(t, Execute(context.Background(), opCtx, operation.OpTypeBeforeInsert))
+		require.True(t, reflect.ValueOf(tt.doc).Elem().Field(0).IsZero(), "insert must not mark a document deleted")
+		require.NoError(t, Execute(context.Background(), opCtx, operation.OpTypeBeforeDelete))
+		require.Equal(t, bson.M{"$set": bson.M{"deleted_at": tt.want}}, opCtx.Updates)
+		require.True(t, opCtx.SoftDelete)
+	}
+}
+
+func TestDeleteWithoutDeletedAt(t *testing.T) {
+	for _, doc := range []any{struct{ Name string }{}, struct {
+		UpdatedAt time.Time `bson:"updated_at"`
+	}{}, struct{ DeletedAt string }{}, struct {
+		DeletedAt time.Time `bson:"-"`
+	}{}} {
+		opCtx := operation.NewOpContext(nil, operation.WithFields(field.ParseFields(doc)), operation.WithFilter(bson.M{"x": 1}))
+		require.NoError(t, Execute(context.Background(), opCtx, operation.OpTypeBeforeDelete))
+		require.Nil(t, opCtx.Updates)
+		require.False(t, opCtx.SoftDelete)
+		require.Equal(t, bson.M{"x": 1}, opCtx.Filter)
+	}
+	require.NoError(t, Execute(context.Background(), nil, operation.OpTypeBeforeDelete))
 }

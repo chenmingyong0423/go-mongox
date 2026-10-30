@@ -29,8 +29,10 @@ import (
 
 //go:generate optioner -type OpContext -output types.go -mode append
 type OpContext struct {
-	Col          *mongo.Collection `opt:"-"`
-	Filter       any               `opt:"-"`
+	Col    *mongo.Collection `opt:"-"`
+	Filter any               `opt:"-"`
+	// Updates is the update document used for soft deletion.
+	Updates      any
 	MongoOptions any
 	ModelHook    any
 	StartTime    time.Time
@@ -59,6 +61,12 @@ func NewOpContext(col *mongo.Collection, filter any, opts ...OpContextOption) *O
 	}
 
 	return opContext
+}
+
+func WithUpdates(updates any) OpContextOption {
+	return func(opContext *OpContext) {
+		opContext.Updates = updates
+	}
 }
 
 func WithMongoOptions(mongoOptions any) OpContextOption {

@@ -17,11 +17,16 @@ package updater_test
 import (
 	"context"
 	"testing"
+	"time"
+
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/field"
 
 	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"github.com/chenmingyong0423/go-mongox/v2/updater"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/mock/gomock"
@@ -500,46 +505,130 @@ func TestUpdater_GetCollection(t *testing.T) {
 }
 
 func TestUpdater_PreActionHandler(t *testing.T) {
+	type document struct {
+		CreatedAt time.Time `bson:"created_at"`
+		UpdatedAt time.Time `bson:"updated_at"`
+		DeletedAt time.Time `bson:"deleted_at"`
+	}
+	now := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	filter := bson.M{"name": "alice"}
+	fields := field.ParseFields(document{})
+	conditions := bson.D{{Key: "deleted_at", Value: bson.D{{Key: "$in", Value: bson.A{nil, time.Time{}}}}}}
+	scopedFilter := bson.D{{Key: "$and", Value: bson.A{filter, conditions}}}
 	testCases := []struct {
 		name            string
 		ctx             context.Context
 		globalOpContext *operation.OpContext
 		opContext       *updater.OpContext
 		opType          operation.OpType
-		wantErr         bool
-		expectedError   error
+		globalHook      callback.CbFn
+		beforeHook      []updater.BeforeHookFn
+		after           func(t *testing.T, globalOpContext *operation.OpContext, opContext *updater.OpContext)
+
+		wantErr       bool
+		expectedError error
 	}{
 		{
 			name:            "pre action handler success",
 			ctx:             context.Background(),
-			globalOpContext: &operation.OpContext{},
-			opContext:       &updater.OpContext{},
+			globalOpContext: operation.NewOpContext(nil),
+			opContext:       updater.NewOpContext(nil, nil, nil),
 			opType:          operation.OpTypeBeforeUpdate,
-			wantErr:         false,
-			expectedError:   nil,
 		},
 		{
-			name:            "pre action handler with error",
+			name:            "global before hook error",
 			ctx:             context.Background(),
-			globalOpContext: &operation.OpContext{},
-			opContext:       &updater.OpContext{},
+			globalOpContext: operation.NewOpContext(nil),
+			opContext:       updater.NewOpContext(nil, nil, nil),
 			opType:          operation.OpTypeBeforeUpdate,
-			wantErr:         true,
-			expectedError:   assert.AnError,
+			globalHook: func(context.Context, *operation.OpContext, ...any) error {
+				return assert.AnError
+			},
+			beforeHook: []updater.BeforeHookFn{
+				func(context.Context, *updater.OpContext, ...any) error {
+					assert.Fail(t, "local hook must not run after a global hook error")
+					return nil
+				},
+			},
+			wantErr:       true,
+			expectedError: assert.AnError,
+		},
+		{
+			name:            "update filter and updates",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       updater.NewOpContext(nil, nil, nil),
+			opType:          operation.OpTypeBeforeUpdate,
+			beforeHook: []updater.BeforeHookFn{
+				func(_ context.Context, opCtx *updater.OpContext, _ ...any) error {
+					assert.Equal(t, scopedFilter, opCtx.Filter)
+					assert.Equal(t, bson.M{"$set": bson.M{"name": "alice", "updated_at": now}}, opCtx.Updates)
+					opCtx.Filter = bson.M{"name": "bob"}
+					opCtx.Updates = bson.M{"$set": bson.M{"name": "bob"}}
+					return nil
+				},
+			},
+			after: func(t *testing.T, globalOpContext *operation.OpContext, opContext *updater.OpContext) {
+				assert.Equal(t, bson.M{"name": "bob"}, globalOpContext.Filter)
+				assert.Equal(t, bson.M{"$set": bson.M{"name": "bob"}}, globalOpContext.Updates)
+				assert.Equal(t, globalOpContext.Filter, opContext.Filter)
+				assert.Equal(t, globalOpContext.Updates, opContext.Updates)
+				assert.Equal(t, bson.M{"name": "alice"}, filter)
+			},
+		},
+		{
+			name:            "upsert filter and updates",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       updater.NewOpContext(nil, nil, nil),
+			opType:          operation.OpTypeBeforeUpsert,
+			beforeHook: []updater.BeforeHookFn{
+				func(_ context.Context, opCtx *updater.OpContext, _ ...any) error {
+					assert.Equal(t, scopedFilter, opCtx.Filter)
+					assert.Equal(t, bson.M{"$set": bson.M{"name": "alice", "updated_at": now}, "$setOnInsert": bson.M{"created_at": now}}, opCtx.Updates)
+					opCtx.Filter = bson.M{"name": "bob"}
+					opCtx.Updates = bson.M{"$set": bson.M{"name": "bob"}}
+					return nil
+				},
+			},
+			after: func(t *testing.T, globalOpContext *operation.OpContext, opContext *updater.OpContext) {
+				assert.Equal(t, bson.M{"name": "bob"}, globalOpContext.Filter)
+				assert.Equal(t, bson.M{"$set": bson.M{"name": "bob"}}, globalOpContext.Updates)
+				assert.Equal(t, globalOpContext.Filter, opContext.Filter)
+				assert.Equal(t, globalOpContext.Updates, opContext.Updates)
+				assert.Equal(t, bson.M{"name": "alice"}, filter)
+			},
+		},
+		{
+			name:            "local before hook error",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       updater.NewOpContext(nil, nil, nil),
+			opType:          operation.OpTypeBeforeUpdate,
+			beforeHook: []updater.BeforeHookFn{
+				func(context.Context, *updater.OpContext, ...any) error { return assert.AnError },
+			},
+			wantErr:       true,
+			expectedError: assert.AnError,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			u := mocks.NewMockIUpdater[any](ctl)
-			u.EXPECT().PreActionHandler(tc.ctx, tc.globalOpContext, tc.opContext, tc.opType).Return(tc.expectedError).Times(1)
+			callbacks := callback.InitializeCallbacks()
+			if tc.globalHook != nil {
+				callbacks.Register(tc.opType, tc.name, tc.globalHook)
+			}
+			u := updater.NewUpdater[document](nil, callbacks, fields)
+			u.RegisterBeforeHooks(tc.beforeHook...)
 
 			err := u.PreActionHandler(tc.ctx, tc.globalOpContext, tc.opContext, tc.opType)
 			if tc.wantErr {
-				assert.Error(t, err)
-				assert.Equal(t, tc.expectedError, err)
+				assert.ErrorIs(t, err, tc.expectedError)
 			} else {
 				assert.NoError(t, err)
+			}
+			if tc.after != nil {
+				tc.after(t, tc.globalOpContext, tc.opContext)
 			}
 		})
 	}

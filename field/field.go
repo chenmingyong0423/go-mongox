@@ -16,6 +16,7 @@ package field
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 	"time"
 )
@@ -28,6 +29,7 @@ type Filed struct {
 	FieldType      reflect.Type
 	AutoCreateTime TimeType
 	AutoUpdateTime TimeType
+	AutoDeleteTime TimeType
 
 	InlinedFields []*Filed
 }
@@ -48,12 +50,14 @@ const (
 const (
 	CreatedAt      = "CreatedAt"
 	UpdatedAt      = "UpdatedAt"
+	DeletedAt      = "DeletedAt"
 	AutoCreateTime = "autoCreateTime"
 	AutoUpdateTime = "autoUpdateTime"
+	AutoDeleteTime = "autoDeleteTime"
 )
 
 var (
-	timeType = reflect.TypeOf(time.Time{})
+	timeType = reflect.TypeFor[time.Time]()
 )
 
 func ParseFields[T any](doc T) []*Filed {
@@ -76,13 +80,17 @@ func ParseFields[T any](doc T) []*Filed {
 
 		bsonTag := structField.Tag.Get("bson")
 		if structField.Anonymous {
-			if bsonTag == ",inline" {
+			if slices.Contains(strings.Split(bsonTag, ",")[1:], "inline") {
 				fields = append(fields, &Filed{Name: structField.Name, FieldType: structField.Type, InlinedFields: ParseFields(reflect.New(structField.Type).Elem().Interface())})
 				continue
 			}
 		}
 
 		fd.MongoField = getMongoField(bsonTag, structField.Name)
+		if fd.MongoField == "-" || !structField.IsExported() {
+			fields = append(fields, fd)
+			continue
+		}
 
 		tag := structField.Tag.Get("mongox")
 		if len(tag) > 0 {
@@ -95,6 +103,8 @@ func ParseFields[T any](doc T) []*Filed {
 			parseDefaultTimeType(structField, func(timeType TimeType) {
 				fd.AutoUpdateTime = timeType
 			})
+		} else if structField.Name == DeletedAt {
+			fd.AutoDeleteTime = defaultTimeType(structField.Type)
 		}
 
 		fields = append(fields, fd)
@@ -122,11 +132,11 @@ func defaultTimeType(fieldType reflect.Type) TimeType {
 
 func getMongoField(bsonTag string, defaultValue string) string {
 	if bsonTag == "" {
-		return defaultValue
+		return strings.ToLower(defaultValue)
 	}
 	split := strings.Split(bsonTag, ",")
 	if split[0] == "" {
-		return defaultValue
+		return strings.ToLower(defaultValue)
 	}
 	return split[0]
 }
@@ -141,6 +151,8 @@ func parseTag(tag string, fd *Filed) {
 			fd.AutoCreateTime = parseTimeType(s, fd.FieldType)
 		case strings.HasPrefix(s, AutoUpdateTime):
 			fd.AutoUpdateTime = parseTimeType(s, fd.FieldType)
+		case s == AutoDeleteTime || strings.HasPrefix(s, AutoDeleteTime+":"):
+			fd.AutoDeleteTime = parseTimeType(s, fd.FieldType)
 		}
 	}
 }

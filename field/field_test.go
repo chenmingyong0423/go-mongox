@@ -76,80 +76,81 @@ func TestParseFields(t *testing.T) {
 					Name:       "ID",
 					MongoField: "_id",
 					AutoID:     true,
-					FieldType:  reflect.TypeOf(bson.ObjectID{}),
+					FieldType:  reflect.TypeFor[bson.ObjectID](),
 				},
 				{
 					Name:       "Name",
 					MongoField: "name",
-					FieldType:  reflect.TypeOf(""),
+					FieldType:  reflect.TypeFor[string](),
 				},
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoCreateTime: UnixTime,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoUpdateTime: UnixTime,
 				},
 				{
-					Name:       "DeletedAt",
-					MongoField: "deleted_at",
-					FieldType:  reflect.TypeOf(time.Time{}),
+					Name:           "DeletedAt",
+					MongoField:     "deleted_at",
+					FieldType:      reflect.TypeFor[time.Time](),
+					AutoDeleteTime: UnixTime,
 				},
 				{
 					Name:           "CreateSecondTime",
 					MongoField:     "create_second_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixSecond,
 				},
 				{
 					Name:           "UpdateSecondTime",
 					MongoField:     "update_second_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixSecond,
 				},
 				{
 					Name:           "CreateMilliTime",
 					MongoField:     "create_milli_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixMillisecond,
 				},
 				{
 					Name:           "UpdateMilliTime",
 					MongoField:     "update_milli_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixMillisecond,
 				},
 				{
 					Name:           "CreateNanoTime",
 					MongoField:     "create_nano_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixNanosecond,
 				},
 				{
 					Name:           "UpdateNanoTime",
 					MongoField:     "update_nano_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixNanosecond,
 				},
 				{
 					Name:       "NoneBsonTagField",
-					MongoField: "NoneBsonTagField",
-					FieldType:  reflect.TypeOf(""),
+					MongoField: "nonebsontagfield",
+					FieldType:  reflect.TypeFor[string](),
 				},
 				{
 					Name:       "InvalidBsonTagField",
-					MongoField: "InvalidBsonTagField",
-					FieldType:  reflect.TypeOf(""),
+					MongoField: "invalidbsontagfield",
+					FieldType:  reflect.TypeFor[string](),
 				},
 				{
 					Name:           "InvalidTimeTagField",
 					MongoField:     "invalid_time_tag_field",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoCreateTime: 0,
 				},
 			},
@@ -169,72 +170,73 @@ func TestParseFields(t *testing.T) {
 			want: []*Filed{
 				{
 					Name:      "model",
-					FieldType: reflect.TypeOf(model{}),
+					FieldType: reflect.TypeFor[model](),
 					InlinedFields: []*Filed{
 						{
 							Name:       "ID",
 							MongoField: "_id",
 							AutoID:     true,
-							FieldType:  reflect.TypeOf(bson.ObjectID{}),
+							FieldType:  reflect.TypeFor[bson.ObjectID](),
 						},
 						{
 							Name:           "CreatedAt",
 							MongoField:     "created_at",
-							FieldType:      reflect.TypeOf(time.Time{}),
+							FieldType:      reflect.TypeFor[time.Time](),
 							AutoCreateTime: UnixTime,
 						},
 						{
 							Name:           "UpdatedAt",
 							MongoField:     "updated_at",
-							FieldType:      reflect.TypeOf(time.Time{}),
+							FieldType:      reflect.TypeFor[time.Time](),
 							AutoUpdateTime: UnixTime,
 						},
 						{
-							Name:       "DeletedAt",
-							MongoField: "deleted_at",
-							FieldType:  reflect.TypeOf(time.Time{}),
+							Name:           "DeletedAt",
+							MongoField:     "deleted_at",
+							FieldType:      reflect.TypeFor[time.Time](),
+							AutoDeleteTime: UnixTime,
 						},
 					},
 				},
 				{
 					Name:       "Name",
 					MongoField: "name",
-					FieldType:  reflect.TypeOf(""),
+					FieldType:  reflect.TypeFor[string](),
 				},
 				{
 					Name:           "CreateSecondTime",
 					MongoField:     "create_second_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixSecond,
 				},
 				{
 					Name:           "UpdateSecondTime",
 					MongoField:     "update_second_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixSecond,
 				},
 				{
 					Name:           "CreateMilliTime",
 					MongoField:     "create_milli_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixMillisecond,
 				},
 				{
 					Name:           "UpdateMilliTime",
 					MongoField:     "update_milli_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixMillisecond,
 				},
 				{
 					Name:           "CreateNanoTime",
 					MongoField:     "create_nano_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixNanosecond,
 				},
 				{
 					Name:           "UpdateNanoTime",
 					MongoField:     "update_nano_time",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoUpdateTime: UnixNanosecond,
 				},
 			},
@@ -249,13 +251,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixSecond,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(0),
+					FieldType:      reflect.TypeFor[int](),
 					AutoUpdateTime: UnixSecond,
 				},
 			},
@@ -270,13 +272,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixSecond,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(0),
+					FieldType:      reflect.TypeFor[int](),
 					AutoUpdateTime: UnixSecond,
 				},
 			},
@@ -291,13 +293,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoCreateTime: UnixTime,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoUpdateTime: UnixTime,
 				},
 			},
@@ -313,19 +315,19 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreateSecondTime",
 					MongoField:     "create_second_time",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoCreateTime: 0,
 				},
 				{
 					Name:           "UpdateMilliTime",
 					MongoField:     "update_milli_time",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoUpdateTime: 0,
 				},
 				{
 					Name:           "CreateNanoTime",
 					MongoField:     "create_nano_time",
-					FieldType:      reflect.TypeOf(time.Time{}),
+					FieldType:      reflect.TypeFor[time.Time](),
 					AutoCreateTime: 0,
 				},
 			},
@@ -340,13 +342,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(int64(0)),
+					FieldType:      reflect.TypeFor[int64](),
 					AutoCreateTime: UnixMillisecond,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(0),
+					FieldType:      reflect.TypeFor[int](),
 					AutoUpdateTime: UnixSecond,
 				},
 			},
@@ -361,13 +363,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreateMilliTime",
 					MongoField:     "create_milli_time",
-					FieldType:      reflect.TypeOf(0),
+					FieldType:      reflect.TypeFor[int](),
 					AutoCreateTime: UnixMillisecond,
 				},
 				{
 					Name:           "UpdateNanoTime",
 					MongoField:     "update_nano_time",
-					FieldType:      reflect.TypeOf(0),
+					FieldType:      reflect.TypeFor[int](),
 					AutoUpdateTime: UnixNanosecond,
 				},
 			},
@@ -382,13 +384,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(""),
+					FieldType:      reflect.TypeFor[string](),
 					AutoCreateTime: 0,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(false),
+					FieldType:      reflect.TypeFor[bool](),
 					AutoUpdateTime: 0,
 				},
 			},
@@ -403,13 +405,13 @@ func TestParseFields(t *testing.T) {
 				{
 					Name:           "CreatedAt",
 					MongoField:     "created_at",
-					FieldType:      reflect.TypeOf(""),
+					FieldType:      reflect.TypeFor[string](),
 					AutoCreateTime: 0,
 				},
 				{
 					Name:           "UpdatedAt",
 					MongoField:     "updated_at",
-					FieldType:      reflect.TypeOf(false),
+					FieldType:      reflect.TypeFor[bool](),
 					AutoUpdateTime: 0,
 				},
 			},
@@ -419,6 +421,57 @@ func TestParseFields(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			got := ParseFields(tc.doc)
 			require.ElementsMatch(t, tc.want, got)
+		})
+	}
+}
+
+func TestParseInlineDeletedAtOptions(t *testing.T) {
+	type Audit struct {
+		DeletedAt int64 `bson:"removed_at" mongox:"autoDeleteTime:milli"`
+	}
+	tests := []struct {
+		name    string
+		doc     any
+		inlined bool
+	}{
+		{"inline", struct {
+			Audit `bson:",inline"`
+		}{}, true},
+		{"inline before omitempty", struct {
+			Audit `bson:",inline,omitempty"`
+		}{}, true},
+		{"inline after omitempty", struct {
+			Audit `bson:",omitempty,inline"`
+		}{}, true},
+		{"inline between options", struct {
+			Audit `bson:",omitempty,inline,minsize"`
+		}{}, true},
+		{"no tag", struct{ Audit }{}, false},
+		{"no inline option", struct {
+			Audit `bson:",omitempty"`
+		}{}, false},
+		{"inline in field name", struct {
+			Audit `bson:"inline,omitempty"`
+		}{}, false},
+		{"inline option prefix", struct {
+			Audit `bson:",inline_extra"`
+		}{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fields := ParseFields(tt.doc)
+			require.Len(t, fields, 1)
+			if !tt.inlined {
+				require.Nil(t, fields[0].InlinedFields)
+				return
+			}
+			require.Len(t, fields[0].InlinedFields, 1)
+			deleted := fields[0].InlinedFields[0]
+			require.Equal(t, "removed_at", deleted.MongoField)
+			require.Equal(t, UnixMillisecond, deleted.AutoDeleteTime)
+			encoded, err := bson.Marshal(tt.doc)
+			require.NoError(t, err)
+			require.Equal(t, bson.TypeInt64, bson.Raw(encoded).Lookup(deleted.MongoField).Type)
 		})
 	}
 }

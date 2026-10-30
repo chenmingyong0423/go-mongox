@@ -20,6 +20,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/chenmingyong0423/go-mongox/v2/callback"
+	"github.com/chenmingyong0423/go-mongox/v2/field"
+
 	"github.com/chenmingyong0423/go-mongox/v2/finder"
 	mocks "github.com/chenmingyong0423/go-mongox/v2/mock"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
@@ -805,59 +808,123 @@ func TestFinder_RegisterAfterHooks(t *testing.T) {
 }
 
 func TestFinder_PreActionHandler(t *testing.T) {
-	type TestUser struct {
-		ID           bson.ObjectID `bson:"_id,omitempty"`
-		Name         string        `bson:"name"`
-		Age          int64
-		UnknownField string    `bson:"-"`
-		CreatedAt    time.Time `bson:"created_at"`
-		UpdatedAt    time.Time `bson:"updated_at"`
+	type document struct {
+		UpdatedAt time.Time `bson:"updated_at"`
+		DeletedAt time.Time `bson:"deleted_at"`
 	}
+	now := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	filter := bson.M{"name": "alice"}
+	fields := field.ParseFields(document{})
+	conditions := bson.D{{Key: "deleted_at", Value: bson.D{{Key: "$in", Value: bson.A{nil, time.Time{}}}}}}
+	scopedFilter := bson.D{{Key: "$and", Value: bson.A{filter, conditions}}}
 	testCases := []struct {
-		name string
-		mock func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser]
-		ctx  context.Context
-
+		name            string
+		ctx             context.Context
 		globalOpContext *operation.OpContext
-		opContext       *finder.OpContext[TestUser]
+		opContext       *finder.OpContext[document]
 		opTypes         []operation.OpType
-		wantErr         error
+		globalHook      callback.CbFn
+		beforeHook      []finder.BeforeHookFn[document]
+		after           func(t *testing.T, globalOpContext *operation.OpContext, opContext *finder.OpContext[document])
+
+		wantErr error
 	}{
 		{
-			name: "success",
-			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
-				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
-				mockCollection.EXPECT().PreActionHandler(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(1)
-				return mockCollection
-			},
+			name:            "pre action handler success",
 			ctx:             context.Background(),
-			globalOpContext: &operation.OpContext{},
-			opContext:       &finder.OpContext[TestUser]{},
+			globalOpContext: operation.NewOpContext(nil),
+			opContext:       finder.NewOpContext[document](nil, nil),
 			opTypes:         []operation.OpType{operation.OpTypeBeforeFind},
-			wantErr:         nil,
 		},
 		{
-			name: "error",
-			mock: func(ctx context.Context, ctl *gomock.Controller) finder.IFinder[TestUser] {
-				mockCollection := mocks.NewMockIFinder[TestUser](ctl)
-				mockCollection.EXPECT().PreActionHandler(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("pre action error")).Times(1)
-				return mockCollection
-			},
+			name:            "global before hook error",
 			ctx:             context.Background(),
-			globalOpContext: &operation.OpContext{},
-			opContext:       &finder.OpContext[TestUser]{},
+			globalOpContext: operation.NewOpContext(nil),
+			opContext:       finder.NewOpContext[document](nil, nil),
 			opTypes:         []operation.OpType{operation.OpTypeBeforeFind},
-			wantErr:         errors.New("pre action error"),
+			globalHook: func(context.Context, *operation.OpContext, ...any) error {
+				return assert.AnError
+			},
+			beforeHook: []finder.BeforeHookFn[document]{
+				func(context.Context, *finder.OpContext[document], ...any) error {
+					assert.Fail(t, "local hook must not run after a global hook error")
+					return nil
+				},
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name:            "soft delete filter",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       finder.NewOpContext[document](nil, nil),
+			opTypes:         []operation.OpType{operation.OpTypeBeforeFind},
+			beforeHook: []finder.BeforeHookFn[document]{
+				func(_ context.Context, opCtx *finder.OpContext[document], _ ...any) error {
+					assert.Equal(t, scopedFilter, opCtx.Filter)
+					assert.Equal(t, bson.M{"$set": bson.M{"name": "alice"}}, opCtx.Updates)
+					opCtx.Filter = bson.M{"name": "bob"}
+					opCtx.Updates = bson.M{"$set": bson.M{"name": "bob"}}
+					return nil
+				},
+			},
+			after: func(t *testing.T, globalOpContext *operation.OpContext, opContext *finder.OpContext[document]) {
+				assert.Equal(t, bson.M{"name": "bob"}, globalOpContext.Filter)
+				assert.Equal(t, bson.M{"$set": bson.M{"name": "bob"}}, globalOpContext.Updates)
+				assert.Equal(t, globalOpContext.Filter, opContext.Filter)
+				assert.Equal(t, globalOpContext.Updates, opContext.Updates)
+				assert.Equal(t, bson.M{"name": "alice"}, filter)
+			},
+		},
+		{
+			name:            "find and update filter and updates",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       finder.NewOpContext[document](nil, nil),
+			opTypes:         []operation.OpType{operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate},
+			beforeHook: []finder.BeforeHookFn[document]{
+				func(_ context.Context, opCtx *finder.OpContext[document], _ ...any) error {
+					assert.Equal(t, bson.D{{Key: "$and", Value: bson.A{scopedFilter, conditions}}}, opCtx.Filter)
+					assert.Equal(t, bson.M{"$set": bson.M{"name": "alice", "updated_at": now}}, opCtx.Updates)
+					opCtx.Filter = bson.M{"name": "bob"}
+					opCtx.Updates = bson.M{"$set": bson.M{"name": "bob"}}
+					return nil
+				},
+			},
+			after: func(t *testing.T, globalOpContext *operation.OpContext, opContext *finder.OpContext[document]) {
+				assert.Equal(t, bson.M{"name": "bob"}, globalOpContext.Filter)
+				assert.Equal(t, bson.M{"$set": bson.M{"name": "bob"}}, globalOpContext.Updates)
+				assert.Equal(t, globalOpContext.Filter, opContext.Filter)
+				assert.Equal(t, globalOpContext.Updates, opContext.Updates)
+				assert.Equal(t, bson.M{"name": "alice"}, filter)
+			},
+		},
+		{
+			name:            "local before hook error",
+			ctx:             context.Background(),
+			globalOpContext: operation.NewOpContext(nil, operation.WithFilter(filter), operation.WithUpdates(bson.M{"$set": bson.M{"name": "alice"}}), operation.WithFields(fields), operation.WithStartTime(now)),
+			opContext:       finder.NewOpContext[document](nil, nil),
+			opTypes:         []operation.OpType{operation.OpTypeBeforeFind},
+			beforeHook: []finder.BeforeHookFn[document]{
+				func(context.Context, *finder.OpContext[document], ...any) error { return assert.AnError },
+			},
+			wantErr: assert.AnError,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ctl := gomock.NewController(t)
-			defer ctl.Finish()
-			finder := tc.mock(tc.ctx, ctl)
+			callbacks := callback.InitializeCallbacks()
+			if tc.globalHook != nil {
+				callbacks.Register(tc.opTypes[0], tc.name, tc.globalHook)
+			}
+			f := finder.NewFinder[document](nil, callbacks, fields)
+			f.RegisterBeforeHooks(tc.beforeHook...)
 
-			err := finder.PreActionHandler(tc.ctx, tc.globalOpContext, tc.opContext, tc.opTypes...)
+			err := f.PreActionHandler(tc.ctx, tc.globalOpContext, tc.opContext, tc.opTypes...)
 			assert.Equal(t, tc.wantErr, err)
+			if tc.after != nil {
+				tc.after(t, tc.globalOpContext, tc.opContext)
+			}
 		})
 	}
 }

@@ -74,6 +74,12 @@ func InitializeCallbacks() *Callback {
 		},
 		beforeDelete: []callbackHandler{
 			{
+				name: "mongox:fieds",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, operation.OpTypeBeforeDelete, opts...)
+				},
+			},
+			{
 				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
 					return model.Execute(ctx, opCtx, operation.OpTypeBeforeDelete, opts...)
@@ -111,6 +117,12 @@ func InitializeCallbacks() *Callback {
 			},
 		},
 		beforeFind: []callbackHandler{
+			{
+				name: "mongox:fieds",
+				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {
+					return field.Execute(ctx, opCtx, operation.OpTypeBeforeFind, opts...)
+				},
+			},
 			{
 				name: "mongox:model",
 				fn: func(ctx context.Context, opCtx *operation.OpContext, opts ...any) error {

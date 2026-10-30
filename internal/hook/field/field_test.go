@@ -24,6 +24,7 @@ import (
 	mongoxfield "github.com/chenmingyong0423/go-mongox/v2/field"
 	"github.com/chenmingyong0423/go-mongox/v2/operation"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -187,7 +188,7 @@ func TestExecute(t *testing.T) {
 		{
 			name:    "beforeUpdate",
 			ctx:     context.Background(),
-			opCtx:   operation.NewOpContext(nil, operation.WithUpdates(bson.M{})),
+			opCtx:   operation.NewOpContext(nil, operation.WithFilter(bson.M{}), operation.WithUpdates(bson.M{})),
 			opType:  operation.OpTypeBeforeUpdate,
 			opts:    nil,
 			wantErr: nil,
@@ -195,7 +196,7 @@ func TestExecute(t *testing.T) {
 		{
 			name:    "beforeUpsert",
 			ctx:     context.Background(),
-			opCtx:   operation.NewOpContext(nil, operation.WithUpdates(bson.M{})),
+			opCtx:   operation.NewOpContext(nil, operation.WithFilter(bson.M{}), operation.WithUpdates(bson.M{})),
 			opType:  operation.OpTypeBeforeUpsert,
 			opts:    nil,
 			wantErr: nil,
@@ -255,5 +256,23 @@ func Test_executeSlice(t *testing.T) {
 			err := executeSlice(tc.ctx, tc.docs, tc.opType, tc.currentTime, tc.fields)
 			assert.Equal(t, tc.wantErr, err)
 		})
+	}
+}
+
+func TestExecuteSkipsStrategyForNilFilter(t *testing.T) {
+	var nilMap bson.M
+	var nilDocument bson.D
+	var nilPlainMap map[string]any
+	fields := mongoxfield.ParseFields(new(model))
+	for _, nilDoc := range []any{nil, nilMap, &nilMap, nilDocument, &nilDocument, nilPlainMap, &nilPlainMap, (*bson.M)(nil), (*bson.D)(nil), (*map[string]any)(nil), bson.Raw(nil), []byte(nil)} {
+		for _, modelFields := range [][]*mongoxfield.Filed{fields, nil} {
+			for _, op := range []operation.OpType{operation.OpTypeBeforeFind, operation.OpTypeBeforeUpdate, operation.OpTypeBeforeUpsert, operation.OpTypeBeforeDelete} {
+				updates := bson.M{"$set": bson.M{"name": "alice"}}
+				opCtx := operation.NewOpContext(nil, operation.WithFields(modelFields), operation.WithFilter(nilDoc), operation.WithUpdates(updates), operation.WithStartTime(time.Now()))
+				require.NoError(t, Execute(context.Background(), opCtx, op))
+				require.Equal(t, nilDoc, opCtx.Filter)
+				require.Equal(t, bson.M{"$set": bson.M{"name": "alice"}}, opCtx.Updates)
+			}
+		}
 	}
 }
